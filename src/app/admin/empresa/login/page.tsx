@@ -1,0 +1,108 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Building2, Lock, ArrowRight, Mail, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+export default function EmpresaLogin() {
+    const [email, setEmail] = useState("");
+    const [pass, setPass] = useState("");
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        // Clear previous session and supabase auth if any
+        const clearSession = async () => {
+            await supabase.auth.signOut();
+            localStorage.removeItem('empresa_id');
+            localStorage.removeItem('empresa_name');
+            sessionStorage.clear();
+        };
+        clearSession();
+    }, []);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const { data, error } = await supabase
+                .from('companies')
+                .select('id, name, email, password')
+                .eq('email', email)
+                .eq('password', pass)
+                .single();
+
+            if (error || !data) {
+                alert("Credenciales incorrectas o empresa no registrada.");
+            } else {
+                localStorage.setItem('empresa_id', data.id);
+                localStorage.setItem('empresa_name', data.name);
+                router.push("/admin/empresa");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error al intentar ingresar. Reintente.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-6 font-sans">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass p-12 w-full max-w-md border-white/5 space-y-8 bg-white/[0.02] relative overflow-hidden">
+
+                <div className="text-center space-y-4">
+                    <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20">
+                        <Building2 className="w-10 h-10 text-brand" />
+                    </div>
+                    <h1 className="text-3xl font-black tracking-tight italic">Portal <span className="text-brand">Corporativo</span></h1>
+                    <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">Gestión de Capacitación LMS</p>
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div className="space-y-4">
+                        <div className="relative group">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-brand transition-colors" />
+                            <input
+                                type="email"
+                                placeholder="Email Administrativo"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-brand/40 transition-all font-medium"
+                            />
+                        </div>
+                        <div className="relative group">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-brand transition-colors" />
+                            <input
+                                type="password"
+                                placeholder="Contraseña de Empresa"
+                                value={pass}
+                                onChange={(e) => setPass(e.target.value)}
+                                required
+                                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-brand/40 transition-all font-medium"
+                            />
+                        </div>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="w-full py-4 bg-brand text-black disabled:opacity-50 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-brand/10"
+                    >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ingresar al Panel"}
+                        {!loading && <ArrowRight className="w-4 h-4" />}
+                    </button>
+                </form>
+
+                <div className="pt-4 flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/20">
+                    <span>Metaverso Corporativo</span>
+                    <span className="text-brand/40">V3.0.0</span>
+                </div>
+            </motion.div>
+        </div>
+    );
+}

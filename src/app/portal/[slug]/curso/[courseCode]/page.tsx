@@ -1,0 +1,360 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Lock, ArrowLeft, LogIn, UserPlus, Building2 } from "lucide-react";
+import SignatureCanvas from "@/components/SignatureCanvas";
+
+export default function CourseAuthPage() {
+    const params = useParams();
+    const router = useRouter();
+    const slug = params.slug as string;
+    const courseCode = params.courseCode as string;
+
+    const [loading, setLoading] = useState(true);
+    const [company, setCompany] = useState<any>(null);
+    const [course, setCourse] = useState<any>(null);
+    
+    const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+    
+    // Login State
+    const [loginData, setLoginData] = useState({ email: '', password: '' });
+    
+    // Register State
+    const [regStep, setRegStep] = useState(1);
+    const [regData, setRegData] = useState({
+        first_name: '', last_name: '', email: '', password: '', 
+        rut: '', passport: '', gender: '', age: '', position: '', language: 'es'
+    });
+    const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+
+    const [error, setError] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    useEffect(() => {
+        const init = async () => {
+            try {
+                // 1. Fetch Company
+                const { data: comp } = await supabase.from('companies').select('*').eq('slug', slug).single();
+                if (!comp) throw new Error("Empresa inválida.");
+                setCompany(comp);
+
+                // 2. Fetch Course
+                const { data: crs } = await supabase.from('courses').select('*').eq('code', courseCode).single();
+                if (!crs) throw new Error("Curso no encontrado.");
+
+                // Check Registration Mode from Relationship (company_courses)
+                const { data: assignment } = await supabase
+                    .from('company_courses')
+                    .select('registration_mode')
+                    .eq('company_id', comp.id)
+                    .eq('course_id', crs.id)
+                    .single();
+
+                // Respect assignment mode first, fallback to course global mode (if legacy), default to open
+                const trueMode = assignment?.registration_mode || crs.registration_mode || 'open';
+                crs.registration_mode = trueMode;
+
+                setCourse(crs);
+
+                // 3. Set Auth Mode
+                if (trueMode === 'restricted') {
+                    setAuthMode('login');
+                } else {
+                    setAuthMode('login');
+                }
+
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        init();
+    }, [slug, courseCode]);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setActionLoading(true);
+        setError(null);
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: loginData.email,
+                password: loginData.password,
+            });
+
+            if (error) throw error;
+
+            // Check if user is student
+            const { data: student } = await supabase.from('students').select('*').eq('auth_user_id', data.user.id).single();
+            if (student) {
+                // Verificar Inscripción (Enrollment)
+                const { data: enrollment } = await supabase
+                    .from('enrollments')
+                    .select('*')
+                    .eq('student_id', student.id)
+                    .eq('course_id', course.id)
+                    .single();
+
+                if (course.registration_mode === 'restricted' && !enrollment) {
+                    throw new Error("⛔ No estás inscrito en este curso. Contacta a tu administrador para solicitar acceso.");
+                }
+
+                if (!enrollment) {
+                    // Si es 'open' y no tiene inscripción, lo inscribimos automáticamente
+                    console.log("Inscripción automática para curso abierto...");
+                    await supabase.from('enrollments').insert({
+                        student_id: student.id,
+                        course_id: course.id,
+                        status: 'not_started',
+                        progress: 0
+                    });
+                }
+
+                localStorage.setItem('user', JSON.stringify(student));
+                window.location.href = '/admin/empresa/alumnos/cursos';
+            } else {
+                throw new Error("Cuenta no es de estudiante.");
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleRegister = async () => {
+        if (!signatureUrl) return setError("Firma requerida.");
+        setActionLoading(true);
+        try {
+            const res = await fetch('/api/students/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...regData,
+                    company_name: company.name, 
+                    client_id: company.id, // Enforce stricter link
+                    digital_signature_url: signatureUrl
+                })
+            });
+            
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error);
+
+            alert("Registro exitoso. Iniciando sesión...");
+            
+            // Auto-login
+            const { data: loginRes, error: loginErr } = await supabase.auth.signInWithPassword({
+                email: regData.email,
+                password: regData.password
+            });
+            
+            if (loginErr) throw loginErr;
+            
+            // Fetch student profile again to save to localstorage
+            localStorage.setItem('user', JSON.stringify(result.student));
+            
+            // Create Enrollment for this course automatically
+            // This is a nice-to-have: if they register via a course link, enroll them immediately!
+            if (course) {
+                await supabase.from('enrollments').insert({
+                    student_id: result.student.id,
+                    course_id: course.id,
+                    status: 'not_started',
+                    progress: 0
+                });
+            }
+
+            window.location.href = '/admin/empresa/alumnos/cursos';
+
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white/20">Cargando...</div>;
+    if (!company || !course) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-red-500">Recurso no disponible</div>;
+
+    const isRestricted = course.registration_mode === 'restricted';
+
+    return (
+        <div className="min-h-screen flex flex-col md:flex-row bg-[#050505]">
+            {/* Left Panel: Context */}
+            <div className="w-full md:w-1/2 p-10 flex flex-col relative overflow-hidden bg-[#0a0a0a]">
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-brand/5 blur-[120px] rounded-full" />
+                </div>
+                
+                <div className="relative z-10 flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+                    <button onClick={() => router.back()} className="flex items-center gap-2 text-white/40 hover:text-white mb-10 transition-colors">
+                        <ArrowLeft className="w-4 h-4" /> Volver al Portal
+                    </button>
+
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                        {company.logo_url ? <img src={company.logo_url} className="w-12 h-12 object-contain" /> : <Building2 className="w-8 h-8 text-white/40" />}
+                    </div>
+
+                    <h1 className="text-4xl font-black uppercase text-white mb-2">{course.name}</h1>
+                    <p className="text-white/60 text-lg leading-relaxed mb-8">{course.description || "Inicia sesión para acceder al contenido."}</p>
+
+                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className={`w-2 h-2 rounded-full ${isRestricted ? 'bg-red-500' : 'bg-green-500'}`} />
+                            <span className="text-xs font-black uppercase tracking-widest text-white/40">
+                                {isRestricted ? "Acceso Restringido" : "Inscripción Abierta"}
+                            </span>
+                        </div>
+                        <p className="text-sm text-white/60">
+                            {isRestricted 
+                                ? "Este curso requiere que tu cuenta haya sido creada previamente por el administrador. No se admiten nuevos registros públicos."
+                                : "Puedes iniciar sesión con tu cuenta existente o crear una nueva para comenzar inmediatamente."}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Panel: Auth Forms */}
+            <div className="w-full md:w-1/2 bg-black border-l border-white/5 flex items-center justify-center p-6 md:p-12 relative">
+                <div className="w-full max-w-md space-y-8">
+                    
+                    {/* Switcher (Only if not restricted) */}
+                    {!isRestricted && (
+                        <div className="flex p-1 bg-white/5 rounded-xl mb-8">
+                            <button
+                                onClick={() => setAuthMode('login')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${authMode === 'login' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                            >
+                                <LogIn className="w-4 h-4" /> Ingresar
+                            </button>
+                            <button
+                                onClick={() => setAuthMode('register')}
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${authMode === 'register' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                            >
+                                <UserPlus className="w-4 h-4" /> Registrarse
+                            </button>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl font-bold">
+                            {error}
+                        </div>
+                    )}
+
+                    {authMode === 'login' ? (
+                        <form onSubmit={handleLogin} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">Email Corporativo</label>
+                                <input 
+                                    type="email" 
+                                    required
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand outline-none transition-colors"
+                                    value={loginData.email}
+                                    onChange={e => setLoginData({...loginData, email: e.target.value})}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">Contraseña</label>
+                                <input 
+                                    type="password" 
+                                    required
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand outline-none transition-colors"
+                                    value={loginData.password}
+                                    onChange={e => setLoginData({...loginData, password: e.target.value})}
+                                />
+                            </div>
+                            <button 
+                                disabled={actionLoading}
+                                className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all text-xs"
+                            >
+                                {actionLoading ? 'Verificando...' : 'Iniciar Sesión'}
+                            </button>
+                        </form>
+                    ) : (
+                        <div className="space-y-6">
+                            {regStep === 1 && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Nombre</label>
+                                            <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Juan" required 
+                                                value={regData.first_name} onChange={e => setRegData({...regData, first_name: e.target.value})} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Apellido</label>
+                                            <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Pérez" required 
+                                                value={regData.last_name} onChange={e => setRegData({...regData, last_name: e.target.value})} />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Email</label>
+                                        <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
+                                            value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Contraseña</label>
+                                        <input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required minLength={6}
+                                            value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">RUT / ID</label>
+                                        <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
+                                            value={regData.rut} onChange={e => setRegData({...regData, rut: e.target.value})} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Género</label>
+                                            <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs" 
+                                                value={regData.gender} onChange={e => setRegData({...regData, gender: e.target.value})}>
+                                                <option value="">Seleccione</option>
+                                                <option value="Masculino">Masculino</option>
+                                                <option value="Femenino">Femenino</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Edad</label>
+                                            <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
+                                                value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
+                                        </div>
+                                    </div>
+
+                                    <button onClick={() => {
+                                        if(!regData.email || !regData.password || !regData.rut) {
+                                            setError("Completa los campos obligatorios"); return;
+                                        }
+                                        setRegStep(2);
+                                    }} className="w-full mt-4 py-4 bg-brand text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all text-xs">
+                                        Continuar a Firma
+                                    </button>
+                                </div>
+                            )}
+
+                            {regStep === 2 && (
+                                <div className="space-y-6">
+                                    <div className="text-center">
+                                        <h3 className="text-xl font-black text-white">Firma Digital</h3>
+                                        <p className="text-xs text-white/40">Dibuja tu firma para aceptar el consentimiento de datos.</p>
+                                    </div>
+
+                                    <SignatureCanvas onSave={setSignatureUrl} />
+
+                                    <div className="flex gap-4">
+                                        <button onClick={() => setRegStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl text-xs font-bold uppercase">Volver</button>
+                                        <button onClick={handleRegister} className="flex-1 py-3 bg-brand text-black rounded-xl text-xs font-black uppercase" disabled={actionLoading}>
+                                            {actionLoading ? 'Registrando...' : 'Finalizar Registro'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

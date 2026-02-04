@@ -1,0 +1,748 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    ChevronRight, CheckCircle2, Lock, Volume2,
+    ChevronLeft, Library, FileText as FileIcon, Download
+} from "lucide-react";
+import GeniallyEmbed from "./GeniallyEmbed";
+import VideoPlayer, { VideoPlayerRef } from "./VideoPlayer";
+import SignatureCanvas from "./SignatureCanvas";
+import QuizEngine from "./QuizEngine";
+import ScormPlayer from "./ScormPlayer";
+
+// Types
+type ModuleItem = {
+    id: string;
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header';
+    content: any;
+    order_index: number;
+};
+
+type CoursePlayerProps = {
+    courseId: string;
+    studentId: string;
+    onComplete?: () => void;
+    mode?: 'student' | 'preview';
+    className?: string;
+};
+
+export default function CoursePlayer({ courseId, studentId, onComplete, mode = 'student', className = '' }: CoursePlayerProps) {
+    const [modules, setModules] = useState<any[]>([]);
+    const [activeModuleIndex, setActiveModuleIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [itemsCompleted, setItemsCompleted] = useState<Set<string>>(new Set());
+    const [moduleCompleted, setModuleCompleted] = useState(false);
+    const [approved, setApproved] = useState(false);
+    const [quizScore, setQuizScore] = useState<number | null>(null);
+    const [scormScore, setScormScore] = useState<number>(0);
+    const [scormModalItem, setScormModalItem] = useState<ModuleItem | null>(null);
+    const [enrollment, setEnrollment] = useState<any>(null);
+    const [extrasOpen, setExtrasOpen] = useState(false);
+
+    const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
+    const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
+
+    const handleEvaluationItemScore = (itemId: string, score: number, type: string) => {
+        console.log(`[CoursePlayer] handleEvaluationItemScore called - Type: ${type}, Score: ${score}, ItemId: ${itemId}`);
+        
+        // Solo actualizar puntajes si el módulo actual es de tipo 'evaluation'
+        const currentModule = modules[activeModuleIndex];
+        const isEvalModule = currentModule?.type === 'evaluation';
+
+        if (isEvalModule) {
+            if (type === 'quiz') {
+                console.log('[CoursePlayer] Setting Quiz Score:', score);
+                setQuizScore(score);
+            }
+            if (type === 'scorm') {
+                console.log('[CoursePlayer] Setting SCORM Score:', score);
+                setScormScore(score);
+            }
+        } else {
+            console.log('[CoursePlayer] Quiz completado en módulo de contenido (no evaluativo).');
+        }
+        
+        handleItemCompletion(itemId);
+        // La aprobación se calcula en el useEffect de abajo
+    };
+
+    // NUEVO: Lógica de aprobación ponderada
+    useEffect(() => {
+        if (quizScore === null) return;
+
+        const quizWeight = 0.8;
+        const scormWeight = 0.2;
+        const minPass = 90;
+
+        const qScore = quizScore || 0;
+        const sScore = scormScore || 0;
+
+        const total = (qScore * quizWeight) + (sScore * scormWeight);
+        const roundedTotal = Math.round(total);
+        
+        console.log('[CoursePlayer] Score Calculation:', {
+            quizScore: qScore,
+            scormScore: sScore,
+            quizWeighted: qScore * quizWeight,
+            scormWeighted: sScore * scormWeight,
+            total: roundedTotal,
+            minPass,
+            passed: total >= minPass
+        });
+        
+        // Determinar si realmente puede completar el curso
+        const isLastModule = activeModuleIndex === modules.length - 1;
+        const canComplete = total >= minPass && isLastModule && moduleCompleted;
+
+        if (canComplete) {
+            console.log('[CoursePlayer] COURSE COMPLETED! Total score:', roundedTotal);
+            setApproved(true);
+            updateEnrollmentStatus('completed', roundedTotal);
+        } else {
+            setApproved(total >= minPass); // Aprobado para mostrar UI, pero no necesariamente completado en DB
+            if (total > 0) updateEnrollmentStatus('in_progress', roundedTotal);
+        }
+    }, [quizScore, scormScore, moduleCompleted, activeModuleIndex, modules.length]);
+
+    useEffect(() => {
+        loadCourseStructure();
+    }, [courseId]);
+
+    useEffect(() => {
+        setModuleCompleted(false);
+        setItemsCompleted(new Set());
+        stopAllMedia();
+        setExtrasOpen(false);
+    }, [activeModuleIndex]);
+
+    const stopAllMedia = () => {
+        audioRefs.current.forEach((audio) => {
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        });
+        videoRefs.current.forEach((videoControl) => {
+            if (videoControl && videoControl.stop) {
+                videoControl.stop();
+            }
+        });
+    };
+
+    const loadCourseStructure = async () => {
+        setLoading(true);
+        const { data: mods } = await supabase
+            .from('course_modules')
+            .select('*, module_items(*)')
+            .eq('course_id', courseId)
+            .order('order_index');
+
+        if (mods) {
+            const formatted = mods.map((m: any) => ({
+                ...m,
+                items: (m.module_items || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+            })).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
+            
+            setModules(formatted);
+        }
+        setLoading(false);
+    };
+
+    const fetchEnrollment = async () => {
+        if (mode === 'preview' || studentId === "preview-admin" || !studentId || !courseId) return;
+        try {
+            const { data, error } = await supabase
+                .from('enrollments')
+                .select('*, courses(*), students(*)')
+                .eq('student_id', studentId)
+                .eq('course_id', courseId)
+                .single();
+
+            if (data) {
+                setEnrollment(data);
+                
+                // SOLO cargar puntajes si el curso NO está reiniciado (status != 'not_started')
+                // Si está en not_started, resetear todo a 0 y comenzar desde el principio
+                if (data.status === 'not_started') {
+                    console.log("[CoursePlayer] Course in 'not_started' status, resetting to module 0");
+                    setActiveModuleIndex(0); // Forzar inicio desde módulo 0
+                    setQuizScore(0);
+                    setScormScore(0);
+                    setApproved(false);
+                    setItemsCompleted(new Set()); // Limpiar items completados
+                    setModuleCompleted(false);
+                } else {
+                    // Cargar el módulo guardado
+                    if (data.current_module_index !== undefined && data.current_module_index !== null) {
+                        setActiveModuleIndex(data.current_module_index);
+                    }
+                    
+                    // Cargar puntajes detallados si existen
+                    if (data.quiz_score !== undefined && data.quiz_score !== null) setQuizScore(data.quiz_score);
+                    if (data.scorm_score !== undefined && data.scorm_score !== null) setScormScore(data.scorm_score);
+
+                    // Si no hay scores detallados todavía, pero hay un best_score (migración vieja), lo usamos de base para el quiz
+                    if (!data.quiz_score && data.best_score && !data.scorm_score) {
+                        setQuizScore(data.best_score);
+                    }
+
+                    if (data.status === 'completed') {
+                        setApproved(true);
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("Error loading enrollment", e);
+        }
+    };
+
+    const updateEnrollmentStatus = async (status: string, totalScore: number) => {
+        if (mode === 'preview' || studentId === "preview-admin" || !enrollment?.id) return;
+        if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
+
+        try {
+            const updatePayload: any = { 
+                status, 
+                best_score: totalScore,
+                quiz_score: quizScore,
+                scorm_score: scormScore,
+                completed_at: status === 'completed' ? new Date().toISOString() : null
+            };
+
+            await supabase
+                .from('enrollments')
+                .update(updatePayload)
+                .eq('id', enrollment.id);
+            console.log("CoursePlayer: Enrollment status updated with scores:", { status, totalScore, quizScore, scormScore });
+        } catch (err) {
+            console.error("Error updating enrollment status:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchEnrollment();
+    }, [studentId, courseId, mode]);
+
+    const handleItemCompletion = (itemId: string) => {
+        console.log(`[CoursePlayer] Item completado: ${itemId}`);
+        setItemsCompleted(prev => {
+            const newSet = new Set(prev);
+            newSet.add(itemId);
+            console.log(`[CoursePlayer] Total items completados:`, newSet.size);
+            return newSet;
+        });
+    };
+
+    const handleSignatureSave = async (data: string, itemId: string) => {
+        handleItemCompletion(itemId);
+        if (mode === 'student' && studentId && studentId !== "preview-admin") {
+            try {
+                console.log(`[CoursePlayer] Saving signature for student ${studentId}, data length: ${data.length} chars`);
+                
+                const { error } = await supabase
+                    .from('students')
+                    .update({ 
+                        digital_signature_url: data,
+                        consent_accepted_at: new Date().toISOString()
+                    })
+                    .eq('id', studentId);
+                
+                if (error) {
+                    console.error("[CoursePlayer] ❌ Error saving signature:", error);
+                } else {
+                    console.log("[CoursePlayer] ✅ Signature and consent saved successfully for student:", studentId);
+                    
+                    // Verificación inmediata
+                    const { data: verification } = await supabase
+                        .from('students')
+                        .select('digital_signature_url, consent_accepted_at')
+                        .eq('id', studentId)
+                        .single();
+                    
+                    console.log("[CoursePlayer] 🔍 Verification - Signature in DB:", verification?.digital_signature_url ? `YES (${verification.digital_signature_url.length} chars)` : 'NO');
+                    console.log("[CoursePlayer] 🔍 Verification - Consent at:", verification?.consent_accepted_at || 'NO');
+                }
+            } catch (err) {
+                console.error("[CoursePlayer] Exception saving signature:", err);
+            }
+        }
+    };
+
+    useEffect(() => {
+        // Reset completion status when changing module
+        setModuleCompleted(false);
+        
+        if (!modules || !modules[activeModuleIndex]) return;
+
+        const currentModule = modules[activeModuleIndex];
+        const currentItems = currentModule.items || [];
+
+        // Si ya pasamos por aquí antes (módulo mayor que el actual en BD), permitir avanzar
+        // CORRECCIÓN: Si el curso está en 'not_started', NO desbloquear nada por progreso previo
+        if (enrollment && enrollment.status !== 'not_started' && typeof enrollment.current_module_index === 'number' && activeModuleIndex < enrollment.current_module_index) {
+            console.log(`[CoursePlayer] Módulo ${activeModuleIndex + 1} ya fue superado previamente. Desbloqueando.`);
+            setModuleCompleted(true);
+            return;
+        }
+
+        // Timer automático para Genially (15 segundos)
+        const geniallyItems = currentItems.filter((i: ModuleItem) => i.type === 'genially');
+        const geniallyTimers: NodeJS.Timeout[] = [];
+        
+        geniallyItems.forEach((item: ModuleItem) => {
+            if (!itemsCompleted.has(item.id)) {
+                console.log(`[CoursePlayer] Iniciando timer de 15s para Genially: ${item.id}`);
+                const timer = setTimeout(() => {
+                    console.log(`[CoursePlayer] Timer de Genially completado: ${item.id}`);
+                    handleItemCompletion(item.id);
+                }, 15000); // 15 segundos
+                geniallyTimers.push(timer);
+            }
+        });
+
+        const pendingItems = currentItems.filter((item: ModuleItem) => {
+            // Estos elementos NO bloquean el botón:
+            if (['text', 'image', 'pdf', 'header'].includes(item.type)) return false;
+            
+            // Estos elementos SÍ bloquean hasta que se dispara handleItemCompletion:
+            // - video (onEnded o 90%)
+            // - audio (onEnded)
+            // - scorm (onComplete)
+            // - genially (15s timer o interacción)
+            // - quiz (onComplete)
+            // - signature (onSave)
+            return !itemsCompleted.has(item.id);
+        });
+        
+        const isDone = pendingItems.length === 0;
+        console.log(`[CoursePlayer] Módulo ${activeModuleIndex + 1} - Pendientes (${pendingItems.length}):`, pendingItems.map((i: any) => `${i.type}:${i.id}`));
+        
+        setModuleCompleted(isDone);
+
+        return () => {
+            geniallyTimers.forEach(clearTimeout);
+        };
+    }, [itemsCompleted, activeModuleIndex, modules.length, enrollment?.current_module_index]);
+
+    const saveProgress = async (index: number) => {
+        if (mode === 'preview' || studentId === "preview-admin") return;
+        if (!studentId || !courseId) return;
+        try {
+            const targetId = enrollment?.id;
+            if (targetId) {
+                // Si estamos avanzando desde el módulo 0 y el status es 'not_started', actualizar a 'in_progress'
+                const updatePayload: any = { current_module_index: index };
+                
+                if (enrollment?.status === 'not_started' && index > 0) {
+                    updatePayload.status = 'in_progress';
+                    console.log("[CoursePlayer] Updating status from 'not_started' to 'in_progress'");
+                }
+                
+                await supabase
+                    .from('enrollments')
+                    .update(updatePayload)
+                    .eq('id', targetId);
+                    
+                console.log("CoursePlayer: Progress saved for index:", index);
+                
+                // Actualizar estado local para prevenir bloqueos al navegar
+                setEnrollment((prev: any) => prev ? { ...prev, ...updatePayload } : prev);
+            }
+        } catch (err) {
+            console.error("Error saving progress:", err);
+        }
+    };
+
+    const handleNext = async () => {
+        if (activeModuleIndex < modules.length - 1) {
+            const nextIndex = activeModuleIndex + 1;
+            setActiveModuleIndex(nextIndex);
+            await saveProgress(nextIndex);
+        } else {
+            // Último módulo - cerrar curso
+            console.log('[CoursePlayer] Finalizando curso...');
+            if (onComplete) {
+                onComplete();
+            } else {
+                // Si no hay callback, navegar de regreso
+                window.location.href = '/admin/empresa/alumnos/cursos';
+            }
+        }
+    };
+
+    const handlePrevious = () => {
+        if (activeModuleIndex > 0) {
+            setActiveModuleIndex(prev => prev - 1);
+        }
+    };
+
+    if (loading) return <div className="text-white text-center p-20">Cargando curso...</div>;
+    if (modules.length === 0) return <div className="text-white text-center p-20">Este curso no tiene contenido asignado.</div>;
+
+    const currentModule = modules[activeModuleIndex];
+    
+    // Guard preventivo si el índice no es válido o módulos aún no cargados
+    if (!currentModule) {
+        return <div className="text-white text-center p-20">Módulo no encontrado.</div>;
+    }
+
+    const isEvaluation = currentModule.type === 'evaluation';
+
+    // Helper to detect light backgrounds (very basic check)
+    const isLightBg = currentModule.settings?.bg_color && 
+        ['#ffffff', '#fff', '#f4f4f4', '#f8f8f8', '#eeeeee', 'white'].includes(currentModule.settings.bg_color.toLowerCase());
+
+    return (
+        <div className={`flex flex-col w-full text-white relative bg-[#060606] ${className}`}>
+            {/* Content area con scroll visible solo aquí */}
+            <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
+                {/* Visual Stage / Diapositiva */}
+                <div 
+                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
+                    style={{ backgroundColor: currentModule.settings?.bg_color || '#0a0a0a' }}
+                >
+                    <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 w-full">
+
+                        {/* Header */}
+                        <header className={`mb-8 pb-4 border-b ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
+                            <div className="flex justify-between items-center gap-4">
+                                <div>
+                                    <span className="text-brand text-xs font-bold">Diapositiva {activeModuleIndex + 1} de {modules.length}</span>
+                                    <h1 className={`text-2xl md:text-3xl font-black mt-1 ${isLightBg ? 'text-slate-900' : 'text-white'}`}>{currentModule.title}</h1>
+                                </div>
+                                
+                                {/* Biblioteca */}
+                                {currentModule.settings?.extras?.length > 0 && (
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setExtrasOpen((prev) => !prev)}
+                                            className={`px-4 py-2 rounded-xl border transition-all flex items-center gap-2 text-sm font-bold ${isLightBg ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-brand/10 border-brand/20 text-white hover:bg-brand/20'}`}
+                                        >
+                                            <Library className="w-4 h-4" />
+                                            <span>Material ({currentModule.settings.extras.length})</span>
+                                        </button>
+                                        
+                                        <div
+                                            className={`absolute right-0 top-full mt-2 w-72 bg-[#111] border border-white/10 rounded-xl shadow-2xl transition-all z-50 p-3 text-white ${extrasOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                                        >
+                                            {currentModule.settings.extras.map((extra: any, idx: number) => (
+                                                <a 
+                                                    key={idx}
+                                                    href={extra.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all"
+                                                    onClick={() => setExtrasOpen(false)}
+                                                >
+                                                    <FileIcon className="w-5 h-5 text-brand" />
+                                                    <span className="text-sm flex-1 truncate">{extra.name}</span>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </header>
+
+                        {/* CONTENIDO DEL MÓDULO */}
+                        <div className="space-y-12">
+                            {/* Header de Evaluación Especial */}
+                        {isEvaluation && (
+                            <div className={`p-6 rounded-xl border mb-6 ${approved ? 'bg-brand/5 border-brand/20' : (isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10')}`}>
+                                <h3 className="text-xl font-bold mb-3" style={{ color: approved ? '#31d22d' : (isLightBg ? '#0f172a' : '#fff') }}>Evaluación Final</h3>
+                                
+                                {/* Desglose de Puntajes */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                    <div className={`p-4 rounded-xl border ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
+                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>Quiz Bruto</p>
+                                        <p className="text-2xl font-black" style={{ color: isLightBg ? '#0f172a' : '#fff' }}>{quizScore || 0}%</p>
+                                    </div>
+                                    <div className={`p-4 rounded-xl border ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
+                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>Quiz x80%</p>
+                                        <p className="text-2xl font-black text-blue-500">{Math.round((quizScore || 0) * 0.8)}%</p>
+                                    </div>
+                                    <div className={`p-4 rounded-xl border ${scormScore === 0 ? 'opacity-30' : ''} ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
+                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>{scormScore === 0 ? 'SCORM Pendiente' : 'SCORM Bruto'}</p>
+                                        <p className="text-2xl font-black" style={{ color: isLightBg ? '#0f172a' : '#fff' }}>{scormScore === 0 ? '---' : `${scormScore}%`}</p>
+                                    </div>
+                                    <div className={`p-4 rounded-xl border ${scormScore === 0 ? 'opacity-30' : ''} ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
+                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>SCORM x20%</p>
+                                        <p className="text-2xl font-black text-purple-500">{scormScore === 0 ? '---' : `${Math.round(scormScore * 0.2)}%`}</p>
+                                    </div>
+                                </div>
+
+                                {/* Total Ponderado */}
+                                <div className={`p-6 rounded-xl border-2 mb-4 ${approved ? 'bg-brand/10 border-brand' : 'bg-yellow-500/10 border-yellow-500/50'}`}>
+                                    <p className="text-xs uppercase font-black mb-2" style={{ color: approved ? '#31d22d' : '#fbbf24' }}>TOTAL PONDERADO (Req: 90%)</p>
+                                    <p className="text-5xl font-black" style={{ color: approved ? '#31d22d' : '#fbbf24' }}>
+                                        {Math.round((quizScore || 0) * 0.8 + scormScore * 0.2)}%
+                                    </p>
+                                </div>
+
+                                {!approved && (
+                                    <p className={`text-sm ${isLightBg ? 'text-slate-600' : 'text-white/60'}`}>
+                                        ⚠️ Completa todas las actividades para completar el curso. Debes obtener al menos un 90% del puntaje para aprobar.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                            {currentModule.items && currentModule.items.map((item: ModuleItem) => (
+                                <div key={item.id}>
+                                    {/* Título/Header */}
+                                    {(item.type === 'header' || (item.type === 'text' && item.content?.isHeader)) && (
+                                        <h2 
+                                            className="text-center py-6"
+                                            style={{ 
+                                                fontSize: item.content?.tag === 'h1' ? '2.5rem' : item.content?.tag === 'h2' ? '2rem' : '1.5rem',
+                                                fontWeight: item.content?.bold ? '900' : '700',
+                                                color: item.content?.color || (isLightBg ? '#0f172a' : '#fff')
+                                            }}
+                                        >
+                                            {item.content?.text}
+                                        </h2>
+                                    )}
+
+                                    {/* Texto */}
+                                    {item.type === 'text' && !item.content?.isHeader && (
+                                        <div className={`prose max-w-none p-6 rounded-xl border ${isLightBg ? 'prose-slate bg-black/5 border-black/10' : 'prose-invert bg-white/5 border-white/10'}`}>
+                                            <div dangerouslySetInnerHTML={{ __html: item.content?.html || item.content?.text || '' }} />
+                                        </div>
+                                    )}
+
+                                    {/* Imagen */}
+                                    {item.type === 'image' && (
+                                        <div className="flex justify-center">
+                                            <img src={item.content?.url} alt="" className="max-w-full rounded-xl shadow-xl" />
+                                        </div>
+                                    )}
+
+                                    {/* Video */}
+                                    {item.type === 'video' && (
+                                        <div className={`rounded-xl overflow-hidden bg-black border ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
+                                            <VideoPlayer
+                                                ref={(el) => { if (el) videoRefs.current.set(item.id, el); }}
+                                                src={item.content?.url}
+                                                onEnded={() => handleItemCompletion(item.id)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Audio */}
+                                    {item.type === 'audio' && (
+                                        <div className={`p-6 rounded-xl flex items-center gap-4 border ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                            <div className="p-3 bg-brand rounded-lg">
+                                                <Volume2 className="w-6 h-6 text-black" />
+                                            </div>
+                                            <audio
+                                                ref={(el) => { if (el) audioRefs.current.set(item.id, el); }}
+                                                controls
+                                                className="flex-1"
+                                                src={item.content?.url}
+                                                onEnded={() => handleItemCompletion(item.id)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* PDF */}
+                                    {item.type === 'pdf' && (
+                                        <div className="space-y-4">
+                                            <iframe src={item.content?.url} className={`w-full h-[600px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
+                                            <a href={item.content?.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 rounded-lg text-sm font-bold transition-all">
+                                                <FileIcon className="w-4 h-4" />
+                                                Abrir PDF
+                                            </a>
+                                        </div>
+                                    )}
+
+                                    {/* Genially */}
+                                    {item.type === 'genially' && (
+                                        <div className="h-[600px] rounded-xl overflow-hidden border border-white/10">
+                                            <GeniallyEmbed src={item.content?.url} onInteract={() => handleItemCompletion(item.id)} />
+                                        </div>
+                                    )}
+
+                                    {/* SCORM - Ocultar Reiniciar si ya se aprobó el quiz */}
+                                    {item.type === 'scorm' && !approved && (
+                                        <div className={`p-6 rounded-xl border flex items-center justify-between ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-brand/20 rounded-lg flex items-center justify-center">
+                                                    <Lock className="w-6 h-6 text-brand" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold">Actividad Interactiva</h4>
+                                                    <p className={`text-sm ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>SCORM</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => setScormModalItem(item)}
+                                                className="px-6 py-3 bg-brand text-black font-bold rounded-lg hover:scale-105 transition-all shadow-lg"
+                                            >
+                                                {itemsCompleted.has(item.id) ? 'Reiniciar' : 'Iniciar'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Quiz */}
+                                    {item.type === 'quiz' && (
+                                        <div className={`${(approved && isEvaluation) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                            <QuizEngine
+                                                questions={item.content.questions || []}
+                                                passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 10}
+                                                courseId={courseId}
+                                                enrollmentId={enrollment?.id}
+                                                onComplete={(score) => handleEvaluationItemScore(item.id, score, 'quiz')}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Firma */}
+                                    {item.type === 'signature' && (
+                                        <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                            <h3 className="text-xl font-bold mb-2">Firma Digital del Alumno</h3>
+                                            <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>Por favor, firma en el recuadro para validar tu participación.</p>
+                                            
+                                            {itemsCompleted.has(item.id) ? (
+                                                <div className="bg-brand/10 p-6 rounded-xl border border-brand/20 flex flex-col items-center gap-3">
+                                                    <CheckCircle2 className="w-12 h-12 text-brand" />
+                                                    <p className="text-brand font-bold">Firma registrada correctamente</p>
+                                                </div>
+                                            ) : (
+                                                <SignatureCanvas 
+                                                    onSave={(data) => handleSignatureSave(data, item.id)} 
+                                                    isLight={isLightBg}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Banner de Aprobación Final */}
+                        {isEvaluation && approved && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="mt-12 bg-brand/5 p-12 rounded-3xl border border-brand/20 text-center shadow-2xl shadow-brand/10"
+                            >
+                                <div className="w-20 h-20 bg-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(49,210,45,0.4)]">
+                                    <CheckCircle2 className="w-10 h-10 text-black" />
+                                </div>
+                                <h3 className="text-3xl font-black text-brand mb-2">¡Curso Aprobado!</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-8 max-w-lg mx-auto">
+                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+                                        <p className="text-[10px] text-white/40 uppercase font-black mb-1">Cuestionario (80%)</p>
+                                        <p className="text-xl font-bold">{Math.round((quizScore || 0) * 0.8)}%</p>
+                                    </div>
+                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+                                        <p className="text-[10px] text-white/40 uppercase font-black mb-1">SCORM (20%)</p>
+                                        <p className="text-xl font-bold">{Math.round(scormScore * 0.2)}%</p>
+                                    </div>
+                                    <div className="bg-brand/10 p-4 rounded-2xl border border-brand/20 col-span-2 md:col-span-1">
+                                        <p className="text-[10px] text-brand/60 uppercase font-black mb-1">Total Obtenido</p>
+                                        <p className="text-2xl font-black text-brand">{Math.round((quizScore || 0) * 0.8 + scormScore * 0.2)}%</p>
+                                    </div>
+                                </div>
+                                <p className="text-white/40 text-sm mt-8">Has superado el 90% requerido. Ya puedes descargar tu certificado.</p>
+                                
+                                <button
+                                    onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
+                                    className="mt-6 px-8 py-4 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                                >
+                                    <Download className="w-5 h-5" /> Descargar Certificado
+                                </button>
+                            </motion.div>
+                        )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer de Navegación Profesional */}
+            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl relative">
+                {/* Slim Progress Bar on top of footer */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
+                    <motion.div
+                        className="h-full bg-brand shadow-[0_0_15px_rgba(49,210,45,0.4)]"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((activeModuleIndex + 1) / modules.length) * 100}%` }}
+                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    />
+                </div>
+
+                <div className="max-w-4xl mx-auto flex items-center justify-between py-5 px-4 md:px-8">
+                    {/* Info Módulo */}
+                    <div className="flex items-center gap-6">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">Módulo Actual</span>
+                            <span className="text-sm font-bold text-white/90 truncate max-w-[200px]">
+                                {activeModuleIndex + 1}. {currentModule?.title}
+                            </span>
+                        </div>
+                        <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
+                        <div className="flex flex-col hidden sm:flex">
+                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">Progreso</span>
+                            <span className="text-sm font-mono text-brand font-bold">
+                                {activeModuleIndex + 1}/{modules.length}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Botones de Navegación */}
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={handlePrevious}
+                            disabled={activeModuleIndex === 0}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
+                        >
+                            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            <span>Anterior</span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                if (activeModuleIndex === modules.length - 1) {
+                                    window.location.href = '/admin/empresa/alumnos/cursos';
+                                } else {
+                                    handleNext();
+                                }
+                            }}
+                            disabled={mode !== 'preview' && !moduleCompleted}
+                            style={{ 
+                                opacity: (mode !== 'preview' && !moduleCompleted) ? 0.3 : 1,
+                                cursor: (mode !== 'preview' && !moduleCompleted) ? 'not-allowed' : 'pointer',
+                                backgroundColor: (mode !== 'preview' && !moduleCompleted) ? '#333' : '#31D22D'
+                            }}
+                            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
+                        >
+                            <span>{activeModuleIndex === modules.length - 1 ? 'Finalizar' : 'Siguiente'}</span>
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
+                </div>
+            </footer>
+
+            {/* SCORM Modal */}
+            <AnimatePresence>
+                {scormModalItem && (
+                    <div className="fixed inset-0 z-[200]">
+                        <ScormPlayer
+                            courseUrl={scormModalItem.content.url}
+                            courseTitle={currentModule.title || "Actividad"}
+                            user={enrollment?.students || { id: studentId }}
+                            enrollment={enrollment}
+                            courseId={courseId}
+                            onClose={() => setScormModalItem(null)}
+                            onComplete={(score) => {
+                                handleEvaluationItemScore(scormModalItem.id, score, 'scorm');
+                            }}
+                        />
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}

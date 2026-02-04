@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Docker: Reiniciar Servidor (Metaverso)",
+			"type": "shell",
+			"command": "docker compose -f \"j:\\Empres\\MetaversOtec\\Desarrollos\\App\\docker-compose.yml\" up --build"
+		}
+	]
+}

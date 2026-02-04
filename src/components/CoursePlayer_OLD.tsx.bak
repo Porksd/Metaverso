@@ -1,0 +1,682 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    ChevronRight, CheckCircle2, Lock, Volume2, AlertCircle, 
+    ChevronLeft, Library, FileText as FileIcon 
+} from "lucide-react";
+import GeniallyEmbed from "./GeniallyEmbed";
+import VideoPlayer, { VideoPlayerRef } from "./VideoPlayer";
+import AudioTextImage from "./AudioTextImage";
+import SignatureCanvas from "./SignatureCanvas";
+import QuizEngine from "./QuizEngine";
+import ScormPlayer from "./ScormPlayer";
+
+// Types
+type ModuleItem = {
+    id: string;
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header';
+    content: any;
+    order_index: number;
+};
+
+type CoursePlayerProps = {
+    courseId: string;
+    studentId: string;
+    onComplete?: () => void;
+};
+
+export default function CoursePlayer({ courseId, studentId, onComplete }: CoursePlayerProps) {
+    // State declarations
+    const [modules, setModules] = useState<any[]>([]);
+    const [activeModuleIndex, setActiveModuleIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [itemsCompleted, setItemsCompleted] = useState<Set<string>>(new Set());
+    const [moduleCompleted, setModuleCompleted] = useState(false);
+    const [approved, setApproved] = useState(false);
+    const [quizScore, setQuizScore] = useState<number | null>(null);
+    const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+    const [scormModalItem, setScormModalItem] = useState<ModuleItem | null>(null);
+    const [enrollment, setEnrollment] = useState<any>(null);
+
+    // Refs para controlar media
+    const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
+    const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
+
+    const handleEvaluationItemScore = (itemId: string, score: number, type: string) => {
+        // Store the score for evaluation items
+        if (type === 'quiz') {
+            setQuizScore(score);
+        }
+
+        // Mark as completed in the set
+        handleItemCompletion(itemId);
+
+        // Check if passing score is met
+        const currentModule = modules[activeModuleIndex];
+        const minScore = currentModule?.settings?.min_score || 60;
+
+        if (score >= minScore) {
+            setApproved(true);
+            setModuleCompleted(true);
+        }
+    };
+
+    const checkGlobalApproval = () => {
+        // Logic to check if all evaluation requirements are met
+        const currentModule = modules[activeModuleIndex];
+        if (currentModule?.type === 'evaluation') {
+            const minScore = currentModule?.settings?.min_score || 60;
+            if (quizScore && quizScore >= minScore) {
+                setApproved(true);
+                setModuleCompleted(true);
+            }
+        }
+    };
+
+    useEffect(() => {
+        checkGlobalApproval();
+    }, [quizScore]);
+
+    // Removed Confetti Effect
+    /*
+    useEffect(() => {
+        if (approved) {
+            confetti({ ... });
+        }
+    }, [approved]);
+    */
+
+    useEffect(() => {
+        loadCourseStructure();
+    }, [courseId]);
+
+    useEffect(() => {
+        // Reset state on module change
+        setModuleCompleted(false);
+        setItemsCompleted(new Set());
+        stopAllMedia();
+    }, [activeModuleIndex]);
+
+
+
+    const stopAllMedia = () => {
+        // Stop all audio elements
+        audioRefs.current.forEach((audio) => {
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        });
+
+        // Stop all video elements
+        videoRefs.current.forEach((videoControl) => {
+            if (videoControl && videoControl.stop) {
+                videoControl.stop();
+            }
+        });
+    };
+
+    const loadCourseStructure = async () => {
+        setLoading(true);
+        const { data: mods } = await supabase
+            .from('course_modules')
+            .select('*, module_items(*)')
+            .eq('course_id', courseId)
+            .order('order_index');
+
+        if (mods) {
+            const formatted = mods.map((m: any) => ({
+                ...m,
+                items: (m.module_items || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+            })).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
+            
+            setModules(formatted);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        const fetchEnrollment = async () => {
+            if (!studentId || !courseId) return;
+            const { data } = await supabase
+                .from('enrollments')
+                .select('*, courses(*)')
+                .eq('student_id', studentId)
+                .eq('course_id', courseId)
+                .single();
+
+            if (data) {
+                setEnrollment(data);
+                if (data.current_module_index !== undefined && data.current_module_index !== null) {
+                    setActiveModuleIndex(data.current_module_index);
+                }
+                if (data.status === 'completed') setModuleCompleted(true);
+            }
+        };
+        fetchEnrollment();
+    }, [studentId, courseId]);
+
+    // ... (rest of useEffects)
+
+    const handleItemCompletion = (itemId: string) => {
+        setItemsCompleted(prev => {
+            const newSet = new Set(prev);
+            newSet.add(itemId);
+            return newSet;
+        });
+    };
+
+    // Check if current module is complete
+    useEffect(() => {
+        if (!modules[activeModuleIndex]) return;
+
+        const currentItems = modules[activeModuleIndex].items || [];
+        const allDone = currentItems.every((item: ModuleItem) => {
+            // Auto-completar tipos pasivos (incluyendo cabeceras guardadas como text o header)
+            if (['text', 'image', 'pdf', 'header'].includes(item.type)) return true;
+            return itemsCompleted.has(item.id);
+        });
+
+        if (allDone) setModuleCompleted(true);
+    }, [itemsCompleted, activeModuleIndex, modules]);
+
+
+    const saveProgress = async (index: number) => {
+        if (!studentId || !courseId) return;
+
+        try {
+            const { data: enrollmentData } = await supabase
+                .from('enrollments')
+                .select('id')
+                .eq('student_id', studentId)
+                .eq('course_id', courseId)
+                .single();
+
+            if (enrollmentData) {
+                await supabase
+                    .from('enrollments')
+                    .update({
+                        current_module_index: index
+                    })
+                    .eq('id', enrollmentData.id);
+            }
+        } catch (err) {
+            console.error("Error saving progress:", err);
+        }
+    };
+
+    const handleNext = async () => {
+        if (activeModuleIndex < modules.length - 1) {
+            const nextIndex = activeModuleIndex + 1;
+            setActiveModuleIndex(nextIndex);
+            await saveProgress(nextIndex);
+        } else {
+            if (onComplete) onComplete();
+        }
+    };
+
+    const handlePrevious = () => {
+        if (activeModuleIndex > 0) {
+            setActiveModuleIndex(prev => prev - 1);
+        }
+    };
+
+    if (loading) return <div className="text-white text-center p-20">Cargando curso...</div>;
+    if (modules.length === 0) return <div className="text-white text-center p-20">Este curso no tiene contenido asignado.</div>;
+
+    const currentModule = modules[activeModuleIndex];
+    const isEvaluation = currentModule.type === 'evaluation';
+
+    return (
+        <div 
+            className="flex flex-col h-screen transition-colors duration-700 text-white overflow-hidden"
+            style={{ backgroundColor: currentModule.settings?.bg_color || '#0a0a0a' }}
+        >
+            {/* Professional Progress Bar */}
+            <div className="h-1.5 bg-gradient-to-r from-white/5 via-white/10 to-white/5 w-full relative overflow-hidden">
+                <motion.div
+                    className="h-full bg-gradient-to-r from-brand/80 via-brand to-brand/80 shadow-[0_0_15px_rgba(49,210,45,0.5)]"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((activeModuleIndex + 1) / modules.length) * 100}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                />
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-gradient-to-b from-transparent via-black/10 to-transparent">
+                <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-10 pb-36">
+
+                    {/* Professional Header */}
+                    <header className="mb-10 pb-6 border-b border-white/10">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="px-3 py-1 rounded-full bg-brand/20 border border-brand/30">
+                                        <span className="text-brand text-xs font-bold">Módulo {activeModuleIndex + 1}/{modules.length}</span>
+                                    </div>
+                                    <div className="text-xs text-white/40 font-medium">
+                                        {Math.round(((activeModuleIndex + 1) / modules.length) * 100)}% completado
+                                    </div>
+                                </div>
+                                <h1 className="text-3xl md:text-4xl font-black tracking-tight">{currentModule.title}</h1>
+                            </div>
+                            
+                            {/* Library / Extra Content - Always visible in header */}
+                            {currentModule.settings?.extras?.length > 0 && (
+                                <div className="flex gap-3">
+                                    <div className="relative group/library">
+                                        <button className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-brand/10 to-brand/5 border border-brand/20 hover:border-brand hover:shadow-[0_0_20px_rgba(49,210,45,0.2)] transition-all text-sm font-bold text-white">
+                                            <Library className="w-5 h-5 text-brand" />
+                                            <span>Material de Apoyo</span>
+                                            <span className="px-2 py-0.5 rounded-full bg-brand/20 text-brand text-xs">{currentModule.settings.extras.length}</span>
+                                        </button>
+                                        
+                                        <div className="absolute right-0 top-full mt-3 w-80 bg-[#0d0d0d] border border-white/20 rounded-3xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/library:opacity-100 group-hover/library:translate-y-0 group-hover/library:pointer-events-auto transition-all duration-300 z-50 overflow-hidden backdrop-blur-xl">
+                                            <div className="p-5 border-b border-white/10 bg-gradient-to-r from-brand/5 to-transparent">
+                                                <p className="text-xs font-black text-brand uppercase tracking-wider">📚 Recursos Descargables</p>
+                                                <p className="text-xs text-white/40 mt-1">Material complementario para tu aprendizaje</p>
+                                            </div>
+                                            <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto">
+                                                {currentModule.settings.extras.map((extra: any, idx: number) => (
+                                                    <a 
+                                                        key={idx}
+                                                        href={extra.url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-brand/30 transition-all group/item"
+                                                    >
+                                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 flex items-center justify-center border border-red-500/20 group-hover/item:border-red-500 group-hover/item:scale-110 transition-all">
+                                                            <FileIcon className="w-6 h-6 text-red-500" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold truncate text-white group-hover/item:text-brand transition-colors">{extra.name}</p>
+                                                            <p className="text-xs text-white/40 uppercase tracking-wide mt-0.5">📄 Documento PDF</p>
+                                                        </div>
+                                                        <div className="text-white/40 group-hover/item:text-brand transition-colors">
+                                                            →
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    {/* Dynamic Items Render - Professional Content Display */}
+                    {!isEvaluation && (
+                        <div className="relative min-h-[500px]">
+                            {currentModule.items && currentModule.items.length > 0 ? (
+                                currentModule.items.map((item: ModuleItem, index: number) => (
+                                    <div
+                                        key={item.id}
+                                        className={`${index === activeItemIndex ? 'block' : 'hidden'}`}
+                                    >
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5 }}
+                                        >
+                                            {/* Header/Title Display */}
+                                            {(item.type === 'header' || (item.type === 'text' && item.content?.isHeader)) && (
+                                                <div className="text-center py-12 md:py-20 px-4">
+                                                    <motion.h1 
+                                                        initial={{ scale: 0.95 }}
+                                                        animate={{ scale: 1 }}
+                                                        transition={{ duration: 0.6 }}
+                                                        className="leading-tight drop-shadow-2xl" 
+                                                        style={{ 
+                                                            fontSize: item.content?.tag === 'h1' ? 'clamp(2.5rem, 5vw, 4rem)' : item.content?.tag === 'h2' ? 'clamp(2rem, 4vw, 3rem)' : item.content?.tag === 'h3' ? 'clamp(1.5rem, 3vw, 2.2rem)' : '1.8rem',
+                                                            fontWeight: item.content?.bold ? '900' : '700',
+                                                            color: item.content?.color || '#ffffff',
+                                                            textShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                                                        }}
+                                                    >
+                                                        {item.content?.text}
+                                                    </motion.h1>
+                                                </div>
+                                            )}
+
+                                            {/* Rich Text Content Display */}
+                                            {item.type === 'text' && !item.content?.isHeader && (
+                                                <div className="prose prose-lg prose-invert prose-brand max-w-none bg-white/5 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl">
+                                                    <div dangerouslySetInnerHTML={{ __html: item.content?.html || item.content?.text || '' }} />
+                                                </div>
+                                            )}
+
+                                            {/* Image Display */}
+                                            {item.type === 'image' && (
+                                                <div className="flex justify-center items-center py-6">
+                                                    <div className="relative group">
+                                                        <img 
+                                                            src={item.content?.url} 
+                                                            alt="Contenido visual" 
+                                                            className="max-h-[70vh] w-auto rounded-3xl object-contain shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-white/10 group-hover:scale-[1.02] transition-transform duration-300" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Video Player */}
+                                            {item.type === 'video' && (
+                                                <div className="rounded-3xl overflow-hidden border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.5)] bg-black">
+                                                    <VideoPlayer
+                                                        ref={(el) => {
+                                                            if (el) videoRefs.current.set(item.id, el);
+                                                        }}
+                                                        src={item.content?.url}
+                                                        onEnded={() => handleItemCompletion(item.id)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Audio Player */}
+                                            {item.type === 'audio' && (
+                                                <div className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm p-10 rounded-3xl flex flex-col md:flex-row items-center gap-8 border border-white/20 shadow-2xl">
+                                                    <div className="relative">
+                                                        <div className="absolute inset-0 bg-brand/20 blur-2xl rounded-full"></div>
+                                                        <div className="relative p-6 bg-gradient-to-br from-brand to-brand/80 rounded-3xl text-black shadow-lg">
+                                                            <Volume2 className="w-10 h-10" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 w-full space-y-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-2 h-2 bg-brand rounded-full animate-pulse"></div>
+                                                            <p className="text-sm font-bold uppercase text-brand tracking-wider">🎧 Audio de Contenido</p>
+                                                        </div>
+                                                        <audio
+                                                            ref={(el) => {
+                                                                if (el) audioRefs.current.set(item.id, el);
+                                                            }}
+                                                            controls
+                                                            className="w-full h-12 rounded-xl"
+                                                            src={item.content?.url}
+                                                            onEnded={() => handleItemCompletion(item.id)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Genially Interactive Content */}
+                                            {item.type === 'genially' && (
+                                                <div className="h-[600px] md:h-[700px] w-full rounded-3xl overflow-hidden border border-white/20 shadow-2xl bg-black/50">
+                                                    <GeniallyEmbed
+                                                        src={item.content?.url}
+                                                        onInteract={() => handleItemCompletion(item.id)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* PDF Viewer */}
+                                            {item.type === 'pdf' && (
+                                                <div className="space-y-6">
+                                                    <div className="rounded-3xl overflow-hidden border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.5)] bg-white/5">
+                                                        <iframe 
+                                                            src={item.content?.url}
+                                                            className="w-full h-[650px] md:h-[800px]" 
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-center">
+                                                        <a 
+                                                            href={item.content?.url} 
+                                                            target="_blank" 
+                                                            rel="noreferrer"
+                                                            className="px-8 py-4 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center gap-4 hover:border-brand hover:bg-brand/10 transition-all group font-bold text-sm shadow-lg"
+                                                        >
+                                                            <FileIcon className="w-6 h-6 text-brand group-hover:scale-110 transition-transform" />
+                                                            <span>📄 Abrir documento en pantalla completa</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* SCORM Interactive Activity */}
+                                            {item.type === 'scorm' && (
+                                                <div className="p-10 md:p-12 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 border border-white/20 bg-gradient-to-br from-white/10 via-white/5 to-transparent backdrop-blur-sm shadow-2xl">
+                                                    <div className="flex items-center gap-6 text-center md:text-left flex-col md:flex-row">
+                                                        <div className="relative">
+                                                            <div className="absolute inset-0 bg-brand/20 blur-3xl rounded-full"></div>
+                                                            <div className="relative w-24 h-24 bg-gradient-to-br from-brand/20 to-brand/10 rounded-[2rem] flex items-center justify-center border-2 border-brand/30">
+                                                                <Lock className={`w-12 h-12 ${itemsCompleted.has(item.id) ? 'text-green-500' : 'text-brand'}`} />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-2xl md:text-3xl font-black mb-2">Actividad Interactiva</h4>
+                                                            <p className="text-white/50 font-medium text-sm">Contenido dinámico SCORM</p>
+                                                            {itemsCompleted.has(item.id) && (
+                                                                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30">
+                                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                    <span className="text-xs font-bold text-green-500">Completado</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setScormModalItem(item)}
+                                                        className="w-full md:w-auto px-12 py-6 bg-gradient-to-r from-brand to-brand/90 text-black font-black uppercase text-sm tracking-widest rounded-3xl hover:scale-105 hover:shadow-[0_0_40px_rgba(49,210,45,0.4)] active:scale-95 transition-all shadow-xl"
+                                                    >
+                                                        {itemsCompleted.has(item.id) ? '🔄 Reiniciar' : '▶️ Iniciar'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-20 text-white/40">Este módulo no tiene diapositivas.</div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Evaluation Logic */}
+                    {isEvaluation && (
+                        <div className="space-y-8">
+                            {!approved ? (
+                                <div className="space-y-6">
+                                    <div className="glass p-6 rounded-2xl border-brand/10">
+                                        <h3 className="text-xl font-bold mb-2 text-brand">Evaluación Final</h3>
+                                        <p className="text-white/60 text-sm">Completa las siguientes actividades para aprobar el curso.</p>
+                                        <div className="mt-4 flex gap-4 text-xs font-mono text-white/40">
+                                            <span>Nota Mínima: {currentModule.settings?.min_score || 60}%</span>
+                                            {currentModule.settings?.scorm_percentage > 0 && <span>Ponderación SCORM: {currentModule.settings?.scorm_percentage}%</span>}
+                                        </div>
+                                    </div>
+
+                                    {/* Render Evaluation Items */}
+                                    {currentModule.items.map((item: ModuleItem) => {
+                                        if (item.type === 'quiz') {
+                                            // Quiz is rendered inline
+                                            // We need to track its score independently
+                                            // If already passed, show result?
+                                            // QuizEngine determines its own "passed" state internally but we need the score.
+                                            // We can rely on onComplete prop of QuizEngine.
+                                            // We might need to hide it if done? Or show a "Redo" button?
+                                            // For simplicyt, let's keep it visible.
+                                            return (
+                                                <div key={item.id} className="border-t border-white/5 pt-8">
+                                                    <h4 className="text-lg font-bold mb-4">Cuestionario</h4>
+                                                    <QuizEngine
+                                                        questions={item.content.questions || []}
+                                                        passingScore={currentModule.settings?.min_score || 60}
+                                                        courseId={courseId}
+                                                        enrollmentId={enrollment?.id}
+                                                        onComplete={(score) => handleEvaluationItemScore(item.id, score, 'quiz')}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        if (item.type === 'scorm') {
+                                            // Button to launch SCORM
+                                            return (
+                                                <div key={item.id} className="glass p-6 rounded-2xl flex items-center justify-between">
+                                                    <div>
+                                                        <h4 className="font-bold">Actividad Interactiva SCORM</h4>
+                                                        <p className="text-xs text-white/40">Paquete externo evaluado</p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setScormModalItem(item)}
+                                                        className="px-4 py-2 bg-brand text-black font-bold rounded-lg text-sm hover:scale-105 transition-transform"
+                                                    >
+                                                        Iniciar Actividad
+                                                    </button>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (item.type === 'genially') {
+                                            return (
+                                                <div key={item.id} className="h-[500px] w-full bg-black/50 rounded-2xl overflow-hidden">
+                                                    <GeniallyEmbed src={item.content.url} />
+                                                </div>
+                                            );
+                                        }
+
+                                        return null;
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="space-y-8">
+                                    <div className="glass p-8 rounded-3xl border-brand/20 text-center relative overflow-hidden">
+                                        <div className="w-20 h-20 bg-brand text-black rounded-full flex items-center justify-center mx-auto mb-4 relative z-10">
+                                            <CheckCircle2 className="w-10 h-10" />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-brand mb-2 relative z-10">¡Felicitaciones!</h3>
+                                        <p className="text-white/60 mb-6 relative z-10">Has aprobado el curso con {quizScore?.toFixed(0)}%</p>
+                                    </div>
+
+                                    {/* Signature Step - Conditional */}
+                                    {currentModule.items.some((i: ModuleItem) => i.type === 'signature') && (
+                                        <div className="glass p-8 rounded-3xl border-white/5 text-center">
+                                            <h3 className="text-xl font-bold mb-4">Firma Digital Final</h3>
+                                            <p className="text-sm text-white/40 mb-6">Dibuja tu firma para generar el certificado.</p>
+
+                                            <div className="flex justify-center">
+                                                <SignatureCanvas
+                                                    onSave={async (signature) => {
+                                                        setSignatureUrl(signature);
+                                                        // Guardar en la base de datos
+                                                        await supabase
+                                                            .from('students')
+                                                            .update({ digital_signature_url: signature })
+                                                            .eq('id', studentId);
+                                                        setModuleCompleted(true);
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Professional Navigation Footer */}
+            <footer className="border-t border-white/20 fixed bottom-0 w-full z-50 bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-2xl shadow-2xl">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
+                    <div className="flex items-center justify-between gap-4">
+                        
+                        {/* Left: Back Button */}
+                        <div className="flex-1 flex justify-start">
+                            {(activeModuleIndex > 0 || activeItemIndex > 0) && (
+                                <button
+                                    onClick={handleGoBack}
+                                    className="group flex items-center gap-3 px-6 py-3.5 rounded-2xl font-bold text-sm transition-all border border-white/20 hover:border-white/40 hover:bg-white/5 active:scale-95 text-white/70 hover:text-white"
+                                >
+                                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                                    <span className="hidden sm:inline">Anterior</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Center: Progress Indicators */}
+                        <div className="flex-1 flex flex-col items-center gap-3">
+                            {!isEvaluation && currentModule.items && currentModule.items.length > 1 && (
+                                <>
+                                    <div className="flex gap-2 p-2.5 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
+                                        {currentModule.items.map((_: ModuleItem, idx: number) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setActiveItemIndex(idx)}
+                                                className={`rounded-full transition-all duration-300 ${
+                                                    idx === activeItemIndex 
+                                                        ? 'w-8 h-3 bg-brand shadow-[0_0_15px_rgba(49,210,45,0.7)]' 
+                                                        : 'w-3 h-3 bg-white/20 hover:bg-white/40'
+                                                }`}
+                                                aria-label={`Diapositiva ${idx + 1} de ${currentModule.items.length}`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <span className="text-xs text-white/40 font-medium">
+                                        {activeItemIndex + 1} / {currentModule.items.length}
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Right: Next/Continue Button */}
+                        <div className="flex-1 flex justify-end">
+                            <button
+                                onClick={() => {
+                                    if (!isEvaluation && activeItemIndex < currentModule.items.length - 1) {
+                                        const currentItemId = currentModule.items[activeItemIndex].id;
+                                        handleItemCompletion(currentItemId);
+                                        setActiveItemIndex(prev => prev + 1);
+                                    } else {
+                                        handleNext();
+                                    }
+                                }}
+                                disabled={isEvaluation && !moduleCompleted}
+                                className={`
+                                    group flex items-center gap-3 px-8 py-3.5 rounded-2xl font-black uppercase tracking-wider text-sm transition-all relative overflow-hidden
+                                    ${(isEvaluation && !moduleCompleted)
+                                        ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/10'
+                                        : 'bg-gradient-to-r from-brand to-brand/90 text-black hover:shadow-[0_0_30px_rgba(49,210,45,0.5)] hover:scale-105 active:scale-95 shadow-lg'}
+                                `}
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    {!isEvaluation && activeItemIndex < currentModule.items.length - 1
+                                        ? "Siguiente"
+                                        : activeModuleIndex === modules.length - 1
+                                            ? "Finalizar Curso"
+                                            : "Continuar"
+                                    }
+                                    {(isEvaluation && !moduleCompleted) 
+                                        ? <Lock className="w-4 h-4" /> 
+                                        : <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    }
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            {/* SCORM Modal Overlay */}
+            <AnimatePresence>
+                {scormModalItem && (
+                    <div className="fixed inset-0 z-[200]">
+                        <ScormPlayer
+                            courseUrl={scormModalItem.content.url}
+                            courseTitle={currentModule.title || "Actividad SCORM"}
+                            user={enrollment?.students || { id: studentId }}
+                            enrollment={enrollment}
+                            courseId={courseId}
+                            onClose={() => setScormModalItem(null)}
+                            onComplete={(score) => {
+                                handleEvaluationItemScore(scormModalItem.id, score, 'scorm');
+                                // Optionally close or ask user to close
+                            }}
+                        />
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
