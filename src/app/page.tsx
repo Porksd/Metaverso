@@ -1,12 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Building2, BookOpen, ShieldCheck, ArrowRight, Terminal, Zap, Globe, Cpu } from "lucide-react";
-import Link from "next/link";
+import { redirect } from 'next/navigation';
 
 export default function RootLanding() {
-  return (
-    <div className="min-h-screen bg-[#060606] text-white flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
+    redirect('/admin');
+}
 
       {/* Background Aesthetics - ULTRA PREMUM */}
       <div className="fixed inset-0 z-0 text-[#31D22D]">
