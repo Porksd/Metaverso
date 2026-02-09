@@ -12,7 +12,15 @@ export default function CoursesAdmin() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newCourse, setNewCourse] = useState({ name: '', code: '', company_ids: [] as string[], registration_mode: 'open' });
+    const [newCourse, setNewCourse] = useState({ 
+        name: '', 
+        code: '', 
+        company_ids: [] as string[], 
+        registration_mode: 'open',
+        passing_score: 90,
+        weight_quiz: 80,
+        weight_scorm: 20
+    });
     const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
     const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
 
@@ -49,18 +57,44 @@ export default function CoursesAdmin() {
     const handleSaveCourse = async () => {
         if (editingCourseId) {
             // 1. Update Course Name, Code & Mode
+            const currentCourse = courses.find(c => c.id === editingCourseId);
             const { error: courseError } = await supabase
                 .from('courses')
                 .update({ 
                     name: newCourse.name,
                     code: newCourse.code,
-                    registration_mode: newCourse.registration_mode
+                    registration_mode: newCourse.registration_mode,
+                    config: {
+                        ...(currentCourse?.config || {}),
+                        passing_score: newCourse.passing_score,
+                        weight_quiz: newCourse.weight_quiz,
+                        weight_scorm: newCourse.weight_scorm
+                    }
                 })
                 .eq('id', editingCourseId);
             
             if (courseError) return alert("Error actualizando curso: " + courseError.message);
 
-            // 2. Sync Companies (Delete & Re-insert)
+            // 2. Sync Evaluation Module Settings if it exists
+            const { data: evalModules } = await supabase
+                .from('course_modules')
+                .select('id, settings')
+                .eq('course_id', editingCourseId)
+                .eq('type', 'evaluation');
+            
+            if (evalModules && evalModules.length > 0) {
+                for (const mod of evalModules) {
+                    const newSettings = {
+                        ...(mod.settings || {}),
+                        min_score: newCourse.passing_score,
+                        quiz_percentage: newCourse.weight_quiz,
+                        scorm_percentage: newCourse.weight_scorm
+                    };
+                    await supabase.from('course_modules').update({ settings: newSettings }).eq('id', mod.id);
+                }
+            }
+
+            // 3. Sync Companies (Delete & Re-insert)
             await supabase.from('company_courses').delete().eq('course_id', editingCourseId);
             
             if (newCourse.company_ids.length > 0) {
@@ -74,7 +108,15 @@ export default function CoursesAdmin() {
 
             setIsCreateModalOpen(false);
             setEditingCourseId(null);
-            setNewCourse({ name: '', code: '', company_ids: [], registration_mode: 'open' });
+            setNewCourse({ 
+                name: '', 
+                code: '', 
+                company_ids: [], 
+                registration_mode: 'open',
+                passing_score: 90,
+                weight_quiz: 80,
+                weight_scorm: 20
+            });
             fetchCourses();
         } else {
             handleCreateCourse();
@@ -122,7 +164,12 @@ export default function CoursesAdmin() {
             code: newCourse.code || ("MOC-" + Math.floor(Math.random() * 10000)),
             is_active: true,
             registration_mode: newCourse.registration_mode,
-            config: { passing_score: 60, weight_scorm: 50, weight_quiz: 50, questions: [] }
+            config: { 
+                passing_score: newCourse.passing_score, 
+                weight_scorm: newCourse.weight_scorm, 
+                weight_quiz: newCourse.weight_quiz, 
+                questions: [] 
+            }
         };
 
         const { data: course, error: courseError } = await supabase
@@ -144,7 +191,15 @@ export default function CoursesAdmin() {
             }
 
             setIsCreateModalOpen(false);
-            setNewCourse({ name: '', code: '', company_ids: [], registration_mode: 'open' });
+            setNewCourse({ 
+                name: '', 
+                code: '', 
+                company_ids: [], 
+                registration_mode: 'open',
+                passing_score: 90,
+                weight_quiz: 80,
+                weight_scorm: 20
+            });
             fetchCourses();
         }
     };
@@ -263,7 +318,10 @@ export default function CoursesAdmin() {
                                             name: course.name, 
                                             code: course.code,
                                             company_ids: course.company_courses?.map((cc: any) => cc.company_id) || [], 
-                                            registration_mode: course.registration_mode || 'open'
+                                            registration_mode: course.registration_mode || 'open',
+                                            passing_score: course.config?.passing_score || 90,
+                                            weight_quiz: course.config?.weight_quiz || 80,
+                                            weight_scorm: course.config?.weight_scorm || 20
                                         });
                                         setEditingCourseId(course.id);
                                         setIsCreateModalOpen(true);
@@ -304,13 +362,21 @@ export default function CoursesAdmin() {
                             <button onClick={() => { 
                                 setIsCreateModalOpen(false); 
                                 setEditingCourseId(null); 
-                                setNewCourse({ name: '', code: '', company_ids: [], registration_mode: 'open' });
+                                setNewCourse({ 
+                                    name: '', 
+                                    code: '', 
+                                    company_ids: [], 
+                                    registration_mode: 'open',
+                                    passing_score: 90,
+                                    weight_quiz: 80,
+                                    weight_scorm: 20
+                                });
                             }} className="text-white/40 hover:text-white">
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
                             <div>
                                 <label className="text-[10px] font-black uppercase text-white/40 mb-1 block">Nombre del Curso</label>
                                 <input 
@@ -343,6 +409,38 @@ export default function CoursesAdmin() {
                                     <option value="open" className="bg-[#060606]">Abierto (Cualquier alumno del portal se auto-inscribe)</option>
                                     <option value="restricted" className="bg-[#060606]">Restringido (Solo alumnos listados previamente)</option>
                                 </select>
+                            </div>
+
+                            {/* Evaluación Section */}
+                            <div className="p-4 bg-brand/5 border border-brand/20 rounded-2xl space-y-4">
+                                <label className="text-[10px] font-black uppercase text-brand mb-1 block">Ajustes de Evaluación</label>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[9px] font-black uppercase text-white/40 mb-1 block">Puntaje Mínimo (%)</label>
+                                        <input 
+                                            type="number" 
+                                            value={newCourse.passing_score}
+                                            onChange={(e) => setNewCourse(prev => ({ ...prev, passing_score: parseInt(e.target.value) }))}
+                                            className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-brand font-black text-center"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-black uppercase text-white/40 mb-1 block">Ponderación Quiz (%)</label>
+                                        <input 
+                                            type="number" 
+                                            value={newCourse.weight_quiz}
+                                            onChange={(e) => {
+                                                const quiz = parseInt(e.target.value);
+                                                setNewCourse(prev => ({ ...prev, weight_quiz: quiz, weight_scorm: 100 - quiz }));
+                                            }}
+                                            className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-white font-bold text-center"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-[8px] text-white/30 italic text-center">
+                                    El peso SCORM se ajustará automáticamente ({newCourse.weight_scorm}%).
+                                </p>
                             </div>
 
                             <div className="flex-1 overflow-hidden flex flex-col min-h-0">

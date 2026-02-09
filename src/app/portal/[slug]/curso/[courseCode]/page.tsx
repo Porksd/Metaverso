@@ -297,7 +297,15 @@ export default function CourseAuthPage() {
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Contraseña</label>
-                                        <input type="password" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required minLength={6}
+                                        <input 
+                                            type="password" 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
+                                            required 
+                                            minLength={6}
+                                            title="La contraseña debe tener al menos 6 caracteres"
+                                            pattern=".{6,}"
+                                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('La contraseña debe tener al menos 6 caracteres')}
+                                            onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                                             value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
                                     </div>
                                     <div className="space-y-1">

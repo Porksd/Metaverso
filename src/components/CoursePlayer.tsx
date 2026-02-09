@@ -73,9 +73,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     useEffect(() => {
         if (quizScore === null) return;
 
-        const quizWeight = 0.8;
-        const scormWeight = 0.2;
-        const minPass = 90;
+        // Intentar obtener pesos del módulo actual o del curso
+        const currentModule = modules[activeModuleIndex];
+        const quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+        const scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+        const minPass = currentModule?.settings?.min_score ?? enrollment?.courses?.config?.passing_score ?? 90;
 
         const qScore = quizScore || 0;
         const sScore = scormScore || 0;
@@ -86,26 +88,26 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         console.log('[CoursePlayer] Score Calculation:', {
             quizScore: qScore,
             scormScore: sScore,
-            quizWeighted: qScore * quizWeight,
-            scormWeighted: sScore * scormWeight,
+            quizWeight,
+            scormWeight,
             total: roundedTotal,
             minPass,
-            passed: total >= minPass
+            passed: roundedTotal >= minPass
         });
         
         // Determinar si realmente puede completar el curso
         const isLastModule = activeModuleIndex === modules.length - 1;
-        const canComplete = total >= minPass && isLastModule && moduleCompleted;
+        const canComplete = roundedTotal >= minPass && isLastModule && moduleCompleted;
 
         if (canComplete) {
             console.log('[CoursePlayer] COURSE COMPLETED! Total score:', roundedTotal);
             setApproved(true);
             updateEnrollmentStatus('completed', roundedTotal);
         } else {
-            setApproved(total >= minPass); // Aprobado para mostrar UI, pero no necesariamente completado en DB
+            setApproved(roundedTotal >= minPass); // Aprobado para mostrar UI, pero no necesariamente completado en DB
             if (total > 0) updateEnrollmentStatus('in_progress', roundedTotal);
         }
-    }, [quizScore, scormScore, moduleCompleted, activeModuleIndex, modules.length]);
+    }, [quizScore, scormScore, moduleCompleted, activeModuleIndex, modules.length, enrollment]);
 
     useEffect(() => {
         loadCourseStructure();

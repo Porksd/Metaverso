@@ -198,9 +198,10 @@ export default function StudentRegister() {
                             value={formData.language}
                             onChange={(e) => setFormData({ ...formData, language: e.target.value })}
                             className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-brand focus:outline-none"
+                            style={{ colorScheme: 'dark' }}
                         >
-                            <option value="es">Español</option>
-                            <option value="ht">Kreyòl Ayisyen</option>
+                            <option value="es" className="bg-neutral-900 text-white">Español</option>
+                            <option value="ht" className="bg-neutral-900 text-white">Kreyòl Ayisyen</option>
                         </select>
                     </div>
 
@@ -248,12 +249,13 @@ export default function StudentRegister() {
                                 value={formData.gender}
                                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-brand focus:outline-none"
+                                style={{ colorScheme: 'dark' }}
                                 required
                             >
-                                <option value="">-</option>
-                                <option value="Masculino">{t('genderMale')}</option>
-                                <option value="Femenino">{t('genderFemale')}</option>
-                                <option value="Otro">{t('genderOther')}</option>
+                                <option value="" className="bg-neutral-900 text-white">-</option>
+                                <option value="Masculino" className="bg-neutral-900 text-white">{t('genderMale')}</option>
+                                <option value="Femenino" className="bg-neutral-900 text-white">{t('genderFemale')}</option>
+                                <option value="Otro" className="bg-neutral-900 text-white">{t('genderOther')}</option>
                             </select>
                         </div>
                         <div>
@@ -279,11 +281,12 @@ export default function StudentRegister() {
                             value={formData.company}
                             onChange={(e) => handleCompanyChange(e.target.value)}
                             className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-brand focus:outline-none"
+                            style={{ colorScheme: 'dark' }}
                             required
                         >
-                            <option value="">{t('selectCompany')}</option>
+                            <option value="" className="bg-neutral-900 text-white">{t('selectCompany')}</option>
                             {companies.map(c => (
-                                <option key={c.code} value={c.code}>
+                                <option key={c.code} value={c.code} className="bg-neutral-900 text-white">
                                     {formData.language === 'ht' ? c.name_ht || c.name_es : c.name_es}
                                 </option>
                             ))}
@@ -322,11 +325,12 @@ export default function StudentRegister() {
                             value={formData.job_position}
                             onChange={(e) => handleJobChange(e.target.value)}
                             className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-brand focus:outline-none"
+                            style={{ colorScheme: 'dark' }}
                             required
                         >
-                            <option value="">{t('selectJob')}</option>
+                            <option value="" className="bg-neutral-900 text-white">{t('selectJob')}</option>
                             {jobPositions.map(j => (
-                                <option key={j.code} value={j.code}>
+                                <option key={j.code} value={j.code} className="bg-neutral-900 text-white">
                                     {formData.language === 'ht' ? j.name_ht || j.name_es : j.name_es}
                                 </option>
                             ))}

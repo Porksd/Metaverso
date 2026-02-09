@@ -931,9 +931,14 @@ export default function MetaversoAdmin() {
 
                             <div>
                                 <label className="text-sm font-bold text-white/60">Selecciona la empresa</label>
-                                <select className="w-full mt-2 bg-black/20 border border-white/10 rounded-lg p-3" onChange={(e) => setSelectedCompanyId(e.target.value)} value={selectedCompanyId || ''}>
-                                    <option value="">-- Seleccionar Empresa --</option>
-                                    {companies.map(c => (<option key={c.id} value={c.id}>{c.name}</option>))}
+                                <select 
+                                    className="w-full mt-2 bg-white/5 border border-white/10 rounded-lg p-3 text-white" 
+                                    style={{ colorScheme: 'dark' }}
+                                    onChange={(e) => setSelectedCompanyId(e.target.value)} 
+                                    value={selectedCompanyId || ''}
+                                >
+                                    <option value="" className="bg-neutral-900 text-white">-- Seleccionar Empresa --</option>
+                                    {companies.map(c => (<option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>))}
                                 </select>
                             </div>
 

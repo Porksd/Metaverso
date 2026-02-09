@@ -520,10 +520,11 @@ export default function EmpresaAdmin() {
                                     <select 
                                         value={isEditing.company_name || ""} 
                                         onChange={(e) => setIsEditing({ ...isEditing, company_name: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm outline-none"
+                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                        style={{ colorScheme: 'dark' }}
                                     >
-                                        <option value="" className="bg-black">Seleccionar Empresa</option>
-                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-black">{c.name_es}</option>)}
+                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
+                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
@@ -534,10 +535,11 @@ export default function EmpresaAdmin() {
                                             const val = e.target.value;
                                             setIsEditing({ ...isEditing, role_id: val === "" ? null : val });
                                         }}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm outline-none"
+                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                        style={{ colorScheme: 'dark' }}
                                     >
-                                        <option value="" className="bg-black">Seleccionar Cargo</option>
-                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name}</option>)}
+                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
+                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -637,10 +639,11 @@ export default function EmpresaAdmin() {
                                     <select 
                                         value={newStudent.company_name || ""} 
                                         onChange={(e) => setNewStudent({ ...newStudent, company_name: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm outline-none"
+                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                        style={{ colorScheme: 'dark' }}
                                     >
-                                        <option value="" className="bg-black">Seleccionar Empresa</option>
-                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-black">{c.name_es}</option>)}
+                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
+                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
@@ -651,10 +654,11 @@ export default function EmpresaAdmin() {
                                             const val = e.target.value;
                                             setNewStudent({ ...newStudent, role_id: val === "" ? null : val });
                                         }}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm outline-none"
+                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                        style={{ colorScheme: 'dark' }}
                                     >
-                                        <option value="" className="bg-black">Seleccionar Cargo</option>
-                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-black">{c.name}</option>)}
+                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
+                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
                                     </select>
                                 </div>
                             </div>

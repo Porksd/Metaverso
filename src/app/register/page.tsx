@@ -40,6 +40,11 @@ export default function RegisterPage() {
             return;
         }
 
+        if (formData.password.length < 6) {
+            setError("La contraseña debe tener al menos 6 caracteres");
+            return;
+        }
+
         if (!formData.rut && !formData.passport) {
             setError("Debes proporcionar RUT o Pasaporte");
             return;
