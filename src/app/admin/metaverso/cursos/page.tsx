@@ -231,7 +231,15 @@ export default function CoursesAdmin() {
                 <div className="flex gap-2 w-full md:w-auto">
                     <button
                         onClick={() => {
-                            setNewCourse({ name: '', code: '', company_ids: [], registration_mode: 'restricted' });
+                            setNewCourse({ 
+                                name: '', 
+                                code: '', 
+                                company_ids: [], 
+                                registration_mode: 'restricted',
+                                passing_score: 90,
+                                weight_quiz: 80,
+                                weight_scorm: 20
+                            });
                             setEditingCourseId(null);
                             setIsCreateModalOpen(true);
                         }}
