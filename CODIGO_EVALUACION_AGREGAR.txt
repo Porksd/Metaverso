@@ -3,6 +3,12 @@
 // Ubicación: src/app/admin/metaverso/cursos/[id]/contenido/page.tsx
 // =============================================================================
 
+/*
+### **Paso 3: Crear Módulo de Evaluación**
+1. El botón "+ Crear Módulo de Evaluación Final" aparecerá al final de la lista de slides.
+2. Haz clic en el botón morado con gradiente.
+*/
+
 // 1. AGREGAR ESTA FUNCIÓN DESPUÉS DE handleAddModule (línea ~230)
 // =============================================================================
 const handleCreateEvaluationModule = async () => {
@@ -110,7 +116,7 @@ const handleCreateEvaluationModule = async () => {
 // 2. AGREGAR ESTE COMPONENTE DE UI DESPUÉS DEL ÚLTIMO MÓDULO (línea ~570)
 // =============================================================================
 /* Botón para crear evaluación */
-{!modules.some(m => m.type === 'evaluation') && modules.length > 0 && (
+{!modules.some(m => m.type === 'evaluation') && (
     <div className="mb-8">
         <button
             onClick={handleCreateEvaluationModule}
