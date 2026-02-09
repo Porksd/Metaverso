@@ -1080,7 +1080,7 @@ export default function DynamicCourseEditor() {
                 </button>
 
                 {/* Botón para crear evaluación */}
-                {!modules.some(m => m.type === 'evaluation') && modules.length > 0 && (
+                {!modules.some(m => m.type === 'evaluation') && (
                     <div className="mb-8">
                         <button
                             onClick={handleCreateEvaluationModule}

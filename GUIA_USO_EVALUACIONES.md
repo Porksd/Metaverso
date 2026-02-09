@@ -62,8 +62,8 @@ Si Puntaje Final ≥ 90% → ✅ APROBADO → Certificado
 3. En cada slide, agrega videos, imágenes, texto, etc.
 
 ### **Paso 3: Crear Módulo de Evaluación**
-1. Una vez tengas al menos 1 módulo de contenido, aparecerá el botón **"+ Crear Módulo de Evaluación Final"**
-2. Haz clic en el botón morado con gradiente
+1. El botón **"+ Crear Módulo de Evaluación Final"** aparecerá al final de la lista de slides.
+2. Haz clic en el botón morado con gradiente.
 3. Confirma en el diálogo que aparecerá
 4. Se creará automáticamente un módulo con 3 items:
    - ✅ SCORM (vacío, listo para subir)
