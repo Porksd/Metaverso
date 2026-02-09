@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Listado de Participantes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background:#f7f8fa; }
+    .container-narrow { max-width: 1200px; }
+    .table thead th { white-space: nowrap; cursor: pointer; }
+    .status-badge { text-transform: capitalize; }
+    .empty { padding: 2rem; text-align:center; color:#6c757d; }
+    .sticky-controls { position: sticky; top: 0; background: #f7f8fa; z-index: 5; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container container-narrow py-3">
+    <div class="sticky-controls">
+      <div class="d-flex flex-wrap align-items-end gap-2">
+        <div class="me-auto">
+          <h1 class="h4 m-0">Listado de Participantes</h1>
+          <small class="text-muted">Fuente: hoja <code>Respuestas</code> y <code>Detalle</code></small>
+        </div>
+        <div class="ms-auto d-flex gap-2">
+          <input id="filtro" type="search" class="form-control" placeholder="Buscar nombre, correo, RUT, cargo…" />
+          <button id="btnRecargar" class="btn btn-outline-primary">Recargar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 card shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table id="tabla" class="table table-hover align-middle m-0">
+            <thead class="table-light">
+              <tr>
+                <th data-key="fecha" data-type="date">Fecha</th>
+                <th data-key="nombre" data-type="text">Nombre</th>
+                <th data-key="rut" data-type="text">RUT</th>
+                <th data-key="correo" data-type="text">Correo</th>
+                <th data-key="cargo" data-type="text">Cargo</th>
+                <th data-key="porcentaje" data-type="num">% Acierto</th>
+                <th data-key="intentos" data-type="num">Intentos</th>
+                <th data-key="tiempo" data-type="num">Tiempo (HH:MM:SS)</th>
+                <th data-key="estado" data-type="text">Estado</th>
+                <th data-key="certificado" data-type="text">Certificado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="10" class="empty">Cargando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-between small text-muted">
+        <span id="resumen">0 alumnos</span>
+        <span id="ordenInfo"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let DATA = [];
+    let DATA_FILTRADA = [];
+    let sortState = { key: 'fecha', dir: 'desc' }; // default: fecha desc
+
+    // --- Utilidades ---
+    function fmtFechaISOToCL(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth()+1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+      } catch(e) { return iso; }
+    }
+    function badgeEstado(estado) {
+      const map = { aprobado:'success', reprobado:'danger', proceso:'secondary' };
+      const cls = map[estado] || 'secondary';
+      return `<span class="badge text-bg-${cls} status-badge">${estado || ''}</span>`;
+    }
+    function escapeHtml(str){
+      return (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function coincideFiltro(a, q){
+      if (!q) return true;
+      const s = (a.nombre + ' ' + a.apellido + ' ' + a.rut + ' ' + a.correo + ' ' + a.cargo).toLowerCase();
+      return s.includes(q.toLowerCase());
+    }
+
+    function ordenar(arr, key, type, dir){
+      const mult = dir === 'desc' ? -1 : 1;
+      const cp = [...arr];
+      cp.sort((a,b) => {
+        let va = a[key], vb = b[key];
+        if (type === 'num') { va = Number(va)||0; vb = Number(vb)||0; }
+        else if (type === 'date') { va = Date.parse(a.fecha || '')||0; vb = Date.parse(b.fecha || '')||0; }
+        else { va = String(va||'').toLowerCase(); vb = String(vb||'').toLowerCase(); }
+        if (va < vb) return -1*mult;
+        if (va > vb) return  1*mult;
+        return 0;
+      });
+      return cp;
+    }
+
+    // --- Render ---
+    function renderTabla() {
+      const tbody = document.querySelector('#tabla tbody');
+      if (!DATA_FILTRADA.length) {
+        tbody.innerHTML = `<tr><td colspan="10" class="empty">Sin resultados</td></tr>`;
+        document.getElementById('resumen').textContent = '0 alumnos';
+        document.getElementById('ordenInfo').textContent =
+          `Orden: ${sortState.key} ${sortState.dir.toUpperCase()}`;
+        return;
+      }
+
+      const rows = DATA_FILTRADA.map(a => {
+        const nombreCompleto = `${escapeHtml(a.nombre)} ${escapeHtml(a.apellido)}`.trim();
+        const fechaTxt = fmtFechaISOToCL(a.fecha);
+        const porc = Number(a.porcentaje||0);
+        const intentos = Number(a.intentos||0);
+        const tiempoSeg = Number(a.tiempo||0);
+        const tiempoFmt = escapeHtml(a.tiempoFmt || '');
+        const cert = a.certificado ? `<a href="${escapeHtml(a.certificado)}" target="_blank" class="link-primary" title="Abrir certificado">📄</a>` : '';
+        return `
+          <tr>
+            <td>${fechaTxt}</td>
+            <td>${nombreCompleto}</td>
+            <td>${escapeHtml(a.rut)}</td>
+            <td>${escapeHtml(a.correo)}</td>
+            <td>${escapeHtml(a.cargo)}</td>
+            <td><span class="fw-semibold">${porc}%</span></td>
+            <td>${intentos}</td>
+            <td title="${tiempoSeg} seg"><code>${tiempoFmt}</code></td>
+            <td>${badgeEstado(a.estado)}</td>
+            <td class="text-center">${cert}</td>
+          </tr>
+        `;
+      }).join('');
+      tbody.innerHTML = rows;
+
+      document.getElementById('resumen').textContent = `${DATA_FILTRADA.length} alumno(s)`;
+      document.getElementById('ordenInfo').textContent =
+        `Orden: ${sortState.key} ${sortState.dir.toUpperCase()}`;
+    }
+
+    function aplicarFiltroYOrden() {
+      const q = document.getElementById('filtro').value.trim();
+      DATA_FILTRADA = DATA.filter(a => coincideFiltro(a, q));
+      // aplicar orden actual
+      const th = document.querySelector(`th[data-key="${sortState.key}"]`);
+      const type = th ? th.dataset.type : 'text';
+      DATA_FILTRADA = ordenar(DATA_FILTRADA, sortState.key, type, sortState.dir);
+      renderTabla();
+    }
+
+    // --- Cargar datos desde Apps Script ---
+    function cargar() {
+      const tbody = document.querySelector('#tabla tbody');
+      tbody.innerHTML = `<tr><td colspan="10" class="empty">Cargando…</td></tr>`;
+      document.getElementById('resumen').textContent = '—';
+      document.getElementById('ordenInfo').textContent = '';
+
+      google.script.run.withSuccessHandler(function(res){
+        DATA = Array.isArray(res) ? res : [];
+        aplicarFiltroYOrden();
+      }).withFailureHandler(function(err){
+        tbody.innerHTML = `<tr><td colspan="10" class="empty text-danger">Error al cargar: ${escapeHtml(err && err.message || String(err))}</td></tr>`;
+      }).listarAlumnos();
+    }
+
+    // --- Eventos de UI ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // ordenar por click en encabezados
+      document.querySelectorAll('#tabla thead th').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          const type = th.dataset.type || 'text';
+          if (!key) return;
+          // toggle dir si es misma columna
+          if (sortState.key === key) {
+            sortState.dir = (sortState.dir === 'asc') ? 'desc' : 'asc';
+          } else {
+            sortState.key = key;
+            sortState.dir = (type === 'text') ? 'asc' : 'desc'; // heurística
+          }
+          aplicarFiltroYOrden();
+        });
+      });
+
+      // filtro en vivo
+      document.getElementById('filtro').addEventListener('input', () => {
+        aplicarFiltroYOrden();
+      });
+
+      // recargar
+      document.getElementById('btnRecargar').addEventListener('click', cargar);
+
+      cargar();
+    });
+  </script>
+</body>
+</html>

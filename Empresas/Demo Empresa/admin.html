@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body{font-family:Arial; margin:18px; max-width:980px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+    input, select, button{padding:8px; font-size:14px;}
+    input, select{min-width:220px}
+    .card{border:1px solid #ddd; border-radius:10px; padding:12px; margin:12px 0;}
+    .title{font-weight:700; margin-bottom:10px;}
+    .ok{color:#0a7d2a}
+    .err{color:#b00020}
+    table{border-collapse:collapse; width:100%;}
+    td,th{border:1px solid #eee; padding:8px; font-size:13px;}
+  </style>
+</head>
+<body>
+
+  <h2>CORE (Demo) - Empresas / Usuarios / Cursos / Alumnos</h2>
+  <div id="msg"></div>
+
+  <div class="card">
+    <div class="title">1) Crear Empresa</div>
+    <div class="row">
+      <input id="e_nombre" placeholder="Nombre empresa">
+      <input id="e_rut" placeholder="RUT">
+      <input id="e_direccion" placeholder="Dirección">
+      <input id="e_fono" placeholder="Fono">
+      <input id="e_mail" placeholder="Mail">
+      <button onclick="createEmpresa()">Crear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">Seleccionar Empresa</div>
+    <div class="row">
+      <select id="empresaSelect" onchange="onEmpresaChanged()"></select>
+      <button onclick="reloadAll()">Recargar</button>
+    </div>
+    <div class="row">
+      <div><b>empresaId:</b> <span id="empresaIdView">-</span></div>
+      <div><b>folderId:</b> <span id="empresaFolderView">-</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">2) Usuarios (ADMIN / LECTOR)</div>
+    <div class="row">
+      <input id="u_nombre" placeholder="Nombre">
+      <input id="u_email" placeholder="Email">
+      <select id="u_rol">
+        <option value="ADMIN">ADMIN</option>
+        <option value="LECTOR">LECTOR</option>
+      </select>
+      <button onclick="createUsuario()">Crear usuario</button>
+    </div>
+    <div id="usuariosTable"></div>
+  </div>
+
+  <div class="card">
+    <div class="title">3) Cursos</div>
+    <div class="row">
+      <input id="c_nombre" placeholder="Nombre curso (ej: Trabajo en Altura)">
+      <input id="c_codigo" placeholder="Código (ej: ALTURA)">
+      <button onclick="createCurso()">Crear curso</button>
+    </div>
+    <div id="cursosTable"></div>
+  </div>
+
+  <div class="card">
+    <div class="title">4) Ingreso Alumno (Demo)</div>
+    <div class="row">
+      <select id="cursoSelect"></select>
+      <input id="a_nombre" placeholder="Nombre">
+      <input id="a_apellido" placeholder="Apellido">
+      <input id="a_correo" placeholder="Correo">
+      <input id="a_rut" placeholder="RUT">
+      <select id="a_genero">
+        <option value="">Género</option>
+        <option value="MASCULINO">MASCULINO</option>
+        <option value="FEMENINO">FEMENINO</option>
+      </select>
+      <input id="a_edad" placeholder="Edad" type="number" min="0">
+      <input id="a_cargo" placeholder="Cargo">
+      <button onclick="createAlumno()">Guardar alumno</button>
+    </div>
+    <div class="row">
+      <small>Campos restantes (nota/tiempo/firma/certificado) los metemos en el siguiente paso.</small>
+    </div>
+  </div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  function setMsg(text, ok=true){
+    $('msg').innerHTML = `<p class="${ok?'ok':'err'}">${text}</p>`;
+  }
+
+  function loadEmpresas(){
+    google.script.run
+      .withSuccessHandler(list => {
+        const sel = $('empresaSelect');
+        sel.innerHTML = list.map(e => `<option value="${e.empresaId}" data-folder="${e.folderId}">${e.rut} - ${e.nombre}</option>`).join('');
+        onEmpresaChanged();
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiListEmpresas();
+  }
+
+  function onEmpresaChanged(){
+    const sel = $('empresaSelect');
+    const empresaId = sel.value || '';
+    const folderId = sel.options[sel.selectedIndex]?.dataset?.folder || '-';
+    $('empresaIdView').textContent = empresaId || '-';
+    $('empresaFolderView').textContent = folderId || '-';
+
+    if (!empresaId) return;
+    loadUsuarios(empresaId);
+    loadCursos(empresaId);
+  }
+
+  function reloadAll(){
+    loadEmpresas();
+  }
+
+  function createEmpresa(){
+    const payload = {
+      nombre: $('e_nombre').value,
+      rut: $('e_rut').value,
+      direccion: $('e_direccion').value,
+      fono: $('e_fono').value,
+      mail: $('e_mail').value,
+    };
+
+    google.script.run
+      .withSuccessHandler(res => {
+        setMsg(`Empresa creada ✅ empresaId=${res.empresaId} (folderId=${res.folderId})`);
+        loadEmpresas();
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiCreateEmpresa(payload);
+  }
+
+  function createUsuario(){
+    const empresaId = $('empresaSelect').value;
+    const payload = {
+      empresaId,
+      nombre: $('u_nombre').value,
+      email: $('u_email').value,
+      rol: $('u_rol').value,
+    };
+
+    google.script.run
+      .withSuccessHandler(() => {
+        setMsg('Usuario creado ✅');
+        loadUsuarios(empresaId);
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiCreateUsuario(payload);
+  }
+
+  function loadUsuarios(empresaId){
+    google.script.run
+      .withSuccessHandler(list => {
+        $('usuariosTable').innerHTML = renderTable(list, ['userId','nombre','email','rol']);
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiListUsuarios(empresaId);
+  }
+
+  function createCurso(){
+    const empresaId = $('empresaSelect').value;
+    const payload = {
+      empresaId,
+      nombreCurso: $('c_nombre').value,
+      codigoCurso: $('c_codigo').value,
+    };
+
+    google.script.run
+      .withSuccessHandler(() => {
+        setMsg('Curso creado ✅');
+        loadCursos(empresaId);
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiCreateCurso(payload);
+  }
+
+  function loadCursos(empresaId){
+    google.script.run
+      .withSuccessHandler(list => {
+        $('cursosTable').innerHTML = renderTable(list, ['cursoId','nombreCurso','codigoCurso','folderIdCurso']);
+        const sel = $('cursoSelect');
+        sel.innerHTML = list.map(c => `<option value="${c.cursoId}">${c.codigoCurso} - ${c.nombreCurso}</option>`).join('');
+      })
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiListCursos(empresaId);
+  }
+
+  function createAlumno(){
+    const empresaId = $('empresaSelect').value;
+    const cursoId = $('cursoSelect').value;
+
+    const payload = {
+      empresaId,
+      cursoId,
+      'Fecha': new Date().toISOString(),
+      'Nombre': $('a_nombre').value,
+      'Apellido': $('a_apellido').value,
+      'Correo': $('a_correo').value,
+      'RUT': $('a_rut').value,
+      'Género': $('a_genero').value,
+      'Edad': $('a_edad').value,
+      'Empresa': $('empresaSelect').options[$('empresaSelect').selectedIndex]?.textContent || '',
+      'Cargo': $('a_cargo').value,
+    };
+
+    google.script.run
+      .withSuccessHandler(() => setMsg('Alumno guardado ✅'))
+      .withFailureHandler(err => setMsg(err.message, false))
+      .apiCreateAlumno(payload);
+  }
+
+  function renderTable(rows, cols){
+    if (!rows || !rows.length) return '<small class="muted">Sin datos</small>';
+    const th = cols.map(c=>`<th>${c}</th>`).join('');
+    const tb = rows.map(r => `<tr>${cols.map(c=>`<td>${(r[c]??'')}</td>`).join('')}</tr>`).join('');
+    return `<table><thead><tr>${th}</tr></thead><tbody>${tb}</tbody></table>`;
+  }
+
+  // init
+  window.onload = () => reloadAll();
+</script>
+
+</body>
+</html>

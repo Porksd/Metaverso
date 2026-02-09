@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Señalética — Curso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#fff; }
+    .slide { display:none; min-height:100vh; padding:20px; box-sizing:border-box; }
+    .slide.active { display:flex; flex-direction:column; justify-content:center; align-items:center; }
+
+    /* Fondo corporativo tenue */
+    .slide{
+      background-image:url('https://sacyr.com/o/corporativo-theme/images/Branding/logo_Sacyr_color.svg');
+      background-repeat:repeat; background-position:center; background-size:600px;
+      background-color:rgba(255,255,255,0.95); background-blend-mode:lighten;
+    }
+
+    /* Formulario */
+    #formulario{ background:#fff; padding:20px; border-radius:12px; box-shadow:0 0 12px rgba(0,0,0,.1); max-width:1200px; width:100%; }
+    #formulario img{ display:block; margin:0 auto 10px; max-width:250px; }
+    #formulario h1{ font-size:42px; text-align:center; margin-bottom:10px; }
+    #formulario label{ font-weight:bold; display:block; margin-top:8px; }
+    #formulario input, #formulario select{ width:100%; padding:8px; margin-top:4px; border-radius:6px; border:1px solid #ccc; }
+    #formulario button{ margin-top:16px; padding:10px 20px; background:#0033A0; color:#fff; border:none; border-radius:6px; }
+    button{ margin-top:20px; padding:12px 24px; background:#0033A0; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+
+    .split{ display:flex; width:100%; height:100%; }
+    .texto{ flex:2; padding-right:20px; display:flex; flex-direction:column; justify-content:center; }
+    .imagen{ flex:1; }
+    .imagen img{ max-width:100%; height:100%; object-fit:cover; }
+
+    video{ width:640px; max-width:95vw; height:auto; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.15); }
+
+    .embed16x9{
+      position: relative;
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      background: #fff;
+      aspect-ratio: 16 / 9;
+      max-height: 85vh;
+    }
+    .embed16x9 > iframe{
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+    @supports not (aspect-ratio: 1 / 1){
+      .embed16x9{ height: auto; }
+      .embed16x9::before{ content:""; display:block; padding-top:56.25%; }
+      .embed16x9 > iframe{ position:absolute; inset:0; }
+    }
+
+    /* NUEVO: contenedor 1:1 para slide 1 (YouTube y HTML5) */
+    .embed1x1{
+      position: relative;
+      width: min(900px, 100%); /* Ajusta a gusto para hacerlo más grande/pequeño */
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      background: #fff;
+      aspect-ratio: 1 / 1;
+      max-height: 85vh;
+    }
+    .embed1x1 > iframe,
+    .embed1x1 > video{
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0;
+      object-fit: cover; /* relleno visual del cuadrado */
+    }
+    @supports not (aspect-ratio: 1 / 1){
+      .embed1x1{ height: auto; }
+      .embed1x1::before{ content:""; display:block; padding-top:100%; }
+      .embed1x1 > iframe,
+      .embed1x1 > video{ position:absolute; inset:0; }
+    }
+
+    .hs{
+      position: absolute; z-index: 5;
+      border: 0; background: transparent; cursor: pointer;
+      padding: 0; margin: 0; display: none;
+    }
+
+    .opciones .opcion-pill{ display:block; width:100%; text-align:left; margin:10px 0; padding:14px 16px; border:1px solid #cfd6dd; border-radius:12px; background:#fff; color:#14233a; transition:transform .05s ease, box-shadow .15s ease, border-color .15s ease; font-weight:600; }
+    .opciones .opcion-pill:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.06); border-color:#b6c1cc; }
+    .opciones .opcion-pill.selected{ background:#0d6efd; color:#fff; border-color:#0b5ed7; box-shadow:0 10px 24px rgba(13,110,253,.28); }
+
+    .feedback-card{ background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding:16px 20px; }
+    .table-compact thead th{ position:sticky; top:0; background:#f8f9fa; z-index:1; }
+    .table-compact tbody tr.ok td{ background:#eaf7ef; }
+    .table-compact tbody tr.bad td{ background:#fdebea; }
+    .answer-pill{ display:inline-block; padding:.25rem .5rem; border-radius:999px; background:#f1f3f5; font-weight:600; }
+    .answer-pill.ok{ background:#e6f4ea; }
+    .answer-pill.bad{ background:#fdecea; }
+    .qcell{ max-width:520px; }
+    .text-truncate-2{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .ytWrap{
+      position: relative;
+      width: min(650px, 100%);
+      margin: 0 auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      background: #fff;
+      max-height: 85vh;
+    }
+    .ytWrap.aspect-16x9{ aspect-ratio: 16/9; }
+    .ytWrap.aspect-9x16{ aspect-ratio: 9/16; }
+    .ytWrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+    .yt-blocker{ position:absolute; inset:0; z-index:5; background:transparent; pointer-events:auto; }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 0 -->
+  <div class="slide active" id="slide0">
+    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100 bg-white">
+      <form id="formulario" class="bg-white p-4 rounded shadow w-100" style="max-width:1200px;">
+        <div class="text-center mb-4">
+          <img id="logoEmpresa" src="" alt="Logo Empresa" />
+          <h1 id="tituloCurso" class="mt-3 titulo-curso">Cargando...</h1>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="idioma" class="form-label">Idioma</label>
+            <select id="idioma" class="form-select" required>
+              <option value="es">Español</option>
+              <option value="ht">Kreyòl Ayisyen</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" id="nombre" class="form-control" required />
+          </div>
+
+          <div class="col-md-6">
+            <label for="apellido" class="form-label">Apellido</label>
+            <input type="text" id="apellido" class="form-control" required />
+          </div>
+
+          <div class="col-md-6">
+            <label for="correo" class="form-label">Correo</label>
+            <input type="email" id="correo" class="form-control" required />
+          </div>
+
+          <div class="col-md-6">
+            <label for="genero" class="form-label">Género</label>
+            <select id="genero" class="form-select">
+              <option>Seleccione</option>
+              <option>Masculino</option>
+              <option>Femenino</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="edad" class="form-label">Edad</label>
+            <input type="number" id="edad" class="form-control" required />
+          </div>
+
+          <!-- Empresa + campo OTRA -->
+          <div class="col-md-6">
+            <label for="empresa" class="form-label">Empresa</label>
+            <select id="empresa" class="form-select" required>
+              <!-- Dinámico por KV -->
+            </select>
+            <div id="empresaOtraWrap" class="mt-2" style="display:none;">
+              <input type="text" id="empresaOtra" class="form-control" placeholder="Escriba el nombre de su empresa" />
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rut" class="form-label">Rut o Pasaporte de Persona Trabajadora</label>
+            <input type="text" id="rut" class="form-control" required />
+          </div>
+
+          <div class="col-12">
+            <label for="cargo" class="form-label">Cargo</label>
+            <select id="cargo" class="form-select" required onchange="mostrarModalCargo(this.value)">
+              <option value=""></option>
+            </select>
+          </div>
+
+          <div class="col-12 text-center mt-2">
+            <button type="button" class="btn btn-primary btn-lg px-5" onclick="validarFormulario()">Ingresar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Cargo Dinámico -->
+  <div id="modalCargoGeneral" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:2100; align-items:center; justify-content:center;">
+    <div class="contenido bg-white p-4 rounded-3 shadow" style="max-width:1100px; width:92%; max-height:80vh; overflow:auto;">
+      <h2 id="tituloModalCargo" class="h4 m-0">Información para el Cargo</h2>
+      <div id="textoModalCargo" class="mt-3">Cargando...</div>
+      <div class="text-end mt-3">
+        <button class="btn btn-secondary" onclick="cerrarModal('modalCargoGeneral')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pantalla completa -->
+  <div id="modalFullscreen" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:2200; align-items:center; justify-content:center;">
+    <div class="contenido bg-white p-4 rounded-3 shadow text-center" style="max-width:520px;">
+      <h2>Activa pantalla completa</h2>
+      <p>Para una mejor experiencia, haz clic en "Iniciar".</p>
+      <button class="btn btn-primary" onclick="confirmarFullscreen()">Iniciar</button>
+    </div>
+  </div>
+
+  <!-- Slide 1 -->
+  <div class="slide" id="slide1">
+    <h2 id="tituloSlide1"></h2>
+
+    <!-- NUEVO: Contenedor 1:1 para HTML5 -->
+    <div id="html5PlayerSlide1" class="embed1x1" style="display:none;">
+      <video id="videoIntro" playsinline controls>
+        <source src="" type="video/mp4" />
+      </video>
+    </div>
+
+    <!-- NUEVO: Contenedor 1:1 para YouTube -->
+    <div id="ytPlayerSlide1" class="embed1x1" style="display:none;">
+      <div id="ytPlayerSlide1Inner"></div>
+      <div id="ytBlocker" class="yt-blocker" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="slide" id="slide2">
+    <div class="split">
+      <div class="texto">
+        <p id="texto2">Cargando...</p>
+        <audio id="audio2" controls><source src="" type="audio/mpeg" /></audio>
+      </div>
+      <div class="imagen"><img id="imagen2" src="" alt=""></div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Genially embebido -->
+  <div class="slide" id="slide3">
+    <h2 id="tituloJuego"></h2>
+    <div class="embed16x9">
+      <iframe id="juegoIframe" src="" allow="fullscreen" loading="lazy"></iframe>
+      <button id="hs3" class="hs" aria-label="Continuar"></button>
+    </div>
+  </div>
+
+  <!-- Slide 4 -->
+  <div class="slide" id="slide4">
+    <h2 id="tituloSlide4"></h2>
+    <video id="videoSlide4" playsinline controls>
+      <source src="" type="video/mp4" />
+    </video>
+  </div>
+
+  <!-- Slide 5: Genially embebido -->
+  <div class="slide" id="slide5">
+    <h2 id="tituloJuegoSlide5"></h2>
+    <div class="embed16x9">
+      <iframe id="juegoIframeSlide5" src="" allow="fullscreen" loading="lazy"></iframe>
+      <button id="hs5" class="hs" aria-label="Continuar a la evaluación"></button>
+    </div>
+  </div>
+
+  <!-- Slide 6 -->
+  <div class="slide" id="slide6">
+    <div class="split">
+      <div class="texto">
+        <p id="texto6">Cargando...</p>
+        <audio id="audio6" controls><source src="" type="audio/mpeg" /></audio>
+      </div>
+      <div class="imagen"><img id="imagen6" src="" alt=""></div>
+    </div>
+  </div>
+
+  <!-- Slide 7: Quiz -->
+  <div class="slide" id="slide7">
+    <div class="container" style="max-width:1000px;">
+      <div class="d-flex align-items-center justify-content-between w-100 mb-2">
+        <h2 id="tituloQuiz" class="m-0">Evaluación</h2>
+        <span id="infoIntentos" class="badge text-bg-secondary">&nbsp;</span>
+      </div>
+
+      <p id="pregunta" class="fw-bold">Pregunta aquí</p>
+      <div id="opciones" class="opciones"></div>
+
+      <div id="resultadoFinal" style="display:none;"></div>
+
+      <div id="resumenIntento" class="mt-3" style="display:none;">
+        <div class="feedback-card">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+            <h5 class="m-0">Resumen del intento</h5>
+            <div id="resumenIntentoHeader" class="d-flex gap-2 flex-wrap"></div>
+          </div>
+          <div class="table-responsive">
+            <table id="tablaResumen" class="table table-sm table-hover table-borderless align-middle table-compact">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:56px;">#</th>
+                  <th>Pregunta</th>
+                  <th style="width:28%;">Marcada</th>
+                  <th style="width:28%;">Correcta</th>
+                  <th class="text-center" style="width:70px;">OK</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-2">
+        <button id="btnReintentar" class="btn btn-outline-primary" style="display:none;" type="button">Reintentar</button>
+        <button id="btnIrAFirma" class="btn btn-primary" style="display:none;" type="button">Continuar a la firma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 8: Firma -->
+  <div class="slide" id="slide8">
+    <h2 id="tituloFirma">Firma tu participación</h2>
+    <canvas id="canvasFirma" width="300" height="100" style="border:1px solid #ccc;"></canvas><br />
+    <button id="botonLimpiarFirma" onclick="limpiarFirma()" class="btn btn-outline-secondary">Limpiar</button>
+    <button id="botonFinalEnviar" onclick="enviarDatos()" class="btn btn-primary">Enviar Resultados</button>
+  </div>
+
+  <!-- Slide 9: Despedida -->
+  <div class="slide" id="slide9">
+    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+      <h2 class="text-success">¡Gracias por participar!</h2>
+      <p class="lead">Has completado correctamente el curso. Tu certificado ya está disponible según el resultado.</p>
+      <p class="text-muted">Puedes cerrar esta ventana o regresar al inicio.</p>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const MAX_INTENTOS = 3;
+    const APPROVAL_THRESHOLD = 60;
+
+    let intentos = 1;
+    let historialIntentos = [];
+    let preguntasSeleccionadas = [];
+    let preguntaActual = 0;
+    let puntaje = 0;
+    let detallePreguntas = [];
+    let inicioIntentoMs = 0;
+
+    // Tiempo total del curso (desde "Iniciar")
+    let cursoInicioMs = 0;
+
+    let contenidoGlobal = {};
+
+    // ===== Textos fallback (ES / HT) =====
+    const I18N_FALLBACK = {
+      es: {
+        formularioTitulo: "Curso de Señalética y Seguridad",
+        labelIdioma: "Idioma",
+        labelNombre: "Nombre",
+        labelApellido: "Apellido",
+        labelCorreo: "Correo",
+        labelGenero: "Género",
+        labelEdad: "Edad",
+        labelEmpresa: "Empresa",
+        labelCargo: "Cargo",
+        empresaSacyr: "SACYR",
+        empresaOtra: "OTRA",
+        tituloSlide1: "Introducción al curso",
+        tituloJuego: "Actividad interactiva",
+        tituloSlide4: "Medidas preventivas en obra",
+        tituloJuegoSlide5: "Actividad práctica",
+        tituloQuiz: "Evaluación",
+        tituloFirma: "Firma tu participación",
+        botonLimpiarFirma: "Limpiar",
+        botonFinalEnviar: "Enviar resultados",
+        alertaCampos: "Completa todos los campos obligatorios.",
+        generoMasculino: "Masculino",
+        generoFemenino: "Femenino",
+        generoOtro: "Otro",
+        textoResultado: "Puntaje final:",
+        slide2Texto: "Reconoce la señalización y comprende su significado.",
+        slide6Texto: "Recuerda verificar el estado de los elementos de seguridad diariamente.",
+        acomp_slide1: "Bienvenido. Este video te dará el contexto general del curso.",
+        acomp_slide2: "Observa estas señales con atención. Te serán útiles en la actividad.",
+        acomp_slide3: "Realiza la actividad embebida y luego continúa.",
+        acomp_slide4: "Identifica los puntos clave de seguridad que muestra el video.",
+        acomp_slide5: "Nueva actividad práctica: aplica lo aprendido.",
+        acomp_slide6: "Antes de evaluar, repasa estos consejos esenciales.",
+        acomp_slide7: "Lee cada pregunta con calma. Tienes tres intentos.",
+        acomp_slide8: "Firma tu participación para generar el certificado."
+      },
+      ht: {
+        formularioTitulo: "Kou sou Siyalizasyon ak Sekirite",
+        labelIdioma: "Lang",
+        labelNombre: "Non",
+        labelApellido: "Siyati",
+        labelCorreo: "Imèl",
+        labelGenero: "Sèks",
+        labelEdad: "Laj",
+        labelEmpresa: "Konpayi",
+        labelCargo: "Travay",
+        empresaSacyr: "SACYR",
+        empresaOtra: "LÒT",
+        tituloSlide1: "Entwodiksyon kou a",
+        tituloJuego: "Aktivite entèaktif",
+        tituloSlide4: "Mezi prevantif sou chantye",
+        tituloJuegoSlide5: "Aktivite pratik",
+        tituloQuiz: "Evalyasyon",
+        tituloFirma: "Siyen patisipasyon ou",
+        botonLimpiarFirma: "Efase",
+        botonFinalEnviar: "Voye rezilta yo",
+        alertaCampos: "Ranpli tout chan obligatwa yo.",
+        generoMasculino: "Gason",
+        generoFemenino: "Fi",
+        generoOtro: "Lòt",
+        textoResultado: "Nòt final:",
+        slide2Texto: "Idantifye siy yo epi konprann siyifikasyon yo.",
+        slide6Texto: "Chak jou verifye eta ekipman sekirite yo.",
+        acomp_slide1: "Byenvini. Videyo sa a ap bay tout kontèks kou a.",
+        acomp_slide2: "Gade siy sa yo ak atansyon. Yo pral itil nan aktivite a.",
+        acomp_slide3: "Fè aktivite anndan paj la epi kontinye.",
+        acomp_slide4: "Idantifye pwen sekirite prensipal yo nan videyo a.",
+        acomp_slide5: "Nouvo aktivite pratik: aplike sa ou aprann.",
+        acomp_slide6: "Anvan evalyasyon, repase konsèy esansyèl sa yo.",
+        acomp_slide7: "Li chak kesyon ak kalm. Ou gen twa tantativ.",
+        acomp_slide8: "Siyen patisipasyon w pou jenere sètifika a."
+      }
+    };
+
+    // Preguntas fallback
+    const PREG_FALLBACK = {
+      es: [
+        {p:"¿Qué color indica prohibición?", o:["Rojo","Verde","Azul","Amarillo"], c:0},
+        {p:"¿Qué color indica obligación?", o:["Amarillo","Azul","Rojo","Naranja"], c:1},
+        {p:"¿La señal triangular amarilla indica…", o:["Auxilio","Precaución","Obligación","Prohibición"], c:1},
+        {p:"¿La señal verde suele indicar…", o:["Salida/Seguridad","Peligro","Prohibición","Incendio"], c:0},
+        {p:"El extintor debe ubicarse…", o:["Oculto","Al exterior","Visible y accesible","Junto a materiales combustibles"], c:2},
+        {p:"¿Qué EPP es básico en obra?", o:["Casco","Sandalias","Corbata","Anillos"], c:0},
+        {p:"¿Quién puede manipular extintores?", o:["Cualquiera","Personal capacitado","Solo supervisores","Nadie"], c:1}
+      ],
+      ht: [
+        {p:"Ki koulè ki vle di entèdiksyon?", o:["Wouj","Vè","Ble","Jòn"], c:0},
+        {p:"Ki koulè ki vle di obligasyon?", o:["Jòn","Ble","Wouj","Oranj"], c:1},
+        {p:"Siy triyang jòn lan endike…", o:["Sekou","Prekosyon","Obligasyon","Entèdiksyon"], c:1},
+        {p:"Siy vèt souvan vle di…", o:["Sòti/Sekirite","Danse","Entèdiksyon","Dife"], c:0},
+        {p:"Ki kote pou mete etentè a?", o:["Kache","Dehò","Vizib epi fasil pou rive","Toupre materyèl ki pran dife"], c:2},
+        {p:"Ki PPE ki esansyèl sou chantye?", o:["Kas","Sandàl","Kòbata","Bag"], c:0},
+        {p:"Ki moun ki dwe itilize etentè yo?", o:["Nenpòt moun","Pèsonèl ki resevwa fòmasyon","Sèlman sipèvizè","Pèsonn"], c:1}
+      ]
+    };
+
+    // Traducciones
+    function t(clave, idioma){
+      if(!idioma) idioma = document.getElementById("idioma")?.value || "es";
+      return (contenidoGlobal[`${clave}_${idioma}`] || I18N_FALLBACK[idioma]?.[clave] || "");
+    }
+
+    function traducirSlide0() {
+      const idioma = document.getElementById("idioma")?.value || "es";
+      document.getElementById("tituloCurso").innerText = t("formularioTitulo", idioma) || (contenidoGlobal.tituloCurso || "");
+      document.querySelector('label[for="idioma"]').innerText = t("labelIdioma", idioma) || 'Idioma';
+      document.querySelector('label[for="nombre"]').innerText = t("labelNombre", idioma) || 'Nombre';
+      document.querySelector('label[for="apellido"]').innerText = t("labelApellido", idioma) || 'Apellido';
+      document.querySelector('label[for="correo"]').innerText = t("labelCorreo", idioma) || 'Correo';
+      document.querySelector('label[for="genero"]').innerText = t("labelGenero", idioma) || 'Género';
+      document.querySelector('label[for="edad"]').innerText = t("labelEdad", idioma) || 'Edad';
+      document.querySelector('label[for="empresa"]').innerText = t("labelEmpresa", idioma) || 'Empresa';
+      document.querySelector('label[for="cargo"]').innerText = t("labelCargo", idioma) || 'Cargo';
+
+      const genero = document.getElementById("genero");
+      genero.options[1].text = t("generoMasculino", idioma) || "Masculino";
+      genero.options[2].text = t("generoFemenino", idioma) || "Femenino";
+      genero.options[3].text = t("generoOtro", idioma) || "Otro";
+    }
+    function traducirSlide1(){ document.getElementById("tituloSlide1").innerText = t("tituloSlide1") || "Introducción"; }
+    function traducirSlide3(){ document.getElementById("tituloJuego").innerText = t("tituloJuego") || "Actividad interactiva"; }
+    function traducirSlide4(){ document.getElementById("tituloSlide4").innerText = t("tituloSlide4") || "Video"; }
+    function traducirSlide5(){ document.getElementById("tituloJuegoSlide5").innerText = t("tituloJuegoSlide5") || "Actividad práctica"; }
+    function traducirSlide7(){ document.getElementById("tituloQuiz").innerText = t("tituloQuiz") || "Evaluación"; }
+    function traducirSlide8(){
+      document.getElementById("tituloFirma").innerText = t("tituloFirma") || "Firma tu participación";
+      document.getElementById("botonLimpiarFirma").innerText = t("botonLimpiarFirma") || "Limpiar";
+      document.getElementById("botonFinalEnviar").innerText = t("botonFinalEnviar") || "Enviar Resultados";
+    }
+
+    // ======== CARGOS DINÁMICOS por clave→valor ========
+    function getIdiomaActual(){ return document.getElementById("idioma")?.value || "es"; }
+
+    function renderCargosKV() {
+      const idioma = getIdiomaActual();
+      const sel = document.getElementById('cargo');
+      if (!sel) return;
+
+      const prev = sel.value;
+      const raw = (contenidoGlobal.cargos || "").toString().trim();
+      const ids = raw ? raw.split('|').map(s => s.trim()).filter(Boolean) : []
+
+      sel.innerHTML = '';
+      const opt0 = document.createElement('option');
+      opt0.value = '';
+      opt0.textContent = (idioma === 'ht') ? 'CHWAZI TRAVAY OU' : 'SELECCIONE SU CARGO';
+      sel.appendChild(opt0);
+
+      ids.forEach(id => {
+        const keyLang = `cargo_${id}_${idioma}`;
+        const keyFallback = `cargo_${id}_${idioma === 'es' ? 'ht' : 'es'}`;
+        const label = contenidoGlobal[keyLang] || contenidoGlobal[keyFallback] || id;
+        const op = document.createElement('option');
+        op.value = id;
+        op.textContent = label;
+        sel.appendChild(op);
+      });
+
+      if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+      else sel.value = '';
+    }
+
+    // ======== EMPRESAS DINÁMICAS por clave→valor ========
+    function renderEmpresasKV() {
+      const idioma = getIdiomaActual();
+      const sel = document.getElementById('empresa');
+      if (!sel) return;
+
+      const prev = sel.value;
+
+      // La clave 'empresas' contendrá el listado de IDs separados por '|', p.ej: "SACYR|OTRA"
+      const raw = (contenidoGlobal.empresas || "").toString().trim();
+      const ids = raw ? raw.split('|').map(s => s.trim()).filter(Boolean) : [];
+
+      // Limpiar y poblar
+      sel.innerHTML = '';
+
+      // Placeholder traducido
+      const opt0 = document.createElement('option');
+      opt0.value = '';
+      opt0.textContent = (idioma === 'ht') ? 'CHWAZI KONPAYI OU' : 'SELECCIONE SU EMPRESA';
+      sel.appendChild(opt0);
+
+      // Etiquetas por idioma, con fallback cruzado
+      ids.forEach(id => {
+        const keyLang = `empresa_${id}_${idioma}`;
+        const keyFallback = `empresa_${id}_${idioma === 'es' ? 'ht' : 'es'}`;
+        const label = contenidoGlobal[keyLang] || contenidoGlobal[keyFallback] || id;
+        const op = document.createElement('option');
+        op.value = id;
+        op.textContent = label;
+        sel.appendChild(op);
+      });
+
+      // Restaurar selección si aplica
+      if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+      else sel.value = '';
+    }
+
+    // Banco de preguntas
+    function construirBancoPreguntas(idioma) {
+      const preguntas = [];
+      for (let i = 1; i <= 10; i++) {
+        const texto = contenidoGlobal[`pregunta${i}_${idioma}`];
+        const opcionesRaw = contenidoGlobal[`pregunta${i}_opciones_${idioma}`];
+        const correcta = Number(contenidoGlobal[`pregunta${i}_correcta`]);
+        if (texto && opcionesRaw && !isNaN(correcta)) {
+          const opciones = opcionesRaw.split("|").map(o => o.trim());
+          preguntas.push({ pregunta: texto, opciones, correcta });
+        }
+      }
+      if (preguntas.length) return preguntas;
+      const fb = PREG_FALLBACK[idioma] || PREG_FALLBACK.es;
+      return fb.map((q) => ({ pregunta: q.p, opciones: q.o, correcta: q.c }));
+    }
+
+    // ===== Helpers Empresa OTRA/OTRAS =====
+    function isOtraEmpresa(value) {
+      const v = (value || '').trim().toUpperCase();
+      return v === 'OTRA' || v === 'OTRAS';
+    }
+
+    function toggleEmpresaOtraInput() {
+      const sel = document.getElementById('empresa');
+      const wrap = document.getElementById('empresaOtraWrap');
+      const input = document.getElementById('empresaOtra');
+      if (!sel || !wrap || !input) return;
+
+      if (isOtraEmpresa(sel.value)) {
+        wrap.style.display = 'block';
+        setTimeout(() => input.focus(), 0);
+      } else {
+        wrap.style.display = 'none';
+        input.value = '';
+      }
+    }
+
+    function attachEmpresaChangeListener() {
+      const sel = document.getElementById('empresa');
+      if (!sel) return;
+      sel.removeEventListener('change', toggleEmpresaOtraInput);
+      sel.addEventListener('change', toggleEmpresaOtraInput);
+    }
+
+    // Validación & Fullscreen
+    function validarFormulario() {
+      const idioma   = document.getElementById("idioma");
+      const nombre   = document.getElementById("nombre");
+      const apellido = document.getElementById("apellido");
+      const correo   = document.getElementById("correo");
+      const genero   = document.getElementById("genero");
+      const edad     = document.getElementById("edad");
+      const empresa  = document.getElementById("empresa");
+      const rut      = document.getElementById("rut");
+      const cargo    = document.getElementById("cargo");
+
+      [idioma, nombre, apellido, correo, genero, edad, empresa, rut, cargo].forEach(el => {
+        if (!el) return;
+        el.setCustomValidity && el.setCustomValidity("");
+      });
+
+      const faltantes = [];
+      if (!idioma.value)                    faltantes.push("Idioma");
+      if (!nombre.value.trim())             faltantes.push("Nombre");
+      if (!apellido.value.trim())           faltantes.push("Apellido");
+      if (!correo.value.trim())             faltantes.push("Correo");
+      if (!genero.value)                    faltantes.push("Género");
+      if (!edad.value || Number(edad.value) <= 0) faltantes.push("Edad");
+      if (!empresa.value)                   faltantes.push("Empresa");
+      if (!rut.value.trim())                faltantes.push("RUT");
+      if (!cargo.value)                     faltantes.push("Cargo");
+
+      // Si eligió OTRA/OTRAS, exigir texto
+      if (isOtraEmpresa(empresa.value)) {
+        const empresaOtraVal = document.getElementById('empresaOtra')?.value.trim();
+        if (!empresaOtraVal) {
+          faltantes.push("Empresa (especificar)");
+        }
+      }
+
+      if (faltantes.length) {
+        const mapa = {Idioma: idioma, Nombre: nombre, Apellido: apellido, Correo: correo,
+                      "Género": genero, Edad: edad, Empresa: empresa, "Empresa (especificar)": document.getElementById('empresaOtra'),
+                      RUT: rut, Cargo: cargo};
+        const primero = mapa[faltantes[0]];
+        if (primero && primero.setCustomValidity) {
+          primero.setCustomValidity("Este campo es obligatorio");
+          primero.reportValidity();
+        }
+        alert(`${t('alertaCampos') || 'Completa todos los campos obligatorios.'}\n\nFaltan: ${faltantes.join(', ')}`);
+        return;
+      }
+
+      document.getElementById("modalFullscreen").style.display = "flex";
+    }
+
+    function confirmarFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+      document.getElementById("modalFullscreen").style.display = "none";
+      cursoInicioMs = Date.now();
+      mostrarSlide("slide1");
+    }
+
+    /* ========= Hotspots ========= */
+    function setHotspotPercent(elOrId, {top=0, left=0, width=20, height=12, show=true}={}){
+      const el = (typeof elOrId === 'string') ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      el.style.top    = top + '%';
+      el.style.left   = left + '%';
+      el.style.width  = width + '%';
+      el.style.height = height + '%';
+      el.style.display = show ? 'block' : 'none';
+    }
+
+    function setHotspotUnderClose(slideId, hotspotId, { topGapPx=72, rightGapPx=12, widthPct=6, heightPct=8 } = {}) {
+      const box = document.querySelector(`#${slideId} .embed16x9`);
+      const el  = document.getElementById(hotspotId);
+      if (!box || !el) return;
+
+      const rect = box.getBoundingClientRect();
+      const topPct   = (topGapPx   / rect.height) * 100;
+      const rightPct = (rightGapPx / rect.width)  * 100;
+
+      el.style.left   = 'auto';
+      el.style.right  = rightPct + '%';
+      el.style.top    = topPct + '%';
+      el.style.width  = widthPct + '%';
+      el.style.height = heightPct + '%';
+      el.style.display = 'block';
+    }
+
+    const HS_CFG = {
+      slide3: { topGapPx: 0, rightGapPx: 6, widthPct: 15, heightPct: 8, id: 'hs3' },
+      slide5: { topGapPx: 0, rightGapPx: 6, widthPct: 15, heightPct: 8, id: 'hs5' }
+    };
+
+    function recalcularHotspotActivo(){
+      const act = document.querySelector('.slide.active')?.id;
+      if (act === 'slide3') {
+        const {topGapPx,rightGapPx,widthPct,heightPct,id} = HS_CFG.slide3;
+        setHotspotUnderClose('slide3', id, {topGapPx,rightGapPx,widthPct,heightPct});
+      } else if (act === 'slide5') {
+        const {topGapPx,rightGapPx,widthPct,heightPct,id} = HS_CFG.slide5;
+        setHotspotUnderClose('slide5', id, {topGapPx,rightGapPx,widthPct,heightPct});
+      }
+    }
+    window.addEventListener('resize', recalcularHotspotActivo);
+
+    /* ====== YouTube (Shorts/normal) ====== */
+    let YT_API_READY = false;
+    let ytPlayer1 = null;
+
+    function loadYTAPI(){
+      if (window.YT && window.YT.Player) { YT_API_READY = true; return Promise.resolve(); }
+      return new Promise(resolve => {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        window.onYouTubeIframeAPIReady = () => { YT_API_READY = true; resolve(); };
+        document.head.appendChild(tag);
+      });
+    }
+
+    function parseYouTubeId(url){
+      try {
+        const u = new URL(url);
+        if (u.hostname.includes('youtu.be')) return u.pathname.replace('/','').split('?')[0];
+        if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2];
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+      } catch(e) {}
+      return null;
+    }
+
+    function initYouTubeSlide1(url){
+      const id = parseYouTubeId(url);
+      if (!id) return;
+
+      // Para slide 1 forzamos 1:1, no usamos aspect-16x9 ni aspect-9x16
+      loadYTAPI().then(() => {
+        const cont  = document.getElementById('ytPlayerSlide1');
+        const inner = document.getElementById('ytPlayerSlide1Inner');
+        if (!cont || !inner) return;
+
+        // Ocultar HTML5 si estuviera visible
+        const html5Wrap = document.getElementById('html5PlayerSlide1');
+        const html5 = document.getElementById('videoIntro');
+        if (html5Wrap) html5Wrap.style.display = 'none';
+        if (html5) { try { html5.pause(); } catch(e){} }
+
+        cont.style.display = 'block';
+
+        const idioma = document.getElementById("idioma")?.value || "es";
+        const ccLang = (idioma === 'ht') ? 'ht' : 'es';
+
+        ytPlayer1 = new YT.Player('ytPlayerSlide1Inner', {
+          videoId: id,
+          playerVars: {
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            controls: 0,
+            cc_load_policy: 1,
+            cc_lang_pref: ccLang,
+            hl: ccLang
+          },
+          events: {
+            onReady: (ev) => { try { ev.target.playVideo(); } catch(e){} },
+            onStateChange: (ev) => {
+              if (ev.data === YT.PlayerState.ENDED) { mostrarSlide('slide3'); }
+            }
+          }
+        });
+      });
+    }
+
+    function stopYouTubeSlide1(){
+      try { ytPlayer1 && ytPlayer1.stopVideo && ytPlayer1.stopVideo(); } catch(e){}
+    }
+
+    // ===== Navegación =====
+    function mostrarSlide(id) {
+      document.querySelectorAll(".slide").forEach(s => s.classList.remove("active"));
+      const slide = document.getElementById(id);
+      slide.classList.add("active");
+
+      if (id !== 'slide1') { stopYouTubeSlide1(); }
+
+      const audio = slide.querySelector("audio");
+      if (audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
+
+      const video = slide.querySelector("video");
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        if (id === "slide1") video.onended = () => mostrarSlide("slide3");
+        if (id === "slide4") video.onended = () => mostrarSlide("slide5");
+      }
+
+      if (id === 'slide1') {
+        const holder = document.getElementById('ytPlayerSlide1');
+        const urlYT = holder?.dataset?.url || "";
+        const html5Wrap = document.getElementById('html5PlayerSlide1');
+        const html5 = document.getElementById('videoIntro');
+
+        if (urlYT) {
+          // Mostrar YouTube en 1:1
+          if (html5Wrap) html5Wrap.style.display = 'none';
+          if (html5) { try { html5.pause(); } catch(e){} }
+          holder.style.display = 'block';
+          if (!ytPlayer1) { initYouTubeSlide1(urlYT); }
+          else { try { ytPlayer1.playVideo && ytPlayer1.playVideo(); } catch(e){} }
+        } else {
+          // Mostrar HTML5 en 1:1
+          if (holder) holder.style.display = 'none';
+          if (html5Wrap) html5Wrap.style.display = 'block';
+          if (html5) { html5.currentTime = 0; html5.play().catch(()=>{}); html5.onended = () => mostrarSlide('slide3'); }
+        }
+      }
+
+      if (id === 'slide3') {
+        const cfg = HS_CFG.slide3;
+        setHotspotUnderClose('slide3', cfg.id, cfg);
+        const h3 = document.getElementById('hs3');
+        if (h3) h3.onclick = () => mostrarSlide('slide7');
+      } else { setHotspotPercent('hs3', { show: false }); }
+
+      if (id === 'slide5') {
+        const cfg = HS_CFG.slide5;
+        setHotspotUnderClose('slide5', cfg.id, cfg);
+        const h5 = document.getElementById('hs5');
+        if (h5) h5.onclick = () => mostrarSlide('slide7');
+      } else { setHotspotPercent('hs5', { show: false }); }
+
+      if (id === "slide7") iniciarQuiz();
+
+      window.scrollTo(0,0);
+    }
+
+    function avanzarSlide() {
+      const slides = [...document.querySelectorAll('.slide')];
+      const index = slides.findIndex(s => s.classList.contains('active'));
+      if (slides[index + 1]) mostrarSlide(slides[index + 1].id);
+    }
+
+    // Quiz
+    function iniciarQuiz() {
+      const idioma = document.getElementById('idioma')?.value || 'es';
+      preguntasSeleccionadas = construirBancoPreguntas(idioma).slice(0, 7);
+      preguntaActual = 0; puntaje = 0; detallePreguntas = [];
+      inicioIntentoMs = performance.now();
+
+      document.getElementById('resultadoFinal').style.display = 'none';
+      document.getElementById('resumenIntento').style.display = 'none';
+      document.getElementById('btnReintentar').style.display = 'none';
+      document.getElementById('btnIrAFirma').style.display = 'none';
+      document.getElementById('infoIntentos').textContent = `Intento ${intentos} de ${MAX_INTENTOS}`;
+
+      mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+      const p = preguntasSeleccionadas[preguntaActual];
+      document.getElementById('pregunta').innerText = p.pregunta;
+      const opcionesDiv = document.getElementById('opciones');
+      opcionesDiv.innerHTML = '';
+      p.opciones.forEach((op, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opcion-pill';
+        b.textContent = op;
+        b.onclick = () => {
+          opcionesDiv.querySelectorAll('.opcion-pill').forEach(x=>x.classList.remove('selected'));
+          b.classList.add('selected');
+          setTimeout(()=> seleccionarRespuesta(i), 200);
+        };
+        opcionesDiv.appendChild(b);
+      });
+    }
+
+    function seleccionarRespuesta(i) {
+      const p = preguntasSeleccionadas[preguntaActual];
+      const correcta = p.correcta;
+      const letras = ['A','B','C','D','E','F'];
+      const esCorrecta = (i === correcta);
+
+      detallePreguntas.push({
+        numero: preguntaActual + 1,
+        pregunta: p.pregunta,
+        opcionMarcada: letras[i] || '',
+        textoMarcada: p.opciones[i] || '',
+        opcionCorrecta: letras[correcta] || '',
+        textoCorrecta: p.opciones[correcta] || '',
+        esCorrecta: esCorrecta
+      });
+
+      if (esCorrecta) puntaje++;
+      preguntaActual++;
+      if (preguntaActual < preguntasSeleccionadas.length) mostrarPregunta();
+      else mostrarResultado();
+    }
+
+    function pintarTablaFeedback_(detalle) {
+      const tbody = document.querySelector('#tablaResumen tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      detalle.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.className = d.esCorrecta ? 'ok' : 'bad';
+        tr.innerHTML = `
+          <td class="text-nowrap fw-bold">${d.numero}</td>
+          <td class="qcell"><div class="text-truncate-2">${d.pregunta}</div></td>
+          <td class="text-nowrap"><span class="answer-pill ${d.esCorrecta ? 'ok' : 'bad'}">${d.opcionMarcada}</span> — ${d.textoMarcada}</td>
+          <td class="text-nowrap"><span class="answer-pill ok">${d.opcionCorrecta}</span> — ${d.textoCorrecta}</td>
+          <td class="text-center">${d.esCorrecta ? '✔️' : '✖️'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function mostrarResultado() {
+      const total = preguntasSeleccionadas.length;
+      const porcentaje = Math.round((puntaje / total) * 100);
+      const tiempo = Math.round((performance.now() - inicioIntentoMs) / 1000);
+      const aprobado = porcentaje >= APPROVAL_THRESHOLD;
+
+      historialIntentos[intentos - 1] = {
+        intento: intentos,
+        maxIntentos: MAX_INTENTOS,
+        correctas: puntaje,
+        totales: total,
+        porcentaje: porcentaje,
+        tiempo: tiempo,
+        detalle: [...detallePreguntas]
+      };
+
+      const idioma = document.getElementById('idioma').value;
+      const res = document.getElementById('resultadoFinal');
+      res.style.display = 'block';
+      res.innerHTML = `${t('textoResultado', idioma) || 'Puntaje final:'} ${puntaje} de ${total} (${porcentaje}%)` +
+        (aprobado ? ` <span class="badge text-bg-success ms-2">APROBADO (≥ ${APPROVAL_THRESHOLD}%)</span>`
+                  : ` <span class="badge text-bg-danger ms-2">NO APROBADO (&lt; ${APPROVAL_THRESHOLD}%)</span>`);
+
+      const mostrarFeedback = (intentos >= MAX_INTENTOS) || aprobado;
+      const btnRetry = document.getElementById('btnReintentar');
+      const btnFirma = document.getElementById('btnIrAFirma');
+      if (btnRetry) btnRetry.style.display = 'none';
+      if (btnFirma) btnFirma.style.display = 'none';
+
+      if (mostrarFeedback) {
+        pintarTablaFeedback_(detallePreguntas);
+        const chips = [
+          `<span class="badge text-bg-success">Correctas: ${puntaje}</span>`,
+          `<span class="badge text-bg-danger">Incorrectas: ${total - puntaje}</span>`,
+          `<span class="badge text-bg-secondary">Tiempo: ${tiempo}s</span>`
+        ].join(' ');
+        const hdr = document.getElementById('resumenIntentoHeader');
+        if (hdr) hdr.innerHTML = chips;
+        document.getElementById('resumenIntento').style.display = 'block';
+      } else {
+        document.getElementById('resumenIntento').style.display = 'none';
+      }
+
+      if (intentos < MAX_INTENTOS) {
+        if (btnRetry) {
+          btnRetry.style.display = 'inline-block';
+          btnRetry.textContent = `Reintentar (te queda${MAX_INTENTOS - intentos === 1 ? '' : 'n'} ${MAX_INTENTOS - intentos} intento${MAX_INTENTOS - intentos === 1 ? '' : 's'})`;
+          btnRetry.onclick = () => { intentos++; iniciarQuiz(); };
+        }
+        if (aprobado && btnFirma) {
+          btnFirma.style.display = 'inline-block';
+          btnFirma.textContent = 'Continuar a la firma (aprobado)';
+          btnFirma.onclick = () => mostrarSlide('slide8');
+        }
+      } else {
+        if (btnFirma) {
+          btnFirma.style.display = 'inline-block';
+          btnFirma.textContent = aprobado ? 'Continuar a la firma (aprobado)' : 'Continuar a la firma';
+          btnFirma.onclick = () => mostrarSlide('slide8');
+        }
+      }
+
+      document.getElementById('slide7').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Firma
+    function limpiarFirma() {
+      const c = document.getElementById("canvasFirma");
+      c.getContext("2d").clearRect(0, 0, c.width, c.height);
+    }
+    function _formatoHHMMSS_(seg){
+      seg = Math.max(0, Math.floor(Number(seg)||0));
+      const h = Math.floor(seg/3600);
+      const m = Math.floor((seg%3600)/60);
+      const s = seg%60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    function enviarDatos() {
+      const firmaCanvas = document.getElementById("canvasFirma");
+      const firma = firmaCanvas.toDataURL();
+
+      const totalSeg = cursoInicioMs ? Math.max(0, Math.round((Date.now() - cursoInicioMs)/1000)) : 0;
+      const totalFmt = _formatoHHMMSS_(totalSeg);
+
+      const ultimo = historialIntentos[Math.min(historialIntentos.length, MAX_INTENTOS) - 1] || {};
+
+      // Empresa: si eligió OTRA/OTRAS, usar lo escrito
+      let empresaValue = document.getElementById("empresa").value;
+      if (isOtraEmpresa(empresaValue)) {
+        const otraVal = document.getElementById("empresaOtra")?.value.trim();
+        if (otraVal) empresaValue = otraVal;
+      }
+
+      const data = {
+        nombre: document.getElementById("nombre").value.trim(),
+        apellido: document.getElementById("apellido").value.trim(),
+        correo: document.getElementById("correo").value.trim(),
+        genero: document.getElementById("genero").value,
+        edad: document.getElementById("edad").value.trim(),
+        empresa: empresaValue, // <-- aquí
+        rut: document.getElementById("rut").value.trim(),
+        cargo: document.getElementById("cargo").value,
+        curso: document.getElementById("tituloCurso").innerText.trim(),
+        firma: firma,
+
+        correctas: ultimo.correctas || 0,
+        totales: ultimo.totales || 0,
+        porcentaje: ultimo.porcentaje || 0,
+        tiempo: ultimo.tiempo || 0,
+        detalle: Array.isArray(ultimo.detalle) ? ultimo.detalle : detallePreguntas,
+        intentos: historialIntentos,
+        esFinal: (intentos >= MAX_INTENTOS) || historialIntentos.some(it => it.porcentaje >= APPROVAL_THRESHOLD),
+
+        tiempoTotalSegundos: totalSeg,
+        tiempoTotalHHMMSS: totalFmt,
+        tiempoTotal: totalSeg
+      };
+
+      google.script.run
+        .withSuccessHandler(function(resp) {
+          const url = (resp && resp.url) || null;
+          if (url) try { window.open(url, '_blank'); } catch(e){}
+          mostrarSlide("slide9");
+        })
+        .withFailureHandler(function(err){
+          alert('Error al guardar o generar certificado. Intenta nuevamente.\n' + (err && err.message ? err.message : ''));
+        })
+        .guardarDatos(data);
+    }
+
+    // Modales
+    function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+    function mostrarModalCargo(value) {
+      const cargo = (value || '').toLowerCase().replace(/\s+/g, "_");
+      if (!cargo) return;
+      const idioma = document.getElementById("idioma")?.value || "es";
+      const clave = `modal_${cargo}_${idioma}`;
+      const texto = contenidoGlobal[clave] || (idioma==='ht'
+        ? "Enfò sou travay sa a: swiv pwosedi, ekipman ak siy yo."
+        : "Información del cargo: sigue los procedimientos, equipos y señalización.");
+      const sel = document.getElementById('cargo');
+      const labelVisible = sel.options[sel.selectedIndex]?.text || cargo;
+      document.getElementById("tituloModalCargo").innerText = `Información para ${labelVisible}`;
+      document.getElementById("textoModalCargo").innerText = texto;
+      document.getElementById("modalCargoGeneral").style.display = "flex";
+    }
+
+    // Carga de contenido
+    window.onload = () => {
+      google.script.run.withSuccessHandler(data => {
+        contenidoGlobal = data || {};
+
+        const onLangChange = () => {
+          traducirSlide0(); traducirSlide1(); traducirSlide3(); traducirSlide4(); traducirSlide5(); traducirSlide7(); traducirSlide8();
+          renderCargosKV();
+          renderEmpresasKV(); // <-- Empresas dinámicas
+          attachEmpresaChangeListener();
+          toggleEmpresaOtraInput();
+          const act = document.querySelector('.slide.active')?.id || 'slide0';
+          recalcularHotspotActivo();
+        };
+        document.getElementById("idioma").addEventListener("change", onLangChange);
+
+        traducirSlide0(); traducirSlide1(); traducirSlide3(); traducirSlide4(); traducirSlide5(); traducirSlide7(); traducirSlide8();
+
+        document.getElementById("tituloCurso").innerText = data.tituloCurso || t("formularioTitulo") || "";
+        document.getElementById("logoEmpresa").src = data.logo || "";
+
+        // Slide 1: YouTube/MP4 (mostrar en 1:1)
+        const urlIntro = data.videoIntro || "";
+        const esYouTube = /youtube\.com|youtu\.be/i.test(urlIntro);
+        const html5Wrap = document.getElementById("html5PlayerSlide1");
+        const ytWrap = document.getElementById("ytPlayerSlide1");
+        const vid = document.getElementById("videoIntro");
+
+        if (esYouTube) {
+          if (vid) { try { vid.pause(); } catch(e){} }
+          if (html5Wrap) html5Wrap.style.display = "none";
+          if (ytWrap) {
+            ytWrap.style.display = "block";
+            ytWrap.dataset.url = urlIntro;
+          }
+        } else {
+          if (ytWrap) ytWrap.style.display = "none";
+          if (html5Wrap) html5Wrap.style.display = "block";
+          if (vid) {
+            document.querySelector("#videoIntro source").src = urlIntro;
+            vid.load();
+          }
+        }
+
+        // Slide 2
+        document.getElementById("texto2").innerText = data.texto2 || t("slide2Texto");
+        document.querySelector("#audio2 source").src = data.audio2 || "";
+        document.getElementById("audio2").load();
+        document.getElementById("imagen2").src = data.imagen2 || "";
+
+        // Slide 4
+        document.getElementById("tituloSlide4").innerText = data.tituloSlide4 || t("tituloSlide4");
+        document.querySelector("#videoSlide4 source").src = data.videoSlide4 || "";
+        document.getElementById("videoSlide4").load();
+
+        // Slide 5
+        document.getElementById("tituloJuegoSlide5").innerText = data.tituloJuegoSlide5 || t("tituloJuegoSlide5");
+        document.getElementById("juegoIframeSlide5").src = data.juegoSlide5 || "";
+
+        // Slide 3
+        document.getElementById("tituloJuego").innerText = t("tituloJuego") || "Actividad interactiva";
+        document.getElementById("juegoIframe").src = data.juegoSlide3 || "";
+
+        // Slide 6
+        document.getElementById("texto6").innerText = data.texto6 || t("slide6Texto");
+        document.querySelector("#audio6 source").src = data.audio6 || "";
+        document.getElementById("audio6").load();
+        document.getElementById("imagen6").src = data.imagen6 || "";
+
+        // Render dinámicos
+        renderCargosKV();
+        renderEmpresasKV(); // <-- Empresas dinámicas
+        attachEmpresaChangeListener();
+        toggleEmpresaOtraInput(); // sincroniza estado inicial
+
+      }).obtenerContenido();
+
+      // Canvas firma
+      const canvas = document.getElementById("canvasFirma");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 2;
+        let dibujando = false;
+
+        canvas.addEventListener("mousedown", e => { dibujando = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener("mousemove", e => { if (!dibujando) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); });
+        canvas.addEventListener("mouseup", () => dibujando = false);
+        canvas.addEventListener("mouseout", () => dibujando = false);
+
+        canvas.addEventListener("touchstart", e => {
+          e.preventDefault(); dibujando = true;
+          const t = e.touches[0]; const r = canvas.getBoundingClientRect();
+          ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top);
+        });
+        canvas.addEventListener("touchmove", e => {
+          e.preventDefault(); if (!dibujando) return;
+          const t = e.touches[0]; const r = canvas.getBoundingClientRect();
+          ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.stroke();
+        });
+        canvas.addEventListener("touchend", () => dibujando = false);
+      }
+    };
+  </script>
+</body>
+</html>

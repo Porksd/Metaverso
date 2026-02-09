@@ -1,0 +1,12 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cd \"j:\\\\Empres\\\\MetaversOtec\\\\Desarrollos\\\\App\"; node scripts/extract_course_content\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"j:\\\\Empres\\\\MetaversOtec\\\\Desarrollos\\\\App\"; node scripts/import_course_from_excel\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Sacyr Chile S.A.</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      /* Paleta Dark */
+      --bg: #0B1220;              /* fondo app */
+      --surface: #0f172a;         /* tarjetas */
+      --surface-2: #0b1326;       /* header / barras */
+      --on-bg: #E2E8F0;           /* texto principal */
+      --on-muted: #94A3B8;        /* texto secundario */
+      --border: rgba(148,163,184,.12);
+      --border-strong: rgba(148,163,184,.22);
+
+      --primary: #60a5fa;         /* azul */
+      --primary-2: #22d3ee;       /* cian */
+      --accent: #a78bfa;          /* violeta */
+      --danger: #ef4444;          /* rojo */
+
+      --radius: 12px;
+      --shadow: 0 0 0 1px var(--border), 0 8px 24px rgba(2,6,23,.35);
+      --gap: 16px;
+      --pad: 14px;
+
+      --chart-h: 260px;
+    }
+
+    /* App */
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0; padding:18px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: var(--on-bg);
+      background: radial-gradient(1200px 600px at 0% -20%, rgba(96,165,250,.15), transparent 60%),
+                  radial-gradient(1200px 600px at 100% 120%, rgba(34,211,238,.12), transparent 60%),
+                  var(--bg);
+    }
+
+    header{
+      display:flex; align-items:center; gap:12px; margin-bottom:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      border-radius: var(--radius);
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+    }
+    h1{ font-size:16px; font-weight:700; margin:0; color:#f8fafc;}
+    .controls{ margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+    /* Inputs / botones estilo “chip” */
+    .chip{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--on-bg);
+      padding:8px 10px; border-radius:10px; font-size:13px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25) inset;
+    }
+    input[type="date"].chip{
+      outline: none;
+    }
+    .btn{
+      border:1px solid var(--border);
+      color: var(--on-bg);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      padding:8px 12px; border-radius:10px; font-weight:600; font-size:13px;
+      cursor:pointer;
+    }
+    .btn.primary{
+      border-color: rgba(96,165,250,.35);
+      background: linear-gradient(180deg, rgba(96,165,250,.35), rgba(96,165,250,.10));
+      color:#eaf2ff;
+    }
+    .btn.ghost{
+      background: transparent;
+    }
+    .btn:hover{ filter: brightness(1.08); }
+
+    /* Widgets */
+    .stats{
+      display:grid; grid-template-columns: repeat(2, minmax(220px,1fr));
+      gap: var(--gap); margin: 12px 0;
+    }
+    .stat-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      border: 1px solid var(--border);
+      border-radius: var(--radius); padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .stat-title{ font-size:12px; color: var(--on-muted); margin-bottom:6px; }
+    .stat-value{ font-size:30px; font-weight:800; letter-spacing:.3px; color:#f8fafc; }
+    .stat-sub{ font-size:12px; color: var(--on-muted); margin-top:4px; }
+
+    /* Tarjetas contenedoras */
+    .grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap); }
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--pad);
+      box-shadow: var(--shadow);
+      min-height: 120px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .card h3{ margin:0; font-size:14px; color:#e5e7eb; }
+    .card .meta{ font-size:12px; color: var(--on-muted); }
+
+    /* Chart containers */
+    .chart-wrap{ height: var(--chart-h); overflow-x:auto; overflow-y:hidden; }
+    .chart-wrap canvas{ display:block; }
+    .chart-wrap.courses{ height: 400px; overflow-y:auto; overflow-x:hidden; }
+
+    /* Debug */
+    pre.debug{
+      max-height:180px; overflow:auto;
+      background:#0b1220; color:#d1fae5; padding:10px; border-radius:10px;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow); font-size:12px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar{ height:10px; width:10px; }
+    ::-webkit-scrollbar-thumb{ background: rgba(148,163,184,.25); border-radius:10px; }
+    ::-webkit-scrollbar-track{ background: rgba(148,163,184,.08); border-radius:10px; }
+
+    @media (max-width:980px){ .grid{ grid-template-columns:1fr; } .stats{ grid-template-columns:1fr 1fr; } }
+    @media (max-width:560px){ .stats{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard de Cursos</h1>
+    <div class="controls">
+      <label for="dateFilter" style="font-size:13px;color:var(--on-muted)">Filtrar por fecha:</label>
+      <input id="dateFilter" type="date" class="chip" />
+      <button id="applyFilterBtn" class="btn primary" title="Aplicar filtro">Aplicar</button>
+      <button id="resetFilterBtn" class="btn" title="Quitar filtros">Reset</button>
+      <button id="exportDataBtn" class="btn ghost" title="Exportar payload a JSON/CSV">Exportar datos</button>
+    </div>
+  </header>
+
+  <!-- Widgets -->
+  <div class="stats" id="statsRow" style="display:none;">
+    <div class="stat-card">
+      <div class="stat-title">Alumnos únicos totales</div>
+      <div class="stat-value" id="statUnique">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-title">Alumnos con 8 cursos completados</div>
+      <div class="stat-value" id="stat8">—</div>
+      <div class="stat-sub" id="stat8pct">—</div>
+    </div>
+  </div>
+
+  <div id="loader" class="stat-title" style="margin-bottom:12px">Cargando datos…</div>
+
+  <div class="grid" id="dashboardGrid" style="display:none;">
+    <div class="card">
+      <h3>Actividad diaria</h3>
+      <div class="meta">Alumnos únicos (barras) y alumnos ≥8 (línea). Haz click en una barra para filtrar por día.</div>
+      <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Distribución - Total cursos por alumno</h3>
+      <div class="meta">Cursos únicos por RUT</div>
+      <div class="chart-wrap"><canvas id="chartDistribution"></canvas></div>
+      <div id="distSummary" class="meta" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>% Aprobación por edad</h3>
+      <div class="meta">Promedio por rango etario</div>
+      <div class="chart-wrap"><canvas id="chartAge"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Promedio vs Mediana por edad (%)</h3>
+      <div class="meta">Promedio (barra) y mediana (punto)</div>
+      <div class="chart-wrap"><canvas id="chartAgeAvgMed"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>% Aprobación por género</h3>
+      <div class="meta">Promedio por género</div>
+      <div class="chart-wrap"><canvas id="chartGender"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Promedio vs Mediana por género (%)</h3>
+      <div class="meta">Promedio (barra) y mediana (punto)</div>
+      <div class="chart-wrap"><canvas id="chartGenderAvgMed"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>Cursos: Promedio (%) y respuestas</h3>
+      <div class="meta">Top 20 cursos por promedio</div>
+      <div class="chart-wrap courses"><canvas id="chartCourses"></canvas></div>
+    </div>
+  </div>
+
+  <section style="margin-top:14px;">
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <div style="flex:1">
+        <h3 style="margin:0 0 6px 0; font-size:14px; color:#e5e7eb">Depuración / Payload</h3>
+        <div style="display:flex; gap:8px; margin-bottom:6px;">
+          <button id="showRawBtn" class="btn ghost">Mostrar JSON (console)</button>
+          <button id="pastePayloadBtn" class="btn ghost">Pegar payload manual (test)</button>
+        </div>
+        <pre id="debugPre" class="debug" style="display:none;"></pre>
+      </div>
+      <div style="width:340px;">
+        <h3 style="margin:0 0 6px 0; font-size:14px; color:#e5e7eb">Meta / Encabezados</h3>
+        <pre id="metaPre" class="debug">Sin datos aún.</pre>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /* ====== Tema dark para Chart.js (defaults) ====== */
+    function setDarkChartDefaults(){
+      Chart.defaults.color = "#cbd5e1"; // texto general
+      Chart.defaults.font.family = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+      Chart.defaults.plugins.legend.labels.color = "#cbd5e1";
+      Chart.defaults.plugins.tooltip.backgroundColor = "#0b1220";
+      Chart.defaults.plugins.tooltip.borderColor = "#1f2937";
+      Chart.defaults.plugins.tooltip.borderWidth = 1;
+      Chart.defaults.datasets.bar.borderRadius = 6;
+
+      const gridColor = "rgba(148,163,184,.18)";
+      const tickColor = "#94a3b8";
+      const scaleCommon = { grid: { color: gridColor, drawBorder:false }, ticks: { color: tickColor } };
+      Chart.defaults.scales = {
+        linear: scaleCommon,
+        radialLinear: { grid: { color: gridColor }, angleLines:{ color: gridColor }, pointLabels:{ color:"#cbd5e1" }, ticks:{ color: tickColor } },
+        category: { grid:{ color: gridColor, drawBorder:false }, ticks:{ color: tickColor } },
+        time: scaleCommon
+      };
+
+      // Pintar fondo del canvas del color de la tarjeta
+      const bgPlugin = {
+        id: 'cardBG',
+        beforeDraw(chart, args, opts){
+          const {ctx, width, height} = chart;
+          ctx.save();
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = getComputedStyle(chart.canvas.parentElement).backgroundColor || '#0f172a';
+          ctx.fillRect(0,0,width,height);
+          ctx.restore();
+        }
+      };
+      Chart.register(bgPlugin);
+    }
+    setDarkChartDefaults();
+
+    /* ====== Lógica original (sin cambios funcionales) ====== */
+    let originalPayload = null, currentPayload = null;
+    let chartDaily=null, chartDistribution=null, chartAge=null, chartAgeAvgMed=null, chartGender=null, chartGenderAvgMed=null, chartCourses=null;
+
+    function safeNum(v, fallback=0){ const n=Number(v); return (isFinite(n)&&!isNaN(n))?n:fallback; }
+    function median(values){ if(!values||!values.length) return null; const a=[...values].sort((x,y)=>x-y), m=Math.floor(a.length/2); return a.length%2===0?(a[m-1]+a[m])/2:a[m]; }
+    function groupStatsByBucket(students, keyGetter, valueGetter){
+      const buckets={}; (students||[]).forEach(s=>{ const k=keyGetter(s)||'No declarado'; const v=safeNum(valueGetter(s),null);
+        if(!buckets[k]) buckets[k]={sum:0,count:0,vals:[]}; if(v!==null){ buckets[k].sum+=v; buckets[k].count++; buckets[k].vals.push(v); }});
+      return Object.keys(buckets).map(k=>{ const b=buckets[k]; return {key:k, promedio:b.count?+(b.sum/b.count).toFixed(2):null, mediana:b.vals.length?+median(b.vals).toFixed(2):null, count:b.count}; })
+        .sort((a,b)=> (a.key>b.key?1:-1));
+    }
+
+    function renderStats(payload){
+      const t=payload.totals||{}, unique=(t.uniqueStudents!=null)?t.uniqueStudents:(t.totalStudents||0), eight=t.students8Plus||0;
+      const pct = unique ? ((eight/unique)*100).toFixed(1) : '0.0';
+      document.getElementById('statUnique').innerText=unique;
+      document.getElementById('stat8').innerText=eight;
+      document.getElementById('stat8pct').innerText=`${pct}% de alumnos únicos`;
+      document.getElementById('statsRow').style.display='grid';
+    }
+
+    function filterPayloadByDate(payload, dateStr){
+      if(!dateStr) return JSON.parse(JSON.stringify(payload));
+      const studentsFiltered=(payload.students||[]).filter(s=>String(s.Fecha)===String(dateStr));
+      const uniqueRuts=new Set(), maxCursosByRut={};
+      studentsFiltered.forEach(s=>{ const rut=s.RUT||s.rut||''; if(!rut) return; uniqueRuts.add(rut); const c=Number(s.TotalCursos||0); maxCursosByRut[rut]=Math.max(maxCursosByRut[rut]||0,c); });
+      const eightPlusCount=Object.values(maxCursosByRut).filter(v=>v>=8).length;
+      const daily=(payload.dailyActivity||[]).filter(d=>d.date===dateStr);
+      const coursesPerStudent = Object.entries(maxCursosByRut).map(([rut, total]) => ({ RUT: rut, TotalCursos: total }));
+
+      return {
+        totals:{ totalResponses:studentsFiltered.length, totalStudents:uniqueRuts.size, uniqueStudents:uniqueRuts.size, students8Plus:eightPlusCount },
+        dailyActivity:daily,
+        coursesDetected:payload.coursesDetected||[],
+        demographics:payload.demographics||{},
+        students:studentsFiltered,
+        coursesPerStudent,
+        dates:{ labels:daily.map(d=>d.date), total:daily.map(d=>d.uniqueStudents), con8:daily.map(d=>d.students8Plus) },
+        meta:payload.meta||{}
+      };
+    }
+
+    /* Colores para el tema */
+    const C = {
+      blue:   '#60a5fa',
+      cyan:   '#22d3ee',
+      green:  '#22c55e',
+      amber:  '#f59e0b',
+      violet: '#a78bfa',
+      red:    '#ef4444',
+      slate:  '#64748b'
+    };
+
+    function renderDailyActivity(payload){
+      const canvas=document.getElementById('chartDaily'), wrap=canvas.parentElement;
+      const labels=(payload.dates?.labels)||((payload.dailyActivity||[]).map(d=>d.date));
+      const totals=(payload.dates?.total)||((payload.dailyActivity||[]).map(d=>d.uniqueStudents));
+      const con8   =(payload.dates?.con8)||((payload.dailyActivity||[]).map(d=>d.students8Plus));
+      const px=42, widthPx=Math.max(labels.length*px, wrap.clientWidth), heightPx=wrap.clientHeight||parseInt(getComputedStyle(wrap).height)||260;
+      canvas.style.width=widthPx+'px'; canvas.style.height=heightPx+'px'; canvas.width=widthPx; canvas.height=heightPx;
+
+      const data={ labels, datasets:[
+        {type:'bar',label:'Alumnos Únicos',data:totals,backgroundColor:C.blue},
+        {type:'line',label:'Alumnos ≥8',data:con8,borderColor:C.red,tension:0.35,fill:false,pointRadius:4,yAxisID:'y'}
+      ]};
+      const options={ responsive:false, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'top'}},
+        scales:{ x:{ticks:{autoSkip:false,maxRotation:0,minRotation:0}}, y:{beginAtZero:true,title:{display:true,text:'Alumnos'}} },
+        onClick:(evt)=>{ const pts=chartDaily.getElementsAtEventForMode(evt,'nearest',{intersect:true},false); if(pts?.length){ const idx=pts[0].index; const date=labels[idx]; if(date){ document.getElementById('dateFilter').value=date; applyDateFilter(); } } }
+      };
+      if(chartDaily) chartDaily.destroy(); chartDaily=new Chart(canvas.getContext('2d'),{data,options});
+    }
+
+    function renderDistribution(payload){
+      const base = (payload.coursesPerStudent && payload.coursesPerStudent.length)
+        ? payload.coursesPerStudent
+        : (payload.students || []).map(s => ({ RUT:s.RUT, TotalCursos: Number(s.TotalCursos||0) }));
+
+      const hist = {};
+      base.forEach(s => { const n = Number(s.TotalCursos || 0); hist[n] = (hist[n] || 0) + 1; });
+
+      const list = Object.entries(hist).map(([c, cnt]) => ({ cursos: Number(c), alumnos: cnt })).sort((a, b) => a.cursos - b.cursos);
+      const labels = list.map(r => String(r.cursos)), dataVals = list.map(r => r.alumnos);
+
+      const ctx = document.getElementById('chartDistribution').getContext('2d');
+      const data = { labels, datasets: [{ label:'Alumnos', data:dataVals, backgroundColor:C.cyan }] };
+      const options = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } };
+      if(chartDistribution) chartDistribution.destroy();
+      chartDistribution = new Chart(ctx, { type:'bar', data, options });
+
+      const mayor = list.length ? list[list.length - 1] : null;
+      document.getElementById('distSummary').innerText = mayor ? `Mayor: ${mayor.cursos} cursos → ${mayor.alumnos} alumnos` : 'Sin datos';
+    }
+
+    function renderAgeCharts(payload){
+      const students=payload.students||[];
+      const byAge=groupStatsByBucket(
+        students,
+        s=>{ const a=s.Edad??s.edad??null; if(a===null) return 'No declarado'; const n=Number(a); if(isNaN(n)) return 'No declarado'; if(n<18) return '<18'; if(n<25) return '18-24'; if(n<35) return '25-34'; if(n<50) return '35-49'; return '50+'; },
+        s=>s.PromedioNota??s.Promedio??s.promedio
+      );
+      const labels=byAge.map(b=>b.key), proms=byAge.map(b=>b.promedio??0), meds=byAge.map(b=>b.mediana??0);
+      const ctxA=document.getElementById('chartAge').getContext('2d'); if(chartAge) chartAge.destroy();
+      chartAge=new Chart(ctxA,{type:'bar',data:{labels,datasets:[{label:'% Aprobación (promedio)',data:proms,backgroundColor:C.green}]},options:{responsive:true,maintainAspectRatio:false}});
+      const ctxB=document.getElementById('chartAgeAvgMed').getContext('2d'); if(chartAgeAvgMed) chartAgeAvgMed.destroy();
+      chartAgeAvgMed=new Chart(ctxB,{data:{labels,datasets:[{type:'bar',label:'Promedio (%)',data:proms,backgroundColor:C.green},{type:'scatter',label:'Mediana (%)',data:meds.map((m,i)=>({x:i,y:m})),backgroundColor:C.violet}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{callback:i=>labels[i]}},y:{beginAtZero:true}}}});
+    }
+
+    function renderGenderCharts(payload){
+      const students=payload.students||[];
+      const byGender=groupStatsByBucket(students, s=>(s.Género||s.genero||s.gender||'No declarado'), s=>s.PromedioNota??s.Promedio??s.promedio );
+      const labels=byGender.map(b=>b.key), proms=byGender.map(b=>b.promedio??0), meds=byGender.map(b=>b.mediana??0);
+      const ctxG=document.getElementById('chartGender').getContext('2d'); if(chartGender) chartGender.destroy();
+      chartGender=new Chart(ctxG,{type:'bar',data:{labels,datasets:[{label:'% Aprobación (promedio)',data:proms,backgroundColor:C.amber}]},options:{responsive:true,maintainAspectRatio:false}});
+      const ctxH=document.getElementById('chartGenderAvgMed').getContext('2d'); if(chartGenderAvgMed) chartGenderAvgMed.destroy();
+      chartGenderAvgMed=new Chart(ctxH,{data:{labels,datasets:[{type:'bar',label:'Promedio (%)',data:proms,backgroundColor:C.amber},{type:'scatter',label:'Mediana (%)',data:meds.map((m,i)=>({x:i,y:m})),backgroundColor:C.violet}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{callback:i=>labels[i]}},y:{beginAtZero:true}}}});
+    }
+
+    function renderCoursesChart(payload){
+      const canvas=document.getElementById('chartCourses');
+      const wrap=canvas.parentElement;
+
+      const list=(payload.coursesDetected||[]).filter(c=>c.avg!==null).slice(0,200);
+      const top=list.sort((a,b)=>b.avg-a.avg).slice(0,20);
+
+      const labels=top.map(c=>c.course);
+      const avgData=top.map(c=>+(c.avg||0).toFixed(2));
+      const respData=top.map(c=>c.responses||0);
+
+      const heightPx=Math.max(labels.length*28+80, 300);
+      canvas.height=heightPx; canvas.style.height=heightPx+'px';
+      canvas.width=wrap.clientWidth; canvas.style.width='100%';
+
+      const data={ labels,
+        datasets:[
+          { type:'bar', label:'Promedio (%)', data:avgData, backgroundColor:C.primary, borderColor:'#93c5fd77', borderWidth:1, xAxisID:'x' },
+          { type:'bar', label:'Respuestas',   data:respData, backgroundColor:'#64748b55', xAxisID:'x2' }
+        ]};
+
+      const options={
+        indexAxis:'y',
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'top' }, tooltip:{ callbacks:{ label:(ctx)=> ctx.dataset.label==='Promedio (%)' ? `Promedio: ${ctx.parsed.x}%` : `Respuestas: ${ctx.parsed.x}` } } },
+        scales:{
+          x:  { position:'top', beginAtZero:true, title:{display:true,text:'Promedio (%)'}, suggestedMax:100 },
+          x2: { position:'bottom', beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true,text:'Respuestas'} },
+          y:  { ticks:{ autoSkip:false } }
+        }
+      };
+
+      if(chartCourses) chartCourses.destroy();
+      chartCourses=new Chart(canvas.getContext('2d'), { data, options });
+    }
+
+    function renderAll(payload){
+      if(!payload) return;
+      document.getElementById('loader').style.display='none';
+      document.getElementById('dashboardGrid').style.display='grid';
+      document.getElementById('metaPre').innerText=JSON.stringify(payload.meta||{},null,2);
+
+      renderStats(payload);
+      renderDailyActivity(payload);
+      renderDistribution(payload);
+      renderAgeCharts(payload);
+      renderGenderCharts(payload);
+      renderCoursesChart(payload);
+    }
+
+    function fetchPayload(){
+      if(window.google && google.script && google.script.run){
+        document.getElementById('loader').innerText='Cargando datos desde servidor…';
+        google.script.run.withSuccessHandler(function(p){
+          originalPayload=p; currentPayload=p; window.dashboardPayload=p; renderAll(currentPayload);
+        }).withFailureHandler(function(err){
+          document.getElementById('loader').innerText='Error cargando datos: '+(err&&err.message?err.message:JSON.stringify(err));
+          console.error('Error getDashboardData:',err);
+        }).getDashboardData();
+      } else {
+        document.getElementById('loader').innerText='No se detectó google.script.run. Si estás probando localmente, pega el payload manualmente (botón "Pegar payload manual").';
+      }
+    }
+
+    function applyDateFilter(){
+      const dateVal=document.getElementById('dateFilter').value;
+      if(!originalPayload) return alert('Payload no cargado aún.');
+      currentPayload = dateVal ? filterPayloadByDate(originalPayload,dateVal) : JSON.parse(JSON.stringify(originalPayload));
+      window.dashboardPayload=currentPayload;
+      renderAll(currentPayload);
+    }
+    function resetFilter(){ document.getElementById('dateFilter').value=''; currentPayload=JSON.parse(JSON.stringify(originalPayload)); window.dashboardPayload=currentPayload; renderAll(currentPayload); }
+
+    function exportData(){
+      const payload=window.dashboardPayload||originalPayload; if(!payload) return alert('No hay datos para exportar.');
+      const jsonStr=JSON.stringify(payload,null,2); const jBlob=new Blob([jsonStr],{type:'application/json'}); const jUrl=URL.createObjectURL(jBlob);
+      const a1=document.createElement('a'); a1.href=jUrl; a1.download='dashboard-data.json'; a1.click(); URL.revokeObjectURL(jUrl);
+
+      const students=payload.students||[];
+      if(students.length){
+        const headers=Object.keys(students[0]);
+        const rows=students.map(s=>headers.map(h=>`"${String(s[h]??'').replace(/"/g,'""')}"`).join(','));
+        const csv=[headers.join(','),...rows].join('\n');
+        const b=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+        const url=URL.createObjectURL(b);
+        const a2=document.createElement('a'); a2.href=url; a2.download='students.csv'; a2.click(); URL.revokeObjectURL(url);
+      }
+
+      const courses=payload.coursesDetected||[];
+      if(courses.length){
+        const headers=Object.keys(courses[0]);
+        const rows=courses.map(c=>headers.map(h=>`"${String(c[h]??'').replace(/"/g,'""')}"`).join(','));
+        const csv=[headers.join(','),...rows].join('\n');
+        const b2=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+        const url2=URL.createObjectURL(b2);
+        const a3=document.createElement('a'); a3.href=url2; a3.download='coursesDetected.csv'; a3.click(); URL.revokeObjectURL(url2);
+      }
+
+      const cps = payload.coursesPerStudent || [];
+      if (cps.length){
+        const headers = Object.keys(cps[0]);
+        const rows = cps.map(s => headers.map(h => `"${String(s[h] ?? '').replace(/"/g,'""')}"`).join(','));
+        const csv = [headers.join(','), ...rows].join('\n');
+        const b3 = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url3 = URL.createObjectURL(b3);
+        const a4 = document.createElement('a'); a4.href = url3; a4.download = 'courses_per_student.csv'; a4.click();
+        URL.revokeObjectURL(url3);
+      }
+
+      alert('Descarga iniciada (JSON y CSVs si había datos).');
+    }
+
+    function showRawInConsole(){ console.log('payload:', window.dashboardPayload||originalPayload); alert('Payload impreso en consola (F12 → Console).'); }
+    function promptPastePayload(){ const raw=prompt('Pega aquí el JSON del payload (útil para pruebas locales):'); if(!raw) return; try{ const p=JSON.parse(raw); originalPayload=p; currentPayload=p; window.dashboardPayload=p; renderAll(currentPayload); document.getElementById('debugPre').style.display='block'; document.getElementById('debugPre').innerText=JSON.stringify(p,null,2).slice(0,10000);}catch(err){ alert('JSON inválido: '+err.message);} }
+
+    document.getElementById('applyFilterBtn').addEventListener('click', applyDateFilter);
+    document.getElementById('resetFilterBtn').addEventListener('click', resetFilter);
+    document.getElementById('exportDataBtn').addEventListener('click', exportData);
+    document.getElementById('showRawBtn').addEventListener('click', showRawInConsole);
+    document.getElementById('pastePayloadBtn').addEventListener('click', promptPastePayload);
+
+    fetchPayload();
+    window.applyDateFilterFromConsole=function(dateStr){ document.getElementById('dateFilter').value=dateStr; applyDateFilter(); };
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>Administrador de Contenidos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background-color: #f0f2f5;
+    }
+    h1 {
+      color: #0033A0;
+      margin-bottom: 30px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: #0033A0;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Editor de Contenido</h1>
+
+  <form id="formulario">
+    <label for="tituloCurso">Título del Curso:</label>
+    <input type="text" id="tituloCurso" name="tituloCurso">
+
+    <label for="logo">URL del Logo:</label>
+    <input type="text" id="logo" name="logo">
+
+    <label for="modalAyudante">Texto Modal Ayudante:</label>
+    <textarea id="modalAyudante" name="modalAyudante" rows="3"></textarea>
+
+    <label for="modalSupervisor">Texto Modal Supervisor:</label>
+    <textarea id="modalSupervisor" name="modalSupervisor" rows="3"></textarea>
+
+    <label for="videoIntro">URL Video Slide 1:</label>
+    <input type="text" id="videoIntro" name="videoIntro">
+
+    <label for="audio2">Audio Slide 2:</label>
+    <input type="text" id="audio2" name="audio2">
+
+    <label for="texto2">Texto Slide 2:</label>
+    <textarea id="texto2" name="texto2" rows="3"></textarea>
+
+    <label for="imagen2">Imagen Slide 2:</label>
+    <input type="text" id="imagen2" name="imagen2">
+
+    <label for="juegoSlide3">URL Juego Slide 3:</label>
+    <input type="text" id="juegoSlide3" name="juegoSlide3">
+
+    <label for="audio4">Audio Slide 4:</label>
+    <input type="text" id="audio4" name="audio4">
+
+    <label for="texto4">Texto Slide 4:</label>
+    <textarea id="texto4" name="texto4" rows="3"></textarea>
+
+    <label for="imagen4">Imagen Slide 4:</label>
+    <input type="text" id="imagen4" name="imagen4">
+
+    <label for="audio5">Audio Slide 5:</label>
+    <input type="text" id="audio5" name="audio5">
+
+    <label for="texto5">Texto Slide 5:</label>
+    <textarea id="texto5" name="texto5" rows="3"></textarea>
+
+    <label for="imagen5">Imagen Slide 5:</label>
+    <input type="text" id="imagen5" name="imagen5">
+
+    <label for="audio6">Audio Slide 6:</label>
+    <input type="text" id="audio6" name="audio6">
+
+    <label for="texto6">Texto Slide 6:</label>
+    <textarea id="texto6" name="texto6" rows="3"></textarea>
+
+    <label for="imagen6">Imagen Slide 6:</label>
+    <input type="text" id="imagen6" name="imagen6">
+
+        <label for="audio9">Audio Slide 9:</label>
+    <input type="text" id="audio9" name="audio9">
+
+    <label for="texto9">Texto Slide 9:</label>
+    <textarea id="texto9" name="texto9" rows="3"></textarea>
+
+    <label for="imagen9">Imagen Slide 9:</label>
+    <input type="text" id="imagen9" name="imagen9">
+
+    <button type="button" onclick="guardar()">Guardar Cambios</button>
+  </form>
+
+  <script>
+    function guardar() {
+      const data = {
+        tituloCurso: document.getElementById("tituloCurso").value,
+        logo: document.getElementById("logo").value,
+        modalAyudante: document.getElementById("modalAyudante").value,
+        modalSupervisor: document.getElementById("modalSupervisor").value,
+        videoIntro: document.getElementById("videoIntro").value,
+        audio2: document.getElementById("audio2").value,
+        texto2: document.getElementById("texto2").value,
+        imagen2: document.getElementById("imagen2").value,
+        juegoSlide3: document.getElementById("juegoSlide3").value,
+        audio4: document.getElementById("audio4").value,
+        texto4: document.getElementById("texto4").value,
+        imagen4: document.getElementById("imagen4").value,
+        audio5: document.getElementById("audio5").value,
+        texto5: document.getElementById("texto5").value,
+        imagen5: document.getElementById("imagen5").value,
+        audio6: document.getElementById("audio6").value,
+        texto6: document.getElementById("texto6").value,
+        imagen6: document.getElementById("imagen6").value,
+        audio9: document.getElementById("audio9").value,
+        texto9: document.getElementById("texto9").value,
+        imagen9: document.getElementById("imagen9").value
+      };
+
+      google.script.run.withSuccessHandler(() => {
+        alert("Contenido guardado correctamente.");
+      }).guardarContenido(data);
+    }
+
+    google.script.run.withSuccessHandler(function (data) {
+      if (!data) return;
+      for (const key in data) {
+        const el = document.getElementById(key);
+        if (el) el.value = data[key];
+      }
+    }).obtenerContenido();
+  </script>
+</body>
+</html>
+
+

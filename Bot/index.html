@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Asistente Sacyr</title>
+<style>
+  :root{
+    --text:#121212; --muted:#6b7280; --primary:#00A3E0; --primary-hover:#008ec2;
+    --border:#e5e7eb; --panel:#ffffff; --panel-2:#f7fbff; --radius:20px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#fff;color:var(--text);
+       display:flex;flex-direction:column;align-items:center;padding:20px;}
+
+  /* ===== Video (mantiene ancho, menos alto) ===== */
+  .video-container{position:relative;width:100%;max-width:700px;padding-bottom:40%;margin:12px auto 20px;
+    border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);overflow:hidden;}
+  .video-container video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+  /* ===== FAB con logo blanco ===== */
+  .fab{position:fixed;right:22px;bottom:22px;width:72px;height:72px;border-radius:50%;border:1px solid var(--border);
+       background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+       box-shadow:0 10px 30px rgba(0,0,0,.15);padding:10px;transition:transform .15s, box-shadow .2s;z-index:1000;}
+  .fab:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(0,0,0,.2)}
+  .fab-logo img{width:42px;height:auto}
+
+  /* ===== Chat ===== */
+  .chat{position:fixed;right:24px;bottom:104px;width:460px;max-width:95vw;max-height:82vh;
+        background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+        box-shadow:0 24px 70px rgba(0,0,0,.18);display:none;flex-direction:column;overflow:hidden;z-index:999;}
+  .chat.open{display:flex;}
+
+  .chat__header{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px;
+                border-bottom:1px solid var(--border);background:linear-gradient(180deg,#fff,var(--panel-2));}
+  .chat__header img{height:28px}
+  .title{font-weight:800;font-size:17px}
+  .subtitle{font-size:12px;color:var(--muted)}
+  .status-pill{margin-top:4px;font-size:11px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;
+               padding:4px 8px;border-radius:999px}
+
+  .chipbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:#fafafa}
+  .chip{background:#fff;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer;font-size:12px}
+  .chip:hover{border-color:var(--primary);color:var(--primary)}
+
+  .chat__body{padding:16px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px}
+  .bubble{max-width:82%;padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.4;border:1px solid var(--border);white-space:pre-wrap}
+  .bubble--user{align-self:flex-end;background:var(--primary);color:#fff;border-color:var(--primary)}
+  .bubble--bot{align-self:flex-start;background:#f3faff;border-color:#cdeffc}
+  .meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+  .chat__footer{padding:12px;border-top:1px solid var(--border);background:#fafafa;display:flex;gap:10px;align-items:center}
+  .input-wrap{flex:1}
+  .input-wrap input{width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;font-size:14px}
+  .send-btn{min-width:44px;height:44px;border-radius:12px;border:none;background:var(--primary);color:#fff;font-weight:700;padding:0 14px}
+  .send-btn:hover{background:var(--primary-hover)}
+
+  /* ===== Móvil: full-screen real y tipografías grandes ===== */
+  @media (max-width: 900px){
+    .video-container{max-width:100%;padding-bottom:56.25%} /* 16:9 para móvil */
+    .fab{right:16px;bottom:16px;width:84px;height:84px;padding:14px;box-shadow:0 14px 40px rgba(0,0,0,.28)}
+    .fab-logo img{width:50px}
+    .chat{left:0;right:0;top:0;bottom:0;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;box-shadow:none}
+    .chat__header{padding:18px}.chat__header img{height:32px}.title{font-size:19px}.subtitle{font-size:14px}
+    .chipbar{padding:12px}.chip{font-size:14px;padding:8px 14px}
+    .chat__body{padding:18px;gap:14px}.bubble{max-width:90%;font-size:16px;border-radius:18px}
+    .chat__footer{padding:14px;gap:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0))}
+    .input-wrap input{font-size:16px;padding:16px;border-radius:16px}
+    .send-btn{height:56px;min-width:56px;font-size:16px;border-radius:16px;padding:0 18px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Video (Dropbox RAW) -->
+<div class="video-container">
+  <video autoplay muted playsinline loop>
+    <source src="https://www.dropbox.com/scl/fi/qzu6pa9vlden3qe0zqnrk/GlossyClean-Intro_2160p.mp4?rlkey=zsk1bplbrhg4hhwnslbmy38mi&raw=1" type="video/mp4">
+    Tu navegador no soporta el video HTML5.
+  </video>
+</div>
+
+<!-- FAB con logo Sacyr -->
+<button class="fab" id="openBtn" aria-label="Abrir chat">
+  <div class="fab-logo">
+    <img src="https://sacyr.com/o/corporativo-theme/images/Branding/logo_Sacyr_color.svg" alt="Sacyr">
+  </div>
+</button>
+
+<!-- Ventana de chat -->
+<div class="chat" id="chatBox" aria-live="polite">
+  <div class="chat__header">
+    <img src="https://sacyr.com/o/corporativo-theme/images/Branding/logo_Sacyr_color.svg" alt="Sacyr">
+    <div class="title">Asistente Sacyr</div>
+    <div class="subtitle">¿En qué te ayudo?</div>
+    <div class="status-pill" id="status">En línea</div>
+  </div>
+
+  <div class="chipbar" id="chips">
+    <span class="chip" data-q="Hola">Hola</span>
+    <span class="chip" data-q="¿Cómo ingreso a Moodle?">¿Cómo ingreso a Moodle?</span>
+    <span class="chip" data-q="Necesito una cotización">Necesito una cotización</span>
+    <span class="chip" data-q="Cursos disponibles">Cursos disponibles</span>
+  </div>
+
+  <div class="chat__body" id="body"></div>
+
+  <div class="chat__footer">
+    <div class="input-wrap"><input id="msg" type="text" placeholder="Escribe tu mensaje..." aria-label="Mensaje" /></div>
+    <button class="send-btn" id="sendBtn" aria-label="Enviar">Enviar</button>
+  </div>
+</div>
+
+<script>
+  // ===== Estado & helpers =====
+  const chat   = document.getElementById('chatBox');
+  const openBtn= document.getElementById('openBtn');
+  const bodyEl = document.getElementById('body');
+  const msgEl  = document.getElementById('msg');
+  const sendEl = document.getElementById('sendBtn');
+  const chips  = document.getElementById('chips');
+
+  // sessionId persistente por navegador
+  let sessionId = sessionStorage.getItem('chat_session_id');
+  if (!sessionId) {
+    sessionId = 's_' + Math.random().toString(36).slice(2) + Date.now();
+    sessionStorage.setItem('chat_session_id', sessionId);
+  }
+
+  function toggleChat(){
+    chat.classList.toggle('open');
+    if (chat.classList.contains('open') && bodyEl.childElementCount === 0) {
+      botSay("¡Hola! Soy tu asistente 🧠. ¿En qué te ayudo?");
+    }
+  }
+  openBtn.addEventListener('click', toggleChat);
+
+  // Auto-abrir en móvil
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    window.addEventListener('load', ()=> setTimeout(()=> toggleChat(), 500));
+  }
+
+  // Sugerencias
+  chips.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    send(chip.dataset.q);
+  });
+
+  sendEl.addEventListener('click', ()=> {
+    const t = msgEl.value.trim();
+    if (t) send(t);
+  });
+  msgEl.addEventListener('keydown', (e)=> { if (e.key === 'Enter') sendEl.click(); });
+
+  function userSay(text){
+    const wrap = document.createElement('div');
+    const b = document.createElement('div'); b.className = 'bubble bubble--user'; b.textContent = text;
+    wrap.appendChild(b);
+    const m = document.createElement('div'); m.className='meta'; m.textContent='Tú • ahora';
+    wrap.appendChild(m);
+    bodyEl.appendChild(wrap); bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+  function botSay(text){
+    const wrap = document.createElement('div');
+    const b = document.createElement('div'); b.className = 'bubble bubble--bot'; b.textContent = text;
+    wrap.appendChild(b);
+    const m = document.createElement('div'); m.className='meta'; m.textContent='Asistente • ahora';
+    wrap.appendChild(m);
+    bodyEl.appendChild(wrap); bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  // ===== INTEGRACIÓN CON APPS SCRIPT / OPENAI =====
+  function send(text){
+    userSay(text);
+    msgEl.value = '';
+
+    // Llama a tu backend GAS que ya llama al Assistant (Code.gs -> replyTo)
+    google.script.run
+      .withSuccessHandler(res => {
+        botSay(res?.reply || 'Sin respuesta.');
+      })
+      .withFailureHandler(err => {
+        botSay('Ocurrió un error. Intenta nuevamente.');
+      })
+      .replyTo(text, sessionId);
+  }
+</script>
+</body>
+</html>

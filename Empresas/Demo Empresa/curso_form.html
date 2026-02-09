@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8" />
+    <style>
+      body{font-family:Arial; padding:16px; max-width:720px; margin:auto;}
+      .row{display:flex; gap:12px; margin-bottom:10px;}
+      .row > div{flex:1}
+      label{display:block; font-size:12px; opacity:.7; margin-bottom:4px;}
+      input, select{width:100%; padding:10px; border:1px solid #ccc; border-radius:8px;}
+      button{padding:10px 14px; border:0; border-radius:8px; cursor:pointer;}
+      .btn{background:#1d4ed8; color:#fff;}
+      .muted{opacity:.7; font-size:12px;}
+      .ok{color:green} .err{color:#b91c1c}
+      .card{border:1px solid #eee; border-radius:12px; padding:12px; margin-top:12px;}
+    </style>
+  </head>
+  <body>
+    <h2>Ingreso de alumnos</h2>
+    <div class="muted">Empresa: <b id="empresaId"></b></div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>Curso</label>
+          <select id="cursoId"></select>
+        </div>
+        <div>
+          <label>Fecha</label>
+          <input id="Fecha" type="date" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div><label>Nombre</label><input id="Nombre"></div>
+        <div><label>Apellido</label><input id="Apellido"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Correo</label><input id="Correo" type="email"></div>
+        <div><label>RUT</label><input id="RUT"></div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Género</label>
+          <select id="Genero">
+            <option value="">(Seleccione)</option>
+            <option>FEMENINO</option>
+            <option>MASCULINO</option>
+            <option>OTRO</option>
+          </select>
+        </div>
+        <div><label>Edad</label><input id="Edad" type="number" min="0"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Empresa (texto)</label><input id="Empresa"></div>
+        <div><label>Cargo</label><input id="Cargo"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Correctas</label><input id="Correctas" type="number" min="0"></div>
+        <div><label>Totales</label><input id="Totales" type="number" min="0"></div>
+        <div><label>Porcentaje</label><input id="Porcentaje"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Tiempo Total (seg)</label><input id="TiempoSeg" type="number" min="0"></div>
+        <div><label>Tiempo Total (HH:MM:SS)</label><input id="TiempoHMS" placeholder="00:00:00"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Firma (base64)</label><input id="Firma"></div>
+      </div>
+
+      <div class="row">
+        <div><label>Certificado (url/texto)</label><input id="Certificado"></div>
+      </div>
+
+      <div class="row" style="justify-content:space-between; align-items:center;">
+        <button class="btn" onclick="guardar()">Guardar</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </div>
+
+    <script>
+      const EMPRESA_ID = "<?= empresaId ?>";
+      const TOKEN = "<?= token ?>";
+
+      document.getElementById('empresaId').textContent = EMPRESA_ID;
+
+      function loadCursos(){
+        google.script.run
+          .withSuccessHandler(cursos => {
+            const sel = document.getElementById('cursoId');
+            sel.innerHTML = '';
+            cursos.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c.cursoId;
+              opt.textContent = `${c.codigoCurso} - ${c.nombreCurso}`;
+              sel.appendChild(opt);
+            });
+          })
+          .withFailureHandler(err => setStatus('Error cargando cursos: ' + err.message, true))
+          .apiListCursos(EMPRESA_ID);
+      }
+
+      function setStatus(msg, isErr=false){
+        const el = document.getElementById('status');
+        el.textContent = msg;
+        el.className = isErr ? 'err' : 'ok';
+      }
+
+      function guardar(){
+        const payload = {
+          empresaId: EMPRESA_ID,
+          token: TOKEN,
+          cursoId: document.getElementById('cursoId').value,
+
+          Fecha: document.getElementById('Fecha').value,
+          Nombre: document.getElementById('Nombre').value,
+          Apellido: document.getElementById('Apellido').value,
+          Correo: document.getElementById('Correo').value,
+          RUT: document.getElementById('RUT').value,
+          "Género": document.getElementById('Genero').value,
+          Edad: document.getElementById('Edad').value,
+          Empresa: document.getElementById('Empresa').value,
+          Cargo: document.getElementById('Cargo').value,
+          Correctas: document.getElementById('Correctas').value,
+          Totales: document.getElementById('Totales').value,
+          Porcentaje: document.getElementById('Porcentaje').value,
+          "Tiempo Total (seg)": document.getElementById('TiempoSeg').value,
+          "Tiempo Total (HH:MM:SS)": document.getElementById('TiempoHMS').value,
+          "Firma (base64)": document.getElementById('Firma').value,
+          Certificado: document.getElementById('Certificado').value
+        };
+
+        setStatus('Guardando...');
+        google.script.run
+          .withSuccessHandler(() => setStatus('✅ Guardado'))
+          .withFailureHandler(err => setStatus('❌ ' + err.message, true))
+          .apiCreateAlumnoSecure(payload);
+      }
+
+      loadCursos();
+    </script>
+  </body>
+</html>
