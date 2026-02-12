@@ -75,7 +75,17 @@ export default function MetaversoAdmin() {
     };
 
     const handleSaveStudent = async (student: any) => {
-        const { id, enrollments, companies, company_roles, ...data } = student;
+        const { id, enrollments, companies: companyRef, company_roles, ...data } = student;
+        
+        // Validación de cupos para nuevos alumnos o cambio de empresa
+        if (!id && data.client_id) {
+            const company = companies.find(c => c.id === data.client_id);
+            if (company && company.used_quotas >= company.total_quotas) {
+                alert(`Error: La empresa ${company.name} no tiene cupos disponibles (${company.used_quotas}/${company.total_quotas}).`);
+                return;
+            }
+        }
+
         let error;
         if (id) {
             const { error: err } = await supabase.from('students').update(data).eq('id', id);
@@ -90,6 +100,7 @@ export default function MetaversoAdmin() {
             setEditingStudent(null);
             setIsCreatingStudent(false);
             fetchParticipants();
+            fetchCompanies(); // Recargar empresas para actualizar contador de cupos
         }
     };
 
@@ -508,7 +519,7 @@ export default function MetaversoAdmin() {
                                                 <>
                                                     <button 
                                                         onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
-                                                        className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-brand/10 text-brand border-brand/20 hover:bg-brand/20'}`}
+                                                        className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20'}`}
                                                         title="Copiar Portal Alumnos"
                                                     >
                                                         {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
