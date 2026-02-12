@@ -59,6 +59,7 @@ export default function EmpresaPortalLogin() {
             } else {
                 localStorage.setItem('empresa_id', data.id);
                 localStorage.setItem('empresa_name', data.name);
+                localStorage.setItem('empresa_slug', slug as string); // Store slug for logout redirect
                 router.push("/admin/empresa");
             }
         } catch (err) {

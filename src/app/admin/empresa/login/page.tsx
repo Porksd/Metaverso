@@ -30,7 +30,7 @@ export default function EmpresaLogin() {
         try {
             const { data, error } = await supabase
                 .from('companies')
-                .select('id, name, email, password')
+                .select('id, name, email, password, slug')
                 .eq('email', email)
                 .eq('password', pass)
                 .single();
@@ -40,6 +40,7 @@ export default function EmpresaLogin() {
             } else {
                 localStorage.setItem('empresa_id', data.id);
                 localStorage.setItem('empresa_name', data.name);
+                if (data.slug) localStorage.setItem('empresa_slug', data.slug);
                 router.push("/admin/empresa");
             }
         } catch (err) {

@@ -189,10 +189,16 @@ export default function EmpresaAdmin() {
     });
 
     const handleLogout = async () => {
+        const slug = localStorage.getItem('empresa_slug');
         await supabase.auth.signOut();
         window.sessionStorage.clear();
         window.localStorage.clear();
-        router.push("/admin/empresa/login");
+        
+        if (slug) {
+            router.push(`/admin/empresa/portal/${slug}`);
+        } else {
+            router.push("/admin/empresa/login");
+        }
     };
 
     const [showCompanyManager, setShowCompanyManager] = useState(false);
