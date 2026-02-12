@@ -1129,23 +1129,23 @@ export default function DynamicCourseEditor() {
                 {/* EVALUATION MODULE - ALWAYS LAST */}
                 {modules.filter(m => m.type === 'evaluation').map((module, mIdx) => (
                     <div key={module.id} className="glass rounded-3xl border-brand/20 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 px-4 py-2 bg-brand text-black text-[10px] font-black uppercase tracking-widest rounded-bl-2xl">
-                            Evaluación Final
+                        <div className="absolute top-0 right-0 p-1 flex items-center bg-brand rounded-bl-2xl">
+                            <span className="px-3 py-1 text-black text-[10px] font-black uppercase tracking-widest">
+                                Evaluación Final
+                            </span>
+                            <button 
+                                onClick={() => handleDeleteModule(module.id!, mIdx)} 
+                                className="p-1.5 mr-1 hover:bg-black/10 text-black/40 hover:text-red-600 rounded-lg transition-colors"
+                                title="Eliminar Evaluación"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                         </div>
                         {/* Module Header */}
                         <div className="bg-brand/5 p-4 flex items-center gap-4 border-b border-white/5">
                             <span className="bg-brand text-black w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold">{module.order_index + 1}</span>
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-brand">{module.title}</h3>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={() => handleDeleteModule(module.id!, mIdx)} 
-                                    className="p-2 hover:bg-red-500/20 text-white/40 hover:text-red-500 rounded-lg transition-colors"
-                                    title="Eliminar Evaluación"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
                             </div>
                         </div>
 
