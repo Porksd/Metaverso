@@ -1212,11 +1212,11 @@ export default function DynamicCourseEditor() {
                                             type="number" 
                                             min="0" 
                                             max="100"
-                                            value={module.settings?.quiz_percentage || 80}
+                                            value={module.settings?.quiz_percentage ?? 80}
                                             onChange={(e) => {
                                                 const newMods = [...modules];
                                                 const idx = newMods.findIndex(m => m.id === module.id);
-                                                const quizVal = parseInt(e.target.value);
+                                                const quizVal = isNaN(parseInt(e.target.value)) ? 0 : Math.min(100, Math.max(0, parseInt(e.target.value)));
                                                 newMods[idx].settings = {
                                                     ...newMods[idx].settings,
                                                     quiz_percentage: quizVal,
@@ -1234,12 +1234,9 @@ export default function DynamicCourseEditor() {
                                         <label className="text-[9px] font-black uppercase text-white/40 mb-2 block text-center">
                                             Peso SCORM
                                         </label>
-                                        <input 
-                                            type="number" 
-                                            disabled
-                                            value={module.settings?.scorm_percentage || 20}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-3xl font-black text-orange-400 opacity-50 cursor-not-allowed"
-                                        />
+                                        <div className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-3xl font-black text-orange-400 opacity-50">
+                                            {100 - (module.settings?.quiz_percentage ?? 80)}
+                                        </div>
                                         <p className="text-[8px] text-white/30 mt-1 text-center">auto-calculado</p>
                                     </div>
                                     
