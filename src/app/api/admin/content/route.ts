@@ -19,13 +19,11 @@ export async function POST(req: Request) {
     }
 
     const isBulk = Array.isArray(data);
-    let query = supabaseAdmin.from(table).insert(data).select();
+    const baseQuery = supabaseAdmin.from(table).insert(data).select();
     
-    if (!isBulk) {
-      query = query.single();
-    }
-
-    const { data: result, error } = await query;
+    const { data: result, error } = isBulk 
+      ? await baseQuery 
+      : await baseQuery.single();
 
     if (error) {
       console.error(`Admin DB API Error (Insert into ${table}):`, error);
