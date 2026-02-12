@@ -1269,11 +1269,11 @@ export default function DynamicCourseEditor() {
                                 {/* Fórmula visual */}
                                 <div className="mt-4 p-3 bg-black/40 rounded-lg border border-white/5">
                                     <p className="text-xs text-white/60 text-center font-mono">
-                                        <span className="text-blue-400 font-bold">Quiz ({module.settings?.quiz_percentage || 80}%)</span>
+                                        <span className="text-blue-400 font-bold">Quiz ({module.settings?.quiz_percentage ?? 80}%)</span>
                                         {' + '}
-                                        <span className="text-orange-400 font-bold">SCORM ({module.settings?.scorm_percentage || 20}%)</span>
+                                        <span className="text-orange-400 font-bold">SCORM ({module.settings?.scorm_percentage ?? 20}%)</span>
                                         {' ≥ '}
-                                        <span className="text-purple-400 font-bold">{module.settings?.min_score || 90}%</span>
+                                        <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 90}%</span>
                                         {' → '}
                                         <span className="text-green-400 font-bold">Certificado ✓</span>
                                     </p>
