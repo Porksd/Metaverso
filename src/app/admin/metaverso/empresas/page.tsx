@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Building2, Plus, Edit, Trash2, Save, X, Upload } from "lucide-react";
+import { Building2, Plus, Edit, Trash2, Save, X, Upload, Copy, Check } from "lucide-react";
 import ContentUploader from "@/components/ContentUploader";
 
 export default function CompaniesAdmin() {
@@ -10,6 +10,13 @@ export default function CompaniesAdmin() {
     const [loading, setLoading] = useState(true);
     const [editingCompany, setEditingCompany] = useState<any>(null);
     const [showModal, setShowModal] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     useEffect(() => {
         fetchCompanies();
@@ -34,7 +41,10 @@ export default function CompaniesAdmin() {
         const companyData = {
             name: editingCompany.name,
             rut: editingCompany.rut,
-            // Add other fields as necessary
+            slug: editingCompany.slug,
+            primary_color: editingCompany.primary_color,
+            secondary_color: editingCompany.secondary_color,
+            logo_url: editingCompany.logo_url,
             signature_name_1: editingCompany.signature_name_1,
             signature_role_1: editingCompany.signature_role_1,
             signature_url_1: editingCompany.signature_url_1,
@@ -88,8 +98,12 @@ export default function CompaniesAdmin() {
                 {companies.map(company => (
                     <div key={company.id} className="glass p-6 rounded-2xl border-white/10 hover:border-brand/30 transition-all group">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/5 rounded-xl">
-                                <Building2 className="w-8 h-8 text-brand" />
+                            <div className="p-3 bg-white/5 rounded-xl overflow-hidden w-14 h-14 flex items-center justify-center border border-white/5">
+                                {company.logo_url ? (
+                                    <img src={company.logo_url} alt={company.name} className="w-full h-full object-contain" />
+                                ) : (
+                                    <Building2 className="w-8 h-8 text-brand" />
+                                )}
                             </div>
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
@@ -103,6 +117,39 @@ export default function CompaniesAdmin() {
 
                         <h3 className="text-xl font-bold mb-1">{company.name}</h3>
                         <p className="text-white/40 text-sm mb-4">RUT: {company.rut}</p>
+
+                        {/* URLs de Acceso */}
+                        <div className="space-y-3 mb-6 bg-black/20 p-4 rounded-xl border border-white/5">
+                            <h4 className="text-[10px] uppercase font-black text-brand tracking-widest">URLs de Acceso</h4>
+                            
+                            <div className="space-y-2">
+                                <div>
+                                    <p className="text-[9px] text-white/40 uppercase mb-1">Portal Alumnos</p>
+                                    <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5">
+                                        <code className="text-[10px] text-white/60 truncate flex-1">/portal/{company.slug || 'sin-slug'}</code>
+                                        <button 
+                                            onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
+                                            className="p-1 hover:bg-white/10 rounded transition-colors"
+                                        >
+                                            {copiedId === `${company.id}_portal` ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-white/40" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p className="text-[9px] text-white/40 uppercase mb-1">Panel Administración</p>
+                                    <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5">
+                                        <code className="text-[10px] text-white/60 truncate flex-1">/admin/empresa/portal/{company.slug || 'sin-slug'}</code>
+                                        <button 
+                                            onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
+                                            className="p-1 hover:bg-white/10 rounded transition-colors"
+                                        >
+                                            {copiedId === `${company.id}_admin` ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-white/40" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div className="space-y-2 border-t border-white/5 pt-4">
                             <div className="flex items-center gap-2 text-xs text-white/60">
@@ -153,6 +200,67 @@ export default function CompaniesAdmin() {
                                             onChange={e => setEditingCompany({ ...editingCompany, rut: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:border-brand outline-none"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Slug (URL amigable)</label>
+                                        <input
+                                            value={editingCompany.slug || ''}
+                                            onChange={e => setEditingCompany({ ...editingCompany, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                                            placeholder="ej: mi-empresa"
+                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Logo Corporativo</label>
+                                        <ContentUploader
+                                            courseId={`company_${editingCompany.id || 'new'}`}
+                                            sectionKey="logo"
+                                            label="Subir Logo"
+                                            accept="image/*"
+                                            currentValue={editingCompany.logo_url}
+                                            onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url: url })}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Personalización (Colores) */}
+                            <section className="space-y-4">
+                                <h3 className="text-sm font-black uppercase text-brand tracking-widest">Personalización UI</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Color Primario (Hex)</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="color"
+                                                value={editingCompany.primary_color || '#AEFF00'}
+                                                onChange={e => setEditingCompany({ ...editingCompany, primary_color: e.target.value })}
+                                                className="w-12 h-12 bg-transparent border-none p-0 cursor-pointer"
+                                            />
+                                            <input
+                                                value={editingCompany.primary_color || ''}
+                                                onChange={e => setEditingCompany({ ...editingCompany, primary_color: e.target.value })}
+                                                placeholder="#AEFF00"
+                                                className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl focus:border-brand outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Color Secundario (Hex)</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="color"
+                                                value={editingCompany.secondary_color || '#000000'}
+                                                onChange={e => setEditingCompany({ ...editingCompany, secondary_color: e.target.value })}
+                                                className="w-12 h-12 bg-transparent border-none p-0 cursor-pointer"
+                                            />
+                                            <input
+                                                value={editingCompany.secondary_color || ''}
+                                                onChange={e => setEditingCompany({ ...editingCompany, secondary_color: e.target.value })}
+                                                placeholder="#000000"
+                                                className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl focus:border-brand outline-none"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </section>

@@ -11,7 +11,13 @@ export default function EmpresaPortalLogin() {
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
-    const [companyInfo, setCompanyInfo] = useState<{name: string, id: string} | null>(null);
+    const [companyInfo, setCompanyInfo] = useState<{
+        name: string, 
+        id: string,
+        logo_url?: string,
+        primary_color?: string,
+        secondary_color?: string
+    } | null>(null);
     const [errorMsg, setErrorMsg] = useState("");
     const router = useRouter();
 
@@ -21,7 +27,7 @@ export default function EmpresaPortalLogin() {
             
             const { data, error } = await supabase
                 .from('companies')
-                .select('id, name')
+                .select('id, name, logo_url, primary_color, secondary_color')
                 .eq('slug', slug)
                 .single();
 
@@ -74,11 +80,21 @@ export default function EmpresaPortalLogin() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass p-12 w-full max-w-md border-white/5 space-y-8 bg-white/[0.02]">
 
                 <div className="text-center space-y-4">
-                    <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20">
-                        <Building2 className="w-10 h-10 text-brand" />
+                    <div 
+                        className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20 overflow-hidden"
+                        style={companyInfo?.primary_color ? { borderColor: `${companyInfo.primary_color}40`, backgroundColor: `${companyInfo.primary_color}10` } : {}}
+                    >
+                        {companyInfo?.logo_url ? (
+                            <img src={companyInfo.logo_url} alt={companyInfo.name} className="w-full h-full object-contain p-2" />
+                        ) : (
+                            <Building2 className="w-10 h-10 text-brand" style={companyInfo?.primary_color ? { color: companyInfo.primary_color } : {}} />
+                        )}
                     </div>
-                    <p className="text-brand text-[10px] font-black uppercase tracking-[0.2em]">Portal Corporativo</p>
-                    <h1 className="text-3xl font-black tracking-tight italic">
+                    <p 
+                        className="text-brand text-[10px] font-black uppercase tracking-[0.2em]"
+                        style={companyInfo?.primary_color ? { color: companyInfo.primary_color } : {}}
+                    >Portal Corporativo</p>
+                    <h1 className="text-3xl font-black tracking-tight italic" style={companyInfo?.primary_color ? { color: companyInfo.primary_color } : {}}>
                         {companyInfo ? companyInfo.name : "..."}
                     </h1>
                     <p className="text-white/40 text-[9px] font-medium uppercase">Acceso Administrativo</p>
@@ -95,6 +111,9 @@ export default function EmpresaPortalLogin() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-brand/40"
+                                style={companyInfo?.primary_color ? { transition: 'border-color 0.2s' } : {}}
+                                onFocus={(e) => { if(companyInfo?.primary_color) e.target.style.borderColor = companyInfo.primary_color }}
+                                onBlur={(e) => { e.target.style.borderColor = '' }}
                             />
                         </div>
                         <div className="relative group">
@@ -106,6 +125,9 @@ export default function EmpresaPortalLogin() {
                                 onChange={(e) => setPass(e.target.value)}
                                 required
                                 className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-brand/40"
+                                style={companyInfo?.primary_color ? { transition: 'border-color 0.2s' } : {}}
+                                onFocus={(e) => { if(companyInfo?.primary_color) e.target.style.borderColor = companyInfo.primary_color }}
+                                onBlur={(e) => { e.target.style.borderColor = '' }}
                             />
                         </div>
                     </div>
@@ -114,6 +136,7 @@ export default function EmpresaPortalLogin() {
                         type="submit" 
                         disabled={loading || !companyInfo}
                         className="w-full py-4 bg-brand text-black disabled:opacity-50 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                        style={companyInfo?.primary_color ? { backgroundColor: companyInfo.primary_color } : {}}
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ingresar Gestión"}
                         {!loading && <ArrowRight className="w-4 h-4" />}
