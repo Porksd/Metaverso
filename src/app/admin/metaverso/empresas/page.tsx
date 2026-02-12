@@ -83,8 +83,8 @@ export default function CompaniesAdmin() {
         <div className="p-8 text-white min-h-screen">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-black">Gestión de Empresas</h1>
-                    <p className="text-white/40">Configura logos y firmas para los certificados</p>
+                    <h1 className="text-3xl font-black">Gestión de Empresas (v2.1)</h1>
+                    <p className="text-white/40">Configura logos, colores y firmas para los certificados</p>
                 </div>
                 <button
                     onClick={() => { setEditingCompany({}); setShowModal(true); }}
