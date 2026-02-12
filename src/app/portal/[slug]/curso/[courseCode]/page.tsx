@@ -79,44 +79,45 @@ export default function CourseAuthPage() {
         setActionLoading(true);
         setError(null);
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: loginData.email,
-                password: loginData.password,
-            });
+            // Intentar login manual consultando la tabla de estudiantes
+            // El administrador crea estudiantes directamente en la tabla 'students' sin crear registro en auth.users
+            const { data: student, error: studentError } = await supabase
+                .from('students')
+                .select('*')
+                .or(`email.eq.${loginData.email},rut.eq.${loginData.email}`)
+                .eq('password', loginData.password)
+                .single();
 
-            if (error) throw error;
-
-            // Check if user is student
-            const { data: student } = await supabase.from('students').select('*').eq('auth_user_id', data.user.id).single();
-            if (student) {
-                // Verificar Inscripción (Enrollment)
-                const { data: enrollment } = await supabase
-                    .from('enrollments')
-                    .select('*')
-                    .eq('student_id', student.id)
-                    .eq('course_id', course.id)
-                    .single();
-
-                if (course.registration_mode === 'restricted' && !enrollment) {
-                    throw new Error("⛔ No estás inscrito en este curso. Contacta a tu administrador para solicitar acceso.");
-                }
-
-                if (!enrollment) {
-                    // Si es 'open' y no tiene inscripción, lo inscribimos automáticamente
-                    console.log("Inscripción automática para curso abierto...");
-                    await supabase.from('enrollments').insert({
-                        student_id: student.id,
-                        course_id: course.id,
-                        status: 'not_started',
-                        progress: 0
-                    });
-                }
-
-                localStorage.setItem('user', JSON.stringify(student));
-                window.location.href = '/admin/empresa/alumnos/cursos';
-            } else {
-                throw new Error("Cuenta no es de estudiante.");
+            if (studentError || !student) {
+                throw new Error("Credenciales inválidas. Verifica tu email/RUT y contraseña.");
             }
+
+            // Verificar Inscripción (Enrollment)
+            const { data: enrollment } = await supabase
+                .from('enrollments')
+                .select('*')
+                .eq('student_id', student.id)
+                .eq('course_id', course.id)
+                .single();
+
+            if (course.registration_mode === 'restricted' && !enrollment) {
+                throw new Error("⛔ No estás inscrito en este curso. Contacta a tu administrador para solicitar acceso.");
+            }
+
+            if (!enrollment) {
+                // Si es 'open' y no tiene inscripción, lo inscribimos automáticamente
+                console.log("Inscripción automática para curso abierto...");
+                await supabase.from('enrollments').insert({
+                    student_id: student.id,
+                    course_id: course.id,
+                    status: 'not_started',
+                    progress: 0
+                });
+            }
+
+            localStorage.setItem('user', JSON.stringify(student));
+            window.location.href = '/admin/empresa/alumnos/cursos';
+            
         } catch (err: any) {
             setError(err.message);
         } finally {
