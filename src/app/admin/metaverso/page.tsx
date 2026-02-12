@@ -405,6 +405,12 @@ export default function MetaversoAdmin() {
                     >
                         Gestión de Participantes
                     </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/empresas')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest text-white/40 border-transparent hover:text-white transition-all border-b-2"
+                    >
+                        Configuración Marca / Colores
+                    </button>
                 </div>
 
                 {view === 'companies' ? (
