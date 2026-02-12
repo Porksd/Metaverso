@@ -225,6 +225,11 @@ export default function DynamicCourseEditor() {
     };
 
     const handleCreateEvaluationModule = async () => {
+        if (modules.some(m => m.type === 'evaluation')) {
+            alert("Ya existe un módulo de evaluación en este curso. No puedes agregar más de uno.");
+            return;
+        }
+
         if (!confirm('¿Crear módulo de evaluación final?\n\nIncluirá:\n✓ Quiz con preguntas\n✓ Actividad SCORM\n✓ Firma digital del alumno\n✓ Generación de certificado')) return;
         
         setLoading(true);
@@ -1132,6 +1137,15 @@ export default function DynamicCourseEditor() {
                             <span className="bg-brand text-black w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold">{module.order_index + 1}</span>
                             <div className="flex-1">
                                 <h3 className="text-lg font-bold text-brand">{module.title}</h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={() => handleDeleteModule(module.id!, mIdx)} 
+                                    className="p-2 hover:bg-red-500/20 text-white/40 hover:text-red-500 rounded-lg transition-colors"
+                                    title="Eliminar Evaluación"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
 
