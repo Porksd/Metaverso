@@ -108,7 +108,10 @@ export default function MetaversoAdmin() {
         if (!confirm("¿Eliminar alumno permanentemente?")) return;
         const { error } = await supabase.from('students').delete().eq('id', id);
         if (error) alert(error.message);
-        else fetchParticipants();
+        else {
+            fetchParticipants();
+            fetchCompanies(); // Refrescar cupos
+        }
     };
 
     const sortedAndFilteredParticipants = participants
@@ -209,6 +212,17 @@ export default function MetaversoAdmin() {
 
     const saveCompanyCourses = async () => {
         if (!selectedCompanyId) return alert('Selecciona primero una empresa');
+
+        // Validación de cupos proyectada
+        const company = companies.find(c => c.id === selectedCompanyId);
+        const studentCount = participants.filter(p => (p.companies?.id === selectedCompanyId || p.client_id === selectedCompanyId)).length;
+        const estimatedEnrollments = selectedCourseIds.length * studentCount;
+
+        if (company && estimatedEnrollments > company.total_quotas) {
+            alert(`Error: Se proyectan ${estimatedEnrollments} matrículas (${selectedCourseIds.length} cursos x ${studentCount} alumnos), pero la empresa solo dispone de ${company.total_quotas} cupos totales.`);
+            return;
+        }
+
         // Delete existing assignments
         const { error: delErr } = await supabase.from('company_courses').delete().eq('company_id', selectedCompanyId);
         if (delErr) {
@@ -218,6 +232,7 @@ export default function MetaversoAdmin() {
         if (selectedCourseIds.length === 0) {
             alert('Asignaciones guardadas (sin cursos)');
             setAssignCoursesModal(false);
+            fetchCompanies(); // Refrescar para estar seguros
             return;
         }
         const rows = selectedCourseIds.map(id => ({ 
@@ -231,6 +246,7 @@ export default function MetaversoAdmin() {
         } else {
             alert('Asignaciones guardadas correctamente');
             setAssignCoursesModal(false);
+            fetchCompanies(); // Refrescar contadores
         }
     };
 
@@ -293,9 +309,44 @@ export default function MetaversoAdmin() {
     };
 
     const fetchCompanies = async () => {
-        const { data } = await supabase.from('companies').select('*, company_courses(course_id)').order('name');
-        setCompanies(data || []);
-        setIsLoading(false);
+        setIsLoading(true);
+        try {
+            // 1. Obtener empresas básicas
+            const { data: companiesData, error: compError } = await supabase
+                .from('companies')
+                .select('*, company_courses(course_id)')
+                .order('name');
+            
+            if (compError) throw compError;
+
+            // 2. Obtener conteo real de matrículas (enrollments) agrupado por empresa (vía student.client_id)
+            const { data: enrollmentsData, error: enrollError } = await supabase
+                .from('enrollments')
+                .select('id, students!inner(client_id)');
+            
+            if (enrollError) throw enrollError;
+
+            // 3. Procesar conteo
+            const enrollmentCounts: Record<string, number> = {};
+            enrollmentsData?.forEach((en: any) => {
+                const clientId = en.students?.client_id;
+                if (clientId) {
+                    enrollmentCounts[clientId] = (enrollmentCounts[clientId] || 0) + 1;
+                }
+            });
+
+            // 4. Integrar datos
+            const updatedCompanies = (companiesData || []).map(c => ({
+                ...c,
+                used_quotas: enrollmentCounts[c.id] || 0
+            }));
+
+            setCompanies(updatedCompanies);
+        } catch (err: any) {
+            console.error('Error fetching dynamic quotas:', err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleSaveCompany = async () => {
@@ -435,9 +486,9 @@ export default function MetaversoAdmin() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {[
                         { label: "Empresas Activas", value: companies.filter(c => c.is_active).length, icon: Building2, color: "brand" },
-                        { label: "Cupos Totales", value: "25.000", icon: Layers, color: "brand" },
-                        { label: "Alumnos Globales", value: "12.450", icon: Users, color: "brand" },
-                        { label: "Cursos en Catálogo", value: "18", icon: BookOpen, color: "brand" },
+                        { label: "Matrículas Totales", value: companies.reduce((acc, c) => acc + (c.used_quotas || 0), 0).toLocaleString(), icon: Layers, color: "brand" },
+                        { label: "Participantes Registrados", value: participants.length.toLocaleString(), icon: Users, color: "brand" },
+                        { label: "Cursos en Catálogo", value: courses.length, icon: BookOpen, color: "brand" },
                     ].map((stat, i) => (
                         <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                             className="glass p-6 flex flex-col gap-4 group glass-hover">
