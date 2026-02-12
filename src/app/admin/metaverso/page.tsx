@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import {
     Building2, Users, BookOpen, Layers, Plus, Search,
     Settings, Save, Upload, Trash2, PieChart, ShieldCheck, X,
-    ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe
+    ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe,
+    Copy, Check
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import ContentUploader from "@/components/ContentUploader";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -22,6 +24,13 @@ export default function MetaversoAdmin() {
     const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
     const [courseModes, setCourseModes] = useState<Record<string, string>>({});
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
 
     const [view, setView] = useState<'companies' | 'participants'>('companies');
     const [participants, setParticipants] = useState<any[]>([]);
@@ -296,7 +305,9 @@ export default function MetaversoAdmin() {
             total_quotas: data.total_quotas || 0, // RESTAURADO
             password: data.password,
             is_active: data.is_active,
-            logo_url: data.logo_url
+            logo_url: data.logo_url,
+            primary_color: data.primary_color,
+            secondary_color: data.secondary_color
         };
 
         if (!id) {
@@ -384,7 +395,7 @@ export default function MetaversoAdmin() {
                             Cerrar Sesión
                         </button>
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0 })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000" })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -404,12 +415,6 @@ export default function MetaversoAdmin() {
                         className={`pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${view === 'participants' ? 'text-brand border-brand' : 'text-white/40 border-transparent hover:text-white'}`}
                     >
                         Gestión de Participantes
-                    </button>
-                    <button 
-                        onClick={() => router.push('/admin/metaverso/empresas')} 
-                        className="pb-4 text-xs font-black uppercase tracking-widest text-white/40 border-transparent hover:text-white transition-all border-b-2"
-                    >
-                        Configuración Marca / Colores
                     </button>
                 </div>
 
@@ -498,19 +503,24 @@ export default function MetaversoAdmin() {
                                                 <span className="text-brand font-black">{company.total_quotas || 0}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5 text-right space-x-2">
+                                        <td className="px-6 py-5 text-right space-x-2 whitespace-nowrap">
                                             {company.slug && (
-                                                <button 
-                                                    onClick={() => {
-                                                        const url = `${window.location.origin}/portal/${company.slug}`;
-                                                        navigator.clipboard.writeText(url);
-                                                        alert(`Copiado: ${url}`);
-                                                    }}
-                                                    className="p-2.5 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand transition-all border border-brand/20" 
-                                                    title="Copiar Link del Portal"
-                                                >
-                                                    <Globe className="w-4 h-4" />
-                                                </button>
+                                                <>
+                                                    <button 
+                                                        onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
+                                                        className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-brand/10 text-brand border-brand/20 hover:bg-brand/20'}`}
+                                                        title="Copiar Portal Alumnos"
+                                                    >
+                                                        {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
+                                                        className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_admin` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white'}`}
+                                                        title="Copiar Panel Admin"
+                                                    >
+                                                        {copiedId === `${company.id}_admin` ? <Check className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                                                    </button>
+                                                </>
                                             )}
                                             <button onClick={() => setEditingCompany(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
                                                 <Settings className="w-4 h-4" />
@@ -773,45 +783,38 @@ export default function MetaversoAdmin() {
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none min-h-[80px]" 
                                     />
                                 </div>
+
+                                <div className="space-y-1.5 col-span-2 border-t border-white/10 pt-4">
+                                    <label className="text-[10px] font-black uppercase text-brand tracking-widest pl-1">Identidad de Marca</label>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Color Primario</label>
+                                    <div className="flex gap-2">
+                                        <input type="color" value={editingCompany.primary_color || "#AEFF00"} onChange={(e) => setEditingCompany({ ...editingCompany, primary_color: e.target.value })} className="w-12 h-12 bg-transparent border-none p-0 cursor-pointer" />
+                                        <input value={editingCompany.primary_color || ""} onChange={(e) => setEditingCompany({ ...editingCompany, primary_color: e.target.value })} placeholder="#AEFF00" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none" />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Color Secundario</label>
+                                    <div className="flex gap-2">
+                                        <input type="color" value={editingCompany.secondary_color || "#000000"} onChange={(e) => setEditingCompany({ ...editingCompany, secondary_color: e.target.value })} className="w-12 h-12 bg-transparent border-none p-0 cursor-pointer" />
+                                        <input value={editingCompany.secondary_color || ""} onChange={(e) => setEditingCompany({ ...editingCompany, secondary_color: e.target.value })} placeholder="#000000" className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none" />
+                                    </div>
+                                </div>
+
                                 <div className="space-y-1.5 col-span-2">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Logo Empresa</label>
-                                    <div className="flex gap-2 items-center">
-                                        <input
-                                            value={editingCompany.logo_url || ""}
-                                            onChange={(e) => setEditingCompany({ ...editingCompany, logo_url: e.target.value })}
-                                            placeholder="https://images.servidor.com/logo-sacyr.png"
-                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none"
-                                        />
-                                        {/* File uploader for logo */}
-                                        <label className="cursor-pointer bg-brand/10 hover:bg-brand/20 text-brand border border-brand/30 px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2">
-                                            <Upload className="w-3 h-3" />
-                                            <span>Subir</span>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                style={{ display: 'none' }}
-                                                onChange={async (e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (!file) return;
-                                                    // Subir a Supabase Storage (company-logos/uploads/companies/)
-                                                    const fileName = `${Date.now()}_${file.name}`;
-                                                    const { data, error } = await supabase.storage
-                                                        .from('company-logos')
-                                                        .upload(`uploads/companies/${fileName}`, file, { upsert: true });
-                                                    if (error) {
-                                                        alert('Error subiendo logo: ' + error.message);
-                                                    } else {
-                                                        // Obtener URL pública
-                                                        const { data: urlData } = supabase.storage.from('company-logos').getPublicUrl(`uploads/companies/${fileName}`);
-                                                        setEditingCompany({ ...editingCompany, logo_url: urlData?.publicUrl });
-                                                    }
-                                                }}
-                                            />
-                                        </label>
-                                    </div>
+                                    <ContentUploader
+                                        courseId={`company_${editingCompany.id || 'new'}`}
+                                        sectionKey="logo"
+                                        label="Subir Logo Corporativo"
+                                        accept="image/*"
+                                        currentValue={editingCompany.logo_url}
+                                        onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url: url })}
+                                    />
                                     {editingCompany.logo_url && (
-                                        <div className="mt-2">
-                                            <img src={editingCompany.logo_url} alt="Logo" className="h-12 max-w-xs object-contain border border-white/10 rounded bg-white/5 p-1" />
+                                        <div className="mt-2 flex justify-center p-4 bg-white/5 rounded-xl border border-white/10">
+                                            <img src={editingCompany.logo_url} alt="Logo" className="h-12 max-w-xs object-contain" />
                                         </div>
                                     )}
                                 </div>
