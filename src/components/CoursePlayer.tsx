@@ -45,8 +45,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
     const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
 
-    const handleEvaluationItemScore = (itemId: string, score: number, type: string) => {
-        console.log(`[CoursePlayer] handleEvaluationItemScore called - Type: ${type}, Score: ${score}, ItemId: ${itemId}`);
+    const handleEvaluationItemScore = (itemId: string, score: number, type: string, passed?: boolean) => {
+        console.log(`[CoursePlayer] handleEvaluationItemScore called - Type: ${type}, Score: ${score}, ItemId: ${itemId}, Passed: ${passed}`);
         
         // Solo actualizar puntajes si el módulo actual es de tipo 'evaluation'
         const currentModule = modules[activeModuleIndex];
@@ -65,8 +65,12 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             console.log('[CoursePlayer] Quiz completado en módulo de contenido (no evaluativo).');
         }
         
-        handleItemCompletion(itemId);
-        // La aprobación se calcula en el useEffect de abajo
+        // Solo marcar como completado si aprobó (para quiz de avance)
+        if (passed !== false) {
+            handleItemCompletion(itemId);
+        } else {
+            console.log('[CoursePlayer] Item no aprobado. Repetir para avanzar.');
+        }
     };
 
     // NUEVO: Lógica de aprobación ponderada
@@ -593,10 +597,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         <div className={`${(approved && isEvaluation) ? 'opacity-50 pointer-events-none' : ''}`}>
                                             <QuizEngine
                                                 questions={item.content.questions || []}
-                                                passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 10}
+                                                passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 100}
                                                 courseId={courseId}
                                                 enrollmentId={enrollment?.id}
-                                                onComplete={(score) => handleEvaluationItemScore(item.id, score, 'quiz')}
+                                                onComplete={(score, passed) => handleEvaluationItemScore(item.id, score, 'quiz', passed)}
+                                                persistScore={false}
                                             />
                                         </div>
                                     )}
@@ -739,7 +744,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             courseId={courseId}
                             onClose={() => setScormModalItem(null)}
                             onComplete={(score) => {
-                                handleEvaluationItemScore(scormModalItem.id, score, 'scorm');
+                                handleEvaluationItemScore(scormModalItem.id, score, 'scorm', score >= 60);
                             }}
                         />
                     </div>

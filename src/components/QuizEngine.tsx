@@ -33,9 +33,10 @@ interface QuizEngineProps {
     onFinish?: (score: number) => void;
     onComplete?: (score: number, passed: boolean) => void; // New callback
     currentEnrollment?: any;
+    persistScore?: boolean; // New prop to control side-effects
 }
 
-export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment }: QuizEngineProps) {
+export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment, persistScore = true }: QuizEngineProps) {
     const baseQuestions = propQuestions || config?.questions || [];
     const seenKeys = new Set<string>();
     const finalQuestions: Question[] = Array.isArray(baseQuestions)
@@ -167,14 +168,18 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         if (isValidUUID) {
             try {
                 // FALLBACK: Usamos best_score mientras la columna quiz_score no existe
-                await supabase
-                    .from('enrollments')
-                    .update({
-                        status: passed ? 'completed' : 'in_progress',
-                        best_score: finalScore,
-                        completed_at: passed ? new Date().toISOString() : null
-                    })
-                    .eq('id', targetEnrollmentId);
+                // SOLO si persistScore es true (Legacy o Evaluación Individual)
+                if (persistScore) {
+                    await supabase
+                        .from('enrollments')
+                        .update({
+                            status: passed ? 'completed' : 'in_progress',
+                            best_score: finalScore,
+                            completed_at: passed ? new Date().toISOString() : null
+                        })
+                        .eq('id', targetEnrollmentId);
+                    console.log("QuizEngine: Enrollment updated directly (persistScore=true)");
+                }
 
                 // 2. Guardar en course_progress para tracking de completitud
                 await supabase.from("course_progress").insert({

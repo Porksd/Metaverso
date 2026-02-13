@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Upload, FileVideo, FileAudio, FileBox, CheckCircle, Package } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface ContentUploaderProps {
     courseId: string;
@@ -30,29 +31,84 @@ export default function ContentUploader({
         if (!file) return;
 
         setUploading(true);
-        setProgress(10); // Fake start progress
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('courseId', courseId);
-        formData.append('sectionKey', sectionKey);
+        setProgress(10);
 
         try {
-            const res = await fetch('/api/upload/course-content', {
-                method: 'POST',
-                body: formData
-            });
+            const isZip = file.name.endsWith('.zip');
+            const timestamp = Date.now();
+            const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            
+            // 1. Upload file directly to Supabase Storage (Bypassing Vercel's 4.5MB limit)
+            const subDir = isZip ? 'temp-packages' : 'media';
+            const path = `${courseId}/${subDir}/${timestamp}_${safeName}`;
 
-            if (!res.ok) throw new Error('Upload failed');
+            console.log(`Uploading directly to storage: ${path} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('course-content')
+                .upload(path, file, {
+                    cacheControl: '3600',
+                    upsert: true
+                });
 
-            const data = await res.json();
-            if (data.success) {
-                setProgress(100);
-                onUploadComplete(data.url);
+            if (uploadError) {
+                console.error("Storage upload error:", uploadError);
+                throw new Error(`Error en Storage: ${uploadError.message}`);
             }
-        } catch (error) {
+
+            let finalUrl = '';
+
+            if (isZip) {
+                // 2a. If ZIP, call API to extract it from the storage path
+                console.log("Calling API to process ZIP from storage...");
+                const formData = new FormData();
+                formData.append('storagePath', path);
+                formData.append('courseId', courseId);
+                formData.append('sectionKey', sectionKey);
+
+                const res = await fetch('/api/upload/course-content', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errorMsg = await res.text();
+                    throw new Error(errorMsg || 'Server processing failed');
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    finalUrl = data.url;
+                } else {
+                    throw new Error(data.error || 'Server processing failed');
+                }
+            } else {
+                // 2b. Simple file: Just get public URL and update DB
+                const { data: urlData } = supabase.storage
+                    .from('course-content')
+                    .getPublicUrl(path);
+                
+                finalUrl = urlData.publicUrl;
+
+                const { error: dbError } = await supabase
+                    .from('course_content')
+                    .upsert({ 
+                        course_id: courseId, 
+                        key: sectionKey, 
+                        value: finalUrl, 
+                        updated_at: new Date().toISOString() 
+                    }, { onConflict: 'course_id,key' });
+
+                if (dbError) throw dbError;
+            }
+
+            if (finalUrl) {
+                setProgress(100);
+                onUploadComplete(finalUrl);
+            }
+        } catch (error: any) {
             console.error(error);
-            alert('Error al subir contenido');
+            alert('Error al subir contenido: ' + (error.message || 'Error desconocido'));
         } finally {
             setUploading(false);
             setProgress(0);
