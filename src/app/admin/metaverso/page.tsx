@@ -58,7 +58,9 @@ export default function MetaversoAdmin() {
             return;
         }
 
-        if (session.user.email !== 'admin@metaversotec.com') {
+        const email = session.user.email?.toLowerCase();
+        // Allow the main developer/admin emails
+        if (email !== 'admin@metaversotec.com' && email !== 'porksde@gmail.com') {
             setIsAuthorized(false);
             return;
         }
