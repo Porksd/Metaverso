@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
-    LogOut, BookOpen, Clock, CheckCircle2,
+    LogOut, BookOpen, Clock, CheckCircle2, Award,
     X, Lock, Download, ChevronRight, Percent, Award as AwardIcon, Users,
     Globe
 } from "lucide-react";
