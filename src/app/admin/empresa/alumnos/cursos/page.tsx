@@ -484,8 +484,8 @@ export default function CoursesPage() {
                         <span className="text-sm font-black tracking-tight">{user.first_name} {user.last_name}</span>
                         <span className="text-xs text-white/40 font-mono">{user.rut}</span>
                     </div>
-                    <button onClick={handleLogout} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/10 group">
-                        <LogOut title={t?.logout} className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                    <button onClick={handleLogout} title={t?.logout} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/10 group">
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     </button>
                 </div>
             </header>
