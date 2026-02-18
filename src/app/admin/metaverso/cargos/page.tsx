@@ -38,8 +38,9 @@ export default function JobPositionsAdmin() {
             return;
         }
 
-        // Check for metaverso admin email
-        if (session.user.email !== 'admin@metaversotec.com') {
+        // Check for metaverso admin email or developer email
+        const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com'];
+        if (!allowedEmails.includes(session.user.email || '')) {
             console.log("Unauthorized email:", session.user.email);
             // Optional: redirect to a generic unauthorized page or login
             router.push("/admin/metaverso/login");
