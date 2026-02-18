@@ -120,8 +120,10 @@ export async function POST(request: NextRequest) {
 
         if (studentError) {
             console.error('Error creating student profile:', studentError);
-            // Rollback: delete auth user
-            await supabase.auth.admin.deleteUser(authData.user.id);
+            // Rollback: try to delete auth user since profile failed
+            if (authUser?.id) {
+                await supabaseAdmin.auth.admin.deleteUser(authUser.id);
+            }
             return NextResponse.json(
                 { error: 'Error al crear perfil de estudiante' },
                 { status: 500 }
