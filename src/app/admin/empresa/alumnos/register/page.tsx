@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Globe, Building2, Briefcase, Info } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function StudentRegister() {
     const router = useRouter();
