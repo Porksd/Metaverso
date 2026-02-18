@@ -60,7 +60,8 @@ export default function MetaversoAdmin() {
 
         const email = session.user.email?.toLowerCase();
         // Allow the main developer/admin emails
-        if (email !== 'admin@metaversotec.com' && email !== 'porksde@gmail.com') {
+        const allowedAdmins = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
+        if (!email || !allowedAdmins.includes(email)) {
             setIsAuthorized(false);
             return;
         }

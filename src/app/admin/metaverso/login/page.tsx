@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 function LoginForm() {
-    const [email, setEmail] = useState("admin@metaversotec.com");
+    const [email, setEmail] = useState("apacheco@lobus.cl");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();

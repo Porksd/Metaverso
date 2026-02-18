@@ -39,7 +39,7 @@ export default function JobPositionsAdmin() {
         }
 
         // Check for metaverso admin email or developer email
-        const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com'];
+        const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
         if (!allowedEmails.includes(session.user.email || '')) {
             console.log("Unauthorized email:", session.user.email);
             // Optional: redirect to a generic unauthorized page or login
