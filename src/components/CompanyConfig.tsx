@@ -58,35 +58,30 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
         setUploading(true);
 
         try {
-            const uploadedUrls: string[] = [];
+            const uploadedUrls: string[] = [...signatures.map(s => s.url || "")];
 
             // Subir cada firma
             for (let i = 0; i < signatures.length; i++) {
                 const sig = signatures[i];
 
                 if (sig.file) {
-                    // Subir nuevo archivo
-                    const formData = new FormData();
-                    formData.append('file', sig.file);
-                    formData.append('companyId', companyId);
-                    formData.append('type', 'signature');
+                    // Subir nuevo archivo directamente a Supabase storage
+                    const fileExt = sig.file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${sig.file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                    const filePath = `uploads/companies/${companyId}/signatures/${fileName}`;
 
-                    const response = await fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
+                    const { error: uploadError } = await supabase.storage
+                        .from('company-logos')
+                        .upload(filePath, sig.file, { upsert: true });
 
-                    const result = await response.json();
-                    if (result.success) {
-                        uploadedUrls[i] = result.url;
-                    } else {
-                        throw new Error(result.error);
-                    }
-                } else if (sig.url) {
-                    // Mantener URL existente
-                    uploadedUrls[i] = sig.url;
-                } else {
-                    uploadedUrls[i] = '';
+                    if (uploadError) throw uploadError;
+
+                    // Obtener URL pública
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('company-logos')
+                        .getPublicUrl(filePath);
+
+                    uploadedUrls[i] = publicUrl;
                 }
             }
 
@@ -107,9 +102,9 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
 
             alert('Configuración guardada exitosamente');
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving config:', error);
-            alert('Error al guardar la configuración');
+            alert(`Error al guardar la configuración: ${error.message || 'Error desconocido'}`);
         } finally {
             setUploading(false);
         }

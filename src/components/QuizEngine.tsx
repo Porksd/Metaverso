@@ -11,7 +11,8 @@ interface Question {
     id: string;
     type?: QuestionType;
     text: string;
-    options: { id: string; text: string }[];
+    text_ht?: string; // Soporte para creole
+    options: { id: string; text: string; text_ht?: string }[]; // Soporte para creole
     correctAnswer: string | string[];
     weight?: number; // optional weight for this question (default 1)
 }
@@ -34,9 +35,48 @@ interface QuizEngineProps {
     onComplete?: (score: number, passed: boolean) => void; // New callback
     currentEnrollment?: any;
     persistScore?: boolean; // New prop to control side-effects
+    language?: string; // Nuevo: soporte para idioma
 }
 
-export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment, persistScore = true }: QuizEngineProps) {
+const translations: any = {
+    es: {
+        error: "Error: Pregunta no encontrada",
+        quiz_finished: "¡Quiz Finalizado!",
+        activity_completed: "¡Actividad Completada!",
+        answered_correctly: (correct: number, total: number) => `Has respondido correctamente ${correct} de ${total} preguntas.`,
+        activity_success: "Has completado satisfactoriamente los ejercicios de esta sección.",
+        hits: "Aciertos",
+        weight: "Ponderación (80%)",
+        try_again: "Intentar Nuevamente",
+        repeat_activity: "Repetir Actividad",
+        progress_saved: "* Tu progreso ha sido guardado. Completa el contenido SCORM para alcanzar el 90% requerido para aprobar.",
+        question: "Pregunta",
+        of: "de",
+        multiple_selection: "Múltiple Selección",
+        finish_eval: "Finalizar Evaluación",
+        next_question: "Siguiente Pregunta"
+    },
+    ht: {
+        error: "Erè: Kesyon pa jwenn",
+        quiz_finished: "Egzamen fini!",
+        activity_completed: "Aktivite konplè!",
+        answered_correctly: (correct: number, total: number) => `Ou reponn kòrèkteman ${correct} nan ${total} kesyon.`,
+        activity_success: "Ou te konplete avèk siksè egzèsis yo nan seksyon sa a.",
+        hits: "Siksè",
+        weight: "Pwa (80%)",
+        try_again: "Eseye ankò",
+        repeat_activity: "Repete aktivite",
+        progress_saved: "* Pwogrè ou sove. Ranpli kontni SCORM pou rive nan 90% obligatwa pou pase.",
+        question: "Kesyon",
+        of: "nan",
+        multiple_selection: "Plis pase yon chwa",
+        finish_eval: "Fini Evalyasyon",
+        next_question: "Kesyon Pwochen"
+    }
+};
+
+export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment, persistScore = true, language = 'es' }: QuizEngineProps) {
+    const t = translations[language] || translations.es;
     const baseQuestions = propQuestions || config?.questions || [];
     const seenKeys = new Set<string>();
     const finalQuestions: Question[] = Array.isArray(baseQuestions)
@@ -83,7 +123,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     const currentQuestion = finalQuestions[currentQuestionIdx];
     const questionType: QuestionType = resolveQuestionType(currentQuestion);
 
-    if (!currentQuestion && !isFinished) return <div className="text-center text-white/40">Error: Pregunta no encontrada</div>;
+    if (!currentQuestion && !isFinished) return <div className="text-center text-white/40">{t.error}</div>;
 
     const handleAnswer = (optionId: string) => {
         if (questionType === 'multiple') {
@@ -242,28 +282,39 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                     <CheckCircle2 className="w-12 h-12 text-brand" />
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-3xl font-bold">¡Quiz Finalizado!</h2>
-                    <p className="text-white/60">Has respondido correctamente {correctCount} de {finalQuestions.length} preguntas.</p>
+                    <h2 className="text-3xl font-bold">
+                        {persistScore ? t.quiz_finished : t.activity_completed}
+                    </h2>
+                    <p className="text-white/60">
+                        {persistScore 
+                            ? t.answered_correctly(correctCount, finalQuestions.length)
+                            : t.activity_success
+                        }
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                    <div className="glass p-4 border-brand/20">
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Aciertos</p>
-                        <p className="text-2xl font-black text-brand">{score}%</p>
-                    </div>
-                    <div className="glass p-4 border-brand/20">
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Ponderación (80%)</p>
-                        <p className="text-2xl font-black text-brand">{contribution}%</p>
-                    </div>
-                </div>
+                {persistScore && (
+                    <>
+                        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+                            <div className="glass p-4 border-brand/20">
+                                <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.hits}</p>
+                                <p className="text-2xl font-black text-brand">{score}%</p>
+                            </div>
+                            <div className="glass p-4 border-brand/20">
+                                <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.weight}</p>
+                                <p className="text-2xl font-black text-brand">{contribution}%</p>
+                            </div>
+                        </div>
 
-                <div className="w-full max-w-sm h-2 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand transition-all duration-1000" style={{ width: `${score}%` }} />
-                </div>
+                        <div className="w-full max-w-sm h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-brand transition-all duration-1000" style={{ width: `${score}%` }} />
+                        </div>
 
-                <p className="text-xs text-brand/60 font-medium italic">
-                    * Tu progreso ha sido guardado. Completa el contenido SCORM para alcanzar el 90% requerido para aprobar.
-                </p>
+                        <p className="text-xs text-brand/60 font-medium italic">
+                            {t.progress_saved}
+                        </p>
+                    </>
+                )}
 
                 <div className="flex flex-col w-full max-w-sm gap-3">
                     <button
@@ -274,7 +325,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                         }}
                         className="w-full py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase"
                     >
-                        Intentar Nuevamente
+                        {persistScore ? t.try_again : t.repeat_activity}
                     </button>
                 </div>
             </div>
@@ -288,9 +339,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
             <div className="space-y-4">
                 <div className="flex justify-between items-end">
                     <div className="space-y-1">
-                        <span className="text-xs text-white/40 font-bold uppercase tracking-widest block">Pregunta {currentQuestionIdx + 1} de {finalQuestions.length}</span>
+                        <span className="text-xs text-white/40 font-bold uppercase tracking-widest block">{t.question} {currentQuestionIdx + 1} {t.of} {finalQuestions.length}</span>
                         {questionType === 'multiple' && (
-                            <span className="text-[10px] bg-brand/20 text-brand px-2 py-0.5 rounded font-black uppercase">Múltiple Selección</span>
+                            <span className="text-[10px] bg-brand/20 text-brand px-2 py-0.5 rounded font-black uppercase">{t.multiple_selection}</span>
                         )}
                     </div>
                     <span className="text-brand font-black tabular-nums">{Math.round(((currentQuestionIdx) / finalQuestions.length) * 100)}%</span>
@@ -306,7 +357,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 animate={{ opacity: 1, x: 0 }}
                 className="space-y-8"
             >
-                <h3 className="text-2xl font-black leading-tight">{currentQuestion.text}</h3>
+                <h3 className="text-2xl font-black leading-tight">
+                    {(language === 'ht' && currentQuestion.text_ht) ? currentQuestion.text_ht : currentQuestion.text}
+                </h3>
 
                 <div className="grid grid-cols-1 gap-3">
                     {currentQuestion.options.map((opt, optIdx) => (
@@ -318,7 +371,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                                 : 'bg-white/[0.02] border-white/5 text-white/60 hover:bg-white/5 hover:border-white/10'
                                 }`}
                         >
-                            <span className="font-bold text-sm md:text-base pr-8 relative z-10">{opt.text}</span>
+                            <span className="font-bold text-sm md:text-base pr-8 relative z-10">
+                                {(language === 'ht' && opt.text_ht) ? opt.text_ht : opt.text}
+                            </span>
                             <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 relative z-10 ${isOptionSelected(opt.id) ? 'bg-brand border-brand' : 'border-white/10'
                                 }`}>
                                 {isOptionSelected(opt.id) && <Check className="w-4 h-4 text-black stroke-[4]" />}
@@ -334,7 +389,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                     disabled={!hasAnswered}
                     className="group w-full py-5 bg-brand disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-black font-black uppercase text-sm tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.98] transition-all shadow-xl shadow-brand/10 font-mono"
                 >
-                    {currentQuestionIdx === finalQuestions.length - 1 ? "Finalizar Evaluación" : "Siguiente Pregunta"}
+                    {currentQuestionIdx === finalQuestions.length - 1 ? t.finish_eval : t.next_question}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>

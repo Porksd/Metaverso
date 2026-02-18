@@ -169,8 +169,20 @@ export default function EnhancedManagerDashboard({ companyName, companyId }: { c
     const dailyActivity = useMemo((): DailyActivity[] => {
         const dailyMap = new Map<string, { students: Set<string>; completed: number; scores: number[] }>();
 
+        // Generar los últimos 7 días por defecto si no hay datos, para que el gráfico no esté vacío
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return d.toISOString().split('T')[0];
+        });
+
+        last7Days.forEach(date => {
+            dailyMap.set(date, { students: new Set(), completed: 0, scores: [] });
+        });
+
         filteredEnrollments.forEach(e => {
             const date = new Date(e.created_at).toISOString().split('T')[0];
+            // Solo registrar si está dentro de nuestro rango o si estamos viendo todos los datos
             if (!dailyMap.has(date)) {
                 dailyMap.set(date, { students: new Set(), completed: 0, scores: [] });
             }
@@ -195,7 +207,8 @@ export default function EnhancedManagerDashboard({ companyName, companyId }: { c
                     ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length)
                     : 0
             }))
-            .sort((a, b) => a.date.localeCompare(b.date));
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .slice(-30); // Limitar a los últimos 30 días para no saturar el gráfico
     }, [filteredEnrollments]);
 
     // Estadísticas por curso

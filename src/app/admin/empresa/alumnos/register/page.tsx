@@ -44,12 +44,42 @@ export default function StudentRegister() {
     };
 
     const loadJobPositions = async () => {
-        const { data } = await supabase
+        // Fetch global job positions
+        const { data: globalJobs } = await supabase
             .from('job_positions')
             .select('*')
             .eq('active', true)
             .order('code');
-        if (data) setJobPositions(data);
+            
+        // Fetch company specific roles if any
+        const { data: companyRoles } = await supabase
+            .from('company_roles')
+            .select('*')
+            .eq('company_id', formData.client_id)
+            .order('name');
+
+        const unifiedJobs = [
+            ...(globalJobs || []).map(j => ({
+                id: j.id,
+                code: j.code,
+                name_es: j.name_es,
+                name_ht: j.name_ht || j.name_es,
+                description_es: j.description_es,
+                description_ht: j.description_ht || j.description_es,
+                is_global: true
+            })),
+            ...(companyRoles || []).map(r => ({
+                id: r.id,
+                code: r.id, // Using ID as code for company roles
+                name_es: r.name,
+                name_ht: r.name_ht || r.name,
+                description_es: r.description,
+                description_ht: r.description_ht || r.description,
+                is_global: false
+            }))
+        ];
+
+        setJobPositions(unifiedJobs);
     };
 
     const t = (key: string) => {
@@ -76,7 +106,10 @@ export default function StudentRegister() {
                 alreadyHaveAccount: "¿Ya tienes cuenta?",
                 login: "Iniciar Sesión",
                 fillAllFields: "Por favor complete todos los campos obligatorios",
-                registering: "Registrando..."
+                registering: "Registrando...",
+                close: "Cerrar",
+                success: "Registro exitoso. Por favor inicia sesión.",
+                error: "Error al registrar: "
             },
             ht: {
                 title: "Enskripsyon Elèv",
@@ -100,7 +133,10 @@ export default function StudentRegister() {
                 alreadyHaveAccount: "Ou gen yon kont deja?",
                 login: "Konekte",
                 fillAllFields: "Tanpri ranpli tout chan obligatwa yo",
-                registering: "Ap enskri..."
+                registering: "Ap enskri...",
+                close: "Fèmen",
+                success: "Enskripsyon an reyisi. Tanpri konekte.",
+                error: "Erè nan anrejistreman: "
             }
         };
         return translations[formData.language]?.[key] || key;
@@ -147,32 +183,43 @@ export default function StudentRegister() {
 
         try {
             const companyName = formData.company === 'OTRA' ? formData.other_company : formData.company;
+            const selectedJob = jobPositions.find(j => j.code === formData.job_position);
+            
+            const studentData: any = {
+                language: formData.language,
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                email: formData.email,
+                gender: formData.gender,
+                age: parseInt(formData.age),
+                company_name: companyName,
+                rut: formData.rut,
+                client_id: formData.client_id
+            };
+
+            if (selectedJob?.is_global) {
+                studentData.job_position = selectedJob.code;
+            } else {
+                studentData.role_id = selectedJob?.id;
+                studentData.job_position = selectedJob?.name_es; // Fallback for display
+            }
 
             const { data, error } = await supabase
                 .from('students')
-                .insert({
-                    language: formData.language,
-                    first_name: formData.first_name,
-                    last_name: formData.last_name,
-                    email: formData.email,
-                    gender: formData.gender,
-                    age: parseInt(formData.age),
-                    company_name: companyName,
-                    rut: formData.rut,
-                    job_position: formData.job_position,
-                    client_id: formData.client_id
-                })
+                .insert(studentData)
+                .select()
+                .single();
                 .select()
                 .single();
 
             if (error) throw error;
 
             // Store in localStorage and redirect to login
-            alert('Registro exitoso. Por favor inicia sesión.');
+            alert(t('success'));
             router.push('/admin/empresa/alumnos/login');
         } catch (error: any) {
             console.error('Registration error:', error);
-            alert('Error al registrar: ' + error.message);
+            alert(t('error') + error.message);
         } finally {
             setLoading(false);
         }
@@ -337,6 +384,22 @@ export default function StudentRegister() {
                         </select>
                     </div>
 
+                    {/* Cargo Tip */}
+                    {formData.job_position && jobPositions.find(j => j.code === formData.job_position) && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 bg-brand/10 border border-brand/20 rounded-xl flex items-start gap-3"
+                        >
+                            <Info className="w-5 h-5 text-brand shrink-0 mt-0.5" />
+                            <p className="text-xs text-brand leading-relaxed font-medium">
+                                {formData.language === 'ht' 
+                                    ? jobPositions.find(j => j.code === formData.job_position)?.description_ht || jobPositions.find(j => j.code === formData.job_position)?.description_es 
+                                    : jobPositions.find(j => j.code === formData.job_position)?.description_es}
+                            </p>
+                        </motion.div>
+                    )}
+
                     {/* Submit Button */}
                     <button
                         type="submit"
@@ -373,7 +436,7 @@ export default function StudentRegister() {
                             onClick={() => setShowJobDescription(false)}
                             className="w-full py-3 bg-white/10 rounded-xl font-bold uppercase text-sm hover:bg-white/20 transition-all"
                         >
-                            Cerrar
+                            {t('close')}
                         </button>
                     </div>
                 </div>

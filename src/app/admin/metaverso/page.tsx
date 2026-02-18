@@ -12,6 +12,7 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ContentUploader from "@/components/ContentUploader";
+import CompanyConfig from "@/components/CompanyConfig";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -43,12 +44,31 @@ export default function MetaversoAdmin() {
     const [editingStudent, setEditingStudent] = useState<any>(null);
     const [isCreatingStudent, setIsCreatingStudent] = useState(false);
 
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
     useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            router.push("/admin/metaverso/login?returnUrl=/admin/metaverso");
+            return;
+        }
+
+        if (session.user.email !== 'admin@metaversotec.com') {
+            setIsAuthorized(false);
+            return;
+        }
+        
+        setIsAuthorized(true);
         fetchCompanies();
         fetchParticipants();
         fetchCourses();
         fetchRoles();
-    }, []);
+    };
 
     const fetchRoles = async () => {
         const { data } = await supabase.from('company_roles').select('*').order('name');
@@ -399,31 +419,6 @@ export default function MetaversoAdmin() {
         }
     };
 
-    const handleSaveSignatures = async () => {
-        if (!signatureModal) return;
-        const { id, ...data } = signatureModal;
-        const { error } = await supabase
-            .from('companies')
-            .update({
-                signature_name_1: data.signature_name_1,
-                signature_role_1: data.signature_role_1,
-                signature_url_1: data.signature_url_1,
-                signature_name_2: data.signature_name_2,
-                signature_role_2: data.signature_role_2,
-                signature_url_2: data.signature_url_2,
-                signature_name_3: data.signature_name_3,
-                signature_role_3: data.signature_role_3,
-                signature_url_3: data.signature_url_3,
-            })
-            .eq('id', id);
-
-        if (error) alert(error.message);
-        else {
-            setSignatureModal(null);
-            fetchCompanies();
-        }
-    };
-
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
@@ -434,6 +429,21 @@ export default function MetaversoAdmin() {
             window.location.href = "/admin";
         }
     };
+
+    if (isAuthorized === null) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-brand font-black animate-pulse uppercase tracking-widest">Verificando Acceso Maestro...</div>
+        </div>
+    );
+
+    if (isAuthorized === false) return (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center space-y-6">
+            <ShieldCheck className="w-20 h-20 text-red-500" />
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase">Acceso Denegado</h1>
+            <p className="text-white/40 max-w-md uppercase text-xs font-bold leading-relaxed">Las credenciales no tienen autorización para el protocolo de acceso nivel 5.</p>
+            <button onClick={() => router.push("/admin/metaverso/login")} className="bg-white text-black px-8 py-4 rounded-2xl font-black uppercase text-xs">Volver al Portal</button>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans">
@@ -889,85 +899,13 @@ export default function MetaversoAdmin() {
 
                 {/* Modal: Firmas Digitales (3 slots) */}
                 {signatureModal && (
-                    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass p-10 w-full max-w-4xl space-y-8 border-brand/20 overflow-y-auto max-h-[90vh]">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-2xl font-black lowercase tracking-tighter text-brand">/firmas_y_autoridades</h3>
-                                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Configuración de Certificación para {signatureModal.name}</p>
-                                </div>
-                                <X onClick={() => setSignatureModal(null)} className="w-6 h-6 text-white/40 cursor-pointer hover:text-white" />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-brand uppercase tracking-widest">Autoridad #{i}</span>
-                                            {signatureModal[`signature_url_${i}`] && <div className="w-10 h-10 bg-white p-1 rounded-lg border border-white/20"><img src={signatureModal[`signature_url_${i}`]} className="w-full h-full object-contain" /></div>}
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black uppercase text-white/20">Nombre Completo</label>
-                                            <input
-                                                value={signatureModal[`signature_name_${i}`] || ""}
-                                                onChange={(e) => setSignatureModal({ ...signatureModal, [`signature_name_${i}`]: e.target.value })}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none focus:border-brand/40"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black uppercase text-white/20">Cargo / Posición</label>
-                                            <input
-                                                value={signatureModal[`signature_role_${i}`] || ""}
-                                                onChange={(e) => setSignatureModal({ ...signatureModal, [`signature_role_${i}`]: e.target.value })}
-                                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none focus:border-brand/40"
-                                            />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black uppercase text-white/20">URL Rúbrica (PNG Transparente)</label>
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    value={signatureModal[`signature_url_${i}`] || ""}
-                                                    onChange={(e) => setSignatureModal({ ...signatureModal, [`signature_url_${i}`]: e.target.value })}
-                                                    placeholder="https://..."
-                                                    className="flex-1 bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none focus:border-brand/40 font-mono"
-                                                />
-                                                <label className={`cursor-pointer bg-brand/10 hover:bg-brand/20 text-brand border border-brand/30 px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2`}>
-                                                    <Upload className="w-3 h-3" />
-                                                    <span>Subir</span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        style={{ display: 'none' }}
-                                                        onChange={async (e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (!file) return;
-                                                            const fileName = `${Date.now()}_${file.name}`;
-                                                            const companyId = signatureModal.id;
-                                                            const path = companyId ? `uploads/companies/${companyId}/signatures/${fileName}` : `uploads/companies/${fileName}`;
-                                                            const { data: upData, error: upErr } = await supabase.storage
-                                                                .from('company-logos')
-                                                                .upload(path, file, { upsert: true });
-                                                            if (upErr) {
-                                                                alert('Error subiendo firma: ' + upErr.message);
-                                                            } else {
-                                                                const { data: urlData } = supabase.storage.from('company-logos').getPublicUrl(path);
-                                                                setSignatureModal({ ...signatureModal, [`signature_url_${i}`]: urlData?.publicUrl });
-                                                            }
-                                                        }}
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-4">
-                                <button onClick={() => setSignatureModal(null)} className="flex-1 py-4 rounded-xl bg-white/5 text-white/40 font-black uppercase text-[10px] tracking-widest">Cerrar</button>
-                                <button onClick={handleSaveSignatures} className="flex-1 py-4 rounded-xl bg-brand text-black font-black uppercase text-[10px] tracking-widest shadow-xl shadow-brand/20">Guardar 3 Firmas</button>
-                            </div>
-                        </motion.div>
-                    </div>
+                    <CompanyConfig 
+                        companyId={signatureModal.id} 
+                        onClose={() => {
+                            setSignatureModal(null);
+                            fetchCompanies();
+                        }} 
+                    />
                 )}
 
                 {/* Course Assignment */}

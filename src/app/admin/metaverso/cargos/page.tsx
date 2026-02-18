@@ -2,34 +2,60 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Plus, Trash2, Edit2, Search, Briefcase, Info, X, ChevronRight, Check } from "lucide-react";
+import { Plus, Trash2, Edit2, Search, Briefcase, Info, X, ChevronRight, Check, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface JobPosition {
     id: string;
     code: string;
-    name: string;
-    description: string;
+    name_es: string;
+    name_ht: string;
+    description_es: string;
+    description_ht: string;
     active: boolean;
 }
 
 export default function JobPositionsAdmin() {
+    const router = useRouter();
     const [positions, setPositions] = useState<JobPosition[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<JobPosition | null>(null);
     const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
-        loadPositions();
+        checkAuth();
     }, []);
+
+    const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            console.log("No session found, redirecting to login...");
+            router.push("/admin/metaverso/login?returnUrl=/admin/metaverso/cargos");
+            return;
+        }
+
+        // Check for metaverso admin email
+        if (session.user.email !== 'admin@metaversotec.com') {
+            console.log("Unauthorized email:", session.user.email);
+            // Optional: redirect to a generic unauthorized page or login
+            router.push("/admin/metaverso/login");
+            return;
+        }
+        
+        setIsAuthorized(true);
+        loadPositions();
+    };
 
     const loadPositions = async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('job_positions')
             .select('*')
-            .order('name');
+            .order('name_es');
 
         if (data) setPositions(data);
         setLoading(false);
@@ -39,9 +65,11 @@ export default function JobPositionsAdmin() {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const positionData = {
-            name: formData.get('name') as string,
+            name_es: formData.get('name_es') as string,
+            name_ht: formData.get('name_ht') as string,
             code: formData.get('code') as string,
-            description: formData.get('description') as string,
+            description_es: formData.get('description_es') as string,
+            description_ht: formData.get('description_ht') as string,
             active: formData.get('active') === 'on'
         };
 
@@ -63,8 +91,23 @@ export default function JobPositionsAdmin() {
     };
 
     const filteredPositions = positions.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.code.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.name_es?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (p.code?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+    );
+
+    if (isAuthorized === null) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-brand font-black animate-pulse">VERIFICANDO ACCESO...</div>
+        </div>
+    );
+
+    if (isAuthorized === false) return (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center space-y-6">
+            <ShieldAlert className="w-20 h-20 text-red-500" />
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase">Acceso Denegado</h1>
+            <p className="text-white/40 max-w-md">No tienes permisos para acceder a este panel de administración.</p>
+            <button onClick={() => router.push("/admin/metaverso/login")} className="bg-white text-black px-8 py-4 rounded-2xl font-black uppercase text-xs">Volver al Login</button>
+        </div>
     );
 
     return (
@@ -118,8 +161,8 @@ export default function JobPositionsAdmin() {
                                 <thead>
                                     <tr className="bg-white/5 border-b border-white/10">
                                         <th className="p-6 text-xs uppercase font-black text-white/40">Código</th>
-                                        <th className="p-6 text-xs uppercase font-black text-white/40">Nombre del Cargo</th>
-                                        <th className="p-6 text-xs uppercase font-black text-white/40">Descripción</th>
+                                        <th className="p-6 text-xs uppercase font-black text-white/40">Nombre (ES / HT)</th>
+                                        <th className="p-6 text-xs uppercase font-black text-white/40">Descripción (ES / HT)</th>
                                         <th className="p-6 text-xs uppercase font-black text-white/40 text-center">Estado</th>
                                         <th className="p-6 text-xs uppercase font-black text-white/40 text-right">Acciones</th>
                                     </tr>
@@ -129,10 +172,12 @@ export default function JobPositionsAdmin() {
                                         <tr key={pos.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
                                             <td className="p-6 font-mono text-xs text-brand">{pos.code || 'N/A'}</td>
                                             <td className="p-6">
-                                                <div className="font-bold text-white">{pos.name}</div>
+                                                <div className="font-bold text-white">{pos.name_es}</div>
+                                                <div className="text-[10px] text-white/20 italic">{pos.name_ht || '-'}</div>
                                             </td>
                                             <td className="p-6 max-w-xs">
-                                                <div className="text-xs text-white/40 line-clamp-2 italic">{pos.description || 'Sin descripción'}</div>
+                                                <div className="text-xs text-white/40 line-clamp-1 italic">{pos.description_es || 'Sin descripción'}</div>
+                                                <div className="text-[10px] text-white/10 line-clamp-1 italic">{pos.description_ht || '-'}</div>
                                             </td>
                                             <td className="p-6">
                                                 <div className="flex justify-center">
@@ -196,7 +241,7 @@ export default function JobPositionsAdmin() {
 
                             <form onSubmit={handleSave} className="space-y-6">
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-4 gap-4">
                                         <div className="col-span-1 border-b border-white/5 pb-2">
                                             <label className="text-[10px] font-black uppercase text-white/20 block mb-1">Código</label>
                                             <input
@@ -206,27 +251,49 @@ export default function JobPositionsAdmin() {
                                                 className="w-full bg-transparent p-0 text-brand font-mono focus:outline-none"
                                             />
                                         </div>
-                                        <div className="col-span-2 border-b border-white/5 pb-2">
-                                            <label className="text-[10px] font-black uppercase text-white/20 block mb-1 italic">Nombre del Cargo *</label>
+                                        <div className="col-span-3 border-b border-white/5 pb-2">
+                                            <label className="text-[10px] font-black uppercase text-white/20 block mb-1 italic">Nombre (ES) *</label>
                                             <input
-                                                name="name"
+                                                name="name_es"
                                                 required
-                                                defaultValue={isEditing?.name}
+                                                defaultValue={isEditing?.name_es}
                                                 placeholder="Ej: Supervisor de Terreno"
                                                 className="w-full bg-transparent p-0 text-white font-bold focus:outline-none placeholder:text-white/10"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-white/20 block">Descripción del Cargo</label>
-                                        <textarea
-                                            name="description"
-                                            defaultValue={isEditing?.description}
-                                            rows={4}
-                                            placeholder="Detalla las responsabilidades o requisitos..."
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white/60 focus:border-brand/50 outline-none transition-all resize-none"
+                                    <div className="border-b border-white/5 pb-2">
+                                        <label className="text-[10px] font-black uppercase text-white/20 block mb-1 italic">Nombre (Haitití - Creole)</label>
+                                        <input
+                                            name="name_ht"
+                                            defaultValue={isEditing?.name_ht}
+                                            placeholder="Ej: Sipèvizè teren"
+                                            className="w-full bg-transparent p-0 text-white/60 font-medium focus:outline-none placeholder:text-white/10"
                                         />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-white/20 block">Descripción (ES) / Tip</label>
+                                            <textarea
+                                                name="description_es"
+                                                defaultValue={isEditing?.description_es}
+                                                rows={3}
+                                                placeholder="Tip para el alumno..."
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white/60 focus:border-brand/50 outline-none transition-all resize-none"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-white/20 block">Descripción (HT) / Tip</label>
+                                            <textarea
+                                                name="description_ht"
+                                                defaultValue={isEditing?.description_ht}
+                                                rows={3}
+                                                placeholder="Konsèy pou elèv..."
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white/60 focus:border-brand/50 outline-none transition-all resize-none"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">

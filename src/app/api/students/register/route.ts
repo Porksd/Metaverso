@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
     try {
@@ -36,43 +36,83 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 1. Create Supabase Auth User
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: `${first_name} ${last_name}`,
-                    language
-                }
-            }
-        });
-
-        if (authError || !authData.user) {
+        // 1. Create or Update Supabase Auth User
+        // Usamos supabaseAdmin para crear el usuario y confirmar el email inmediatamente.
+        if (!supabaseAdmin) {
             return NextResponse.json(
-                { error: authError?.message || 'Error al crear usuario' },
-                { status: 400 }
+                { error: 'Error de configuración: supabaseAdmin no disponible' },
+                { status: 500 }
             );
         }
 
-        // 2. Create Student Profile
+        // Primero intentamos crear, si ya existe lo actualizamos para asegurar que esté confirmado
+        let authUser;
+        const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+                full_name: `${first_name} ${last_name}`,
+                language
+            }
+        });
+
+        if (createError) {
+            if (createError.message.includes('already registered') || createError.message.includes('already exists')) {
+                // Si el usuario existe, lo buscamos y lo actualizamos para confirmar su email y setear la clave
+                const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+                const existingUser = users?.find(u => u.email === email);
+                
+                if (existingUser) {
+                    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+                        existingUser.id,
+                        { 
+                            password, 
+                            email_confirm: true,
+                            user_metadata: {
+                                full_name: `${first_name} ${last_name}`,
+                                language
+                            }
+                        }
+                    );
+                    if (updateError) {
+                        return NextResponse.json({ error: updateError.message }, { status: 400 });
+                    }
+                    authUser = updateData.user;
+                } else {
+                    return NextResponse.json({ error: 'Usuario ya existe en Auth pero no se pudo encontrar para actualizar' }, { status: 400 });
+                }
+            } else {
+                return NextResponse.json({ error: createError.message }, { status: 400 });
+            }
+        } else {
+            authUser = createData.user;
+        }
+
+        if (!authUser) {
+            return NextResponse.json({ error: 'Error al gestionar usuario de autenticación' }, { status: 400 });
+        }
+
+        // 2. Create or Update Student Profile
         const { data: student, error: studentError } = await supabase
             .from('students')
-            .insert({
-                auth_user_id: authData.user.id,
+            .upsert({
+                auth_user_id: authUser.id,
                 rut: rut || null,
                 passport: passport || null,
                 first_name,
                 last_name,
                 email,
+                password, // Store password for corporate login bypass
                 gender: gender || null,
                 age: age || null,
                 company_name: company_name || null,
                 client_id: client_id || null, // Insert FK
                 position: position || null,
+                job_position: position || null,
                 digital_signature_url: digital_signature_url || null,
                 language
-            })
+            }, { onConflict: 'email' }) // Use email as conflict target if available
             .select()
             .single();
 

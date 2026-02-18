@@ -1,16 +1,38 @@
--- Migration: Open RLS for Supabase Storage (course-content bucket)
--- This allows the frontend to upload large files directly, bypassing Vercel's 4.5MB limit.
+-- Migration: Fix and Open Storage RLS for course-content
+-- This version is more explicit and targets any roles (anon/authenticated)
+-- Run this in the Supabase SQL Editor if you get RLS errors during upload.
 
--- Ensure the bucket exists (though typically managed in UI)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('course-content', 'course-content', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
+-- 1. Ensure bucket exists and is public
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'course-content', 
+  'course-content', 
+  true, 
+  524288000, -- 500MB limit
+  '{video/*,image/*,application/pdf,application/zip,audio/*}' -- allowed types
+)
+ON CONFLICT (id) DO UPDATE SET 
+  public = true,
+  file_size_limit = 524288000,
+  allowed_mime_types = '{video/*,image/*,application/pdf,application/zip,audio/*}';
 
--- Allow public access to read files
-CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'course-content');
+-- 2. Clear existing specific policies to avoid conflicts
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public select" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public insert" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public update" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public delete" ON storage.objects;
 
--- Allow anyone to upload files (For development/demo stability)
--- In production, you would restrict this to authenticated users
-CREATE POLICY "Public Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'course-content');
-CREATE POLICY "Public Update" ON storage.objects FOR UPDATE USING (bucket_id = 'course-content');
-CREATE POLICY "Public Delete" ON storage.objects FOR DELETE USING (bucket_id = 'course-content');
+-- 3. Create robust policies for anyone to manage files in this specific bucket
+-- Note: 'anon' is the role used by the frontend when not logged in with Supabase Auth.
+GRANT USAGE ON SCHEMA storage TO anon, authenticated;
+GRANT ALL ON TABLE storage.objects TO anon, authenticated;
+GRANT ALL ON TABLE storage.buckets TO anon, authenticated;
+
+CREATE POLICY "Public Select" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id = 'course-content');
+CREATE POLICY "Public Insert" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'course-content');
+CREATE POLICY "Public Update" ON storage.objects FOR UPDATE TO anon, authenticated USING (bucket_id = 'course-content');
+CREATE POLICY "Public Delete" ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'course-content');

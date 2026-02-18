@@ -27,9 +27,62 @@ type CoursePlayerProps = {
     onComplete?: () => void;
     mode?: 'student' | 'preview';
     className?: string;
+    language?: string; // Nuevo prop para el idioma
 };
 
-export default function CoursePlayer({ courseId, studentId, onComplete, mode = 'student', className = '' }: CoursePlayerProps) {
+const translations: any = {
+    es: {
+        loading: "Cargando curso...",
+        no_content: "Este curso no tiene contenido asignado.",
+        module_not_found: "Módulo no encontrado.",
+        slide: "Diapositiva",
+        of: "de",
+        material: "Material",
+        open_pdf: "Abrir PDF",
+        interactive_activity: "Actividad Interactiva",
+        start: "Iniciar",
+        restart: "Reiniciar",
+        signature_title: "Firma Digital del Alumno",
+        signature_desc: "Por favor, firma en el recuadro para validar tu participación.",
+        signature_success: "Firma registrada correctamente",
+        course_approved: "¡Curso Aprobado!",
+        course_approved_desc: "Has superado satisfactoriamente todas las evaluaciones y contenidos del curso.",
+        diploma_desc: "Ya puedes descargar tu certificado de participación.",
+        download_cert: "Descargar Certificado",
+        current_module: "Módulo Actual",
+        progress: "Progreso",
+        previous: "Anterior",
+        next: "Siguiente",
+        finish: "Finalizar"
+    },
+    ht: {
+        loading: "Chaje kou...",
+        no_content: "Kou sa a pa gen kontni asiyen.",
+        module_not_found: "Modil pa jwenn.",
+        slide: "Diapozitif",
+        of: "nan",
+        material: "Materyèl",
+        open_pdf: "Louvri PDF",
+        interactive_activity: "Aktivite Enteraktif",
+        start: "Kòmanse",
+        restart: "Rekòmanse",
+        signature_title: "Siyati Dijital Elèv la",
+        signature_desc: "Tanpri, siyen nan bwat la pou valide patisipasyon ou.",
+        signature_success: "Siyati anrejistre kòrèkteman",
+        course_approved: "Kou Apwouve!",
+        course_approved_desc: "Ou te pase avèk siksè tout evalyasyon ak kontni kou a.",
+        diploma_desc: "Ou ka telechaje sètifika patisipasyon ou kounye a.",
+        download_cert: "Telechaje Sètifika",
+        current_module: "Modil aktyèl",
+        progress: "Pwogrè",
+        previous: "Anvan",
+        next: "Next",
+        finish: "Fini"
+    }
+};
+
+export default function CoursePlayer({ courseId, studentId, onComplete, mode = 'student', className = '', language = 'es' }: CoursePlayerProps) {
+    const t = translations[language] || translations.es;
     const [modules, setModules] = useState<any[]>([]);
     const [activeModuleIndex, setActiveModuleIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -100,18 +153,20 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         });
         
         // Determinar si realmente puede completar el curso
+        // El diploma se genera si el puntaje es suficiente (passed) y estamos en el último módulo.
+        // La presencia de la firma ya no bloquea la generación del diploma en la DB si el alumno aprobó.
         const isLastModule = activeModuleIndex === modules.length - 1;
-        const canComplete = roundedTotal >= minPass && isLastModule && moduleCompleted;
+        const canComplete = roundedTotal >= minPass && isLastModule;
 
         if (canComplete) {
             console.log('[CoursePlayer] COURSE COMPLETED! Total score:', roundedTotal);
             setApproved(true);
             updateEnrollmentStatus('completed', roundedTotal);
         } else {
-            setApproved(roundedTotal >= minPass); // Aprobado para mostrar UI, pero no necesariamente completado en DB
+            setApproved(roundedTotal >= minPass); // Aprobado para mostrar UI
             if (total > 0) updateEnrollmentStatus('in_progress', roundedTotal);
         }
-    }, [quizScore, scormScore, moduleCompleted, activeModuleIndex, modules.length, enrollment]);
+    }, [quizScore, scormScore, activeModuleIndex, modules.length, enrollment]);
 
     useEffect(() => {
         loadCourseStructure();
@@ -374,6 +429,19 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 onComplete();
             } else {
                 // Si no hay callback, navegar de regreso
+                // Intentamos redirigir al portal si es posible
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    try {
+                        const user = JSON.parse(userStr);
+                        if (user.companies?.slug) {
+                            window.location.href = `/portal/${user.companies.slug}`;
+                            return;
+                        }
+                    } catch (e) {
+                        console.error("Error redirecting to portal", e);
+                    }
+                }
                 window.location.href = '/admin/empresa/alumnos/cursos';
             }
         }
@@ -385,14 +453,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         }
     };
 
-    if (loading) return <div className="text-white text-center p-20">Cargando curso...</div>;
-    if (modules.length === 0) return <div className="text-white text-center p-20">Este curso no tiene contenido asignado.</div>;
+    if (loading) return <div className="text-white text-center p-20">{t.loading}</div>;
+    if (modules.length === 0) return <div className="text-white text-center p-20">{t.no_content}</div>;
 
     const currentModule = modules[activeModuleIndex];
     
     // Guard preventivo si el índice no es válido o módulos aún no cargados
     if (!currentModule) {
-        return <div className="text-white text-center p-20">Módulo no encontrado.</div>;
+        return <div className="text-white text-center p-20">{t.module_not_found}</div>;
     }
 
     const isEvaluation = currentModule.type === 'evaluation';
@@ -416,7 +484,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         <header className={`mb-8 pb-4 border-b ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
                             <div className="flex justify-between items-center gap-4">
                                 <div>
-                                    <span className="text-brand text-xs font-bold">Diapositiva {activeModuleIndex + 1} de {modules.length}</span>
+                                    <span className="text-brand text-xs font-bold">{t.slide} {activeModuleIndex + 1} {t.of} {modules.length}</span>
                                     <h1 className={`text-2xl md:text-3xl font-black mt-1 ${isLightBg ? 'text-slate-900' : 'text-white'}`}>{currentModule.title}</h1>
                                 </div>
                                 
@@ -428,7 +496,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                             className={`px-4 py-2 rounded-xl border transition-all flex items-center gap-2 text-sm font-bold ${isLightBg ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-brand/10 border-brand/20 text-white hover:bg-brand/20'}`}
                                         >
                                             <Library className="w-4 h-4" />
-                                            <span>Material ({currentModule.settings.extras.length})</span>
+                                            <span>{t.material} ({currentModule.settings.extras.length})</span>
                                         </button>
                                         
                                         <div
@@ -455,47 +523,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                         {/* CONTENIDO DEL MÓDULO */}
                         <div className="space-y-12">
-                            {/* Header de Evaluación Especial */}
-                        {isEvaluation && (
-                            <div className={`p-6 rounded-xl border mb-6 ${approved ? 'bg-brand/5 border-brand/20' : (isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10')}`}>
-                                <h3 className="text-xl font-bold mb-3" style={{ color: approved ? '#31d22d' : (isLightBg ? '#0f172a' : '#fff') }}>Evaluación Final</h3>
-                                
-                                {/* Desglose de Puntajes */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                    <div className={`p-4 rounded-xl border ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
-                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>Quiz Bruto</p>
-                                        <p className="text-2xl font-black" style={{ color: isLightBg ? '#0f172a' : '#fff' }}>{quizScore || 0}%</p>
-                                    </div>
-                                    <div className={`p-4 rounded-xl border ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
-                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>Quiz x80%</p>
-                                        <p className="text-2xl font-black text-blue-500">{Math.round((quizScore || 0) * 0.8)}%</p>
-                                    </div>
-                                    <div className={`p-4 rounded-xl border ${scormScore === 0 ? 'opacity-30' : ''} ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
-                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>{scormScore === 0 ? 'SCORM Pendiente' : 'SCORM Bruto'}</p>
-                                        <p className="text-2xl font-black" style={{ color: isLightBg ? '#0f172a' : '#fff' }}>{scormScore === 0 ? '---' : `${scormScore}%`}</p>
-                                    </div>
-                                    <div className={`p-4 rounded-xl border ${scormScore === 0 ? 'opacity-30' : ''} ${isLightBg ? 'bg-white border-black/5' : 'bg-white/5 border-white/10'}`}>
-                                        <p className="text-[10px] uppercase font-black mb-1" style={{ color: isLightBg ? '#64748b' : '#94a3b8' }}>SCORM x20%</p>
-                                        <p className="text-2xl font-black text-purple-500">{scormScore === 0 ? '---' : `${Math.round(scormScore * 0.2)}%`}</p>
-                                    </div>
-                                </div>
-
-                                {/* Total Ponderado */}
-                                <div className={`p-6 rounded-xl border-2 mb-4 ${approved ? 'bg-brand/10 border-brand' : 'bg-yellow-500/10 border-yellow-500/50'}`}>
-                                    <p className="text-xs uppercase font-black mb-2" style={{ color: approved ? '#31d22d' : '#fbbf24' }}>TOTAL PONDERADO (Req: 90%)</p>
-                                    <p className="text-5xl font-black" style={{ color: approved ? '#31d22d' : '#fbbf24' }}>
-                                        {Math.round((quizScore || 0) * 0.8 + scormScore * 0.2)}%
-                                    </p>
-                                </div>
-
-                                {!approved && (
-                                    <p className={`text-sm ${isLightBg ? 'text-slate-600' : 'text-white/60'}`}>
-                                        ⚠️ Completa todas las actividades para completar el curso. Debes obtener al menos un 90% del puntaje para aprobar.
-                                    </p>
-                                )}
-                            </div>
-                        )}
-
                             {currentModule.items && currentModule.items.map((item: ModuleItem) => (
                                 <div key={item.id}>
                                     {/* Título/Header */}
@@ -559,7 +586,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                             <iframe src={item.content?.url} className={`w-full h-[600px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
                                             <a href={item.content?.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 rounded-lg text-sm font-bold transition-all">
                                                 <FileIcon className="w-4 h-4" />
-                                                Abrir PDF
+                                                {t.open_pdf}
                                             </a>
                                         </div>
                                     )}
@@ -579,7 +606,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                     <Lock className="w-6 h-6 text-brand" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold">Actividad Interactiva</h4>
+                                                    <h4 className="font-bold">{t.interactive_activity}</h4>
                                                     <p className={`text-sm ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>SCORM</p>
                                                 </div>
                                             </div>
@@ -587,7 +614,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                 onClick={() => setScormModalItem(item)}
                                                 className="px-6 py-3 bg-brand text-black font-bold rounded-lg hover:scale-105 transition-all shadow-lg"
                                             >
-                                                {itemsCompleted.has(item.id) ? 'Reiniciar' : 'Iniciar'}
+                                                {itemsCompleted.has(item.id) ? t.restart : t.start}
                                             </button>
                                         </div>
                                     )}
@@ -601,21 +628,22 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                 courseId={courseId}
                                                 enrollmentId={enrollment?.id}
                                                 onComplete={(score, passed) => handleEvaluationItemScore(item.id, score, 'quiz', passed)}
-                                                persistScore={false}
+                                                persistScore={isEvaluation}
+                                                language={language}
                                             />
                                         </div>
                                     )}
 
-                                    {/* Firma */}
+                                    {/* Firma - Solo mostrar si se ha añadido explícitamente */}
                                     {item.type === 'signature' && (
                                         <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
-                                            <h3 className="text-xl font-bold mb-2">Firma Digital del Alumno</h3>
-                                            <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>Por favor, firma en el recuadro para validar tu participación.</p>
+                                            <h3 className="text-xl font-bold mb-2">{t.signature_title}</h3>
+                                            <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>{t.signature_desc}</p>
                                             
                                             {itemsCompleted.has(item.id) ? (
                                                 <div className="bg-brand/10 p-6 rounded-xl border border-brand/20 flex flex-col items-center gap-3">
                                                     <CheckCircle2 className="w-12 h-12 text-brand" />
-                                                    <p className="text-brand font-bold">Firma registrada correctamente</p>
+                                                    <p className="text-brand font-bold">{t.signature_success}</p>
                                                 </div>
                                             ) : (
                                                 <SignatureCanvas 
@@ -639,28 +667,15 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 <div className="w-20 h-20 bg-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(49,210,45,0.4)]">
                                     <CheckCircle2 className="w-10 h-10 text-black" />
                                 </div>
-                                <h3 className="text-3xl font-black text-brand mb-2">¡Curso Aprobado!</h3>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-8 max-w-lg mx-auto">
-                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                                        <p className="text-[10px] text-white/40 uppercase font-black mb-1">Cuestionario (80%)</p>
-                                        <p className="text-xl font-bold">{Math.round((quizScore || 0) * 0.8)}%</p>
-                                    </div>
-                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                                        <p className="text-[10px] text-white/40 uppercase font-black mb-1">SCORM (20%)</p>
-                                        <p className="text-xl font-bold">{Math.round(scormScore * 0.2)}%</p>
-                                    </div>
-                                    <div className="bg-brand/10 p-4 rounded-2xl border border-brand/20 col-span-2 md:col-span-1">
-                                        <p className="text-[10px] text-brand/60 uppercase font-black mb-1">Total Obtenido</p>
-                                        <p className="text-2xl font-black text-brand">{Math.round((quizScore || 0) * 0.8 + scormScore * 0.2)}%</p>
-                                    </div>
-                                </div>
-                                <p className="text-white/40 text-sm mt-8">Has superado el 90% requerido. Ya puedes descargar tu certificado.</p>
+                                <h3 className="text-3xl font-black text-brand mb-2">{t.course_approved}</h3>
+                                <p className="text-white/60 text-lg mt-4 font-medium">{t.course_approved_desc}</p>
+                                <p className="text-white/40 text-sm mt-2">{t.diploma_desc}</p>
                                 
                                 <button
                                     onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
-                                    className="mt-6 px-8 py-4 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                                    className="mt-8 px-10 py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-lg"
                                 >
-                                    <Download className="w-5 h-5" /> Descargar Certificado
+                                    <Download className="w-6 h-6" /> {t.download_cert}
                                 </button>
                             </motion.div>
                         )}
@@ -684,14 +699,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     {/* Info Módulo */}
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">Módulo Actual</span>
+                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.current_module}</span>
                             <span className="text-sm font-bold text-white/90 truncate max-w-[200px]">
                                 {activeModuleIndex + 1}. {currentModule?.title}
                             </span>
                         </div>
                         <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
                         <div className="flex flex-col hidden sm:flex">
-                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">Progreso</span>
+                            <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.progress}</span>
                             <span className="text-sm font-mono text-brand font-bold">
                                 {activeModuleIndex + 1}/{modules.length}
                             </span>
@@ -706,7 +721,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
                         >
                             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                            <span>Anterior</span>
+                            <span>{t.previous}</span>
                         </button>
 
                         <button
@@ -725,7 +740,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             }}
                             className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
                         >
-                            <span>{activeModuleIndex === modules.length - 1 ? 'Finalizar' : 'Siguiente'}</span>
+                            <span>{activeModuleIndex === modules.length - 1 ? t.finish : t.next}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>

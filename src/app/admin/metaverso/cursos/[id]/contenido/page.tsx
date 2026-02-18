@@ -230,7 +230,7 @@ export default function DynamicCourseEditor() {
             return;
         }
 
-        if (!confirm('¿Crear módulo de evaluación final?\n\nIncluirá:\n✓ Quiz con preguntas\n✓ Actividad SCORM\n✓ Firma digital del alumno\n✓ Generación de certificado')) return;
+        if (!confirm('¿Crear módulo de evaluación final?\n\nIncluirá:\n✓ Quiz con preguntas\n✓ Actividad SCORM\n✓ Generación de certificado\n\n(Puedes agregar la Firma Digital manualmente desde el selector de contenidos si la necesitas)')) return;
         
         setLoading(true);
         
@@ -245,7 +245,7 @@ export default function DynamicCourseEditor() {
                     min_score: courseConfig?.passing_score || 90,
                     quiz_percentage: courseConfig?.weight_quiz || 80,
                     scorm_percentage: courseConfig?.weight_scorm || 20,
-                    requires_signature: true,
+                    requires_signature: false,
                     max_attempts: 3
                 }
             };
@@ -295,16 +295,6 @@ export default function DynamicCourseEditor() {
                         ]
                     },
                     order_index: 1
-                },
-                // Item 3: Firma digital (último paso antes del certificado)
-                {
-                    module_id: newModuleId,
-                    type: 'signature',
-                    content: {
-                        title: 'Firma Digital',
-                        description: 'Firma digitalmente para validar tu participación y generar el certificado'
-                    },
-                    order_index: 2
                 }
             ];
             

@@ -338,12 +338,23 @@ export default function EmpresaAdmin() {
                                                                     if (!companyId) return;
                                                                     const { data: comp } = await supabase.from('companies').select('*').eq('id', companyId).single();
                                                                     
-                                                                    // Fetch student signature
+                                                                    // Fetch student signature and details
                                                                     const { data: studentData } = await supabase
                                                                         .from('students')
-                                                                        .select('digital_signature_url')
+                                                                        .select('digital_signature_url, age, gender, company_name, job_position')
                                                                         .eq('id', st.id)
                                                                         .single();
+
+                                                                    // Obtener nombre del cargo
+                                                                    let jobName = st.company_roles?.name || studentData?.job_position;
+                                                                    if (studentData?.job_position && !st.company_roles?.name) {
+                                                                        const { data: jobInfo } = await supabase
+                                                                            .from('job_positions')
+                                                                            .select('name_es')
+                                                                            .eq('code', studentData.job_position)
+                                                                            .single();
+                                                                        if (jobInfo) jobName = jobInfo.name_es;
+                                                                    }
 
                                                                     if (comp) setCertData({ 
                                                                         studentName: `${st.first_name} ${st.last_name}`, 
@@ -356,7 +367,11 @@ export default function EmpresaAdmin() {
                                                                             { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 }
                                                                         ].filter(s => s.url || s.name),
                                                                         studentSignature: studentData?.digital_signature_url,
-                                                                        companyLogo: comp.logo_url
+                                                                        companyLogo: comp.logo_url,
+                                                                        companyName: studentData?.company_name || comp.name,
+                                                                        jobPosition: jobName,
+                                                                        age: studentData?.age,
+                                                                        gender: studentData?.gender
                                                                     });
                                                                 }} 
                                                                 className="p-2 rounded-lg bg-brand/10 text-brand text-[10px] font-black flex items-center gap-1 border border-brand/30 hover:bg-brand hover:text-black transition-all"
@@ -679,11 +694,74 @@ export default function EmpresaAdmin() {
 
                 {showCargoManager && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
-                        <div className="glass p-10 w-full max-w-lg space-y-6">
-                            <h3 className="text-xl font-black uppercase">Gestionar Cargos</h3>
-                            <div className="flex gap-2"><input id="newCargoName" placeholder="Nueva..." className="flex-1 bg-white/5 p-3 rounded-xl text-sm" /><button onClick={async () => { const i = document.getElementById('newCargoName') as HTMLInputElement; if(!i.value || !companyId) return; const {error} = await supabase.from('company_roles').insert({ name: i.value, company_id: companyId }); if(error) alert(error.message); i.value = ""; fetchData(); }} className="bg-brand text-black px-4 rounded-xl font-black text-[10px]">Aceptar</button></div>
-                            <div className="max-h-60 overflow-auto space-y-2">{cargos.map(c => (<div key={c.id} className="flex justify-between items-center bg-white/5 p-4 rounded-xl mb-2 text-sm"><span>{c.name}</span><button onClick={async () => { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); }} className="text-red-500"><Trash2 className="w-4 h-4" /></button></div>))}</div>
-                            <button onClick={() => setShowCargoManager(false)} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px]">Cerrar</button>
+                        <div className="glass p-10 w-full max-w-2xl space-y-6">
+                            <h3 className="text-xl font-black uppercase tracking-tight text-brand">Gestionar Cargos</h3>
+                            
+                            <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
+                                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">Añadir Nuevo Cargo</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10" />
+                                    <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <textarea id="newCargoDesc" placeholder="Descripción / Tip (Español)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10" />
+                                    <textarea id="newCargoDescHT" placeholder="Descripción / Tip (Creole)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10" />
+                                </div>
+                                <button 
+                                    onClick={async () => { 
+                                        const n = document.getElementById('newCargoName') as HTMLInputElement; 
+                                        const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
+                                        const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement; 
+                                        const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement; 
+                                        
+                                        if(!n.value || !companyId) return; 
+                                        
+                                        const {error} = await supabase.from('company_roles').insert({ 
+                                            name: n.value, 
+                                            name_ht: nHT.value,
+                                            description: d.value,
+                                            description_ht: dHT.value,
+                                            company_id: companyId 
+                                        }); 
+                                        
+                                        if(error) alert(error.message); 
+                                        else {
+                                            n.value = ""; nHT.value = ""; d.value = ""; dHT.value = "";
+                                            fetchData(); 
+                                        }
+                                    }} 
+                                    className="w-full bg-brand text-black py-4 rounded-xl font-black text-xs uppercase hover:scale-[1.02] transition-all"
+                                >
+                                    Agregar Cargo
+                                </button>
+                            </div>
+
+                            <div className="max-h-60 overflow-auto space-y-2 pr-2 custom-scrollbar">
+                                {cargos.map(c => (
+                                    <div key={c.id} className="bg-white/5 p-4 rounded-xl border border-white/5">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <div>
+                                                <span className="font-bold text-sm text-white">{c.name}</span>
+                                                <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
+                                            </div>
+                                            <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="text-white/20 hover:text-red-500 transition-colors">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
+                                            <div>
+                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
+                                                <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
+                                                <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button onClick={() => setShowCargoManager(false)} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
                         </div>
                     </div>
                 )}

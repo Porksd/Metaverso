@@ -4,7 +4,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
     LogOut, BookOpen, Clock, Award, CheckCircle2,
-    X, Lock, Download, ChevronRight, Percent, Award as AwardIcon, Users
+    X, Lock, Download, ChevronRight, Percent, Award as AwardIcon, Users,
+    Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ScormPlayer from "@/components/ScormPlayer";
@@ -13,6 +14,45 @@ import CertificateCanvas from "@/components/CertificateCanvas";
 import CoursePlayer from "@/components/CoursePlayer";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
+
+const translations: any = {
+    es: {
+        welcome: "Bienvenido",
+        assigned_courses: "Cursos Asignados",
+        completed: "Completados",
+        global_avg: "Promedio Global",
+        my_training: "Mis Capacitaciones",
+        view_courses: "Vista de Cursos",
+        loading_courses: "Cargando cursos asignados...",
+        no_courses: "No tienes cursos asignados actualmente.",
+        in_progress: "En Progreso",
+        completed_course: "Curso Realizado",
+        available: "Disponible",
+        start: "Comenzar",
+        certificate: "Certificado",
+        access_desc: "Accede a tus cursos asignados y mantén tu certificación al día.",
+        collab: "Colaborador",
+        logout: "Cerrar Sesión",
+    },
+    ht: {
+        welcome: "Byenvini",
+        assigned_courses: "Kou Asiyen",
+        completed: "Konplè",
+        global_avg: "Mwayèn Global",
+        my_training: "Fòmasyon m yo",
+        view_courses: "Gade kou yo",
+        loading_courses: "Chaje kou asiyen...",
+        no_courses: "Ou pa gen okenn kou asiyen kounye a.",
+        in_progress: "Nan Pwogrè",
+        completed_course: "Kou Konplete",
+        available: "Disponib",
+        start: "Kòmanse",
+        certificate: "Sètifika",
+        access_desc: "Aksede kou ou asiyen yo epi kenbe sètifikasyon ou a jou.",
+        collab: "Kolaboratè",
+        logout: "Dekonekte",
+    }
+};
 
 export default function CoursesPage() {
     const [user, setUser] = useState<any>(null);
@@ -24,6 +64,8 @@ export default function CoursesPage() {
     const [companyInfo, setCompanyInfo] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga
+
+    const t = translations[user?.language || 'es'];
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -38,6 +80,18 @@ export default function CoursesPage() {
 
     const fetchEnrollments = async (studentId: string, clientId: string) => {
         setLoading(true);
+
+        // 0. Recargar datos del estudiante para asegurar el idioma más reciente
+        const { data: studentData } = await supabase
+            .from('students')
+            .select('*')
+            .eq('id', studentId)
+            .single();
+        
+        if (studentData) {
+            setUser(studentData);
+            localStorage.setItem("user", JSON.stringify(studentData));
+        }
 
         // 1. Obtener Info Empresa (Firmas)
         const { data: comp } = await supabase.from('companies').select('*').eq('id', clientId).single();
@@ -129,8 +183,42 @@ export default function CoursesPage() {
     }, [activeCourse]);
 
     const handleLogout = () => {
+        const user = localStorage.getItem("user");
+        let redirectUrl = "/admin/empresa/alumnos/login";
+        
+        if (user) {
+            try {
+                const parsedUser = JSON.parse(user);
+                // Si tenemos la info de la empresa y el slug, redirigimos al portal
+                if (companyInfo && companyInfo.slug) {
+                    redirectUrl = `/portal/${companyInfo.slug}`;
+                } else if (parsedUser.companies && parsedUser.companies.slug) {
+                    redirectUrl = `/portal/${parsedUser.companies.slug}`;
+                }
+            } catch (e) {
+                console.error("Error parsing user for logout redirect", e);
+            }
+        }
+
         localStorage.removeItem("user");
-        window.location.href = "/admin/empresa/alumnos/login";
+        window.location.href = redirectUrl;
+    };
+
+    const handleLanguageChange = async (newLang: string) => {
+        if (!user) return;
+        
+        const { error } = await supabase
+            .from('students')
+            .update({ language: newLang })
+            .eq('id', user.id);
+
+        if (!error) {
+            const updatedUser = { ...user, language: newLang };
+            setUser(updatedUser);
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            // Actualizar enrollments para refrescar cualquier título traducido
+            fetchEnrollments(user.id, user.client_id);
+        }
     };
 
     const handleDownloadCertificate = async (enrollment: any) => {
@@ -155,12 +243,39 @@ export default function CoursesPage() {
         // CRÍTICO: Obtener la firma digital del estudiante y otros datos de perfil
         const { data: studentData, error: studentError } = await supabase
             .from('students')
-            .select('digital_signature_url, age, gender')
+            .select('digital_signature_url, age, gender, company_name, job_position, role_id')
             .eq('id', user.id)
             .single();
 
         if (studentError) {
             console.error("Error fetching student signature:", studentError);
+        }
+
+        // Obtener nombre del cargo
+        let jobName = studentData?.job_position;
+        
+        // 1. Intentar por role_id (Cargo específico de empresa)
+        if (studentData?.role_id) {
+            const { data: roleInfo } = await supabase
+                .from('company_roles')
+                .select('name, name_ht')
+                .eq('id', studentData.role_id)
+                .single();
+            if (roleInfo) {
+                jobName = user.language === 'ht' ? roleInfo.name_ht || roleInfo.name : roleInfo.name;
+            }
+        } 
+        // 2. Si no hay role_id o falló, intentar por job_position (global code)
+        else if (studentData?.job_position) {
+            const { data: jobInfo } = await supabase
+                .from('job_positions')
+                .select('name_es, name_ht')
+                .eq('code', studentData.job_position)
+                .single();
+            
+            if (jobInfo) {
+                jobName = user.language === 'ht' ? jobInfo.name_ht || jobInfo.name_es : jobInfo.name_es;
+            }
         }
 
         const studentSignature = studentData?.digital_signature_url;
@@ -177,8 +292,10 @@ export default function CoursesPage() {
             courseName: enrollment.course.name.toUpperCase(),
             date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString(),
             signatures: sigs,
-            studentSignature: studentSignature, // ← AGREGADO
+            studentSignature: studentSignature,
             companyLogo: companyInfo.logo_url,
+            companyName: studentData?.company_name || companyInfo.name,
+            jobPosition: jobName,
             age: studentData?.age,
             gender: studentData?.gender
         });
@@ -242,6 +359,7 @@ export default function CoursesPage() {
                                                 fetchEnrollments(user.id, user.client_id);
                                             }}
                                             className="h-full"
+                                            language={user.language || 'es'}
                                         />
                                     </div>
                                 ) :
@@ -261,6 +379,7 @@ export default function CoursesPage() {
                                                         user={user}
                                                         enrollment={activeCourse}
                                                         courseConfig={activeCourse.course}
+                                                        language={user.language || 'es'}
                                                         onClose={() => {
                                                             setActiveCourse(null);
                                                             fetchEnrollments(user.id, user.client_id);
@@ -281,6 +400,7 @@ export default function CoursesPage() {
                                                         config={{ ...activeCourse.course.config, id: activeCourse.course.id, title: activeCourse.course.name }}
                                                         user={user}
                                                         currentEnrollment={activeCourse}
+                                                        language={user.language || 'es'}
                                                         onFinish={(s: number) => {
                                                             fetchEnrollments(user.id, user.client_id);
                                                         }}
@@ -296,6 +416,7 @@ export default function CoursesPage() {
                                             user={user}
                                             enrollment={activeCourse}
                                             courseConfig={activeCourse.course}
+                                            language={user.language || 'es'}
                                             onClose={() => {
                                                 setActiveCourse(null);
                                                 fetchEnrollments(user.id, user.client_id);
@@ -309,6 +430,7 @@ export default function CoursesPage() {
                                             config={{ ...activeCourse.course.config, id: activeCourse.course.id, title: activeCourse.course.name }}
                                             user={user}
                                             currentEnrollment={activeCourse}
+                                            language={user.language || 'es'}
                                             onFinish={async (finalScore: number) => {
                                                 // Refrescar enrollments
                                                 await fetchEnrollments(user.id, user.client_id);
@@ -339,18 +461,31 @@ export default function CoursesPage() {
                     <img src="/logo-metaverso.png" alt="Logo" className="h-8 w-auto hover:opacity-80 transition-opacity" />
                     <div className="h-6 w-px bg-white/10 mx-2 hidden md:block" />
                     <div className="hidden md:flex flex-col">
-                        <span className="text-[10px] text-white/40 uppercase tracking-widest font-black">Colaborador</span>
+                        <span className="text-[10px] text-white/40 uppercase tracking-widest font-black">{t?.collab}</span>
                         <span className="text-sm font-bold text-brand">{companyInfo?.name || "Empresa"}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
+                    {/* Selector de Idioma */}
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 backdrop-blur-md">
+                        <Globe className="w-4 h-4 text-white/40" />
+                        <select 
+                            value={user.language || 'es'} 
+                            onChange={(e) => handleLanguageChange(e.target.value)}
+                            className="bg-transparent border-none text-xs font-bold uppercase tracking-widest outline-none cursor-pointer text-white/70 hover:text-white transition-colors"
+                        >
+                            <option value="es" className="bg-[#111]">ES</option>
+                            <option value="ht" className="bg-[#111]">HT</option>
+                        </select>
+                    </div>
+
                     <div className="flex flex-col items-end mr-2">
                         <span className="text-sm font-black tracking-tight">{user.first_name} {user.last_name}</span>
                         <span className="text-xs text-white/40 font-mono">{user.rut}</span>
                     </div>
                     <button onClick={handleLogout} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/10 group">
-                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        <LogOut title={t?.logout} className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                     </button>
                 </div>
             </header>
@@ -366,20 +501,20 @@ export default function CoursesPage() {
                             {companyInfo?.name} Training Hub
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
-                            Bienvenido,<br />
+                            {t?.welcome},<br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-blue-400">{user.first_name}</span>
                         </h2>
                         <p className="text-white/50 text-lg max-w-2xl font-medium leading-relaxed">
-                            Accede a tus cursos asignados y mantén tu certificación al día.
+                            {t?.access_desc}
                         </p>
                     </motion.div>
                 </section>
 
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                        { label: "Cursos Asignados", value: enrollments.length, icon: BookOpen },
-                        { label: "Completados", value: completedCount, icon: CheckCircle2 },
-                        { label: "Promedio Global", value: `${avgScore}%`, icon: Percent },
+                        { label: t?.assigned_courses, value: enrollments.length, icon: BookOpen },
+                        { label: t?.completed, value: completedCount, icon: CheckCircle2 },
+                        { label: t?.global_avg, value: `${avgScore}%`, icon: Percent },
                     ].map((stat, i) => (
                         <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }}
                             className="glass p-8 rounded-3xl flex items-center justify-between group transition-all duration-500 relative overflow-hidden bg-white/[0.02]">
@@ -397,18 +532,18 @@ export default function CoursesPage() {
                     <div className="flex items-center justify-between">
                         <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
                             <div className="w-2.5 h-8 bg-brand rounded-full shadow-[0_0_15px_#31D22D]" />
-                            Mis Capacitaciones
+                            {t?.my_training}
                         </h3>
-                        <span className="text-xs text-white/30 font-bold uppercase tracking-widest">Vista de Cursos</span>
+                        <span className="text-xs text-white/30 font-bold uppercase tracking-widest">{t?.view_courses}</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
-                        {loading && <div className="text-white/40 animate-pulse col-span-full">Cargando cursos asignados...</div>}
+                        {loading && <div className="text-white/40 animate-pulse col-span-full">{t?.loading_courses}</div>}
 
                         {!loading && enrollments.length === 0 && (
                             <div className="col-span-full py-12 text-center border border-white/10 rounded-3xl bg-white/[0.02]">
                                 <BookOpen className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                                <p className="text-white/40 font-medium">No tienes cursos asignados actualmente.</p>
+                                <p className="text-white/40 font-medium">{t?.no_courses}</p>
                             </div>
                         )}
 
@@ -443,14 +578,14 @@ export default function CoursesPage() {
                                                         <span className="text-brand font-black text-lg">{enrollment.partial_progress}%</span>
                                                     </div>
                                                 </div>
-                                                <span className="text-brand/80 font-bold text-xs">En Progreso</span>
+                                                <span className="text-brand/80 font-bold text-xs">{t?.in_progress}</span>
                                             </div>
                                         ) : (
                                             <BookOpen className="w-16 h-16 text-white/10 group-hover:text-brand/30 transition-all duration-700 group-hover:scale-110" />
                                         )}
 
                                         <div className={`mt-3 text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-[0.15em] border z-10 backdrop-blur-md ${isCompleted ? 'bg-brand/20 text-brand border-brand/40 shadow-[0_5px_15px_rgba(49,210,45,0.2)]' : enrollment.partial_progress > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/5 text-white/40 border-white/10'}`}>
-                                            {isCompleted ? 'Curso Realizado' : enrollment.partial_progress > 0 ? `${enrollment.partial_progress}% Completado` : 'Disponible'}
+                                            {isCompleted ? t?.completed_course : enrollment.partial_progress > 0 ? `${enrollment.partial_progress}% ${t?.completed}` : t?.available}
                                         </div>
                                     </div>
 
@@ -470,14 +605,14 @@ export default function CoursesPage() {
                                                     onClick={() => setActiveCourse(enrollment)}
                                                     className="flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20"
                                                 >
-                                                    Comenzar <ChevronRight className="w-4 h-4" />
+                                                    {t?.start} <ChevronRight className="w-4 h-4" />
                                                 </button>
                                             ) : (
                                                 <button
                                                     onClick={() => handleDownloadCertificate(enrollment)}
                                                     className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs"
                                                 >
-                                                    <Award className="w-5 h-5" /> Certificado
+                                                    <Award className="w-5 h-5" /> {t?.certificate}
                                                 </button>
                                             )}
                                         </div>

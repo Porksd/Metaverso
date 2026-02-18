@@ -15,9 +15,34 @@ interface ScormPlayerProps {
     courseConfig?: any;
     onClose: () => void;
     onComplete?: (scormScore: number) => void;
+    language?: string; // New prop for language
 }
 
-export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, courseId, courseConfig, onClose, onComplete }: ScormPlayerProps) {
+const translations: any = {
+    es: {
+        vr_mode: "Modo Aprendizaje VR",
+        exit: "Salir (tu progreso se guardará automáticamente)",
+        scorm_finished: "¡SCORM Finalizado!",
+        max_score: "con el puntaje máximo",
+        hits: (score: number) => `con ${score}% de aciertos`,
+        raw_score: "Puntaje Bruto",
+        weight: "Ponderación (20%)",
+        finish_btn: "Finalizar y volver al curso"
+    },
+    ht: {
+        vr_mode: "Mod Aprantisaj VR",
+        exit: "Soti (pwogrè ou ap sove otomatikman)",
+        scorm_finished: "SCORM Fini!",
+        max_score: "ak nòt maksimòm nan",
+        hits: (score: number) => `avèk ${score}% siksè`,
+        raw_score: "Nòt brit",
+        weight: "Pwa (20%)",
+        finish_btn: "Fini epi tounen nan kou a"
+    }
+};
+
+export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, courseId, courseConfig, onClose, onComplete, language = "es" }: ScormPlayerProps) {
+    const t = translations[language] || translations.es;
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [showCompletionModal, setShowCompletionModal] = useState(false);
     const [scormScore, setScormScore] = useState(0);
@@ -86,7 +111,7 @@ export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, 
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-white">{courseTitle}</h3>
-                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Modo Aprendizaje VR</p>
+                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">{t.vr_mode}</p>
                     </div>
                 </div>
 
@@ -94,7 +119,7 @@ export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, 
                     <button
                         onClick={onClose}
                         className="p-2.5 hover:bg-white/5 rounded-xl text-white/60 hover:text-white transition-colors border border-white/10"
-                        title="Salir (tu progreso se guardará automáticamente)"
+                        title={t.exit}
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -132,18 +157,18 @@ export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, 
                                     <CheckCircle2 className="w-10 h-10 text-brand" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black mb-2">¡SCORM Finalizado!</h3>
+                                    <h3 className="text-2xl font-black mb-2">{t.scorm_finished}</h3>
                                     <p className="text-white/60 text-sm">
-                                        Has realizado la actividad {scormScore === 100 ? 'con el puntaje máximo' : `con ${scormScore}% de aciertos`}.
+                                        Has realizado la actividad {scormScore === 100 ? t.max_score : t.hits(scormScore)}.
                                     </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 w-full">
                                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                                        <p className="text-xs text-white/40 uppercase tracking-widest font-black mb-1">Puntaje Bruto</p>
+                                        <p className="text-xs text-white/40 uppercase tracking-widest font-black mb-1">{t.raw_score}</p>
                                         <p className="text-3xl font-black text-brand">{scormScore}%</p>
                                     </div>
                                     <div className="bg-brand/10 border border-brand/30 rounded-2xl p-4">
-                                        <p className="text-xs text-brand/70 uppercase tracking-widest font-black mb-1">Ponderación (20%)</p>
+                                        <p className="text-xs text-brand/70 uppercase tracking-widest font-black mb-1">{t.weight}</p>
                                         <p className="text-3xl font-black text-brand">{Math.round(scormScore * 0.2)}%</p>
                                     </div>
                                 </div>
@@ -154,7 +179,7 @@ export default function ScormPlayer({ courseUrl, courseTitle, user, enrollment, 
                                     onClick={handleExit}
                                     className="w-full py-4 bg-brand text-black font-black uppercase text-sm rounded-xl hover:bg-white transition-all flex items-center justify-center gap-2"
                                 >
-                                    Finalizar y volver al curso <ArrowRight className="w-5 h-5" />
+                                    {t.finish_btn} <ArrowRight className="w-5 h-5" />
                                 </button>
                             </div>
                         </motion.div>

@@ -8,8 +8,10 @@ interface CertificateCanvasProps {
     courseName: string;
     date: string;
     signatures: { url: string; name: string; role: string }[];
-    studentSignature?: string; // New prop for student signature
-    companyLogo?: string; // New prop for company logo
+    studentSignature?: string; 
+    companyLogo?: string; 
+    companyName?: string;
+    jobPosition?: string;
     age?: string | number;
     gender?: string;
     onReady: (blob: Blob) => void;
@@ -21,8 +23,10 @@ export default function CertificateCanvas({
     courseName,
     date,
     signatures,
-    studentSignature, // Should be passed from parent
+    studentSignature, 
     companyLogo,
+    companyName,
+    jobPosition,
     age,
     gender,
     onReady
@@ -56,7 +60,7 @@ export default function CertificateCanvas({
             const startY = 200;
             let currentY = startY;
             
-            // 0. LOGO DE LA EMPRESA (CENTRADO ARRIBA)
+            // 0. LOGO DE LA EMPRESA (CENTRADO ARRIBA - MÁS GRANDE)
             if (companyLogo) {
                 try {
                     const logoImg = new Image();
@@ -67,69 +71,103 @@ export default function CertificateCanvas({
                         logoImg.onerror = resolve;
                     });
                     
-                    const logoWidth = 250;
-                    const logoHeight = 120;
-                    ctx.drawImage(logoImg, (canvas.width / 2) - (logoWidth / 2), 50, logoWidth, logoHeight);
+                    const logoWidth = 450;
+                    const logoHeight = 180;
+                    ctx.drawImage(logoImg, (canvas.width / 2) - (logoWidth / 2), 40, logoWidth, logoHeight);
                 } catch (e) {
                     console.error("Error loading company logo", e);
                 }
             }
 
-            // 1. TÍTULO: CERTIFICADO DE PARTICIPACIÓN
+            currentY = 260;
+
+            // 1. TÍTULO: CERTIFICADO DE PARTICIPACIÓN (MÁS PEQUEÑO Y REFINADO)
             ctx.fillStyle = "#000000";
-            ctx.font = "bold 70px 'Arial', sans-serif";
+            ctx.font = "bold 50px 'Arial', sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("CERTIFICADO DE PARTICIPACIÓN", canvas.width / 2, currentY);
+            currentY += 30;
+            
+            // Línea decorativa bajo el título
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2 - 400, currentY);
+            ctx.lineTo(canvas.width / 2 + 400, currentY);
+            ctx.strokeStyle = "#EEEEEE";
+            ctx.lineWidth = 2;
+            ctx.stroke();
             currentY += 100;
 
             // 2. Párrafo de certificación
-            ctx.font = "28px 'Arial', sans-serif";
+            ctx.font = "24px 'Arial', sans-serif";
             ctx.textAlign = "left";
-            const text1 = `Se certifica que a ${studentName}, de la empresa [Empresa], con el cargo de`;
+            ctx.fillStyle = "#333333";
+            const text1 = `Se certifica que ${studentName}, de la empresa ${companyName || '[Empresa]'}, con el cargo de`;
             ctx.fillText(text1, marginLeft, currentY);
-            currentY += 50;
-            const text2 = `[Cargo], ha completado el contenido ${courseName}.`;
+            currentY += 45;
+            const text2 = `${jobPosition || '[Cargo]'}, ha completado el contenido del curso:`;
             ctx.fillText(text2, marginLeft, currentY);
-            currentY += 80;
+            currentY += 60;
+            
+            ctx.font = "bold 34px 'Arial', sans-serif";
+            ctx.fillStyle = "#000000";
+            ctx.fillText(courseName, marginLeft, currentY);
+            currentY += 100;
 
             // 3. "Los siguientes son los datos obtenidos..."
+            ctx.font = "italic 22px 'Arial', sans-serif";
+            ctx.fillStyle = "#666666";
             ctx.fillText("Los siguientes son los datos obtenidos en su participación:", marginLeft, currentY);
-            currentY += 60;
+            currentY += 50;
 
-            // 4. Datos tabulados
+            // 4. Datos tabulados (MÁS ORDENADOS CON FONDO TENUE)
+            ctx.fillStyle = "#F9F9F9";
+            ctx.fillRect(marginLeft - 20, currentY - 30, canvas.width - (marginLeft * 2) + 40, 360);
+            
             ctx.font = "24px 'Arial', sans-serif";
-            const dataLeft = marginLeft + 50;
-            ctx.fillText(`Nombre          : ${studentName}`, dataLeft, currentY);
-            currentY += 45;
-            ctx.fillText(`RUT             : ${rut}`, dataLeft, currentY);
-            currentY += 45;
-            ctx.fillText(`% Obtenido      : 100%`, dataLeft, currentY);
-            currentY += 45;
-            ctx.fillText(`Género          : ${gender || ''}`, dataLeft, currentY);
-            currentY += 45;
-            ctx.fillText(`Edad            : ${age || ''}`, dataLeft, currentY);
-            currentY += 45;
-            ctx.fillText(`Fecha de emisión : ${date}`, dataLeft, currentY);
+            ctx.fillStyle = "#000000";
+            const dataLeft = marginLeft + 40;
+            const dataValueX = dataLeft + 250;
+            
+            const drawDataRow = (label: string, value: string) => {
+                ctx.fillStyle = "#666666";
+                ctx.font = "22px 'Arial', sans-serif";
+                ctx.fillText(label, dataLeft, currentY);
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 22px 'Arial', sans-serif";
+                ctx.fillText(`: ${value}`, dataValueX, currentY);
+                currentY += 45;
+            };
+
+            drawDataRow("Nombre", studentName);
+            drawDataRow("RUT", rut);
+            drawDataRow("Cargo", jobPosition || 'No especificado');
+            drawDataRow("% Obtenido", "100%");
+            drawDataRow("Género", gender || 'No especificado');
+            drawDataRow("Edad", age ? `${age} años` : 'No especificada');
+            drawDataRow("Fecha de emisión", date);
+            
             currentY += 80;
 
             // 5. CONSENTIMIENTO
-            ctx.font = "bold 30px 'Arial', sans-serif";
+            ctx.font = "bold 26px 'Arial', sans-serif";
             ctx.fillText("CONSENTIMIENTO", marginLeft, currentY);
-            currentY += 50;
+            currentY += 45;
 
             // 6. Texto de consentimiento
-            ctx.font = "22px 'Arial', sans-serif";
-            const consentText1 = "Declaro que he sido informado/a de la finalidad y condiciones bajo las cuales se tratarán mis datos";
-            ctx.fillText(consentText1, marginLeft, currentY);
-            currentY += 35;
-            const consentText2 = "personales, y autorizo expresamente a MetaversOtec a utilizar mi RUT y demás información señalada";
-            ctx.fillText(consentText2, marginLeft, currentY);
-            currentY += 35;
-            const consentText3 = "para los fines descritos.";
-            ctx.fillText(consentText3, marginLeft, currentY);
-            currentY += 80;
+            ctx.font = "18px 'Arial', sans-serif";
+            ctx.fillStyle = "#444444";
+            const consentLines = [
+                "Declaro que he sido informado/a de la finalidad y condiciones bajo las cuales se tratarán mis datos",
+                "personales, y autorizo expresamente a MetaversOtec a utilizar mi RUT y demás información señalada",
+                "para los fines descritos."
+            ];
+            consentLines.forEach(line => {
+                ctx.fillText(line, marginLeft, currentY);
+                currentY += 30;
+            });
+            currentY += 60;
 
-            // 7. Firma del alumno (CENTRADA)
+            // 7. Firma del alumno (CENTRAD)
             if (studentSignature) {
                 try {
                     const stuSigImg = new Image();
@@ -140,48 +178,48 @@ export default function CertificateCanvas({
                         stuSigImg.onerror = resolve;
                     });
 
-                    const sigWidth = 300;
-                    const sigHeight = 150;
+                    const sigWidth = 350;
+                    const sigHeight = 175;
                     const centerX = canvas.width / 2;
                     
-                    // Dibujar firma centrada
                     ctx.drawImage(stuSigImg, centerX - sigWidth/2, currentY, sigWidth, sigHeight);
-                    currentY += sigHeight + 20;
+                    currentY += sigHeight + 10;
 
                     // Línea de firma (centrada)
                     ctx.beginPath();
-                    ctx.moveTo(centerX - 175, currentY);
-                    ctx.lineTo(centerX + 175, currentY);
+                    ctx.moveTo(centerX - 200, currentY);
+                    ctx.lineTo(centerX + 200, currentY);
                     ctx.strokeStyle = "#000000";
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    currentY += 35;
+                    currentY += 30;
 
                     // Etiqueta "Firma:" (centrada)
                     ctx.font = "bold 16px Arial";
                     ctx.fillStyle = "#000000";
                     ctx.textAlign = "center";
                     ctx.fillText("Firma:", centerX, currentY);
-                    currentY += 40;
+                    currentY += 35;
                     
                     // Confirmación de consentimiento (centrado)
-                    ctx.font = "18px Arial";
-                    const checkMark = "✓";
-                    ctx.fillText(checkMark, centerX - 120, currentY);
-                    ctx.font = "16px Arial";
-                    ctx.fillText("Acepto el tratamiento de datos personales", centerX - 90, currentY);
-                    currentY += 80;
+                    ctx.font = "italic 14px Arial";
+                    ctx.fillText("✓ Acepto el tratamiento de mis datos personales según lo indicado anteriormente", centerX, currentY);
+                    currentY += 80; // Espacio reducido
                 } catch (e) {
-                    console.error("Error drawing signature", e);
+                    console.error("Error drawing student signature", e);
                 }
             }
 
-            // 9. Firmas de la empresa (abajo)
-            currentY = 1600;
+            // 9. Firmas de la empresa (abajo - POSICIÓN DINÁMICA)
+            const signatureStartY = Math.max(currentY + 60, 1600);
+            currentY = signatureStartY;
+            
             const sigSpacing = canvas.width / (signatures.length + 1);
             
             for (let i = 0; i < signatures.length; i++) {
                 const sig = signatures[i];
+                if (!sig.name && !sig.url) continue;
+
                 const xPos = sigSpacing * (i + 1);
 
                 if (sig.url) {
@@ -194,8 +232,8 @@ export default function CertificateCanvas({
                             img.onerror = resolve;
                         });
 
-                        const w = 250;
-                        const h = 120;
+                        const w = 220;
+                        const h = 100;
                         ctx.drawImage(img, xPos - w/2, currentY, w, h);
                     } catch (e) {
                         console.error("Error drawing signature", e);
@@ -203,19 +241,21 @@ export default function CertificateCanvas({
                 }
 
                 // Línea y nombre
-                const lineY = currentY + 140;
+                const lineY = currentY + 120;
                 ctx.beginPath();
-                ctx.moveTo(xPos - 120, lineY);
-                ctx.lineTo(xPos + 120, lineY);
-                ctx.strokeStyle = "#000000";
+                ctx.moveTo(xPos - 130, lineY);
+                ctx.lineTo(xPos + 130, lineY);
+                ctx.strokeStyle = "#DDDDDD";
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                ctx.font = "22px 'Arial', sans-serif";
+                ctx.font = "bold 20px 'Arial', sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(sig.name, xPos, lineY + 30);
-                ctx.font = "18px 'Arial', sans-serif";
-                ctx.fillText(sig.role, xPos, lineY + 55);
+                ctx.fillStyle = "#000000";
+                ctx.fillText(sig.name || "", xPos, lineY + 30);
+                ctx.font = "16px 'Arial', sans-serif";
+                ctx.fillStyle = "#666666";
+                ctx.fillText(sig.role || "", xPos, lineY + 50);
             }
 
             // Generate Blob
