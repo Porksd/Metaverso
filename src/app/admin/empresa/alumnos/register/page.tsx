@@ -221,8 +221,6 @@ export default function StudentRegister() {
                 .insert(studentData)
                 .select()
                 .single();
-                .select()
-                .single();
 
             if (error) throw error;
 
