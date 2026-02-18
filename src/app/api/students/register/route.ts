@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
             age,
             company_name,
             client_id, // Add support for direct company linking
+            role_id,   // Support for company-specific roles
             position,
             digital_signature_url,
             language = 'es'
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
                 age: age || null,
                 company_name: company_name || null,
                 client_id: client_id || null, // Insert FK
+                role_id: role_id || null,     // Specific role FK
                 position: position || null,
                 job_position: position || null,
                 digital_signature_url: digital_signature_url || null,

@@ -143,9 +143,21 @@ export default function StudentRegister() {
     };
 
     const handleCompanyChange = (value: string) => {
-        setFormData({ ...formData, company: value });
+        const selectedCompany = companies.find(c => c.name_es === value);
+        setFormData({ 
+            ...formData, 
+            company: value,
+            client_id: selectedCompany ? selectedCompany.id : formData.client_id
+        });
         setShowOtherCompany(value === 'OTRA');
     };
+
+    // Reload job positions when client_id changes to show company-specific roles
+    useEffect(() => {
+        if (formData.client_id) {
+            loadJobPositions();
+        }
+    }, [formData.client_id]);
 
     const handleJobChange = async (code: string) => {
         setFormData({ ...formData, job_position: code });

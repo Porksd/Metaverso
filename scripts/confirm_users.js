@@ -1,7 +1,10 @@
 // Script to confirm all users in Supabase Auth
-// Usage: node App/scripts/confirm_users.js
+// Usage: node scripts/confirm_users.js
 
 require('dotenv').config({ path: '.env.local' });
+if (!require('fs').existsSync('.env.local')) {
+    require('dotenv').config({ path: '../.env.local' });
+}
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
