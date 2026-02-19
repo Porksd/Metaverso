@@ -573,7 +573,7 @@ export default function CoursesPage() {
                                                 <div className="w-14 h-14 bg-yellow-500/20 rounded-full flex items-center justify-center border border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
                                                     <ClipboardList className="w-8 h-8 text-yellow-500" />
                                                 </div>
-                                                <span className="text-yellow-500 font-black text-xl tracking-tighter">PENDIENTE ENCUESTA</span>
+                                                <span className="text-yellow-500 font-black text-xl tracking-tighter">FALTA ENCUESTA</span>
                                             </div>
                                         ) : enrollment.partial_progress > 0 ? (
                                             <div className="flex flex-col items-center gap-2 relative z-10">
@@ -592,8 +592,8 @@ export default function CoursesPage() {
                                             <BookOpen className="w-16 h-16 text-white/10 group-hover:text-brand/30 transition-all duration-700 group-hover:scale-110" />
                                         )}
 
-                                        <div className={`mt-3 text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-[0.15em] border z-10 backdrop-blur-md ${isCompleted ? 'bg-brand/20 text-brand border-brand/40 shadow-[0_5px_15px_rgba(49,210,45,0.2)]' : enrollment.partial_progress > 0 ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40' : 'bg-white/5 text-white/40 border-white/10'}`}>
-                                            {isCompleted ? t?.completed_course : enrollment.partial_progress > 0 ? `${enrollment.partial_progress}% ${t?.completed}` : t?.available}
+                                        <div className={`mt-3 text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-[0.15em] border z-10 backdrop-blur-md ${isCompleted ? 'bg-brand/20 text-brand border-brand/40 shadow-[0_5px_15px_rgba(49,210,45,0.2)]' : surveyPending ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/40' : enrollment.partial_progress > 0 ? 'bg-brand/10 text-brand/60 border-brand/20' : 'bg-white/5 text-white/40 border-white/10'}`}>
+                                            {isCompleted ? t?.completed_course : surveyPending ? 'ENCUESTA PENDIENTE' : enrollment.partial_progress > 0 ? `${enrollment.partial_progress}% ${t?.completed}` : t?.available}
                                         </div>
                                     </div>
 
@@ -610,9 +610,11 @@ export default function CoursesPage() {
                                         <div className="flex gap-3">
                                             <button
                                                 onClick={() => setActiveCourse(enrollment)}
-                                                className={`flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 ${!isCompleted ? 'bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}
+                                                className={`flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 ${!isCompleted && !surveyPending ? 'bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20' : surveyPending ? 'bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-[1.03] shadow-yellow-500/20' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}
                                             >
-                                                {!isCompleted ? (
+                                                {surveyPending ? (
+                                                    <>IR A ENCUESTA <ClipboardList className="w-4 h-4" /></>
+                                                ) : !isCompleted ? (
                                                     <>{t?.start} <ChevronRight className="w-4 h-4" /></>
                                                 ) : (
                                                     <>{t?.restart || 'Ver Contenido'} <BookOpen className="w-4 h-4" /></>

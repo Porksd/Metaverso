@@ -285,12 +285,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
 
         try {
-            // Verificamos si hay encuestas obligatorias pendientes en el módulo actual
-            const currentModule = modules[activeModuleIndex];
-            const hasPendingSurvey = currentModule?.items?.some((item: any) => 
-                item.type === 'survey' && 
-                item.content?.is_mandatory && 
-                !itemsCompleted.has(item.id)
+            // Verificamos si hay encuestas obligatorias pendientes en CUALQUIER módulo
+            // No solo en el actual, para evitar saltos entre módulos
+            const hasPendingSurvey = modules.some((mod: any) => 
+                mod.items?.some((item: any) => 
+                    item.type === 'survey' && 
+                    item.content?.is_mandatory && 
+                    !itemsCompleted.has(item.id)
+                )
             );
 
             // Si intentamos completar pero falto la encuesta, guardamos como in_progress + scores temporales
@@ -359,7 +361,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
             return changed ? newSet : prev;
         });
-    }, [modules, enrollment?.quiz_score, enrollment?.survey_completed]);
+    }, [modules, enrollment?.quiz_score, enrollment?.survey_completed, activeModuleIndex]); // Update itemsCompleted on module change too
 
     const handleItemCompletion = (itemId: string) => {
         console.log(`[CoursePlayer] Item completado: ${itemId}`);
