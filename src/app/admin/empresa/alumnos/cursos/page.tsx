@@ -97,10 +97,20 @@ export default function CoursesPage() {
         const { data: comp } = await supabase.from('companies').select('*').eq('id', clientId).single();
         if (comp) setCompanyInfo(comp);
 
-        // 2. Obtener Inscripciones
+        // 2. Obtener Inscripciones con estructura profunda para verificar encuestas
         const { data: enrData } = await supabase
             .from('enrollments')
-            .select('*, courses(*, course_modules(*))')
+            .select(`
+                *, 
+                courses(
+                    *, 
+                    course_modules(
+                        module:modules(
+                            items:module_items(*)
+                        )
+                    )
+                )
+            `)
             .eq('student_id', studentId);
 
         if (enrData) {
@@ -568,7 +578,21 @@ export default function CoursesPage() {
 
                         {enrollments.map((enrollment, i) => {
                             const isCompleted = enrollment.status === 'completed';
-                            const surveyPending = enrollment.last_exam_passed && !enrollment.survey_completed;
+                            
+                            // Verificar si existe contenido de encuesta obligatoria
+                            // Nota: Requiere que fetchEnrollments traiga items:module_items(*)
+                            const courseModules = enrollment.courses?.course_modules || [];
+                            const hasMandatorySurvey = courseModules.some((cm: any) => 
+                                cm.module?.items?.some((item: any) => 
+                                    item.type === 'survey' && 
+                                    item.content?.is_mandatory
+                                )
+                            );
+
+                            // Si 'last_exam_passed' no existe (undefined) pero status es completed, asumimos que NO hay examen pendiente
+                            // PERO si hay encuesta obligatoria y no está completada, es pending survey.
+                            const surveyPending = ((enrollment.last_exam_passed === true) || (isCompleted && hasMandatorySurvey)) && hasMandatorySurvey && !enrollment.survey_completed;
+                            
                             const course = enrollment.course;
 
                             return (

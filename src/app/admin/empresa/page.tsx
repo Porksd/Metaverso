@@ -593,7 +593,8 @@ export default function EmpresaAdmin() {
                                                 <button
                                                     onClick={async () => {
                                                         // Resetear TODOS los campos de progreso para asegurar un reinicio limpio
-                                                        const { data: updatedEnrollment, error } = await supabase.from('enrollments').upsert({
+                                                        // NOTA: Los campos de examen y encuesta se agregan condicionalmente si existen en la BD
+                                                        const updateData: any = {
                                                             student_id: isEditing.id,
                                                             course_id: course.id,
                                                             status: 'not_started',
@@ -601,14 +602,31 @@ export default function EmpresaAdmin() {
                                                             quiz_score: 0,
                                                             scorm_score: 0,
                                                             current_module_index: 0,
-                                                            progress: null, // Reset to null to trigger dynamic calc or fresh start
+                                                            progress: null,
                                                             completed_at: null,
-                                                            last_exam_passed: null,
-                                                            last_exam_score: null,
-                                                            survey_completed: false,
                                                             current_attempt: 0,
                                                             max_attempts: 3
-                                                        }, { onConflict: 'student_id,course_id' }).select();
+                                                        };
+
+                                                        // Intentar el upsert básico primero
+                                                        const { data: updatedEnrollment, error } = await supabase
+                                                            .from('enrollments')
+                                                            .upsert(updateData, { onConflict: 'student_id,course_id' })
+                                                            .select();
+                                                        
+                                                        // Si falla, intentamos actualizar los campos nuevos por separado (si existen)
+                                                        if (!error && updatedEnrollment?.[0]?.id) {
+                                                            // Intentar limpiar los campos nuevos en una llamada separada que puede fallar silenciosamente
+                                                            try {
+                                                                await supabase.from('enrollments').update({
+                                                                    last_exam_passed: null,
+                                                                    last_exam_score: null,
+                                                                    survey_completed: false
+                                                                }).eq('id', updatedEnrollment[0].id);
+                                                            } catch (e) {
+                                                                console.warn("Columnas de examen no existen aún, saltando reset extendido");
+                                                            }
+                                                        }
 
                                                         if (error) alert("Error: " + error.message);
                                                         else {
