@@ -97,24 +97,18 @@ export default function CoursesPage() {
         const { data: comp } = await supabase.from('companies').select('*').eq('id', clientId).single();
         if (comp) setCompanyInfo(comp);
 
-        // 2. Obtener Inscripciones con estructura profunda para verificar encuestas
-        const { data: enrData } = await supabase
+                        // 2. Obtener Inscripciones (Revertido a query simple para evitar errores de relación profunda)
+        const { data: enrData, error: enrError } = await supabase
             .from('enrollments')
-            .select(`
-                *, 
-                courses(
-                    *, 
-                    course_modules(
-                        module:modules(
-                            items:module_items(*)
-                        )
-                    )
-                )
-            `)
+            .select('*, courses(*, course_modules(*))') // course_modules solo trae IDs
             .eq('student_id', studentId);
 
+        if (enrError) {
+            console.error("Error fetching enrollments:", enrError);
+        }
+
         if (enrData) {
-            // Para cada enrollment, obtener su progreso
+            // Para cada enrollment, obtener su progreso y verificar encuestas manualmente
             const processedPromises = enrData.map(async (e) => {
                 const { data: progress } = await supabase
                     .from('course_progress')
@@ -126,6 +120,29 @@ export default function CoursesPage() {
                 const scormProgress = progress?.find((p: any) => p.module_type === 'scorm');
                 const scormCompleted = !!scormProgress?.completed_at;
                 const quizCompleted = e.status === 'completed';
+
+                // Verificar manualmente si hay encuesta obligatoria
+                // Solo necesitamos verificar esto si el curso está completado o el examen aprobado
+                let hasMandatorySurvey = false;
+                if (quizCompleted || e.last_exam_passed) {
+                    try {
+                        // Obtener los modules IDs
+                        const moduleIds = e.courses?.course_modules?.map((cm: any) => cm.module_id) || [];
+                        if (moduleIds.length > 0) {
+                            const { data: modItemsData } = await supabase
+                                .from('module_items')
+                                .select('type, content')
+                                .in('module_id', moduleIds)
+                                .eq('type', 'survey');
+                            
+                            if (modItemsData) {
+                                hasMandatorySurvey = modItemsData.some((item: any) => item.content?.is_mandatory);
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Error checking survey status:", err);
+                    }
+                }
 
                 // Calcular progreso parcial
                 let partialProgress = e.progress || 0; // Prioritize DB progress
@@ -151,7 +168,8 @@ export default function CoursesPage() {
                     course: e.courses,
                     config: e.courses?.config,
                     scorm_completed: scormCompleted,
-                    partial_progress: Math.round(partialProgress)
+                    partial_progress: Math.round(partialProgress),
+                    has_mandatory_survey: hasMandatorySurvey // Propagated from manual check
                 };
             });
 
@@ -579,15 +597,8 @@ export default function CoursesPage() {
                         {enrollments.map((enrollment, i) => {
                             const isCompleted = enrollment.status === 'completed';
                             
-                            // Verificar si existe contenido de encuesta obligatoria
-                            // Nota: Requiere que fetchEnrollments traiga items:module_items(*)
-                            const courseModules = enrollment.courses?.course_modules || [];
-                            const hasMandatorySurvey = courseModules.some((cm: any) => 
-                                cm.module?.items?.some((item: any) => 
-                                    item.type === 'survey' && 
-                                    item.content?.is_mandatory
-                                )
-                            );
+                            // Verificar si existe contenido de encuesta obligatoria (YA CALCULADO EN FETCH)
+                            const hasMandatorySurvey = enrollment.has_mandatory_survey;
 
                             // Si 'last_exam_passed' no existe (undefined) pero status es completed, asumimos que NO hay examen pendiente
                             // PERO si hay encuesta obligatoria y no está completada, es pending survey.
