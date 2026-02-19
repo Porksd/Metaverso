@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { 
     Plus, Trash2, Edit2, Search, ClipboardList, 
-    X, Check, ShieldAlert, BarChart3, Globe 
+    X, Check, ShieldAlert, BarChart3, Globe, Settings 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
