@@ -168,14 +168,30 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         // El diploma se genera si el puntaje es suficiente (passed) y estamos en el último módulo.
         // La presencia de la firma ya no bloquea la generación del diploma en la DB si el alumno aprobó.
         const isLastModule = activeModuleIndex === modules.length - 1;
-        const canComplete = roundedTotal >= minPass && isLastModule;
+        
+        // Verificación CRÍTICA de encuestas pendientes antes de permitir la APROBACIÓN VISUAL
+        const hasPendingSurvey = modules.some((mod: any) => 
+            mod.items?.some((item: any) => 
+                item.type === 'survey' && 
+                item.content?.is_mandatory && 
+                !itemsCompleted.has(item.id)
+            )
+        );
+
+        const canComplete = roundedTotal >= minPass && isLastModule && !hasPendingSurvey;
+        
+        console.log('[CoursePlayer] Can Complete Check:', { roundedTotal, minPass, isLastModule, hasPendingSurvey });
 
         if (canComplete) {
             console.log('[CoursePlayer] COURSE COMPLETED! Total score:', roundedTotal);
             setApproved(true);
             updateEnrollmentStatus('completed', roundedTotal);
         } else {
-            setApproved(roundedTotal >= minPass); // Aprobado para mostrar UI
+            // Solo mostramos aprobado si pasó el mínimo, pero bloqueamos el status 'completed' si falta encuesta
+            // Si falta encuesta, setApproved DEBE ser false para no mostrar el botón de descarga
+            const visualApproval = roundedTotal >= minPass && !hasPendingSurvey;
+            setApproved(visualApproval); 
+            
             if (total > 0) updateEnrollmentStatus('in_progress', roundedTotal);
         }
     }, [quizScore, scormScore, activeModuleIndex, modules.length, enrollment]);
@@ -185,8 +201,9 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     }, [courseId]);
 
     useEffect(() => {
+        // Reset completion status when changing module
+        // setItemsCompleted(new Set()); // NO LIMPIAR itemsCompleted para mantener el estado entre módulos
         setModuleCompleted(false);
-        setItemsCompleted(new Set());
         stopAllMedia();
         setExtrasOpen(false);
     }, [activeModuleIndex]);
