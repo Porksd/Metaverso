@@ -71,7 +71,23 @@ export default function MetaversoLanding() {
                             </div>
                         </motion.div>
                     </Link>
-                </div>
+                    <Link href="/admin/metaverso/encuestas" className="group">
+                        <motion.div whileHover={{ scale: 1.02 }} className="glass p-8 h-full border-brand/20 hover:border-brand transition-all space-y-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Briefcase className="w-24 h-24" />
+                            </div>
+                            <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center border border-brand/20">
+                                <Briefcase className="w-7 h-7 text-brand" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-black uppercase tracking-tight">Gestión de Encuestas</h3>
+                                <p className="text-white/40 text-xs leading-relaxed">Creación de plantillas maestras de satisfacción y feedback.</p>
+                            </div>
+                            <div className="flex items-center gap-2 text-brand text-[10px] font-black uppercase tracking-widest pt-4">
+                                Administrar <ArrowRight className="w-3 h-3" />
+                            </div>
+                        </motion.div>
+                    </Link>                </div>
 
                 <footer className="text-center pt-10">
                     <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">© 2026 Metaverso Otec S.A. - All Systems Operational</p>

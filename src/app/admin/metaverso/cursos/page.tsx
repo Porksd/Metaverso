@@ -248,6 +248,12 @@ export default function CoursesAdmin() {
                         <Plus className="w-4 h-4" /> Nuevo Curso
                     </button>
                     <button
+                        onClick={() => router.push('/admin/metaverso/encuestas')}
+                        className="bg-white/5 border border-white/10 text-white/40 px-6 py-3 rounded-xl font-black uppercase text-[10px] hover:bg-brand/10 hover:text-brand transition-all flex items-center gap-2"
+                    >
+                        <Settings className="w-4 h-4" /> Gestión de Encuestas
+                    </button>
+                    <button
                         onClick={handleLogout}
                         className="bg-white/5 border border-white/10 text-white/40 px-4 py-3 rounded-xl font-bold uppercase text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-2"
                     >

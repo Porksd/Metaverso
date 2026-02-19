@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Plus, Trash2, GripVertical,
     Video, Image as ImageIcon, FileText, Gamepad2, PenTool, Music,
-    ArrowUp, ArrowDown, Settings, Building2, X, Check
+    ArrowUp, ArrowDown, Settings, Building2, X, Check, ClipboardList
 } from "lucide-react";
 import ContentUploader from "@/components/ContentUploader";
 import QuizBuilder from "@/components/QuizBuilder";
@@ -19,7 +19,7 @@ import {
 // Simple helper types
 type ModuleItem = {
     id?: string;
-    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header';
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
     content: any;
     order_index: number;
 };
@@ -57,6 +57,10 @@ export default function DynamicCourseEditor() {
     // Drag & Drop State
     const [draggedItem, setDraggedItem] = useState<{ moduleId: string, index: number } | null>(null);
     const [dragOverItem, setDragOverItem] = useState<{ moduleId: string, index: number } | null>(null);
+
+    // Survey Picker State
+    const [surveyTemplates, setSurveyTemplates] = useState<any[]>([]);
+    const [showSurveyPicker, setShowSurveyPicker] = useState(false);
 
     // Drag Handlers
     const handleDragStart = (e: React.DragEvent, moduleId: string, index: number) => {
@@ -112,7 +116,13 @@ export default function DynamicCourseEditor() {
     useEffect(() => {
         fetchData();
         fetchCompanies();
+        fetchSurveyTemplates();
     }, []);
+
+    const fetchSurveyTemplates = async () => {
+        const { data } = await supabase.from('surveys').select('id, title_es').order('title_es');
+        if (data) setSurveyTemplates(data);
+    };
 
     const fetchCompanies = async () => {
         const { data } = await supabase.from('companies').select('id, name').order('name');
@@ -423,6 +433,12 @@ export default function DynamicCourseEditor() {
     const handleAddItem = async (resoureType: ModuleItem['type']) => {
         if (activeModuleIndex === null) return;
 
+        if (resoureType === 'survey') {
+            setShowSurveyPicker(true);
+            setShowItemTypeSelector(false);
+            return;
+        }
+
         const module = modules[activeModuleIndex];
         if (!module.id) return;
 
@@ -452,6 +468,34 @@ export default function DynamicCourseEditor() {
             // Refresh data to be safe with IDs and ordering
             fetchData();
             setShowItemTypeSelector(false);
+            setActiveModuleIndex(null);
+        }
+    };
+
+    const handleSelectSurvey = async (survey: any) => {
+        if (activeModuleIndex === null) return;
+        const module = modules[activeModuleIndex];
+        if (!module.id) return;
+
+        const newItemPayload = {
+            module_id: module.id,
+            type: 'survey',
+            content: { 
+                survey_id: survey.id, 
+                title_es: survey.title_es,
+                is_mandatory: true 
+            },
+            order_index: module.items.length
+        };
+
+        const res = await fetch('/api/admin/content', {
+            method: 'POST',
+            body: JSON.stringify({ table: 'module_items', data: newItemPayload })
+        });
+
+        if (res.ok) {
+            fetchData();
+            setShowSurveyPicker(false);
             setActiveModuleIndex(null);
         }
     };
@@ -1297,6 +1341,7 @@ export default function DynamicCourseEditor() {
                                                     {item.type === 'scorm' && <GripVertical className="w-3 h-3" />}
                                                     {item.type === 'quiz' && <PenTool className="w-3 h-3" />}
                                                     {item.type === 'genially' && <Gamepad2 className="w-3 h-3" />}
+                                                    {item.type === 'survey' && <ClipboardList className="w-3 h-3" />}
                                                     {item.type} Component
                                                 </span>
                                                 <button onClick={() => {
@@ -1390,6 +1435,58 @@ export default function DynamicCourseEditor() {
                                                             💡 <span className="font-bold">Nota:</span> La firma digital se captura usando canvas HTML5 y se almacena como imagen en la base de datos. 
                                                             Se incluye automáticamente en el certificado PDF junto con las firmas de la empresa.
                                                         </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Survey Configuration */}
+                                            {item.type === 'survey' && (
+                                                <div className="p-6 bg-brand/5 border-2 border-brand/20 rounded-xl space-y-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <h4 className="font-black text-brand text-lg flex items-center gap-2 italic">
+                                                                <ClipboardList className="w-5 h-5" />
+                                                                ENCUESTA: {item.content.title_es}
+                                                            </h4>
+                                                            <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mt-1">Configuración en este curso</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">{item.content.is_mandatory ? 'OBLIGATORIA' : 'OPCIONAL'}</span>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const mIdx = modules.findIndex(m => m.id === module.id);
+                                                                    handleUpdateItemContent(mIdx, iIdx, { is_mandatory: !item.content.is_mandatory });
+                                                                }}
+                                                                className={`w-12 h-6 rounded-full transition-all relative ${item.content.is_mandatory ? 'bg-brand' : 'bg-white/10'}`}
+                                                            >
+                                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${item.content.is_mandatory ? 'left-7' : 'left-1'}`} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={async () => {
+                                                                const mIdx = modules.findIndex(m => m.id === module.id);
+                                                                await fetch('/api/admin/content', {
+                                                                    method: 'PUT',
+                                                                    body: JSON.stringify({ 
+                                                                        table: 'module_items', 
+                                                                        id: item.id, 
+                                                                        data: { content: item.content } 
+                                                                    })
+                                                                });
+                                                                alert('✅ Configuración de encuesta guardada');
+                                                            }}
+                                                            className="flex-1 py-3 bg-brand/10 text-brand rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand hover:text-black transition-all border border-brand/20"
+                                                        >
+                                                            Guardar Cambios
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => router.push('/admin/metaverso/encuestas')}
+                                                            className="px-6 py-3 bg-white/5 text-white/40 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-all border border-white/10"
+                                                        >
+                                                            Editar Plantilla
+                                                        </button>
                                                     </div>
                                                 </div>
                                             )}
@@ -1518,6 +1615,7 @@ export default function DynamicCourseEditor() {
                                 { id: 'scorm', label: "Paquete SCORM", icon: GripVertical }, // Icon placeholder
                                 { id: 'quiz', label: "Quiz / Eval", icon: PenTool },
                                 { id: 'signature', label: "Firma Alumno", icon: PenTool }, // Reusing PenTool or maybe another icon
+                                { id: 'survey', label: "Encuesta", icon: ClipboardList },
                             ].map((type) => (
                                 <button
                                     key={type.id}
@@ -1526,6 +1624,38 @@ export default function DynamicCourseEditor() {
                                 >
                                     <type.icon className="w-8 h-8 opacity-50 group-hover:opacity-100" />
                                     <span className="text-xs font-black uppercase text-center">{type.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Survey Picker Modal */}
+            {showSurveyPicker && (
+                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="glass p-8 w-full max-w-xl rounded-3xl border-white/10">
+                        <div className="flex justify-between items-center mb-8">
+                            <h3 className="text-xl font-black uppercase tracking-tight italic">Seleccionar <span className="text-brand">Plantilla de Encuesta</span></h3>
+                            <button onClick={() => { setShowSurveyPicker(false); setActiveModuleIndex(null); }} className="p-2 hover:bg-white/10 rounded-full"><Plus className="w-5 h-5 rotate-45" /></button>
+                        </div>
+
+                        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                            {surveyTemplates.length === 0 ? (
+                                <div className="text-center py-10 text-white/20">No hay encuestas creadas. Ve a Gestión de Encuestas primero.</div>
+                            ) : surveyTemplates.map((survey) => (
+                                <button
+                                    key={survey.id}
+                                    onClick={() => handleSelectSurvey(survey)}
+                                    className="w-full p-6 bg-white/5 hover:bg-brand/10 border border-white/5 hover:border-brand/40 rounded-2xl flex items-center justify-between group transition-all"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+                                            <ClipboardList className="w-5 h-5 text-brand" />
+                                        </div>
+                                        <div className="text-left font-bold text-sm group-hover:text-brand transition-colors">{survey.title_es}</div>
+                                    </div>
+                                    <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-brand transition-all" />
                                 </button>
                             ))}
                         </div>

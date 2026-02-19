@@ -12,11 +12,12 @@ import VideoPlayer, { VideoPlayerRef } from "./VideoPlayer";
 import SignatureCanvas from "./SignatureCanvas";
 import QuizEngine from "./QuizEngine";
 import ScormPlayer from "./ScormPlayer";
+import SurveyEngine from "./SurveyEngine";
 
 // Types
 type ModuleItem = {
     id: string;
-    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header';
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
     content: any;
     order_index: number;
 };
@@ -53,7 +54,12 @@ const translations: any = {
         progress: "Progreso",
         previous: "Anterior",
         next: "Siguiente",
-        finish: "Finalizar"
+        finish: "Finalizar",
+        survey_title: "Encuesta de Satisfacción",
+        survey_desc: "Tu opinión es muy importante para nosotros.",
+        survey_submit: "Enviar Encuesta",
+        survey_thanks: "¡Muchas gracias por tu feedback!",
+        survey_prerequisite: "Debes completar la encuesta obligatoria para descargar tu certificado."
     },
     ht: {
         loading: "Chaje kou...",
@@ -77,7 +83,12 @@ const translations: any = {
         progress: "Pwogrè",
         previous: "Anvan",
         next: "Next",
-        finish: "Fini"
+        finish: "Fini",
+        survey_title: "Sondaj Satisfaksyon",
+        survey_desc: "Opinyon ou trè enpòtan pou nou.",
+        survey_submit: "Voye Sondaj",
+        survey_thanks: "Mèsi anpil pou feedback ou!",
+        survey_prerequisite: "Ou dwe manyen sondaj obligatwa a pou telechaje sètifika ou."
     }
 };
 
@@ -375,6 +386,13 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             // - genially (15s timer o interacción)
             // - quiz (onComplete)
             // - signature (onSave)
+            // - survey (onComplete)
+            if (item.type === 'survey') {
+                const isMandatory = item.content?.is_mandatory;
+                if (!isMandatory) return false;
+                return !itemsCompleted.has(item.id);
+            }
+
             return !itemsCompleted.has(item.id);
         });
         
@@ -634,6 +652,19 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         </div>
                                     )}
 
+                                    {/* Survey */}
+                                    {item.type === 'survey' && (
+                                        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden mt-6">
+                                            <SurveyEngine 
+                                                surveyId={item.content?.survey_id} 
+                                                studentId={studentId}
+                                                enrollmentId={enrollment?.id}
+                                                onComplete={() => handleItemCompletion(item.id)}
+                                                language={language as any}
+                                            />
+                                        </div>
+                                    )}
+
                                     {/* Firma - Solo mostrar si se ha añadido explícitamente */}
                                     {item.type === 'signature' && (
                                         <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
@@ -671,12 +702,21 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 <p className="text-white/60 text-lg mt-4 font-medium">{t.course_approved_desc}</p>
                                 <p className="text-white/40 text-sm mt-2">{t.diploma_desc}</p>
                                 
-                                <button
-                                    onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
-                                    className="mt-8 px-10 py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-lg"
-                                >
-                                    <Download className="w-6 h-6" /> {t.download_cert}
-                                </button>
+                                {moduleCompleted ? (
+                                    <button
+                                        onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
+                                        className="mt-8 px-10 py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-lg"
+                                    >
+                                        <Download className="w-6 h-6" /> {t.download_cert}
+                                    </button>
+                                ) : (
+                                    <div className="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl flex flex-col items-center gap-2">
+                                        <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                            <Library className="w-5 h-5 text-yellow-500" />
+                                        </div>
+                                        <p className="text-yellow-500 text-sm font-bold">{t.survey_prerequisite}</p>
+                                    </div>
+                                )}
                             </motion.div>
                         )}
                 </div>

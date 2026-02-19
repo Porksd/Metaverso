@@ -491,6 +491,12 @@ export default function MetaversoAdmin() {
                     >
                         Gestión de Participantes
                     </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/encuestas')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
+                    >
+                        Gestión de Encuestas
+                    </button>
                 </div>
 
                 {view === 'companies' ? (
