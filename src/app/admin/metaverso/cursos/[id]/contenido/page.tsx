@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Plus, Trash2, GripVertical,
     Video, Image as ImageIcon, FileText, Gamepad2, PenTool, Music,
-    ArrowUp, ArrowDown, Settings, Building2, X, Check, ClipboardList
+    ArrowUp, ArrowDown, Settings, Building2, X, Check, ClipboardList, ArrowRight
 } from "lucide-react";
 import ContentUploader from "@/components/ContentUploader";
 import QuizBuilder from "@/components/QuizBuilder";
