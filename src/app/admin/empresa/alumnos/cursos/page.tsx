@@ -435,13 +435,32 @@ export default function CoursesPage() {
                                                 // Refrescar enrollments
                                                 await fetchEnrollments(user.id, user.client_id);
 
-                                                // Si aprobó (>60%), descargar certificado automáticamente
+                                                // Si aprobó (>60%), verificar si hay encuestas pendientes antes de descargar
                                                 if (finalScore >= 60) {
-                                                    setTimeout(() => {
+                                                    setTimeout(async () => {
                                                         // Buscar el enrollment actualizado
-                                                        const updatedEnrollment = enrollments.find(e => e.course.id === activeCourse.course.id);
+                                                        const { data: updatedEnrollment, error } = await supabase
+                                                            .from('enrollments')
+                                                            .select('*, courses(*, course_modules(module:modules(items:module_items(*))))')
+                                                            .eq('id', activeCourse.id)
+                                                            .single();
+                                                        
                                                         if (updatedEnrollment) {
-                                                            handleDownloadCertificate(updatedEnrollment);
+                                                            // Verificar si hay alguna encuesta obligatoria pendiente
+                                                            const hasPendingSurvey = updatedEnrollment.courses?.course_modules?.some((cm: any) => 
+                                                                cm.module?.items?.some((item: any) => 
+                                                                    item.type === 'survey' && 
+                                                                    item.content?.is_mandatory && 
+                                                                    !updatedEnrollment.survey_completed
+                                                                )
+                                                            );
+
+                                                            // Solo descargar si NO hay encuesta pendiente
+                                                            if (!hasPendingSurvey) {
+                                                                handleDownloadCertificate(updatedEnrollment);
+                                                            } else {
+                                                                console.log("Certificado pendiente de encuesta");
+                                                            }
                                                         }
                                                     }, 1500);
                                                 }
@@ -621,7 +640,7 @@ export default function CoursesPage() {
                                                 )}
                                             </button>
                                             
-                                            {isCompleted && (
+                                            {isCompleted && !surveyPending && (
                                                 <button
                                                     onClick={() => handleDownloadCertificate(enrollment)}
                                                     className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
