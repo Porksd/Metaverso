@@ -59,3 +59,12 @@ CREATE POLICY "survey_responses_all_admin" ON survey_responses FOR ALL USING (tr
 COMMENT ON TABLE surveys IS 'Master templates for surveys';
 COMMENT ON TABLE survey_questions IS 'Questions associated with a survey template';
 COMMENT ON TABLE survey_responses IS 'Student responses to surveys';
+
+-- 6. Add partial progress support to enrollments table
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS survey_completed BOOLEAN DEFAULT false;
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS last_exam_score INTEGER;
+ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS last_exam_passed BOOLEAN;
+
+COMMENT ON COLUMN enrollments.survey_completed IS 'Tracks if the mandatory survey for this course/enrollment was completed';
+COMMENT ON COLUMN enrollments.last_exam_score IS 'Temporary storage for exam score while survey is pending';
+COMMENT ON COLUMN enrollments.last_exam_passed IS 'Temporary storage for exam pass status while survey is pending';

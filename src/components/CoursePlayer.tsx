@@ -105,6 +105,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     const [scormModalItem, setScormModalItem] = useState<ModuleItem | null>(null);
     const [enrollment, setEnrollment] = useState<any>(null);
     const [extrasOpen, setExtrasOpen] = useState(false);
+    const [surveyDone, setSurveyDone] = useState(false);
 
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
     const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
@@ -256,6 +257,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     if (data.quiz_score !== undefined && data.quiz_score !== null) setQuizScore(data.quiz_score);
                     if (data.scorm_score !== undefined && data.scorm_score !== null) setScormScore(data.scorm_score);
 
+                    // Si hay scores temporales (porque faltaba la encuesta), restaurarlos
+                    if (data.last_exam_score !== undefined && data.last_exam_score !== null) {
+                        setQuizScore(data.last_exam_score);
+                    }
+                    if (data.survey_completed) {
+                        setSurveyDone(true);
+                    }
+
                     // Si no hay scores detallados todavía, pero hay un best_score (migración vieja), lo usamos de base para el quiz
                     if (!data.quiz_score && data.best_score && !data.scorm_score) {
                         setQuizScore(data.best_score);
@@ -276,19 +285,33 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
 
         try {
+            // Si intentamos completar pero falto la encuesta, guardamos como in_progress + scores temporales
+            const finalStatus = (status === 'completed' && !moduleCompleted) ? 'in_progress' : status;
+
             const updatePayload: any = { 
-                status, 
+                status: finalStatus, 
                 best_score: totalScore,
                 quiz_score: quizScore,
                 scorm_score: scormScore,
-                completed_at: status === 'completed' ? new Date().toISOString() : null
+                completed_at: finalStatus === 'completed' ? new Date().toISOString() : enrollment.completed_at
             };
+
+            // Guardar scores temporales si está aprobado pero bloqueado por encuesta
+            if (status === 'completed' && !moduleCompleted) {
+                updatePayload.last_exam_score = quizScore;
+                updatePayload.last_exam_passed = true;
+            } else if (finalStatus === 'completed') {
+                // Si ya completó todo, limpiar scores temporales
+                updatePayload.last_exam_score = null;
+                updatePayload.last_exam_passed = null;
+                updatePayload.survey_completed = true;
+            }
 
             await supabase
                 .from('enrollments')
                 .update(updatePayload)
                 .eq('id', enrollment.id);
-            console.log("CoursePlayer: Enrollment status updated with scores:", { status, totalScore, quizScore, scormScore });
+            console.log("CoursePlayer: Enrollment status updated with scores:", { status: finalStatus, totalScore, quizScore, scormScore });
         } catch (err) {
             console.error("Error updating enrollment status:", err);
         }
@@ -659,7 +682,17 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                 surveyId={item.content?.survey_id} 
                                                 studentId={studentId}
                                                 enrollmentId={enrollment?.id}
-                                                onComplete={() => handleItemCompletion(item.id)}
+                                                onComplete={() => {
+                                                    handleItemCompletion(item.id);
+                                                    setSurveyDone(true);
+                                                    // Forzar guardado inmediato si ya estaba aprobado
+                                                    if (approved) {
+                                                        const quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+                                                        const scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+                                                        const total = (quizScore! * quizWeight) + (scormScore * scormWeight);
+                                                        updateEnrollmentStatus('completed', Math.round(total));
+                                                    }
+                                                }}
                                                 language={language as any}
                                             />
                                         </div>
