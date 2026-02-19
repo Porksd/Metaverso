@@ -5,7 +5,7 @@ import Image from "next/image";
 import {
     LogOut, BookOpen, Clock, CheckCircle2, Award,
     X, Lock, Download, ChevronRight, Percent, Award as AwardIcon, Users,
-    Globe
+    Globe, ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ScormPlayer from "@/components/ScormPlayer";
@@ -549,6 +549,7 @@ export default function CoursesPage() {
 
                         {enrollments.map((enrollment, i) => {
                             const isCompleted = enrollment.status === 'completed';
+                            const surveyPending = enrollment.last_exam_passed && !enrollment.survey_completed;
                             const course = enrollment.course;
 
                             return (
@@ -557,7 +558,7 @@ export default function CoursesPage() {
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.15 }}
-                                    className={`glass group rounded-[2.5rem] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5 active:scale-[0.98] ${isCompleted ? 'border-brand/40 bg-brand/[0.02]' : 'hover:border-white/20'}`}
+                                    className={`glass group rounded-[2.5rem] overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/5 active:scale-[0.98] ${isCompleted ? 'border-brand/40 bg-brand/[0.02]' : surveyPending ? 'border-yellow-500/40 bg-yellow-500/[0.02]' : 'hover:border-white/20'}`}
                                 >
                                     <div className="h-44 bg-white/[0.03] relative flex flex-col items-center justify-center border-b border-white/5 group-hover:bg-white/[0.05] transition-all">
                                         {isCompleted ? (
@@ -566,6 +567,13 @@ export default function CoursesPage() {
                                                     <CheckCircle2 className="w-8 h-8 text-brand" />
                                                 </div>
                                                 <span className="text-brand font-black text-xl tracking-tighter">NOTA: {enrollment.best_score}%</span>
+                                            </div>
+                                        ) : surveyPending ? (
+                                            <div className="flex flex-col items-center gap-2 relative z-10">
+                                                <div className="w-14 h-14 bg-yellow-500/20 rounded-full flex items-center justify-center border border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+                                                    <ClipboardList className="w-8 h-8 text-yellow-500" />
+                                                </div>
+                                                <span className="text-yellow-500 font-black text-xl tracking-tighter">PENDIENTE ENCUESTA</span>
                                             </div>
                                         ) : enrollment.partial_progress > 0 ? (
                                             <div className="flex flex-col items-center gap-2 relative z-10">
@@ -600,17 +608,21 @@ export default function CoursesPage() {
                                         </div>
 
                                         <div className="flex gap-3">
-                                            {!isCompleted ? (
-                                                <button
-                                                    onClick={() => setActiveCourse(enrollment)}
-                                                    className="flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20"
-                                                >
-                                                    {t?.start} <ChevronRight className="w-4 h-4" />
-                                                </button>
-                                            ) : (
+                                            <button
+                                                onClick={() => setActiveCourse(enrollment)}
+                                                className={`flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 ${!isCompleted ? 'bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}
+                                            >
+                                                {!isCompleted ? (
+                                                    <>{t?.start} <ChevronRight className="w-4 h-4" /></>
+                                                ) : (
+                                                    <>{t?.restart || 'Ver Contenido'} <BookOpen className="w-4 h-4" /></>
+                                                )}
+                                            </button>
+                                            
+                                            {isCompleted && (
                                                 <button
                                                     onClick={() => handleDownloadCertificate(enrollment)}
-                                                    className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs"
+                                                    className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
                                                 >
                                                     <Award className="w-5 h-5" /> {t?.certificate}
                                                 </button>

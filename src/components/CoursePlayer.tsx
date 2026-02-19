@@ -285,8 +285,16 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
 
         try {
+            // Verificamos si hay encuestas obligatorias pendientes en el módulo actual
+            const currentModule = modules[activeModuleIndex];
+            const hasPendingSurvey = currentModule?.items?.some((item: any) => 
+                item.type === 'survey' && 
+                item.content?.is_mandatory && 
+                !itemsCompleted.has(item.id)
+            );
+
             // Si intentamos completar pero falto la encuesta, guardamos como in_progress + scores temporales
-            const finalStatus = (status === 'completed' && !moduleCompleted) ? 'in_progress' : status;
+            const finalStatus = (status === 'completed' && hasPendingSurvey) ? 'in_progress' : status;
 
             const updatePayload: any = { 
                 status: finalStatus, 
@@ -297,9 +305,10 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             };
 
             // Guardar scores temporales si está aprobado pero bloqueado por encuesta
-            if (status === 'completed' && !moduleCompleted) {
+            if (status === 'completed' && hasPendingSurvey) {
                 updatePayload.last_exam_score = quizScore;
                 updatePayload.last_exam_passed = true;
+                updatePayload.survey_completed = false;
             } else if (finalStatus === 'completed') {
                 // Si ya completó todo, limpiar scores temporales
                 updatePayload.last_exam_score = null;
@@ -311,7 +320,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 .from('enrollments')
                 .update(updatePayload)
                 .eq('id', enrollment.id);
-            console.log("CoursePlayer: Enrollment status updated with scores:", { status: finalStatus, totalScore, quizScore, scormScore });
+            console.log("CoursePlayer: Enrollment status updated with scores:", { status: finalStatus, totalScore, quizScore, scormScore, hasPendingSurvey });
         } catch (err) {
             console.error("Error updating enrollment status:", err);
         }
@@ -320,6 +329,37 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     useEffect(() => {
         fetchEnrollment();
     }, [studentId, courseId, mode]);
+
+    useEffect(() => {
+        if (!modules || !enrollment) return;
+
+        // Auto-completar items conocidos basándose en la base de datos
+        setItemsCompleted(prev => {
+            const newSet = new Set(prev);
+            let changed = false;
+
+            modules.forEach((mod: any) => {
+                mod.items?.forEach((item: any) => {
+                    // Si es un quiz y ya tiene puntaje de aprobación
+                    if (item.type === 'quiz' && enrollment.quiz_score >= (mod.settings?.min_score || 60)) {
+                        if (!newSet.has(item.id)) {
+                            newSet.add(item.id);
+                            changed = true;
+                        }
+                    }
+                    // Si es una encuesta y ya está marcada como completada
+                    if (item.type === 'survey' && enrollment.survey_completed) {
+                        if (!newSet.has(item.id)) {
+                            newSet.add(item.id);
+                            changed = true;
+                        }
+                    }
+                });
+            });
+
+            return changed ? newSet : prev;
+        });
+    }, [modules, enrollment?.quiz_score, enrollment?.survey_completed]);
 
     const handleItemCompletion = (itemId: string) => {
         console.log(`[CoursePlayer] Item completado: ${itemId}`);
