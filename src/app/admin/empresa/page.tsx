@@ -594,7 +594,7 @@ export default function EmpresaAdmin() {
                                                     onClick={async () => {
                                                         // Resetear TODOS los campos de progreso para asegurar un reinicio limpio
                                                         // NOTA: Los campos de examen y encuesta se agregan condicionalmente si existen en la BD
-                                                        const updateData: any = {
+                                                        const baseUpdateData: any = {
                                                             student_id: isEditing.id,
                                                             course_id: course.id,
                                                             status: 'not_started',
@@ -602,19 +602,36 @@ export default function EmpresaAdmin() {
                                                             quiz_score: 0,
                                                             scorm_score: 0,
                                                             current_module_index: 0,
-                                                            progress: null,
                                                             completed_at: null,
                                                             current_attempt: 0,
                                                             max_attempts: 3
                                                         };
 
-                                                        // Intentar el upsert básico primero
-                                                        const { data: updatedEnrollment, error } = await supabase
+                                                        let updatedEnrollment = null;
+                                                        let error = null;
+
+                                                        // PRIMER INTENTO: Upsert COMPLETO (Ideal)
+                                                        // Incluye 'progress' si existe
+                                                        const { data: res1, error: err1 } = await supabase
                                                             .from('enrollments')
-                                                            .upsert(updateData, { onConflict: 'student_id,course_id' })
+                                                            .upsert({ ...baseUpdateData, progress: 0 }, { onConflict: 'student_id,course_id' })
                                                             .select();
                                                         
-                                                        // Si falla, intentamos actualizar los campos nuevos por separado (si existen)
+                                                        if (!err1) {
+                                                            updatedEnrollment = res1;
+                                                        } else {
+                                                            console.warn("Error en upsert completo (quizás falte columna progress):", err1.message);
+                                                            // SEGUNDO INTENTO: Upsert DEGRADADO (Si falla progress)
+                                                            const { data: res2, error: err2 } = await supabase
+                                                                .from('enrollments')
+                                                                .upsert(baseUpdateData, { onConflict: 'student_id,course_id' })
+                                                                .select();
+                                                            
+                                                            updatedEnrollment = res2;
+                                                            error = err2;
+                                                        }
+                                                        
+                                                        // Si logramos hacer el upsert básico, intentar limpiar columnas nuevas
                                                         if (!error && updatedEnrollment?.[0]?.id) {
                                                             // Intentar limpiar los campos nuevos en una llamada separada que puede fallar silenciosamente
                                                             try {
