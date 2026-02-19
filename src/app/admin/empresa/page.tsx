@@ -592,18 +592,32 @@ export default function EmpresaAdmin() {
                                                 </div>
                                                 <button
                                                     onClick={async () => {
-                                                        const { error } = await supabase.from('enrollments').upsert({
+                                                        // Resetear TODOS los campos de progreso para asegurar un reinicio limpio
+                                                        const { data: updatedEnrollment, error } = await supabase.from('enrollments').upsert({
                                                             student_id: isEditing.id,
                                                             course_id: course.id,
                                                             status: 'not_started',
                                                             best_score: 0,
+                                                            quiz_score: 0,
+                                                            scorm_score: 0,
+                                                            current_module_index: 0,
+                                                            progress: null, // Reset to null to trigger dynamic calc or fresh start
+                                                            completed_at: null,
+                                                            last_exam_passed: null,
+                                                            last_exam_score: null,
+                                                            survey_completed: false,
                                                             current_attempt: 0,
                                                             max_attempts: 3
-                                                        }, { onConflict: 'student_id,course_id' });
+                                                        }, { onConflict: 'student_id,course_id' }).select();
 
                                                         if (error) alert("Error: " + error.message);
                                                         else {
-                                                            alert(`Curso ${course.name} asignado.`);
+                                                            // Si estamos reiniciando, limpiar también logs detallados
+                                                            if (isAssigned && updatedEnrollment?.[0]?.id) {
+                                                                await supabase.from('course_progress').delete().eq('enrollment_id', updatedEnrollment[0].id);
+                                                            }
+
+                                                            alert(`Curso ${course.name} ${isAssigned ? 'reiniciado' : 'asignado'}.`);
                                                             fetchData(); // Refresh to show updated status
                                                         }
                                                     }}

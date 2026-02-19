@@ -322,6 +322,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 scorm_score: scormScore,
                 completed_at: finalStatus === 'completed' ? new Date().toISOString() : enrollment.completed_at
             };
+            
+            // Asegurar que el progress siempre se actualice al final
+            if (status === 'completed') {
+                updatePayload.progress = 100;
+            }
 
             // Guardar scores temporales si está aprobado pero bloqueado por encuesta
             if (status === 'completed' && hasPendingSurvey) {
@@ -494,8 +499,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         try {
             const targetId = enrollment?.id;
             if (targetId) {
+                // Calcular porcentaje de progreso basado en total de módulos
+                const progressPercent = modules.length > 0 ? Math.round((index / modules.length) * 100) : 0;
+
                 // Si estamos avanzando desde el módulo 0 y el status es 'not_started', actualizar a 'in_progress'
-                const updatePayload: any = { current_module_index: index };
+                const updatePayload: any = { 
+                    current_module_index: index, 
+                    progress: progressPercent 
+                };
                 
                 if (enrollment?.status === 'not_started' && index > 0) {
                     updatePayload.status = 'in_progress';
