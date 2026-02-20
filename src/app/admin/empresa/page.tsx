@@ -83,16 +83,13 @@ export default function EmpresaAdmin() {
             if (stError) console.error("Error fetching students:", stError);
             setStudents(stData || []);
 
-            // Fetch company-specific + global roles (company_id IS NULL)
-            const { data: cgCompany } = await supabase
+            // Fetch ALL company roles (global + company-specific)
+            const { data: cgData } = await supabase
                 .from('company_roles')
                 .select('*')
-                .eq('company_id', companyId);
-            const { data: cgGlobal } = await supabase
-                .from('company_roles')
-                .select('*')
-                .is('company_id', null);
-            setCargos([...(cgGlobal || []), ...(cgCompany || [])]);
+                .or(`company_id.eq.${companyId},company_id.is.null`)
+                .order('name');
+            setCargos(cgData || []);
 
             // Fetch ONLY assigned courses for this company
             const { data: assignedData, error: assignedError } = await supabase

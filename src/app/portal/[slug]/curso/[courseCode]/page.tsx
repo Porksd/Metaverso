@@ -3,8 +3,41 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info } from "lucide-react";
+import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown } from "lucide-react";
 import SignatureCanvas from "@/components/SignatureCanvas";
+
+// ── Chilean RUT Validator ──
+function cleanRut(rut: string): string {
+    return rut.replace(/[.\-\s]/g, '').toUpperCase();
+}
+
+function formatRut(rut: string): string {
+    const clean = cleanRut(rut);
+    if (clean.length < 2) return clean;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    // Add dots every 3 digits from right
+    const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${formatted}-${dv}`;
+}
+
+function validateRut(rut: string): boolean {
+    const clean = cleanRut(rut);
+    if (clean.length < 2) return false;
+    const body = clean.slice(0, -1);
+    const dvGiven = clean.slice(-1);
+    if (!/^\d+$/.test(body)) return false;
+    
+    let sum = 0;
+    let multiplier = 2;
+    for (let i = body.length - 1; i >= 0; i--) {
+        sum += parseInt(body[i]) * multiplier;
+        multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+    const remainder = sum % 11;
+    const dvExpected = remainder === 0 ? '0' : remainder === 1 ? 'K' : String(11 - remainder);
+    return dvGiven === dvExpected;
+}
 
 export default function CourseAuthPage() {
     const params = useParams();
@@ -17,6 +50,8 @@ export default function CourseAuthPage() {
     const [course, setCourse] = useState<any>(null);
     const [companyRoles, setCompanyRoles] = useState<any[]>([]);
     const [selectedRoleDesc, setSelectedRoleDesc] = useState<string | null>(null);
+    const [lang, setLang] = useState<'es' | 'ht'>('es');
+    const [rutError, setRutError] = useState<string | null>(null);
     
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     
@@ -33,6 +68,42 @@ export default function CourseAuthPage() {
 
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+
+    // i18n labels
+    const t = {
+        es: {
+            login: 'Ingresar', register: 'Registrarse', email: 'Email Corporativo', password: 'Contraseña',
+            loginBtn: 'Iniciar Sesión', verifying: 'Verificando...', name: 'Nombre', surname: 'Apellido',
+            rut: 'RUT', cargo: 'Cargo', gender: 'Género', age: 'Edad', select: 'Seleccione',
+            male: 'Masculino', female: 'Femenino', other: 'Otro', language: 'Idioma',
+            continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios',
+            invalidRut: 'RUT inválido. Verifica el número.',
+            digitalSign: 'Firma Digital', signDesc: 'Dibuja tu firma para aceptar el consentimiento de datos.',
+            back: 'Volver', finish: 'Finalizar Registro', registering: 'Registrando...',
+            backPortal: 'Volver al Portal',
+            restricted: 'Acceso Restringido', open: 'Inscripción Abierta',
+            restrictedDesc: 'Este curso requiere que tu cuenta haya sido creada previamente por el administrador.',
+            openDesc: 'Puedes iniciar sesión con tu cuenta existente o crear una nueva para comenzar inmediatamente.',
+            passMin: 'La contraseña debe tener al menos 6 caracteres',
+            signRequired: 'Firma requerida.',
+        },
+        ht: {
+            login: 'Konekte', register: 'Enskri', email: 'Imèl Antrepriz', password: 'Modpas',
+            loginBtn: 'Konekte', verifying: 'Verifikasyon...', name: 'Non', surname: 'Siyati',
+            rut: 'RUT', cargo: 'Pòs', gender: 'Sèks', age: 'Laj', select: 'Chwazi',
+            male: 'Gason', female: 'Fi', other: 'Lòt', language: 'Lang',
+            continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo',
+            invalidRut: 'RUT envalid. Verifye nimewo a.',
+            digitalSign: 'Siyati Dijital', signDesc: 'Desine siyati ou pou aksepte konsantman done yo.',
+            back: 'Retounen', finish: 'Fini Enskripsyon', registering: 'Anrejistreman...',
+            backPortal: 'Retounen nan Pòtal la',
+            restricted: 'Aksè Restren', open: 'Enskripsyon Ouvè',
+            restrictedDesc: 'Kou sa a egzije ke kont ou te kreye pa administratè a.',
+            openDesc: 'Ou ka konekte ak kont ou oswa kreye yon nouvo pou kòmanse imedyatman.',
+            passMin: 'Modpas la dwe gen omwen 6 karaktè',
+            signRequired: 'Siyati obligatwa.',
+        }
+    }[lang];
 
     useEffect(() => {
         const init = async () => {
@@ -60,17 +131,13 @@ export default function CourseAuthPage() {
 
                 setCourse(crs);
 
-                // 3. Fetch company roles for Cargo selector
-                // Fetch company-specific + global roles (company_id IS NULL)
-                const { data: rolesCompany } = await supabase
+                // 3. Fetch ALL company roles for Cargo selector
+                // Global roles + company-specific roles (dedup by name, company ones take priority)
+                const { data: allRoles } = await supabase
                     .from('company_roles')
                     .select('id, name, name_ht, description, description_ht, company_id')
-                    .eq('company_id', comp.id);
-                const { data: rolesGlobal } = await supabase
-                    .from('company_roles')
-                    .select('id, name, name_ht, description, description_ht, company_id')
-                    .is('company_id', null);
-                setCompanyRoles([...(rolesGlobal || []), ...(rolesCompany || [])]);
+                    .order('name');
+                setCompanyRoles(allRoles || []);
 
                 // 4. Set Auth Mode
                 if (trueMode === 'restricted') {
@@ -140,14 +207,18 @@ export default function CourseAuthPage() {
     };
 
     const handleRegister = async () => {
-        if (!signatureUrl) return setError("Firma requerida.");
+        if (!signatureUrl) return setError(t.signRequired);
         setActionLoading(true);
         try {
+            // Store the clean RUT (without dots/dash) in the DB
+            const cleanedRut = cleanRut(regData.rut);
             const res = await fetch('/api/students/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...regData,
+                    rut: cleanedRut,
+                    language: lang,
                     company_name: company.name, 
                     client_id: company.id,
                     role_id: regData.role_id || null,
@@ -196,6 +267,31 @@ export default function CourseAuthPage() {
 
     const isRestricted = course.registration_mode === 'restricted';
 
+    const handleRutInput = (value: string) => {
+        // Auto-format as user types
+        const clean = cleanRut(value);
+        if (clean.length <= 10) {
+            const formatted = clean.length >= 2 ? formatRut(clean) : clean;
+            setRegData({...regData, rut: formatted});
+            if (clean.length >= 8) {
+                setRutError(validateRut(clean) ? null : (t.invalidRut));
+            } else {
+                setRutError(null);
+            }
+        }
+    };
+
+    const switchLang = (newLang: 'es' | 'ht') => {
+        setLang(newLang);
+        setRegData({...regData, language: newLang});
+        // Update tooltip if a role is selected
+        if (regData.role_id) {
+            const role = companyRoles.find(r => r.id === regData.role_id);
+            const desc = newLang === 'ht' ? (role?.description_ht || role?.description) : role?.description;
+            setSelectedRoleDesc(desc || null);
+        }
+    };
+
     return (
         <div className="min-h-screen flex flex-col md:flex-row bg-[#050505]">
             {/* Left Panel: Context */}
@@ -206,7 +302,7 @@ export default function CourseAuthPage() {
                 
                 <div className="relative z-10 flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
                     <button onClick={() => router.back()} className="flex items-center gap-2 text-white/40 hover:text-white mb-10 transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Volver al Portal
+                        <ArrowLeft className="w-4 h-4" /> {t.backPortal}
                     </button>
 
                     <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
@@ -214,19 +310,17 @@ export default function CourseAuthPage() {
                     </div>
 
                     <h1 className="text-4xl font-black uppercase text-white mb-2">{course.name}</h1>
-                    <p className="text-white/60 text-lg leading-relaxed mb-8">{course.description || "Inicia sesión para acceder al contenido."}</p>
+                    <p className="text-white/60 text-lg leading-relaxed mb-8">{course.description || (lang === 'ht' ? 'Konekte pou jwenn kontni a.' : 'Inicia sesión para acceder al contenido.')}</p>
 
                     <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                         <div className="flex items-center gap-3 mb-2">
                             <div className={`w-2 h-2 rounded-full ${isRestricted ? 'bg-red-500' : 'bg-green-500'}`} />
                             <span className="text-xs font-black uppercase tracking-widest text-white/40">
-                                {isRestricted ? "Acceso Restringido" : "Inscripción Abierta"}
+                                {isRestricted ? t.restricted : t.open}
                             </span>
                         </div>
                         <p className="text-sm text-white/60">
-                            {isRestricted 
-                                ? "Este curso requiere que tu cuenta haya sido creada previamente por el administrador. No se admiten nuevos registros públicos."
-                                : "Puedes iniciar sesión con tu cuenta existente o crear una nueva para comenzar inmediatamente."}
+                            {isRestricted ? t.restrictedDesc : t.openDesc}
                         </p>
                     </div>
                 </div>
@@ -234,22 +328,41 @@ export default function CourseAuthPage() {
 
             {/* Right Panel: Auth Forms */}
             <div className="w-full md:w-1/2 bg-black border-l border-white/5 flex items-center justify-center p-6 md:p-12 relative">
-                <div className="w-full max-w-md space-y-8">
+                <div className="w-full max-w-md space-y-6">
                     
-                    {/* Switcher (Only if not restricted) */}
+                    {/* Language Switcher — always visible */}
+                    <div className="flex items-center justify-end gap-2">
+                        <Globe className="w-3.5 h-3.5 text-white/30" />
+                        <button
+                            type="button"
+                            onClick={() => switchLang('es')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${lang === 'es' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                        >
+                            Español
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => switchLang('ht')}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${lang === 'ht' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                        >
+                            Kreyòl
+                        </button>
+                    </div>
+
+                    {/* Switcher Login/Register (Only if not restricted) */}
                     {!isRestricted && (
-                        <div className="flex p-1 bg-white/5 rounded-xl mb-8">
+                        <div className="flex p-1 bg-white/5 rounded-xl">
                             <button
                                 onClick={() => setAuthMode('login')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${authMode === 'login' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
                             >
-                                <LogIn className="w-4 h-4" /> Ingresar
+                                <LogIn className="w-4 h-4" /> {t.login}
                             </button>
                             <button
                                 onClick={() => setAuthMode('register')}
                                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${authMode === 'register' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
                             >
-                                <UserPlus className="w-4 h-4" /> Registrarse
+                                <UserPlus className="w-4 h-4" /> {t.register}
                             </button>
                         </div>
                     )}
@@ -263,7 +376,7 @@ export default function CourseAuthPage() {
                     {authMode === 'login' ? (
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">Email Corporativo</label>
+                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">{t.email}</label>
                                 <input 
                                     type="email" 
                                     required
@@ -273,7 +386,7 @@ export default function CourseAuthPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">Contraseña</label>
+                                <label className="text-xs font-black uppercase text-white/40 tracking-widest">{t.password}</label>
                                 <input 
                                     type="password" 
                                     required
@@ -286,7 +399,7 @@ export default function CourseAuthPage() {
                                 disabled={actionLoading}
                                 className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all text-xs"
                             >
-                                {actionLoading ? 'Verificando...' : 'Iniciar Sesión'}
+                                {actionLoading ? t.verifying : t.loginBtn}
                             </button>
                         </form>
                     ) : (
@@ -295,151 +408,137 @@ export default function CourseAuthPage() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Nombre</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.name}</label>
                                             <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Juan" required 
                                                 value={regData.first_name} onChange={e => setRegData({...regData, first_name: e.target.value})} />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Apellido</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.surname}</label>
                                             <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Pérez" required 
                                                 value={regData.last_name} onChange={e => setRegData({...regData, last_name: e.target.value})} />
                                         </div>
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Email</label>
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
                                         <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
                                             value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Contraseña</label>
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
                                         <input 
                                             type="password" 
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
                                             required 
                                             minLength={6}
-                                            title="La contraseña debe tener al menos 6 caracteres"
+                                            title={t.passMin}
                                             pattern=".{6,}"
-                                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity('La contraseña debe tener al menos 6 caracteres')}
+                                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
                                             onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                                             value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
                                     </div>
+                                    
+                                    {/* RUT + Cargo row */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">RUT / ID</label>
-                                            <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
-                                                value={regData.rut} onChange={e => setRegData({...regData, rut: e.target.value})} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Cargo</label>
-                                            <select 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none" 
-                                                style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
-                                                value={regData.role_id} 
-                                                onChange={e => {
-                                                    const roleId = e.target.value;
-                                                    const role = companyRoles.find(r => r.id === roleId);
-                                                    setRegData({...regData, role_id: roleId, position: role?.name || ''});
-                                                    const desc = regData.language === 'ht' 
-                                                        ? (role?.description_ht || role?.description) 
-                                                        : role?.description;
-                                                    setSelectedRoleDesc(desc || null);
-                                                }}
-                                            >
-                                                <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>
-                                                    {regData.language === 'ht' ? 'Chwazi' : 'Seleccione'}
-                                                </option>
-                                                {companyRoles.map(role => (
-                                                    <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                        {regData.language === 'ht' ? (role.name_ht || role.name) : role.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {selectedRoleDesc && (
-                                                <div className="flex items-start gap-2 mt-1.5 p-2.5 bg-brand/10 border border-brand/20 rounded-lg">
-                                                    <Info className="w-3.5 h-3.5 text-brand mt-0.5 shrink-0" />
-                                                    <p className="text-[11px] text-brand/80 leading-relaxed">{selectedRoleDesc}</p>
-                                                </div>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.rut}</label>
+                                            <input 
+                                                type="text" 
+                                                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
+                                                placeholder="12.345.678-9"
+                                                required 
+                                                value={regData.rut} 
+                                                onChange={e => handleRutInput(e.target.value)} 
+                                            />
+                                            {rutError && (
+                                                <p className="text-[10px] text-red-400 font-bold">{rutError}</p>
                                             )}
                                         </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}</label>
+                                            <div className="relative">
+                                                <select 
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
+                                                    style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
+                                                    value={regData.role_id} 
+                                                    onChange={e => {
+                                                        const roleId = e.target.value;
+                                                        const role = companyRoles.find(r => r.id === roleId);
+                                                        setRegData({...regData, role_id: roleId, position: role?.name || ''});
+                                                        const desc = lang === 'ht' 
+                                                            ? (role?.description_ht || role?.description) 
+                                                            : role?.description;
+                                                        setSelectedRoleDesc(desc || null);
+                                                    }}
+                                                >
+                                                    <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
+                                                    {companyRoles.map(role => (
+                                                        <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                            {lang === 'ht' ? (role.name_ht || role.name) : role.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    {/* Tooltip full width — below RUT+Cargo row, arrow points to cargo */}
+                                    {selectedRoleDesc && (
+                                        <div className="relative bg-brand/10 border border-brand/20 rounded-xl p-3">
+                                            {/* Arrow pointing up-right toward Cargo column */}
+                                            <div className="absolute -top-2 right-[25%] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-brand/20" />
+                                            <div className="flex items-start gap-2.5">
+                                                <Info className="w-4 h-4 text-brand mt-0.5 shrink-0" />
+                                                <div>
+                                                    <p className="text-[10px] font-black text-brand/60 uppercase tracking-wider mb-0.5">
+                                                        {companyRoles.find(r => r.id === regData.role_id)?.name || t.cargo}
+                                                    </p>
+                                                    <p className="text-[12px] text-brand/80 leading-relaxed">{selectedRoleDesc}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Género</label>
-                                            <select 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none" 
-                                                style={{ color: regData.gender ? '#FFFFFF' : '#9CA3AF' }}
-                                                value={regData.gender} 
-                                                onChange={e => setRegData({...regData, gender: e.target.value})}
-                                            >
-                                                <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>
-                                                    {regData.language === 'ht' ? 'Chwazi' : 'Seleccione'}
-                                                </option>
-                                                <option value="Masculino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                    {regData.language === 'ht' ? 'Gason' : 'Masculino'}
-                                                </option>
-                                                <option value="Femenino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                    {regData.language === 'ht' ? 'Fi' : 'Femenino'}
-                                                </option>
-                                                <option value="Otro" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                    {regData.language === 'ht' ? 'Lòt' : 'Otro'}
-                                                </option>
-                                            </select>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.gender}</label>
+                                            <div className="relative">
+                                                <select 
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
+                                                    style={{ color: regData.gender ? '#FFFFFF' : '#9CA3AF' }}
+                                                    value={regData.gender} 
+                                                    onChange={e => setRegData({...regData, gender: e.target.value})}
+                                                >
+                                                    <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
+                                                    <option value="Masculino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.male}</option>
+                                                    <option value="Femenino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.female}</option>
+                                                    <option value="Otro" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.other}</option>
+                                                </select>
+                                                <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                            </div>
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                                {regData.language === 'ht' ? 'Laj' : 'Edad'}
-                                            </label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}</label>
                                             <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
                                                 value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
                                         </div>
                                     </div>
 
-                                    {/* Language Switcher */}
-                                    <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
-                                        <Globe className="w-4 h-4 text-white/40" />
-                                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                            {regData.language === 'ht' ? 'Lang' : 'Idioma'}
-                                        </span>
-                                        <div className="flex-1 flex gap-2 justify-end">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setRegData({...regData, language: 'es'});
-                                                    // Update tooltip if a role is selected
-                                                    if (regData.role_id) {
-                                                        const role = companyRoles.find(r => r.id === regData.role_id);
-                                                        setSelectedRoleDesc(role?.description || null);
-                                                    }
-                                                }}
-                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${regData.language === 'es' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
-                                            >
-                                                Español
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setRegData({...regData, language: 'ht'});
-                                                    // Update tooltip if a role is selected
-                                                    if (regData.role_id) {
-                                                        const role = companyRoles.find(r => r.id === regData.role_id);
-                                                        setSelectedRoleDesc(role?.description_ht || role?.description || null);
-                                                    }
-                                                }}
-                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${regData.language === 'ht' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
-                                            >
-                                                Kreyòl
-                                            </button>
-                                        </div>
-                                    </div>
-
                                     <button onClick={() => {
                                         if(!regData.email || !regData.password || !regData.rut) {
-                                            setError(regData.language === 'ht' ? "Ranpli tout chan obligatwa yo" : "Completa los campos obligatorios"); return;
+                                            setError(t.required); return;
                                         }
+                                        // Validate RUT before proceeding
+                                        if (!validateRut(regData.rut)) {
+                                            setRutError(t.invalidRut);
+                                            setError(t.invalidRut);
+                                            return;
+                                        }
+                                        setError(null);
                                         setRegStep(2);
                                     }} className="w-full mt-4 py-4 bg-brand text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all text-xs">
-                                        {regData.language === 'ht' ? 'Kontinye nan Siyati' : 'Continuar a Firma'}
+                                        {t.continueSign}
                                     </button>
                                 </div>
                             )}
@@ -447,16 +546,16 @@ export default function CourseAuthPage() {
                             {regStep === 2 && (
                                 <div className="space-y-6">
                                     <div className="text-center">
-                                        <h3 className="text-xl font-black text-white">Firma Digital</h3>
-                                        <p className="text-xs text-white/40">Dibuja tu firma para aceptar el consentimiento de datos.</p>
+                                        <h3 className="text-xl font-black text-white">{t.digitalSign}</h3>
+                                        <p className="text-xs text-white/40">{t.signDesc}</p>
                                     </div>
 
                                     <SignatureCanvas onSave={setSignatureUrl} />
 
                                     <div className="flex gap-4">
-                                        <button onClick={() => setRegStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl text-xs font-bold uppercase">Volver</button>
+                                        <button onClick={() => setRegStep(1)} className="flex-1 py-3 bg-white/10 rounded-xl text-xs font-bold uppercase">{t.back}</button>
                                         <button onClick={handleRegister} className="flex-1 py-3 bg-brand text-black rounded-xl text-xs font-black uppercase" disabled={actionLoading}>
-                                            {actionLoading ? 'Registrando...' : 'Finalizar Registro'}
+                                            {actionLoading ? t.registering : t.finish}
                                         </button>
                                     </div>
                                 </div>
