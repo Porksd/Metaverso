@@ -167,6 +167,16 @@ export default function CourseAuthPage() {
         init();
     }, [slug, courseCode]);
 
+    // Close empresa dropdown on click outside
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.empresa-autocomplete')) setEmpresaDropdownOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setActionLoading(true);
@@ -288,16 +298,6 @@ export default function CourseAuthPage() {
     if (!company || !course) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-red-500">Recurso no disponible</div>;
 
     const isRestricted = course.registration_mode === 'restricted';
-
-    // Close empresa dropdown on click outside
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (!target.closest('.empresa-autocomplete')) setEmpresaDropdownOpen(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
 
     const handleRutInput = (value: string) => {
         // Auto-format as user types
