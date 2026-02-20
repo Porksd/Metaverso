@@ -200,9 +200,9 @@ export default function CertificateCanvas({
             ];
             // Filter out rows with no data
             const rows = allRows.filter(([, v]) => v != null && v !== '') as [string, string][];
-            const rowH = 42;
-            const tableH = rows.length * rowH + 20;
-            const labelColW = 220;
+            const rowH = 44;
+            const tableH = rows.length * rowH + 24;
+            const labelColW = 280;
 
             // Fondo tabla
             ctx.fillStyle = BG_DATA;

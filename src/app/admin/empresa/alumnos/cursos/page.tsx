@@ -274,45 +274,61 @@ export default function CoursesPage() {
             { url: companyInfo.signature_url_3, name: companyInfo.signature_name_3, role: companyInfo.signature_role_3 }
         ].filter(s => s.url || s.name);
 
-        // CRÍTICO: Obtener la firma digital del estudiante y otros datos de perfil
-        const { data: studentData, error: studentError } = await supabase
+        // Re-fetch student data fresh from DB to ensure we have latest values
+        const { data: freshStudent, error: freshError } = await supabase
             .from('students')
-            .select('digital_signature_url, age, gender, company_name, job_position, role_id')
+            .select('*')
             .eq('id', user.id)
             .single();
 
-        if (studentError) {
-            console.error("Error fetching student signature:", studentError);
+        // Use fresh data if available, fall back to user state (which was loaded on page init)
+        const studentSrc = freshStudent || user;
+
+        if (freshError) {
+            console.warn("⚠️ Could not refresh student data, using cached:", freshError.message);
+        } else {
+            // Update local user state with fresh data
+            setUser(freshStudent);
+            localStorage.setItem("user", JSON.stringify(freshStudent));
         }
 
+        console.log("📋 Student source data:", { 
+            role_id: studentSrc.role_id, 
+            job_position: studentSrc.job_position, 
+            age: studentSrc.age, 
+            gender: studentSrc.gender,
+            company_name: studentSrc.company_name,
+            digital_signature_url: studentSrc.digital_signature_url ? '✓' : '✗'
+        });
+
         // Obtener nombre del cargo
-        let jobName = studentData?.job_position;
+        let jobName = studentSrc.job_position || null;
         
         // 1. Intentar por role_id (Cargo específico de empresa)
-        if (studentData?.role_id) {
+        if (studentSrc.role_id) {
             const { data: roleInfo } = await supabase
                 .from('company_roles')
                 .select('name, name_ht')
-                .eq('id', studentData.role_id)
+                .eq('id', studentSrc.role_id)
                 .single();
             if (roleInfo) {
-                jobName = user.language === 'ht' ? roleInfo.name_ht || roleInfo.name : roleInfo.name;
+                jobName = studentSrc.language === 'ht' ? roleInfo.name_ht || roleInfo.name : roleInfo.name;
             }
         } 
         // 2. Si no hay role_id o falló, intentar por job_position (global code)
-        else if (studentData?.job_position) {
+        else if (studentSrc.job_position) {
             const { data: jobInfo } = await supabase
                 .from('job_positions')
                 .select('name_es, name_ht')
-                .eq('code', studentData.job_position)
+                .eq('code', studentSrc.job_position)
                 .single();
             
             if (jobInfo) {
-                jobName = user.language === 'ht' ? jobInfo.name_ht || jobInfo.name_es : jobInfo.name_es;
+                jobName = studentSrc.language === 'ht' ? jobInfo.name_ht || jobInfo.name_es : jobInfo.name_es;
             }
         }
 
-        const studentSignature = studentData?.digital_signature_url;
+        const studentSignature = studentSrc.digital_signature_url;
         
         if (!studentSignature) {
             console.warn("⚠️ Student has no digital signature saved. Certificate will be generated without it.");
@@ -320,21 +336,21 @@ export default function CoursesPage() {
             console.log("✅ Student signature found, will be included in certificate");
         }
 
-        console.log("📋 Certificate data:", { jobName, role_id: studentData?.role_id, job_position: studentData?.job_position, age: studentData?.age, gender: studentData?.gender });
+        console.log("📋 Certificate final data:", { jobName, age: studentSrc.age, gender: studentSrc.gender, company_name: studentSrc.company_name });
 
         setCertData({
-            studentName: `${user.first_name} ${user.last_name}`,
-            rut: user.rut,
+            studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
+            rut: studentSrc.rut,
             courseName: enrollment.course.name.toUpperCase(),
             date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString(),
             score: enrollment.best_score ?? 100,
             signatures: sigs,
             studentSignature: studentSignature,
             companyLogo: companyInfo.logo_url,
-            companyName: studentData?.company_name || companyInfo.name,
+            companyName: studentSrc.company_name || companyInfo.name,
             jobPosition: jobName,
-            age: studentData?.age,
-            gender: studentData?.gender
+            age: studentSrc.age,
+            gender: studentSrc.gender
         });
     };
 
