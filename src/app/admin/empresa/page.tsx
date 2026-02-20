@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     Users, BookOpen, Search, Download, CheckCircle2,
-    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon
+    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import CertificateCanvas from "@/components/CertificateCanvas";
@@ -902,7 +902,7 @@ export default function EmpresaAdmin() {
                                                         if(dHT) dHT.value = c.description_ht || '';
                                                     }, 50);
                                                 }} className="text-white/20 hover:text-brand transition-colors" title="Editar">
-                                                    <UserCog className="w-4 h-4" />
+                                                    <Pencil className="w-4 h-4" />
                                                 </button>
                                                 <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="text-white/20 hover:text-red-500 transition-colors" title="Eliminar">
                                                     <Trash2 className="w-4 h-4" />

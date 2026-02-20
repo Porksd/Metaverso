@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown } from "lucide-react";
+import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown, Search } from "lucide-react";
 import SignatureCanvas from "@/components/SignatureCanvas";
 
 // ── Chilean RUT Validator ──
@@ -52,6 +52,9 @@ export default function CourseAuthPage() {
     const [selectedRoleDesc, setSelectedRoleDesc] = useState<string | null>(null);
     const [lang, setLang] = useState<'es' | 'ht'>('es');
     const [rutError, setRutError] = useState<string | null>(null);
+    const [companiesList, setCompaniesList] = useState<any[]>([]);
+    const [empresaInput, setEmpresaInput] = useState('');
+    const [empresaDropdownOpen, setEmpresaDropdownOpen] = useState(false);
     
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     
@@ -76,6 +79,7 @@ export default function CourseAuthPage() {
             loginBtn: 'Iniciar Sesión', verifying: 'Verificando...', name: 'Nombre', surname: 'Apellido',
             rut: 'RUT', cargo: 'Cargo', gender: 'Género', age: 'Edad', select: 'Seleccione',
             male: 'Masculino', female: 'Femenino', other: 'Otro', language: 'Idioma',
+            empresa: 'Empresa', empresaPh: 'Escribe para buscar o agregar...',
             continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios',
             invalidRut: 'RUT inválido. Verifica el número.',
             digitalSign: 'Firma Digital', signDesc: 'Dibuja tu firma para aceptar el consentimiento de datos.',
@@ -92,6 +96,7 @@ export default function CourseAuthPage() {
             loginBtn: 'Konekte', verifying: 'Verifikasyon...', name: 'Non', surname: 'Siyati',
             rut: 'RUT', cargo: 'Pòs', gender: 'Sèks', age: 'Laj', select: 'Chwazi',
             male: 'Gason', female: 'Fi', other: 'Lòt', language: 'Lang',
+            empresa: 'Antrepriz', empresaPh: 'Ekri pou chèche oswa ajoute...',
             continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo',
             invalidRut: 'RUT envalid. Verifye nimewo a.',
             digitalSign: 'Siyati Dijital', signDesc: 'Desine siyati ou pou aksepte konsantman done yo.',
@@ -138,6 +143,13 @@ export default function CourseAuthPage() {
                     .select('id, name, name_ht, description, description_ht, company_id')
                     .order('name');
                 setCompanyRoles(allRoles || []);
+
+                // 4b. Fetch companies_list for Empresa autocomplete
+                const { data: clData } = await supabase
+                    .from('companies_list')
+                    .select('*')
+                    .order('name_es');
+                setCompaniesList(clData || []);
 
                 // 4. Set Auth Mode
                 if (trueMode === 'restricted') {
@@ -210,6 +222,16 @@ export default function CourseAuthPage() {
         if (!signatureUrl) return setError(t.signRequired);
         setActionLoading(true);
         try {
+            // If empresa was typed and doesn't exist, create it in companies_list
+            const trimmedEmpresa = empresaInput.trim();
+            if (trimmedEmpresa) {
+                const exists = companiesList.some(c => c.name_es?.toLowerCase() === trimmedEmpresa.toLowerCase());
+                if (!exists) {
+                    const code = trimmedEmpresa.toUpperCase().replace(/\s+/g, '_');
+                    await supabase.from('companies_list').insert({ name_es: trimmedEmpresa, code });
+                }
+            }
+
             // Store the clean RUT (without dots/dash) in the DB
             const cleanedRut = cleanRut(regData.rut);
             const res = await fetch('/api/students/register', {
@@ -219,7 +241,7 @@ export default function CourseAuthPage() {
                     ...regData,
                     rut: cleanedRut,
                     language: lang,
-                    company_name: company.name, 
+                    company_name: trimmedEmpresa || company.name, 
                     client_id: company.id,
                     role_id: regData.role_id || null,
                     digital_signature_url: signatureUrl
@@ -266,6 +288,16 @@ export default function CourseAuthPage() {
     if (!company || !course) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-red-500">Recurso no disponible</div>;
 
     const isRestricted = course.registration_mode === 'restricted';
+
+    // Close empresa dropdown on click outside
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.empresa-autocomplete')) setEmpresaDropdownOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
 
     const handleRutInput = (value: string) => {
         // Auto-format as user types
@@ -419,23 +451,72 @@ export default function CourseAuthPage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
-                                        <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
-                                            value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
+                                            <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
+                                                value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
+                                            <input 
+                                                type="password" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
+                                                required 
+                                                minLength={6}
+                                                title={t.passMin}
+                                                pattern=".{6,}"
+                                                onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
+                                                onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
+                                                value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
+                                        </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
-                                        <input 
-                                            type="password" 
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
-                                            required 
-                                            minLength={6}
-                                            title={t.passMin}
-                                            pattern=".{6,}"
-                                            onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
-                                            onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
-                                            value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
+
+                                    {/* Empresa autocomplete */}
+                                    <div className="space-y-1 relative empresa-autocomplete">
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="text" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm pr-10"
+                                                placeholder={t.empresaPh}
+                                                value={empresaInput} 
+                                                onChange={e => {
+                                                    setEmpresaInput(e.target.value);
+                                                    setEmpresaDropdownOpen(true);
+                                                }}
+                                                onFocus={() => setEmpresaDropdownOpen(true)}
+                                            />
+                                            <Search className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                        </div>
+                                        {empresaDropdownOpen && empresaInput.length > 0 && (
+                                            <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl max-h-48 overflow-y-auto shadow-xl">
+                                                {companiesList
+                                                    .filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase()))
+                                                    .map(c => (
+                                                        <button
+                                                            key={c.id}
+                                                            type="button"
+                                                            className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                                                            onClick={() => {
+                                                                setEmpresaInput(c.name_es);
+                                                                setEmpresaDropdownOpen(false);
+                                                            }}
+                                                        >
+                                                            <Building2 className="w-3.5 h-3.5 inline mr-2 text-white/40" />{c.name_es}
+                                                        </button>
+                                                    ))}
+                                                {companiesList.filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase())).length === 0 && (
+                                                    <button
+                                                        type="button"
+                                                        className="w-full text-left px-4 py-2.5 text-sm text-brand hover:bg-brand/10 transition-colors rounded-xl"
+                                                        onClick={() => setEmpresaDropdownOpen(false)}
+                                                    >
+                                                        <span className="text-white/40">+</span> {lang === 'ht' ? 'Ajoute' : 'Agregar'}: <span className="font-bold">{empresaInput}</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     
                                     {/* RUT + Cargo row */}
