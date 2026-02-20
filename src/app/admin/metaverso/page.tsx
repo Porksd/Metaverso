@@ -1066,6 +1066,30 @@ export default function MetaversoAdmin() {
                                         onChange={(e) => setEditingStudent({...editingStudent, company_name: e.target.value})}
                                     />
                                 </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-white/40">Edad</label>
+                                    <input 
+                                        type="number" min="1" max="120"
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm"
+                                        placeholder="Ej: 35"
+                                        value={editingStudent?.age || ''}
+                                        onChange={(e) => setEditingStudent({...editingStudent, age: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-white/40">Género</label>
+                                    <select 
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm"
+                                        value={editingStudent?.gender || ''}
+                                        onChange={(e) => setEditingStudent({...editingStudent, gender: e.target.value || null})}
+                                    >
+                                        <option value="">-- Seleccionar --</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Femenino">Femenino</option>
+                                        <option value="No binario">No binario</option>
+                                        <option value="Prefiero no decir">Prefiero no decir</option>
+                                    </select>
+                                </div>
                                 <div className="col-span-2 space-y-1">
                                     <label className="text-[10px] font-black uppercase text-white/40">Cliente Corporativo Asiciado (Empresa Madre en Sistema)</label>
                                     <select 

@@ -320,6 +320,8 @@ export default function CoursesPage() {
             console.log("✅ Student signature found, will be included in certificate");
         }
 
+        console.log("📋 Certificate data:", { jobName, role_id: studentData?.role_id, job_position: studentData?.job_position, age: studentData?.age, gender: studentData?.gender });
+
         setCertData({
             studentName: `${user.first_name} ${user.last_name}`,
             rut: user.rut,
@@ -670,18 +672,19 @@ export default function CoursesPage() {
                                         </div>
 
                                         <div className="flex gap-3">
+                                            {/* Solo mostrar botón de acción si NO está completado o si falta encuesta */}
+                                            {(!isCompleted || surveyPending) && (
                                             <button
                                                 onClick={() => setActiveCourse(enrollment)}
                                                 className={`flex-1 py-4 font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 ${!isCompleted && !surveyPending ? 'bg-brand text-black hover:bg-white hover:scale-[1.03] shadow-brand/20' : surveyPending ? 'bg-yellow-500 text-black hover:bg-yellow-400 hover:scale-[1.03] shadow-yellow-500/20' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}`}
                                             >
                                                 {surveyPending ? (
                                                     <>IR A ENCUESTA <ClipboardList className="w-4 h-4" /></>
-                                                ) : !isCompleted ? (
-                                                    <>{t?.start} <ChevronRight className="w-4 h-4" /></>
                                                 ) : (
-                                                    <>{t?.restart || 'Ver Contenido'} <BookOpen className="w-4 h-4" /></>
+                                                    <>{t?.start} <ChevronRight className="w-4 h-4" /></>
                                                 )}
                                             </button>
+                                            )}
                                             
                                             {isCompleted && !surveyPending && (
                                                 <button

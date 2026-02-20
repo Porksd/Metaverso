@@ -111,9 +111,11 @@ export default function EmpresaAdmin() {
             first_name: student.first_name,
             last_name: student.last_name,
             email: student.email,
-            company_name: student.company_name, // Added company_name
+            company_name: student.company_name,
             role_id: (student.role_id && student.role_id !== "") ? student.role_id : null,
-            password: student.password
+            password: student.password,
+            age: student.age ? parseInt(student.age, 10) : null,
+            gender: student.gender || null
         };
 
         const { error } = await supabase
@@ -561,6 +563,28 @@ export default function EmpresaAdmin() {
                                     >
                                         <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
                                         {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Edad</label>
+                                    <input type="number" min="1" max="120" value={isEditing.age || ""} onChange={(e) => setIsEditing({ ...isEditing, age: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" placeholder="Ej: 35" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Género</label>
+                                    <select
+                                        value={isEditing.gender || ""}
+                                        onChange={(e) => setIsEditing({ ...isEditing, gender: e.target.value || null })}
+                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                        style={{ colorScheme: 'dark' }}
+                                    >
+                                        <option value="" className="bg-neutral-900 text-white">Seleccionar</option>
+                                        <option value="Masculino" className="bg-neutral-900 text-white">Masculino</option>
+                                        <option value="Femenino" className="bg-neutral-900 text-white">Femenino</option>
+                                        <option value="No binario" className="bg-neutral-900 text-white">No binario</option>
+                                        <option value="Prefiero no decir" className="bg-neutral-900 text-white">Prefiero no decir</option>
                                     </select>
                                 </div>
                             </div>

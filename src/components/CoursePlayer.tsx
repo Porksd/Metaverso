@@ -341,14 +341,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         }
     };
 
-    async function updateEnrollmentStatus(status: string, totalScore: number) {
+    async function updateEnrollmentStatus(status: string, totalScore: number, surveyJustCompleted: boolean = false) {
         if (mode === 'preview' || studentId === "preview-admin" || !enrollment?.id) return;
         if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
 
         try {
             // Verificamos si hay encuestas obligatorias pendientes en CUALQUIER módulo
-            // No solo en el actual, para evitar saltos entre módulos
-            const hasPendingSurvey = modules.some((mod: any) => 
+            // Si la encuesta acaba de completarse (surveyJustCompleted=true), no está pendiente
+            const hasPendingSurvey = surveyJustCompleted ? false : modules.some((mod: any) => 
                 mod.items?.some((item: any) => 
                     item.type === 'survey' && 
                     item.content?.is_mandatory && 
@@ -814,11 +814,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                     handleItemCompletion(item.id);
                                                     setSurveyDone(true);
                                                     // Forzar guardado inmediato si ya estaba aprobado
+                                                    // IMPORTANTE: pasar surveyJustCompleted=true para que no vuelva a detectar encuesta pendiente
                                                     if (approved || evaluationPassed) {
-                                                        const quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
-                                                        const scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
-                                                        const total = (quizScore! * quizWeight) + (scormScore * scormWeight);
-                                                        updateEnrollmentStatus('completed', Math.round(total));
+                                                        let qw = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+                                                        let sw = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+                                                        const hasScorm = currentModule?.items?.some((it: any) => it.type === 'scorm');
+                                                        if (!hasScorm && sw > 0) { qw = 1; sw = 0; }
+                                                        const total = ((quizScore || 0) * qw) + (scormScore * sw);
+                                                        updateEnrollmentStatus('completed', Math.round(total), true);
                                                     }
                                                 }}
                                                 language={language as any}
