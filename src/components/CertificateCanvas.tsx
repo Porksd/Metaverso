@@ -158,8 +158,10 @@ export default function CertificateCanvas({
             ctx.textAlign = "left";
             ctx.font = "22px 'Georgia', serif";
             ctx.fillStyle = DARK;
-            const cargoText = jobPosition || "No especificado";
-            const introText = `Se certifica que ${studentName}, de la empresa ${companyName || 'No especificada'}, con el cargo de ${cargoText}, ha completado satisfactoriamente el contenido del curso:`;
+            const cargoText = jobPosition || "";
+            const introText = jobPosition
+                ? `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, con el cargo de ${cargoText}, ha completado satisfactoriamente el contenido del curso:`
+                : `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, ha completado satisfactoriamente el contenido del curso:`;
             const introLines = wrapText(ctx, introText, contentW);
             for (const line of introLines) {
                 ctx.fillText(line, ML, Y);
@@ -185,16 +187,19 @@ export default function CertificateCanvas({
             ctx.fillText("Los siguientes son los datos obtenidos en su participación:", ML, Y);
             Y += 35;
 
-            // ── 7. Tabla de datos ──
-            const rows: [string, string][] = [
+            // ── 7. Tabla de datos (solo campos con valor) ──
+            const allRows: [string, string | undefined | null][] = [
                 ["Nombre", studentName],
                 ["RUT", rut],
-                ["Cargo", jobPosition || "No especificado"],
+                ["Empresa", companyName],
+                ["Cargo", jobPosition],
                 ["Puntaje obtenido", score != null ? `${score}%` : "100%"],
-                ["Género", gender || "No especificado"],
-                ["Edad", age ? `${age} años` : "No especificada"],
+                ["Género", gender],
+                ["Edad", age ? `${age} años` : null],
                 ["Fecha de emisión", date],
             ];
+            // Filter out rows with no data
+            const rows = allRows.filter(([, v]) => v != null && v !== '') as [string, string][];
             const rowH = 42;
             const tableH = rows.length * rowH + 20;
             const labelColW = 220;
