@@ -61,11 +61,16 @@ export default function CourseAuthPage() {
                 setCourse(crs);
 
                 // 3. Fetch company roles for Cargo selector
-                const { data: roles } = await supabase
+                // Fetch company-specific + global roles (company_id IS NULL)
+                const { data: rolesCompany } = await supabase
                     .from('company_roles')
-                    .select('id, name, name_ht, description, description_ht')
+                    .select('id, name, name_ht, description, description_ht, company_id')
                     .eq('company_id', comp.id);
-                if (roles) setCompanyRoles(roles);
+                const { data: rolesGlobal } = await supabase
+                    .from('company_roles')
+                    .select('id, name, name_ht, description, description_ht, company_id')
+                    .is('company_id', null);
+                setCompanyRoles([...(rolesGlobal || []), ...(rolesCompany || [])]);
 
                 // 4. Set Auth Mode
                 if (trueMode === 'restricted') {

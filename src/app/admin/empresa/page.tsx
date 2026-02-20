@@ -23,6 +23,7 @@ export default function EmpresaAdmin() {
     const [courses, setCourses] = useState<any[]>([]);
     const [isEditing, setIsEditing] = useState<any>(null);
     const [showCargoManager, setShowCargoManager] = useState(false);
+    const [editingCargo, setEditingCargo] = useState<any>(null);
     const [showConfig, setShowConfig] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [certData, setCertData] = useState<any>(null);
@@ -82,12 +83,16 @@ export default function EmpresaAdmin() {
             if (stError) console.error("Error fetching students:", stError);
             setStudents(stData || []);
 
-            const { data: cgData, error: cgError } = await supabase
+            // Fetch company-specific + global roles (company_id IS NULL)
+            const { data: cgCompany } = await supabase
                 .from('company_roles')
                 .select('*')
                 .eq('company_id', companyId);
-            if (cgError) console.error("Error fetching cargos:", cgError);
-            setCargos(cgData || []);
+            const { data: cgGlobal } = await supabase
+                .from('company_roles')
+                .select('*')
+                .is('company_id', null);
+            setCargos([...(cgGlobal || []), ...(cgCompany || [])]);
 
             // Fetch ONLY assigned courses for this company
             const { data: assignedData, error: assignedError } = await supabase
@@ -768,74 +773,161 @@ export default function EmpresaAdmin() {
 
                 {showCargoManager && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
-                        <div className="glass p-10 w-full max-w-2xl space-y-6">
+                        <div className="glass p-10 w-full max-w-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
                             <h3 className="text-xl font-black uppercase tracking-tight text-brand">Gestionar Cargos</h3>
                             
+                            {/* Formulario crear/editar */}
                             <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
-                                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">Añadir Nuevo Cargo</p>
+                                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">
+                                    {editingCargo ? '✏️ Editando Cargo' : 'Añadir Nuevo Cargo'}
+                                </p>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10" />
-                                    <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10" />
+                                    <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name || ''} />
+                                    <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name_ht || ''} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <textarea id="newCargoDesc" placeholder="Descripción / Tip (Español)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10" />
-                                    <textarea id="newCargoDescHT" placeholder="Descripción / Tip (Creole)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10" />
+                                    <textarea id="newCargoDesc" placeholder="Descripción / Tip (Español)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10 text-white" defaultValue={editingCargo?.description || ''} />
+                                    <textarea id="newCargoDescHT" placeholder="Descripción / Tip (Creole)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10 text-white" defaultValue={editingCargo?.description_ht || ''} />
                                 </div>
-                                <button 
-                                    onClick={async () => { 
-                                        const n = document.getElementById('newCargoName') as HTMLInputElement; 
-                                        const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
-                                        const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement; 
-                                        const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement; 
-                                        
-                                        if(!n.value || !companyId) return; 
-                                        
-                                        const {error} = await supabase.from('company_roles').insert({ 
-                                            name: n.value, 
-                                            name_ht: nHT.value,
-                                            description: d.value,
-                                            description_ht: dHT.value,
-                                            company_id: companyId 
-                                        }); 
-                                        
-                                        if(error) alert(error.message); 
-                                        else {
-                                            n.value = ""; nHT.value = ""; d.value = ""; dHT.value = "";
-                                            fetchData(); 
-                                        }
-                                    }} 
-                                    className="w-full bg-brand text-black py-4 rounded-xl font-black text-xs uppercase hover:scale-[1.02] transition-all"
-                                >
-                                    Agregar Cargo
-                                </button>
+                                <div className="flex gap-3">
+                                    {editingCargo && (
+                                        <button
+                                            onClick={() => {
+                                                setEditingCargo(null);
+                                                const n = document.getElementById('newCargoName') as HTMLInputElement;
+                                                const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
+                                                const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement;
+                                                const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement;
+                                                if(n) n.value = ''; if(nHT) nHT.value = ''; if(d) d.value = ''; if(dHT) dHT.value = '';
+                                            }}
+                                            className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={async () => { 
+                                            const n = document.getElementById('newCargoName') as HTMLInputElement; 
+                                            const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
+                                            const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement; 
+                                            const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement; 
+                                            
+                                            if(!n.value || !companyId) return; 
+                                            
+                                            if (editingCargo) {
+                                                // Update existing
+                                                const { error } = await supabase.from('company_roles').update({ 
+                                                    name: n.value, 
+                                                    name_ht: nHT.value || null,
+                                                    description: d.value || null,
+                                                    description_ht: dHT.value || null
+                                                }).eq('id', editingCargo.id);
+                                                if(error) alert(error.message);
+                                                else {
+                                                    setEditingCargo(null);
+                                                    n.value = ''; nHT.value = ''; d.value = ''; dHT.value = '';
+                                                    fetchData();
+                                                }
+                                            } else {
+                                                // Insert new
+                                                const {error} = await supabase.from('company_roles').insert({ 
+                                                    name: n.value, 
+                                                    name_ht: nHT.value || null,
+                                                    description: d.value || null,
+                                                    description_ht: dHT.value || null,
+                                                    company_id: companyId 
+                                                }); 
+                                                if(error) alert(error.message); 
+                                                else {
+                                                    n.value = ''; nHT.value = ''; d.value = ''; dHT.value = '';
+                                                    fetchData(); 
+                                                }
+                                            }
+                                        }} 
+                                        className="flex-1 bg-brand text-black py-4 rounded-xl font-black text-xs uppercase hover:scale-[1.02] transition-all"
+                                    >
+                                        {editingCargo ? 'Guardar Cambios' : 'Agregar Cargo'}
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="max-h-60 overflow-auto space-y-2 pr-2 custom-scrollbar">
-                                {cargos.map(c => (
-                                    <div key={c.id} className="bg-white/5 p-4 rounded-xl border border-white/5">
+                            {/* Lista de cargos */}
+                            <div className="max-h-72 overflow-auto space-y-2 pr-2 custom-scrollbar">
+                                {cargos.filter(c => !c.company_id).length > 0 && (
+                                    <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-2">Cargos Globales (Admin Central)</p>
+                                )}
+                                {cargos.filter(c => !c.company_id).map(c => (
+                                    <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'}`}>
                                         <div className="flex justify-between items-start mb-1">
-                                            <div>
+                                            <div className="flex-1">
+                                                <span className="font-bold text-sm text-white">{c.name}</span>
+                                                <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
+                                                <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                            </div>
+                                        </div>
+                                        {(c.description || c.description_ht) && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
+                                                <div>
+                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
+                                                    <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
+                                                    <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                {cargos.filter(c => c.company_id).length > 0 && (
+                                    <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-4">Cargos de esta Empresa</p>
+                                )}
+                                {cargos.filter(c => c.company_id).map(c => (
+                                    <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'}`}>
+                                        <div className="flex justify-between items-start mb-1">
+                                            <div className="flex-1">
                                                 <span className="font-bold text-sm text-white">{c.name}</span>
                                                 <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
                                             </div>
-                                            <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="text-white/20 hover:text-red-500 transition-colors">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
-                                            <div>
-                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
-                                                <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                            <div className="flex items-center gap-1">
+                                                <button onClick={() => {
+                                                    setEditingCargo(c);
+                                                    // Pre-fill the form inputs
+                                                    setTimeout(() => {
+                                                        const n = document.getElementById('newCargoName') as HTMLInputElement;
+                                                        const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
+                                                        const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement;
+                                                        const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement;
+                                                        if(n) n.value = c.name || '';
+                                                        if(nHT) nHT.value = c.name_ht || '';
+                                                        if(d) d.value = c.description || '';
+                                                        if(dHT) dHT.value = c.description_ht || '';
+                                                    }, 50);
+                                                }} className="text-white/20 hover:text-brand transition-colors" title="Editar">
+                                                    <UserCog className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="text-white/20 hover:text-red-500 transition-colors" title="Eliminar">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
-                                                <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
-                                            </div>
                                         </div>
+                                        {(c.description || c.description_ht) && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
+                                                <div>
+                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
+                                                    <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
+                                                    <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={() => setShowCargoManager(false)} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
+                            <button onClick={() => { setShowCargoManager(false); setEditingCargo(null); }} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
                         </div>
                     </div>
                 )}
