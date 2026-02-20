@@ -36,6 +36,7 @@ interface QuizEngineProps {
     currentEnrollment?: any;
     persistScore?: boolean; // New prop to control side-effects
     language?: string; // Nuevo: soporte para idioma
+    forceFinished?: boolean;
 }
 
 const translations: any = {
@@ -75,7 +76,7 @@ const translations: any = {
     }
 };
 
-export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment, persistScore = true, language = 'es' }: QuizEngineProps) {
+export default function QuizEngine({ config, questions: propQuestions, passingScore: propPassingScore, user, courseId, enrollmentId, onFinish, onComplete, currentEnrollment, persistScore = true, language = 'es', forceFinished = false }: QuizEngineProps) {
     const t = translations[language] || translations.es;
     const baseQuestions = propQuestions || config?.questions || [];
     const seenKeys = new Set<string>();
@@ -113,9 +114,48 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
     const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
     const [answers, setAnswers] = useState<{ [key: string]: string | string[] }>({});
-    const [isFinished, setIsFinished] = useState(currentEnrollment?.status === 'completed');
-    const [score, setScore] = useState(currentEnrollment?.score || 0);
+    const [isFinished, setIsFinished] = useState(currentEnrollment?.status === 'completed' || forceFinished);
+    const [score, setScore] = useState(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || currentEnrollment?.score || 0);
     const [correctCount, setCorrectCount] = useState(0);
+
+    const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
+    const targetCourseId = courseId || config?.id;
+    const quizDraftKey = targetEnrollmentId ? `quiz-draft:${targetEnrollmentId}` : (targetCourseId ? `quiz-draft:course:${targetCourseId}` : null);
+
+    useEffect(() => {
+        if (!quizDraftKey || isFinished || forceFinished) return;
+        try {
+            const rawDraft = localStorage.getItem(quizDraftKey);
+            if (!rawDraft) return;
+            const parsedDraft = JSON.parse(rawDraft);
+            if (parsedDraft?.answers && typeof parsedDraft.answers === 'object') {
+                setAnswers(parsedDraft.answers);
+            }
+            if (typeof parsedDraft?.currentQuestionIdx === 'number' && parsedDraft.currentQuestionIdx >= 0 && parsedDraft.currentQuestionIdx < finalQuestions.length) {
+                setCurrentQuestionIdx(parsedDraft.currentQuestionIdx);
+            }
+        } catch (error) {
+            console.error('Error restoring quiz draft:', error);
+        }
+    }, [quizDraftKey, forceFinished, isFinished, finalQuestions.length]);
+
+    useEffect(() => {
+        if (!quizDraftKey || isFinished || forceFinished) return;
+        try {
+            localStorage.setItem(quizDraftKey, JSON.stringify({
+                answers,
+                currentQuestionIdx
+            }));
+        } catch (error) {
+            console.error('Error saving quiz draft:', error);
+        }
+    }, [answers, currentQuestionIdx, quizDraftKey, isFinished, forceFinished]);
+
+    useEffect(() => {
+        if (!forceFinished) return;
+        setIsFinished(true);
+        setScore(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || 0);
+    }, [forceFinished, currentEnrollment?.quiz_score, currentEnrollment?.last_exam_score, currentEnrollment?.best_score]);
 
     // Resolve props vs config
     const finalPassingScore = propPassingScore || config?.passingScore || 60;
@@ -199,9 +239,6 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         const passed = finalScore >= finalPassingScore;
 
         // Persistir en Supabase
-        const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
-        const targetCourseId = courseId || config?.id;
-
         // Solo persistir si tenemos un enrollment ID válido (los dummy IDs o preview-admin se saltan)
         const isValidUUID = targetEnrollmentId && targetEnrollmentId.length > 20 && targetEnrollmentId !== 'preview-admin' && !targetEnrollmentId.includes('dummy');
 
@@ -249,6 +286,10 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
             } catch (err) {
                 console.error("Error saving quiz results:", err);
             }
+        }
+
+        if (quizDraftKey) {
+            localStorage.removeItem(quizDraftKey);
         }
 
         if (onFinish) onFinish(finalScore);
@@ -322,6 +363,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                             setAnswers({});
                             setCurrentQuestionIdx(0);
                             setIsFinished(false);
+                            if (quizDraftKey) {
+                                localStorage.removeItem(quizDraftKey);
+                            }
                         }}
                         className="w-full py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase"
                     >

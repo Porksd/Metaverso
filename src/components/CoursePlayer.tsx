@@ -59,7 +59,8 @@ const translations: any = {
         survey_desc: "Tu opinión es muy importante para nosotros.",
         survey_submit: "Enviar Encuesta",
         survey_thanks: "¡Muchas gracias por tu feedback!",
-        survey_prerequisite: "Debes completar la encuesta obligatoria para descargar tu certificado."
+        survey_prerequisite: "Debes completar la encuesta obligatoria para descargar tu certificado.",
+        survey_pending_after_exam: "Evaluación aprobada. Para habilitar la descarga del certificado, envía la encuesta obligatoria."
     },
     ht: {
         loading: "Chaje kou...",
@@ -88,7 +89,8 @@ const translations: any = {
         survey_desc: "Opinyon ou trè enpòtan pou nou.",
         survey_submit: "Voye Sondaj",
         survey_thanks: "Mèsi anpil pou feedback ou!",
-        survey_prerequisite: "Ou dwe manyen sondaj obligatwa a pou telechaje sètifika ou."
+        survey_prerequisite: "Ou dwe manyen sondaj obligatwa a pou telechaje sètifika ou.",
+        survey_pending_after_exam: "Egzamen an apwouve. Pou aktive telechajman sètifika a, voye sondaj obligatwa a."
     }
 };
 
@@ -106,6 +108,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     const [enrollment, setEnrollment] = useState<any>(null);
     const [extrasOpen, setExtrasOpen] = useState(false);
     const [surveyDone, setSurveyDone] = useState(false);
+    const [evaluationPassed, setEvaluationPassed] = useState(false);
 
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
     const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
@@ -121,6 +124,9 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             if (type === 'quiz') {
                 console.log('[CoursePlayer] Setting Quiz Score:', score);
                 setQuizScore(score);
+                if (passed) {
+                    setEvaluationPassed(true);
+                }
             }
             if (type === 'scorm') {
                 console.log('[CoursePlayer] Setting SCORM Score:', score);
@@ -178,23 +184,31 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             )
         );
 
-        const canComplete = roundedTotal >= minPass && isLastModule && !hasPendingSurvey;
+        const passedEvaluation = roundedTotal >= minPass && isLastModule;
+        const canComplete = passedEvaluation && !hasPendingSurvey;
         
         console.log('[CoursePlayer] Can Complete Check:', { roundedTotal, minPass, isLastModule, hasPendingSurvey });
 
         if (canComplete) {
             console.log('[CoursePlayer] COURSE COMPLETED! Total score:', roundedTotal);
+            setEvaluationPassed(true);
             setApproved(true);
             updateEnrollmentStatus('completed', roundedTotal);
         } else {
             // Solo mostramos aprobado si pasó el mínimo, pero bloqueamos el status 'completed' si falta encuesta
             // Si falta encuesta, setApproved DEBE ser false para no mostrar el botón de descarga
-            const visualApproval = roundedTotal >= minPass && !hasPendingSurvey;
+            const visualApproval = passedEvaluation && !hasPendingSurvey;
             setApproved(visualApproval); 
+
+            if (passedEvaluation) {
+                setEvaluationPassed(true);
+                updateEnrollmentStatus('completed', roundedTotal);
+                return;
+            }
             
             if (total > 0) updateEnrollmentStatus('in_progress', roundedTotal);
         }
-    }, [quizScore, scormScore, activeModuleIndex, modules.length, enrollment]);
+    }, [quizScore, scormScore, activeModuleIndex, modules, enrollment, itemsCompleted]);
 
     useEffect(() => {
         loadCourseStructure();
@@ -262,6 +276,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     setQuizScore(0);
                     setScormScore(0);
                     setApproved(false);
+                    setEvaluationPassed(false);
                     setItemsCompleted(new Set()); // Limpiar items completados
                     setModuleCompleted(false);
                 } else {
@@ -282,6 +297,10 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         setSurveyDone(true);
                     }
 
+                    if (data.last_exam_passed || data.status === 'completed') {
+                        setEvaluationPassed(true);
+                    }
+
                     // Si no hay scores detallados todavía, pero hay un best_score (migración vieja), lo usamos de base para el quiz
                     if (!data.quiz_score && data.best_score && !data.scorm_score) {
                         setQuizScore(data.best_score);
@@ -297,7 +316,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         }
     };
 
-    const updateEnrollmentStatus = async (status: string, totalScore: number) => {
+    async function updateEnrollmentStatus(status: string, totalScore: number) {
         if (mode === 'preview' || studentId === "preview-admin" || !enrollment?.id) return;
         if (enrollment.status === 'completed' && status !== 'completed') return; // Don't downgrade status
 
@@ -333,11 +352,13 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 updatePayload.last_exam_score = quizScore;
                 updatePayload.last_exam_passed = true;
                 updatePayload.survey_completed = false;
+                setEvaluationPassed(true);
             } else if (finalStatus === 'completed') {
                 // Si ya completó todo, limpiar scores temporales
                 updatePayload.last_exam_score = null;
                 updatePayload.last_exam_passed = null;
                 updatePayload.survey_completed = true;
+                setEvaluationPassed(true);
             }
 
             await supabase
@@ -348,7 +369,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         } catch (err) {
             console.error("Error updating enrollment status:", err);
         }
-    };
+    }
 
     useEffect(() => {
         fetchEnrollment();
@@ -365,7 +386,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             modules.forEach((mod: any) => {
                 mod.items?.forEach((item: any) => {
                     // Si es un quiz y ya tiene puntaje de aprobación
-                    if (item.type === 'quiz' && enrollment.quiz_score >= (mod.settings?.min_score || 60)) {
+                    if (item.type === 'quiz' && (enrollment.last_exam_passed || enrollment.quiz_score >= (mod.settings?.min_score || 60))) {
                         if (!newSet.has(item.id)) {
                             newSet.add(item.id);
                             changed = true;
@@ -710,7 +731,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     )}
 
                                     {/* SCORM - Ocultar Reiniciar si ya se aprobó el quiz */}
-                                    {item.type === 'scorm' && !approved && (
+                                    {item.type === 'scorm' && !evaluationPassed && (
                                         <div className={`p-6 rounded-xl border flex items-center justify-between ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-brand/20 rounded-lg flex items-center justify-center">
@@ -732,14 +753,16 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Quiz */}
                                     {item.type === 'quiz' && (
-                                        <div className={`${(approved && isEvaluation) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        <div className={`${((approved || evaluationPassed) && isEvaluation) ? 'opacity-50 pointer-events-none' : ''}`}>
                                             <QuizEngine
                                                 questions={item.content.questions || []}
                                                 passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 100}
                                                 courseId={courseId}
                                                 enrollmentId={enrollment?.id}
+                                                currentEnrollment={enrollment}
                                                 onComplete={(score, passed) => handleEvaluationItemScore(item.id, score, 'quiz', passed)}
                                                 persistScore={isEvaluation}
+                                                forceFinished={isEvaluation && evaluationPassed}
                                                 language={language}
                                             />
                                         </div>
@@ -748,6 +771,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     {/* Survey */}
                                     {item.type === 'survey' && (
                                         <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden mt-6">
+                                            {evaluationPassed && !surveyDone && (
+                                                <div className="mx-6 mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                                                    <p className="text-yellow-500 text-xs md:text-sm font-bold text-center">{t.survey_pending_after_exam}</p>
+                                                </div>
+                                            )}
                                             <SurveyEngine 
                                                 surveyId={item.content?.survey_id} 
                                                 studentId={studentId}
@@ -756,7 +784,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                     handleItemCompletion(item.id);
                                                     setSurveyDone(true);
                                                     // Forzar guardado inmediato si ya estaba aprobado
-                                                    if (approved) {
+                                                    if (approved || evaluationPassed) {
                                                         const quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
                                                         const scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
                                                         const total = (quizScore! * quizWeight) + (scormScore * scormWeight);

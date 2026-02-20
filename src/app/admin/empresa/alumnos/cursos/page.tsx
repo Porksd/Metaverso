@@ -119,7 +119,7 @@ export default function CoursesPage() {
 
                 const scormProgress = progress?.find((p: any) => p.module_type === 'scorm');
                 const scormCompleted = !!scormProgress?.completed_at;
-                const quizCompleted = e.status === 'completed';
+                const quizCompleted = e.status === 'completed' || e.last_exam_passed === true;
 
                 // Verificar manualmente si hay encuesta obligatoria
                 // Solo necesitamos verificar esto si el curso está completado o el examen aprobado
@@ -145,11 +145,16 @@ export default function CoursesPage() {
                 }
 
                 // Calcular progreso parcial
-                let partialProgress = e.progress || 0; // Prioritize DB progress
+                let partialProgress = typeof e.progress === 'number' ? e.progress : 0;
                 const courseConfig = e.courses;
 
+                // Si ya aprobó evaluación final pero falta encuesta, el curso debe verse 100% completado.
+                if (quizCompleted) {
+                    partialProgress = Math.max(partialProgress, 100);
+                }
+
                 // Solo si no hay progreso guardado en DB (Legacy o SCORM antiguo), calcular dinámicamente
-                if (!partialProgress && partialProgress !== 0) { // Check if undefined/null
+                if (partialProgress === 0 && !quizCompleted) {
                     if (courseConfig?.scorm_weight && courseConfig?.quiz_weight) {
                         if (scormCompleted) partialProgress += parseFloat(courseConfig.scorm_weight);
                         if (quizCompleted) partialProgress += parseFloat(courseConfig.quiz_weight);
