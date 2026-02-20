@@ -327,6 +327,7 @@ export default function CoursesPage() {
             rut: user.rut,
             courseName: enrollment.course.name.toUpperCase(),
             date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString(),
+            score: enrollment.best_score ?? 100,
             signatures: sigs,
             studentSignature: studentSignature,
             companyLogo: companyInfo.logo_url,

@@ -7,6 +7,7 @@ interface CertificateCanvasProps {
     rut: string;
     courseName: string;
     date: string;
+    score?: number;
     signatures: { url: string; name: string; role: string }[];
     studentSignature?: string; 
     companyLogo?: string; 
@@ -17,11 +18,41 @@ interface CertificateCanvasProps {
     onReady: (blob: Blob) => void;
 }
 
+// ── Helpers ──────────────────────────────────────────────
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+    });
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let current = "";
+    for (const word of words) {
+        const test = current ? `${current} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth) {
+            if (current) lines.push(current);
+            current = word;
+        } else {
+            current = test;
+        }
+    }
+    if (current) lines.push(current);
+    return lines;
+}
+
+// ── Component ────────────────────────────────────────────
 export default function CertificateCanvas({
     studentName,
     rut,
     courseName,
     date,
+    score,
     signatures,
     studentSignature, 
     companyLogo,
@@ -36,261 +67,290 @@ export default function CertificateCanvas({
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Fonts
-        const fontBold = "bold 60px 'Inter', sans-serif";
-        const fontRegular = "40px 'Inter', sans-serif";
-        const fontSmall = "30px 'Inter', sans-serif";
-        const fontTitle = "bold 90px 'Inter', sans-serif";
+        const W = canvas.width;   // 1414
+        const H = canvas.height;  // 2000
+        const CX = W / 2;
+        const ML = 140;           // margen izquierdo
+        const MR = W - 140;       // margen derecho
+        const contentW = MR - ML; // ancho útil
 
-        // Load images
-        const bgImage = new Image();
-        bgImage.src = "/certificate-bg-white.jpg"; // We need a clean background or generate one
+        // ── Paleta ──
+        const BLACK   = "#1A1A1A";
+        const DARK    = "#333333";
+        const MID     = "#555555";
+        const LIGHT   = "#888888";
+        const ACCENT  = "#C8A951"; // dorado corporativo
+        const BG_DATA = "#F7F7F5";
+        const LINE_LT = "#E0E0E0";
 
-        bgImage.onload = async () => {
-            // Fondo blanco simple
+        const draw = async () => {
+            // ── Fondo blanco ──
             ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, W, H);
 
-            // Sin bordes
-            const marginLeft = 150;
-            const startY = 200;
-            let currentY = startY;
-            
-            // 0. LOGO DE LA EMPRESA (CENTRADO ARRIBA - MÁS GRANDE)
+            // ── Borde superior decorativo (línea dorada fina) ──
+            ctx.fillStyle = ACCENT;
+            ctx.fillRect(0, 0, W, 6);
+
+            let Y = 60;
+
+            // ── 1. Logo de empresa ──
             if (companyLogo) {
-                try {
-                    const logoImg = new Image();
-                    logoImg.crossOrigin = "anonymous";
-                    logoImg.src = companyLogo;
-                    await new Promise((resolve) => {
-                        logoImg.onload = resolve;
-                        logoImg.onerror = resolve;
-                    });
-                    
-                    const logoWidth = 450;
-                    const logoHeight = 180;
-                    ctx.drawImage(logoImg, (canvas.width / 2) - (logoWidth / 2), 40, logoWidth, logoHeight);
-                } catch (e) {
-                    console.error("Error loading company logo", e);
+                const logoImg = await loadImage(companyLogo);
+                if (logoImg) {
+                    const maxLogoH = 120;
+                    const maxLogoW = 400;
+                    const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
+                    const lw = logoImg.width * ratio;
+                    const lh = logoImg.height * ratio;
+                    ctx.drawImage(logoImg, CX - lw / 2, Y, lw, lh);
+                    Y += lh + 30;
+                } else {
+                    Y += 140;
                 }
+            } else {
+                Y += 80;
             }
 
-            currentY = 260;
-
-            // 1. TÍTULO: CERTIFICADO DE PARTICIPACIÓN (MÁS PEQUEÑO Y REFINADO)
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 50px 'Arial', sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("CERTIFICADO DE PARTICIPACIÓN", canvas.width / 2, currentY);
-            currentY += 30;
-            
-            // Línea decorativa bajo el título
-            ctx.beginPath();
-            ctx.moveTo(canvas.width / 2 - 400, currentY);
-            ctx.lineTo(canvas.width / 2 + 400, currentY);
-            ctx.strokeStyle = "#EEEEEE";
+            // ── 2. Línea decorativa superior ──
+            ctx.save();
+            const gradTop = ctx.createLinearGradient(ML + 100, 0, MR - 100, 0);
+            gradTop.addColorStop(0, "transparent");
+            gradTop.addColorStop(0.2, ACCENT);
+            gradTop.addColorStop(0.8, ACCENT);
+            gradTop.addColorStop(1, "transparent");
+            ctx.strokeStyle = gradTop;
             ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ML + 100, Y);
+            ctx.lineTo(MR - 100, Y);
             ctx.stroke();
-            currentY += 100;
+            ctx.restore();
+            Y += 50;
 
-            // 2. Párrafo de certificación
-            ctx.font = "24px 'Arial', sans-serif";
+            // ── 3. Título ──
+            ctx.textAlign = "center";
+            ctx.fillStyle = BLACK;
+            ctx.font = "600 54px 'Georgia', 'Times New Roman', serif";
+            ctx.fillText("CERTIFICADO DE PARTICIPACIÓN", CX, Y);
+            Y += 25;
+
+            // Línea decorativa bajo título
+            ctx.save();
+            const gradBot = ctx.createLinearGradient(ML + 100, 0, MR - 100, 0);
+            gradBot.addColorStop(0, "transparent");
+            gradBot.addColorStop(0.2, ACCENT);
+            gradBot.addColorStop(0.8, ACCENT);
+            gradBot.addColorStop(1, "transparent");
+            ctx.strokeStyle = gradBot;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ML + 100, Y);
+            ctx.lineTo(MR - 100, Y);
+            ctx.stroke();
+            ctx.restore();
+            Y += 60;
+
+            // ── 4. Párrafo introductorio ──
             ctx.textAlign = "left";
-            ctx.fillStyle = "#333333";
-            const text1 = `Se certifica que ${studentName}, de la empresa ${companyName || '[Empresa]'}, con el cargo de`;
-            ctx.fillText(text1, marginLeft, currentY);
-            currentY += 45;
-            const text2 = `${jobPosition || '[Cargo]'}, ha completado el contenido del curso:`;
-            ctx.fillText(text2, marginLeft, currentY);
-            currentY += 60;
-            
-            ctx.font = "bold 34px 'Arial', sans-serif";
-            ctx.fillStyle = "#000000";
-            ctx.fillText(courseName, marginLeft, currentY);
-            currentY += 100;
-
-            // 3. "Los siguientes son los datos obtenidos..."
-            ctx.font = "italic 22px 'Arial', sans-serif";
-            ctx.fillStyle = "#666666";
-            ctx.fillText("Los siguientes son los datos obtenidos en su participación:", marginLeft, currentY);
-            currentY += 50;
-
-            // 4. Datos tabulados (MÁS ORDENADOS CON FONDO TENUE)
-            ctx.fillStyle = "#F9F9F9";
-            ctx.fillRect(marginLeft - 20, currentY - 30, canvas.width - (marginLeft * 2) + 40, 360);
-            
-            ctx.font = "24px 'Arial', sans-serif";
-            ctx.fillStyle = "#000000";
-            const dataLeft = marginLeft + 40;
-            const dataValueX = dataLeft + 250;
-            
-            const drawDataRow = (label: string, value: string) => {
-                ctx.fillStyle = "#666666";
-                ctx.font = "22px 'Arial', sans-serif";
-                ctx.fillText(label, dataLeft, currentY);
-                ctx.fillStyle = "#000000";
-                ctx.font = "bold 22px 'Arial', sans-serif";
-                ctx.fillText(`: ${value}`, dataValueX, currentY);
-                currentY += 45;
-            };
-
-            drawDataRow("Nombre", studentName);
-            drawDataRow("RUT", rut);
-            drawDataRow("Cargo", jobPosition || 'No especificado');
-            drawDataRow("% Obtenido", "100%");
-            drawDataRow("Género", gender || 'No especificado');
-            drawDataRow("Edad", age ? `${age} años` : 'No especificada');
-            drawDataRow("Fecha de emisión", date);
-            
-            currentY += 80;
-
-            // 5. CONSENTIMIENTO
-            ctx.font = "bold 26px 'Arial', sans-serif";
-            ctx.fillText("CONSENTIMIENTO", marginLeft, currentY);
-            currentY += 45;
-
-            // 6. Texto de consentimiento
-            ctx.font = "18px 'Arial', sans-serif";
-            ctx.fillStyle = "#444444";
-            const consentLines = [
-                "Declaro que he sido informado/a de la finalidad y condiciones bajo las cuales se tratarán mis datos",
-                "personales, y autorizo expresamente a MetaversOtec a utilizar mi RUT y demás información señalada",
-                "para los fines descritos."
-            ];
-            consentLines.forEach(line => {
-                ctx.fillText(line, marginLeft, currentY);
-                currentY += 30;
-            });
-            currentY += 60;
-
-            // 7. Firma del alumno (CENTRAD)
-            if (studentSignature) {
-                try {
-                    const stuSigImg = new Image();
-                    stuSigImg.crossOrigin = "anonymous";
-                    stuSigImg.src = studentSignature;
-                    await new Promise((resolve) => {
-                        stuSigImg.onload = resolve;
-                        stuSigImg.onerror = resolve;
-                    });
-
-                    const sigWidth = 350;
-                    const sigHeight = 175;
-                    const centerX = canvas.width / 2;
-                    
-                    ctx.drawImage(stuSigImg, centerX - sigWidth/2, currentY, sigWidth, sigHeight);
-                    currentY += sigHeight + 10;
-
-                    // Línea de firma (centrada)
-                    ctx.beginPath();
-                    ctx.moveTo(centerX - 200, currentY);
-                    ctx.lineTo(centerX + 200, currentY);
-                    ctx.strokeStyle = "#000000";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    currentY += 30;
-
-                    // Etiqueta "Firma:" (centrada)
-                    ctx.font = "bold 16px Arial";
-                    ctx.fillStyle = "#000000";
-                    ctx.textAlign = "center";
-                    ctx.fillText("Firma:", centerX, currentY);
-                    currentY += 35;
-                    
-                    // Confirmación de consentimiento (centrado)
-                    ctx.font = "italic 14px Arial";
-                    ctx.fillText("✓ Acepto el tratamiento de mis datos personales según lo indicado anteriormente", centerX, currentY);
-                    currentY += 80; // Espacio reducido
-                } catch (e) {
-                    console.error("Error drawing student signature", e);
-                }
+            ctx.font = "22px 'Georgia', serif";
+            ctx.fillStyle = DARK;
+            const cargoText = jobPosition || "No especificado";
+            const introText = `Se certifica que ${studentName}, de la empresa ${companyName || 'No especificada'}, con el cargo de ${cargoText}, ha completado satisfactoriamente el contenido del curso:`;
+            const introLines = wrapText(ctx, introText, contentW);
+            for (const line of introLines) {
+                ctx.fillText(line, ML, Y);
+                Y += 34;
             }
+            Y += 25;
 
-            // 9. Firmas de la empresa (abajo - POSICIÓN DINÁMICA)
-            const signatureStartY = Math.max(currentY + 60, 1600);
-            currentY = signatureStartY;
-            
-            const sigSpacing = canvas.width / (signatures.length + 1);
-            
-            for (let i = 0; i < signatures.length; i++) {
-                const sig = signatures[i];
-                if (!sig.name && !sig.url) continue;
+            // ── 5. Nombre del curso ──
+            ctx.textAlign = "center";
+            ctx.font = "bold 38px 'Georgia', serif";
+            ctx.fillStyle = BLACK;
+            const courseLines = wrapText(ctx, courseName, contentW - 60);
+            for (const line of courseLines) {
+                ctx.fillText(line, CX, Y);
+                Y += 50;
+            }
+            Y += 30;
 
-                const xPos = sigSpacing * (i + 1);
+            // ── 6. Encabezado datos ──
+            ctx.textAlign = "left";
+            ctx.font = "italic 20px 'Georgia', serif";
+            ctx.fillStyle = LIGHT;
+            ctx.fillText("Los siguientes son los datos obtenidos en su participación:", ML, Y);
+            Y += 35;
 
-                if (sig.url) {
-                    try {
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        img.src = sig.url;
-                        await new Promise((resolve) => {
-                            img.onload = resolve;
-                            img.onerror = resolve;
-                        });
+            // ── 7. Tabla de datos ──
+            const rows: [string, string][] = [
+                ["Nombre", studentName],
+                ["RUT", rut],
+                ["Cargo", jobPosition || "No especificado"],
+                ["Puntaje obtenido", score != null ? `${score}%` : "100%"],
+                ["Género", gender || "No especificado"],
+                ["Edad", age ? `${age} años` : "No especificada"],
+                ["Fecha de emisión", date],
+            ];
+            const rowH = 42;
+            const tableH = rows.length * rowH + 20;
+            const labelColW = 220;
 
-                        const w = 220;
-                        const h = 100;
-                        ctx.drawImage(img, xPos - w/2, currentY, w, h);
-                    } catch (e) {
-                        console.error("Error drawing signature", e);
-                    }
+            // Fondo tabla
+            ctx.fillStyle = BG_DATA;
+            ctx.fillRect(ML, Y, contentW, tableH);
+
+            // Borde izquierdo dorado decorativo
+            ctx.fillStyle = ACCENT;
+            ctx.fillRect(ML, Y, 4, tableH);
+
+            Y += 28; // padding top
+            for (let i = 0; i < rows.length; i++) {
+                const [label, value] = rows[i];
+
+                // línea separadora suave entre filas
+                if (i > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(ML + 20, Y - 14);
+                    ctx.lineTo(MR - 20, Y - 14);
+                    ctx.strokeStyle = LINE_LT;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
                 }
 
-                // Línea y nombre
-                const lineY = currentY + 120;
-                ctx.beginPath();
-                ctx.moveTo(xPos - 130, lineY);
-                ctx.lineTo(xPos + 130, lineY);
-                ctx.strokeStyle = "#DDDDDD";
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                ctx.font = "20px 'Arial', sans-serif";
+                ctx.fillStyle = MID;
+                ctx.fillText(label, ML + 24, Y);
 
                 ctx.font = "bold 20px 'Arial', sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillStyle = "#000000";
-                ctx.fillText(sig.name || "", xPos, lineY + 30);
-                ctx.font = "16px 'Arial', sans-serif";
-                ctx.fillStyle = "#666666";
-                ctx.fillText(sig.role || "", xPos, lineY + 50);
+                ctx.fillStyle = BLACK;
+                ctx.fillText(value, ML + 24 + labelColW, Y);
+
+                Y += rowH;
+            }
+            Y += 30; // padding bottom extra
+
+            // ── 8. Consentimiento ──
+            Y += 20;
+            ctx.font = "bold 22px 'Arial', sans-serif";
+            ctx.fillStyle = BLACK;
+            ctx.fillText("CONSENTIMIENTO", ML, Y);
+            Y += 35;
+
+            ctx.font = "17px 'Arial', sans-serif";
+            ctx.fillStyle = MID;
+            const consentText = "Declaro que he sido informado/a de la finalidad y condiciones bajo las cuales se tratarán mis datos personales, y autorizo expresamente a MetaversOtec a utilizar mi RUT y demás información señalada para los fines descritos.";
+            const consentLines = wrapText(ctx, consentText, contentW);
+            for (const line of consentLines) {
+                ctx.fillText(line, ML, Y);
+                Y += 26;
+            }
+            Y += 30;
+
+            // ── 9. Firma del alumno (centrada) ──
+            if (studentSignature) {
+                const stuSigImg = await loadImage(studentSignature);
+                if (stuSigImg) {
+                    const sigW = 280;
+                    const sigH = 140;
+                    ctx.drawImage(stuSigImg, CX - sigW / 2, Y, sigW, sigH);
+                    Y += sigH + 8;
+
+                    // Línea
+                    ctx.beginPath();
+                    ctx.moveTo(CX - 160, Y);
+                    ctx.lineTo(CX + 160, Y);
+                    ctx.strokeStyle = BLACK;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    Y += 22;
+
+                    // Nombre y cargo
+                    ctx.textAlign = "center";
+                    ctx.font = "bold 18px 'Arial', sans-serif";
+                    ctx.fillStyle = BLACK;
+                    ctx.fillText(studentName, CX, Y);
+                    Y += 22;
+                    ctx.font = "16px 'Arial', sans-serif";
+                    ctx.fillStyle = LIGHT;
+                    ctx.fillText(jobPosition || "", CX, Y);
+                    Y += 18;
+
+                    // Checkmark consentimiento
+                    ctx.font = "italic 13px 'Arial', sans-serif";
+                    ctx.fillStyle = LIGHT;
+                    ctx.fillText("✓ Acepto el tratamiento de mis datos personales", CX, Y);
+                    ctx.textAlign = "left";
+                    Y += 50;
+                }
             }
 
-            // Generate Blob
+            // ── 10. Firmas empresa (abajo) ──
+            const sigAreaTop = Math.max(Y + 30, H - 300);
+            const validSigs = signatures.filter(s => s.url || s.name);
+            if (validSigs.length > 0) {
+                const spacing = contentW / validSigs.length;
+                for (let i = 0; i < validSigs.length; i++) {
+                    const sig = validSigs[i];
+                    const xCenter = ML + spacing * i + spacing / 2;
+                    let sY = sigAreaTop;
+
+                    if (sig.url) {
+                        const sigImg = await loadImage(sig.url);
+                        if (sigImg) {
+                            const sw = 200;
+                            const sh = 90;
+                            ctx.drawImage(sigImg, xCenter - sw / 2, sY, sw, sh);
+                            sY += sh + 10;
+                        } else {
+                            sY += 100;
+                        }
+                    } else {
+                        sY += 100;
+                    }
+
+                    // Línea
+                    ctx.beginPath();
+                    ctx.moveTo(xCenter - 120, sY);
+                    ctx.lineTo(xCenter + 120, sY);
+                    ctx.strokeStyle = LINE_LT;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    sY += 24;
+
+                    ctx.textAlign = "center";
+                    ctx.font = "bold 18px 'Arial', sans-serif";
+                    ctx.fillStyle = BLACK;
+                    ctx.fillText(sig.name || "", xCenter, sY);
+                    sY += 20;
+                    ctx.font = "15px 'Arial', sans-serif";
+                    ctx.fillStyle = LIGHT;
+                    ctx.fillText(sig.role || "", xCenter, sY);
+                }
+            }
+
+            // ── Borde inferior decorativo ──
+            ctx.fillStyle = ACCENT;
+            ctx.fillRect(0, H - 6, W, 6);
+
+            // ── Generar blob ──
             canvas.toBlob((blob) => {
                 if (blob) onReady(blob);
-            }, 'image/png');
+            }, "image/png");
         };
 
-        // Fallback execution if no bg image checks
-        // For now, we are creating content programmatically so we trigger it immediately 
-        // if we don't strictly wait for bgImage.onload. 
-        // But since we put logic inside onload, we need to ensure src is set.
-        // If image is missing, it won't trigger. so we'll handle error on bgImage
-        bgImage.onerror = () => {
-            // If BG fails, just fill white and run logic
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-                ctx.fillStyle = "#FFFFFF";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                onReady(new Blob()); // Fail gracefully or run similar drawing logic without bg
-            }
-        };
-
-        // Trigger load (using a base64 white pixel or actual path if exists)
-        // Using a data URI for a white background to ensure onload fires immediately
-        bgImage.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
-
-    }, [studentName, rut, courseName, date, signatures, studentSignature, companyLogo, onReady]);
+        draw().catch(console.error);
+    }, [studentName, rut, courseName, date, score, signatures, studentSignature, companyLogo, companyName, jobPosition, age, gender, onReady]);
 
     return (
         <canvas
             ref={canvasRef}
             width={1414}
             height={2000}
-            className="hidden" // Keep hidden, we only need the blob
+            className="hidden"
         />
     );
 }

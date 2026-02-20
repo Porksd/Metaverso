@@ -362,7 +362,8 @@ export default function EmpresaAdmin() {
                                                                         studentName: `${st.first_name} ${st.last_name}`, 
                                                                         rut: st.rut, 
                                                                         courseName: courseName.toUpperCase(), 
-                                                                        date: new Date(en.completed_at || Date.now()).toLocaleDateString(), 
+                                                                        date: new Date(en.completed_at || Date.now()).toLocaleDateString(),
+                                                                        score: en.best_score ?? 100,
                                                                         signatures: [
                                                                             { url: comp.signature_url_1, name: comp.signature_name_1, role: comp.signature_role_1 }, 
                                                                             { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 }, 
