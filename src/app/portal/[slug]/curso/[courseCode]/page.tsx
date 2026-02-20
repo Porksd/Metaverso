@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Lock, ArrowLeft, LogIn, UserPlus, Building2 } from "lucide-react";
+import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info } from "lucide-react";
 import SignatureCanvas from "@/components/SignatureCanvas";
 
 export default function CourseAuthPage() {
@@ -15,6 +15,8 @@ export default function CourseAuthPage() {
     const [loading, setLoading] = useState(true);
     const [company, setCompany] = useState<any>(null);
     const [course, setCourse] = useState<any>(null);
+    const [companyRoles, setCompanyRoles] = useState<any[]>([]);
+    const [selectedRoleDesc, setSelectedRoleDesc] = useState<string | null>(null);
     
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     
@@ -25,7 +27,7 @@ export default function CourseAuthPage() {
     const [regStep, setRegStep] = useState(1);
     const [regData, setRegData] = useState({
         first_name: '', last_name: '', email: '', password: '', 
-        rut: '', passport: '', gender: '', age: '', position: '', language: 'es'
+        rut: '', passport: '', gender: '', age: '', position: '', role_id: '', language: 'es'
     });
     const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
 
@@ -58,7 +60,14 @@ export default function CourseAuthPage() {
 
                 setCourse(crs);
 
-                // 3. Set Auth Mode
+                // 3. Fetch company roles for Cargo selector
+                const { data: roles } = await supabase
+                    .from('company_roles')
+                    .select('id, name, name_ht, description, description_ht')
+                    .eq('company_id', comp.id);
+                if (roles) setCompanyRoles(roles);
+
+                // 4. Set Auth Mode
                 if (trueMode === 'restricted') {
                     setAuthMode('login');
                 } else {
@@ -135,7 +144,8 @@ export default function CourseAuthPage() {
                 body: JSON.stringify({
                     ...regData,
                     company_name: company.name, 
-                    client_id: company.id, // Enforce stricter link
+                    client_id: company.id,
+                    role_id: regData.role_id || null,
                     digital_signature_url: signatureUrl
                 })
             });
@@ -309,36 +319,122 @@ export default function CourseAuthPage() {
                                             onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                                             value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
                                     </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">RUT / ID</label>
-                                        <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
-                                            value={regData.rut} onChange={e => setRegData({...regData, rut: e.target.value})} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">RUT / ID</label>
+                                            <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
+                                                value={regData.rut} onChange={e => setRegData({...regData, rut: e.target.value})} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Cargo</label>
+                                            <select 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none" 
+                                                style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
+                                                value={regData.role_id} 
+                                                onChange={e => {
+                                                    const roleId = e.target.value;
+                                                    const role = companyRoles.find(r => r.id === roleId);
+                                                    setRegData({...regData, role_id: roleId, position: role?.name || ''});
+                                                    const desc = regData.language === 'ht' 
+                                                        ? (role?.description_ht || role?.description) 
+                                                        : role?.description;
+                                                    setSelectedRoleDesc(desc || null);
+                                                }}
+                                            >
+                                                <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>
+                                                    {regData.language === 'ht' ? 'Chwazi' : 'Seleccione'}
+                                                </option>
+                                                {companyRoles.map(role => (
+                                                    <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                        {regData.language === 'ht' ? (role.name_ht || role.name) : role.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {selectedRoleDesc && (
+                                                <div className="flex items-start gap-2 mt-1.5 p-2.5 bg-brand/10 border border-brand/20 rounded-lg">
+                                                    <Info className="w-3.5 h-3.5 text-brand mt-0.5 shrink-0" />
+                                                    <p className="text-[11px] text-brand/80 leading-relaxed">{selectedRoleDesc}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Género</label>
-                                            <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs" 
-                                                value={regData.gender} onChange={e => setRegData({...regData, gender: e.target.value})}>
-                                                <option value="">Seleccione</option>
-                                                <option value="Masculino">Masculino</option>
-                                                <option value="Femenino">Femenino</option>
-                                                <option value="Otro">Otro</option>
+                                            <select 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none" 
+                                                style={{ color: regData.gender ? '#FFFFFF' : '#9CA3AF' }}
+                                                value={regData.gender} 
+                                                onChange={e => setRegData({...regData, gender: e.target.value})}
+                                            >
+                                                <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>
+                                                    {regData.language === 'ht' ? 'Chwazi' : 'Seleccione'}
+                                                </option>
+                                                <option value="Masculino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                    {regData.language === 'ht' ? 'Gason' : 'Masculino'}
+                                                </option>
+                                                <option value="Femenino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                    {regData.language === 'ht' ? 'Fi' : 'Femenino'}
+                                                </option>
+                                                <option value="Otro" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                    {regData.language === 'ht' ? 'Lòt' : 'Otro'}
+                                                </option>
                                             </select>
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">Edad</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+                                                {regData.language === 'ht' ? 'Laj' : 'Edad'}
+                                            </label>
                                             <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
                                                 value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
                                         </div>
                                     </div>
 
+                                    {/* Language Switcher */}
+                                    <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
+                                        <Globe className="w-4 h-4 text-white/40" />
+                                        <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+                                            {regData.language === 'ht' ? 'Lang' : 'Idioma'}
+                                        </span>
+                                        <div className="flex-1 flex gap-2 justify-end">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setRegData({...regData, language: 'es'});
+                                                    // Update tooltip if a role is selected
+                                                    if (regData.role_id) {
+                                                        const role = companyRoles.find(r => r.id === regData.role_id);
+                                                        setSelectedRoleDesc(role?.description || null);
+                                                    }
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${regData.language === 'es' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                                            >
+                                                Español
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setRegData({...regData, language: 'ht'});
+                                                    // Update tooltip if a role is selected
+                                                    if (regData.role_id) {
+                                                        const role = companyRoles.find(r => r.id === regData.role_id);
+                                                        setSelectedRoleDesc(role?.description_ht || role?.description || null);
+                                                    }
+                                                }}
+                                                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${regData.language === 'ht' ? 'bg-brand text-black' : 'bg-white/5 text-white/50 hover:text-white'}`}
+                                            >
+                                                Kreyòl
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <button onClick={() => {
                                         if(!regData.email || !regData.password || !regData.rut) {
-                                            setError("Completa los campos obligatorios"); return;
+                                            setError(regData.language === 'ht' ? "Ranpli tout chan obligatwa yo" : "Completa los campos obligatorios"); return;
                                         }
                                         setRegStep(2);
                                     }} className="w-full mt-4 py-4 bg-brand text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all text-xs">
-                                        Continuar a Firma
+                                        {regData.language === 'ht' ? 'Kontinye nan Siyati' : 'Continuar a Firma'}
                                     </button>
                                 </div>
                             )}
