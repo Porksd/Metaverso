@@ -119,15 +119,16 @@ export default function CoursesPage() {
 
                 const scormProgress = progress?.find((p: any) => p.module_type === 'scorm');
                 const scormCompleted = !!scormProgress?.completed_at;
-                const quizCompleted = e.status === 'completed' || e.last_exam_passed === true;
+                const quizProgressEntry = progress?.find((p: any) => p.module_type === 'quiz' && p.completed_at);
+                const quizCompleted = e.status === 'completed' || e.last_exam_passed === true || !!quizProgressEntry;
 
                 // Verificar manualmente si hay encuesta obligatoria
                 // Solo necesitamos verificar esto si el curso está completado o el examen aprobado
                 let hasMandatorySurvey = false;
                 if (quizCompleted || e.last_exam_passed) {
                     try {
-                        // Obtener los modules IDs
-                        const moduleIds = e.courses?.course_modules?.map((cm: any) => cm.module_id) || [];
+                        // Obtener los modules IDs (course_modules.id ES el module_id referenciado por module_items)
+                        const moduleIds = e.courses?.course_modules?.map((cm: any) => cm.id) || [];
                         if (moduleIds.length > 0) {
                             const { data: modItemsData } = await supabase
                                 .from('module_items')
@@ -474,14 +475,14 @@ export default function CoursesPage() {
                                                         // Buscar el enrollment actualizado
                                                         const { data: updatedEnrollment, error } = await supabase
                                                             .from('enrollments')
-                                                            .select('*, courses(*, course_modules(module:modules(items:module_items(*))))')
+                                                            .select('*, courses(*, course_modules(*, module_items(*)))')
                                                             .eq('id', activeCourse.id)
                                                             .single();
                                                         
                                                         if (updatedEnrollment) {
                                                             // Verificar si hay alguna encuesta obligatoria pendiente
                                                             const hasPendingSurvey = updatedEnrollment.courses?.course_modules?.some((cm: any) => 
-                                                                cm.module?.items?.some((item: any) => 
+                                                                cm.module_items?.some((item: any) => 
                                                                     item.type === 'survey' && 
                                                                     item.content?.is_mandatory && 
                                                                     !updatedEnrollment.survey_completed
@@ -607,7 +608,9 @@ export default function CoursesPage() {
 
                             // Si 'last_exam_passed' no existe (undefined) pero status es completed, asumimos que NO hay examen pendiente
                             // PERO si hay encuesta obligatoria y no está completada, es pending survey.
-                            const surveyPending = ((enrollment.last_exam_passed === true) || (isCompleted && hasMandatorySurvey)) && hasMandatorySurvey && !enrollment.survey_completed;
+                            // quizCompleted considera: status completed, last_exam_passed, o course_progress quiz completado
+                            const quizWasCompleted = enrollment.last_exam_passed === true || isCompleted || !!(enrollment.partial_progress >= 100);
+                            const surveyPending = quizWasCompleted && hasMandatorySurvey && !enrollment.survey_completed;
                             
                             const course = enrollment.course;
 

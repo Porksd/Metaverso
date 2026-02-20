@@ -150,9 +150,18 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
         // Intentar obtener pesos del módulo actual o del curso
         const currentModule = modules[activeModuleIndex];
-        const quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
-        const scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+        let quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+        let scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
         const minPass = currentModule?.settings?.min_score ?? enrollment?.courses?.config?.passing_score ?? 90;
+
+        // AUTO-AJUSTE: Si el módulo de evaluación NO tiene items SCORM, 
+        // el peso del quiz debe ser 100% (no tiene sentido penalizar por un SCORM inexistente)
+        const hasScormItem = currentModule?.items?.some((item: any) => item.type === 'scorm');
+        if (!hasScormItem && scormWeight > 0) {
+            console.log('[CoursePlayer] No SCORM item found in module, adjusting quiz weight to 100%');
+            quizWeight = 1;
+            scormWeight = 0;
+        }
 
         const qScore = quizScore || 0;
         const sScore = scormScore || 0;
@@ -268,6 +277,13 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             if (data) {
                 setEnrollment(data);
                 
+                // Consultar course_progress para detectar quiz completado (fallback si columna last_exam_passed no existe)
+                const { data: cpData } = await supabase
+                    .from('course_progress')
+                    .select('module_type, completed_at, raw_score')
+                    .eq('enrollment_id', data.id);
+                const quizProgressEntry = cpData?.find((p: any) => p.module_type === 'quiz' && p.completed_at);
+
                 // SOLO cargar puntajes si el curso NO está reiniciado (status != 'not_started')
                 // Si está en not_started, resetear todo a 0 y comenzar desde el principio
                 if (data.status === 'not_started') {
@@ -297,8 +313,17 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         setSurveyDone(true);
                     }
 
-                    if (data.last_exam_passed || data.status === 'completed') {
+                    // Detectar evaluación aprobada desde MÚLTIPLES fuentes (robustez si la columna last_exam_passed no existe aún)
+                    const examPassed = data.last_exam_passed === true || 
+                        data.status === 'completed' || 
+                        !!quizProgressEntry;
+                    
+                    if (examPassed) {
                         setEvaluationPassed(true);
+                        // Restaurar score desde course_progress si no está en enrollment
+                        if (!data.quiz_score && !data.last_exam_score && quizProgressEntry?.raw_score) {
+                            setQuizScore(quizProgressEntry.raw_score);
+                        }
                     }
 
                     // Si no hay scores detallados todavía, pero hay un best_score (migración vieja), lo usamos de base para el quiz
@@ -523,10 +548,15 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 // Calcular porcentaje de progreso basado en total de módulos
                 const progressPercent = modules.length > 0 ? Math.round((index / modules.length) * 100) : 0;
 
+                // Si la evaluación ya fue aprobada, NO reducir el progress (podría estar en 100%)
+                const safeProgress = evaluationPassed 
+                    ? Math.max(progressPercent, enrollment?.progress || 0, 100) 
+                    : progressPercent;
+
                 // Si estamos avanzando desde el módulo 0 y el status es 'not_started', actualizar a 'in_progress'
                 const updatePayload: any = { 
                     current_module_index: index, 
-                    progress: progressPercent 
+                    progress: safeProgress 
                 };
                 
                 if (enrollment?.status === 'not_started' && index > 0) {

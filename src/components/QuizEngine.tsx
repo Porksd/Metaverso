@@ -244,9 +244,10 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
         if (isValidUUID) {
             try {
-                // FALLBACK: Usamos best_score mientras la columna quiz_score no existe
-                // SOLO si persistScore es true (Legacy o Evaluación Individual)
-                if (persistScore) {
+                // SOLO persistir estado directamente si NO hay un handler onComplete externo.
+                // Cuando onComplete existe (ej: CoursePlayer evaluación), el componente padre
+                // maneja la lógica de estado con verificación de encuestas pendientes.
+                if (persistScore && !onComplete) {
                     await supabase
                         .from('enrollments')
                         .update({
@@ -255,7 +256,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                             completed_at: passed ? new Date().toISOString() : null
                         })
                         .eq('id', targetEnrollmentId);
-                    console.log("QuizEngine: Enrollment updated directly (persistScore=true)");
+                    console.log("QuizEngine: Enrollment updated directly (persistScore=true, no onComplete)");
                 }
 
                 // 2. Guardar en course_progress para tracking de completitud
