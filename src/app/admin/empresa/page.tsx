@@ -227,6 +227,11 @@ export default function EmpresaAdmin() {
         if (showCompanyManager) fetchCompanyList();
     }, [showCompanyManager]);
 
+    // Also load companies on initial page load so the edit modal has them
+    useEffect(() => {
+        if (companyId) fetchCompanyList();
+    }, [companyId]);
+
     const handleCreateCompany = async (name: string) => {
         const code = name.toUpperCase().replace(/\s+/g, '_');
         const { error } = await supabase.from('companies_list').insert({ name_es: name, code });
