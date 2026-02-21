@@ -16,12 +16,13 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
     const [viewMode, setViewMode] = useState<'visual' | 'code'>('visual');
     const [htmlContent, setHtmlContent] = useState(content || '');
 
-    // Sincronizar contenido inicial
+    // Sincronizar contenido cuando cambia la prop externa (ej: al editar o limpiar)
     useEffect(() => {
         if (editorRef.current && content !== editorRef.current.innerHTML) {
             editorRef.current.innerHTML = content || '<p><br></p>';
+            setHtmlContent(content || '');
         }
-    }, []);
+    }, [content]);
 
     const execCommand = (command: string, value: string = '') => {
         document.execCommand(command, false, value);
