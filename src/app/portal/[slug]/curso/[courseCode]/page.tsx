@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown, Search } from "lucide-react";
+import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown, Search, CheckCircle2 } from "lucide-react";
 import SignatureCanvas from "@/components/SignatureCanvas";
 
 // ── Chilean RUT Validator ──
@@ -55,6 +55,8 @@ export default function CourseAuthPage() {
     const [companiesList, setCompaniesList] = useState<any[]>([]);
     const [empresaInput, setEmpresaInput] = useState('');
     const [empresaDropdownOpen, setEmpresaDropdownOpen] = useState(false);
+    const [showJobInfoModal, setShowJobInfoModal] = useState(false);
+    const [hasReadJobInfo, setHasReadJobInfo] = useState(false);
     
     const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
     
@@ -550,6 +552,10 @@ export default function CourseAuthPage() {
                                                             ? (role?.description_ht || role?.description) 
                                                             : role?.description;
                                                         setSelectedRoleDesc(desc || null);
+                                                        setHasReadJobInfo(false); // Reset acceptance when role changes
+                                                        if (desc) {
+                                                            setShowJobInfoModal(true); // Open modal automatically when role has description
+                                                        }
                                                     }}
                                                 >
                                                     <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
@@ -564,21 +570,36 @@ export default function CourseAuthPage() {
                                         </div>
                                     </div>
 
-                                    {/* Tooltip full width — below RUT+Cargo row, arrow points to cargo */}
+                                    {/* Tooltip trigger button instead of full width tooltip */}
                                     {selectedRoleDesc && (
-                                        <div className="relative bg-brand/10 border border-brand/20 rounded-xl p-3">
-                                            {/* Arrow pointing up-right toward Cargo column */}
-                                            <div className="absolute -top-2 right-[25%] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-brand/20" />
-                                            <div className="flex items-start gap-2.5">
-                                                <Info className="w-4 h-4 text-brand mt-0.5 shrink-0" />
-                                                <div>
-                                                    <p className="text-[10px] font-black text-brand/60 uppercase tracking-wider mb-0.5">
-                                                        {companyRoles.find(r => r.id === regData.role_id)?.name || t.cargo}
-                                                    </p>
-                                                    <p className="text-[12px] text-brand/80 leading-relaxed">{selectedRoleDesc}</p>
-                                                </div>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowJobInfoModal(true)}
+                                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                                hasReadJobInfo 
+                                                    ? 'bg-brand/10 border-brand/30 text-brand' 
+                                                    : 'bg-orange-500/10 border-orange-500/30 text-orange-400 animate-pulse'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                                    {lang === 'ht' ? 'Enfòmasyon sou Risk' : 'Información de Riesgos'}
+                                                </span>
                                             </div>
-                                        </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold">
+                                                    {hasReadJobInfo 
+                                                        ? (lang === 'ht' ? 'AKSEPTE' : 'ACEPTADO') 
+                                                        : (lang === 'ht' ? 'LI KOUNYE A' : 'LEER AHORA')}
+                                                </span>
+                                                {hasReadJobInfo ? (
+                                                    <CheckCircle2 className="w-4 h-4" />
+                                                ) : (
+                                                    <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                                                )}
+                                            </div>
+                                        </button>
                                     )}
 
                                     <div className="grid grid-cols-2 gap-4">
@@ -616,6 +637,12 @@ export default function CourseAuthPage() {
                                             setError(t.invalidRut);
                                             return;
                                         }
+                                        // Specific check for Job Info acceptance
+                                        if (selectedRoleDesc && !hasReadJobInfo) {
+                                            setError(lang === 'ht' ? 'Ou dwe li epi aksepte enfòmasyon sou pòs la anvan.' : 'Debes leer y aceptar la información del cargo antes de continuar.');
+                                            setShowJobInfoModal(true);
+                                            return;
+                                        }
                                         setError(null);
                                         setRegStep(2);
                                     }} className="w-full mt-4 py-4 bg-brand text-black font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] transition-all text-xs">
@@ -645,6 +672,73 @@ export default function CourseAuthPage() {
                     )}
                 </div>
             </div>
-        </div>
+            {/* Job Info Modal */}
+            {showJobInfoModal && selectedRoleDesc && (
+                <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="glass max-w-2xl w-full flex flex-col max-h-[90vh] border-white/10"
+                    >
+                        {/* Header */}
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                            <h3 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-2">
+                                <Info className="w-5 h-5 text-brand" />
+                                {lang === 'ht' ? 'Enfòmasyon sou Pòs' : 'Información del Cargo'}
+                            </h3>
+                            <div className="text-[10px] font-black uppercase text-brand/60 px-2 py-1 bg-brand/10 border border-brand/20 rounded">
+                                {companyRoles.find(r => r.id === regData.role_id)?.name}
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8 overflow-y-auto space-y-6 custom-scrollbar">
+                            <div 
+                                className="prose prose-invert prose-brand max-w-none text-white/80 leading-relaxed"
+                                dangerouslySetInnerHTML={{ __html: selectedRoleDesc }}
+                            />
+
+                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                                <p className="text-[11px] text-white/60 leading-relaxed italic">
+                                    {lang === 'ht' 
+                                        ? "Konfòm ak sa ki prevwa nan Dekrè Nº 44, Tit II, paragraf 4, atik 15 nan “ENFÒME RISK TRAVAY (IRL)”. Se poutèt sa, moun ki siyen anba a; deklare li konnen risk ki genyen nan travay l ap fè yo, mezi prevansyon li dwe respekte ak swiv imedyatman, nan fè travay li atravè metòd travay kòrèk ak ansekirite."
+                                        : "En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”. Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros."
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Footer / Accept */}
+                        <div className="p-6 border-t border-white/5 bg-white/[0.02] space-y-4">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className={`mt-0.5 w-5 h-5 rounded border-2 transition-all flex items-center justify-center ${hasReadJobInfo ? 'bg-brand border-brand' : 'border-white/20 group-hover:border-brand/50'}`}>
+                                    {hasReadJobInfo && <LogIn className="w-3 h-3 text-black" />}
+                                    <input 
+                                        type="checkbox" 
+                                        className="hidden" 
+                                        checked={hasReadJobInfo} 
+                                        onChange={e => setHasReadJobInfo(e.target.checked)} 
+                                    />
+                                </div>
+                                <span className={`text-sm font-bold transition-colors ${hasReadJobInfo ? 'text-white' : 'text-white/40'}`}>
+                                    {lang === 'ht' ? 'Mwen li epi mwen aksepte enfòmasyon an' : 'He leído y acepto la información'}
+                                </span>
+                            </label>
+
+                            <button 
+                                onClick={() => setShowJobInfoModal(false)}
+                                disabled={!hasReadJobInfo}
+                                className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs transition-all ${
+                                    hasReadJobInfo 
+                                        ? 'bg-brand text-black shadow-[0_0_20px_rgba(49,210,45,0.2)] hover:scale-[1.02]' 
+                                        : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                }`}
+                            >
+                                {lang === 'ht' ? 'Fèmen' : 'Cerrar'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}        </div>
     );
 }

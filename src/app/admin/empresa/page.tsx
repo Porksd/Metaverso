@@ -11,6 +11,7 @@ import CertificateCanvas from "@/components/CertificateCanvas";
 import ManagerDashboard from "@/components/ManagerDashboard";
 import EnhancedManagerDashboard from "@/components/EnhancedManagerDashboard";
 import CompanyConfig from "@/components/CompanyConfig";
+import RichTextEditor from "@/components/RichTextEditor";
 import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +27,8 @@ export default function EmpresaAdmin() {
     const [editingCargo, setEditingCargo] = useState<any>(null);
     const [showConfig, setShowConfig] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [cargoDesc, setCargoDesc] = useState("");
+    const [cargoDescHT, setCargoDescHT] = useState("");
     const [certData, setCertData] = useState<any>(null);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
@@ -788,19 +791,26 @@ export default function EmpresaAdmin() {
                                     <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name_ht || ''} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <textarea id="newCargoDesc" placeholder="Descripción / Tip (Español)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10 text-white" defaultValue={editingCargo?.description || ''} />
-                                    <textarea id="newCargoDescHT" placeholder="Descripción / Tip (Creole)..." rows={2} className="bg-white/5 p-3 rounded-xl text-xs border border-white/10 text-white" defaultValue={editingCargo?.description_ht || ''} />
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Descripción (ES)</label>
+                                        <RichTextEditor content={cargoDesc} onChange={setCargoDesc} />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Descripción (HT)</label>
+                                        <RichTextEditor content={cargoDescHT} onChange={setCargoDescHT} />
+                                    </div>
                                 </div>
                                 <div className="flex gap-3">
                                     {editingCargo && (
                                         <button
                                             onClick={() => {
                                                 setEditingCargo(null);
+                                                setCargoDesc("");
+                                                setCargoDescHT("");
                                                 const n = document.getElementById('newCargoName') as HTMLInputElement;
                                                 const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
-                                                const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement;
-                                                const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement;
-                                                if(n) n.value = ''; if(nHT) nHT.value = ''; if(d) d.value = ''; if(dHT) dHT.value = '';
+                                                if(n) n.value = '';
+                                                if(nHT) nHT.value = '';
                                             }}
                                             className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all"
                                         >
@@ -811,8 +821,6 @@ export default function EmpresaAdmin() {
                                         onClick={async () => { 
                                             const n = document.getElementById('newCargoName') as HTMLInputElement; 
                                             const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
-                                            const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement; 
-                                            const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement; 
                                             
                                             if(!n.value || !companyId) return; 
                                             
@@ -821,13 +829,15 @@ export default function EmpresaAdmin() {
                                                 const { error } = await supabase.from('company_roles').update({ 
                                                     name: n.value, 
                                                     name_ht: nHT.value || null,
-                                                    description: d.value || null,
-                                                    description_ht: dHT.value || null
+                                                    description: cargoDesc || null,
+                                                    description_ht: cargoDescHT || null
                                                 }).eq('id', editingCargo.id);
                                                 if(error) alert(error.message);
                                                 else {
                                                     setEditingCargo(null);
-                                                    n.value = ''; nHT.value = ''; d.value = ''; dHT.value = '';
+                                                    setCargoDesc("");
+                                                    setCargoDescHT("");
+                                                    n.value = ''; nHT.value = '';
                                                     fetchData();
                                                 }
                                             } else {
@@ -835,13 +845,15 @@ export default function EmpresaAdmin() {
                                                 const {error} = await supabase.from('company_roles').insert({ 
                                                     name: n.value, 
                                                     name_ht: nHT.value || null,
-                                                    description: d.value || null,
-                                                    description_ht: dHT.value || null,
+                                                    description: cargoDesc || null,
+                                                    description_ht: cargoDescHT || null,
                                                     company_id: companyId 
                                                 }); 
                                                 if(error) alert(error.message); 
                                                 else {
-                                                    n.value = ''; nHT.value = ''; d.value = ''; dHT.value = '';
+                                                    n.value = ''; nHT.value = '';
+                                                    setCargoDesc("");
+                                                    setCargoDescHT("");
                                                     fetchData(); 
                                                 }
                                             }
@@ -871,11 +883,11 @@ export default function EmpresaAdmin() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
                                                 <div>
                                                     <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
-                                                    <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description || 'N/A' }} />
                                                 </div>
                                                 <div>
                                                     <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
-                                                    <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
+                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description_ht || 'N/A' }} />
                                                 </div>
                                             </div>
                                         )}
@@ -895,16 +907,14 @@ export default function EmpresaAdmin() {
                                             <div className="flex items-center gap-1">
                                                 <button onClick={() => {
                                                     setEditingCargo(c);
+                                                    setCargoDesc(c.description || "");
+                                                    setCargoDescHT(c.description_ht || "");
                                                     // Pre-fill the form inputs
                                                     setTimeout(() => {
                                                         const n = document.getElementById('newCargoName') as HTMLInputElement;
                                                         const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
-                                                        const d = document.getElementById('newCargoDesc') as HTMLTextAreaElement;
-                                                        const dHT = document.getElementById('newCargoDescHT') as HTMLTextAreaElement;
                                                         if(n) n.value = c.name || '';
                                                         if(nHT) nHT.value = c.name_ht || '';
-                                                        if(d) d.value = c.description || '';
-                                                        if(dHT) dHT.value = c.description_ht || '';
                                                     }, 50);
                                                 }} className="text-white/20 hover:text-brand transition-colors" title="Editar">
                                                     <Pencil className="w-4 h-4" />
@@ -918,18 +928,18 @@ export default function EmpresaAdmin() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
                                                 <div>
                                                     <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
-                                                    <p className="text-[10px] text-white/40 italic">{c.description || 'N/A'}</p>
+                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description || 'N/A' }} />
                                                 </div>
                                                 <div>
                                                     <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
-                                                    <p className="text-[10px] text-white/40 italic">{c.description_ht || 'N/A'}</p>
+                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description_ht || 'N/A' }} />
                                                 </div>
                                             </div>
                                         )}
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={() => { setShowCargoManager(false); setEditingCargo(null); }} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
+                            <button onClick={() => { setShowCargoManager(false); setEditingCargo(null); setCargoDesc(""); setCargoDescHT(""); }} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
                         </div>
                     </div>
                 )}
