@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown, Search, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
 import SignatureCanvas from "@/components/SignatureCanvas";
 
 // ── Chilean RUT Validator ──
