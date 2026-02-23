@@ -77,9 +77,15 @@ export default function SurveyStats() {
             setUserRole(profile.role);
             setIsAuthorized(true);
         } else {
-            const allowedEmails = ['apacheco@lobus.cl', 'porksde@gmail.com'];
-            if (email && allowedEmails.includes(email)) {
+            // Fallback for known admins if no DB profile exists yet
+            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
+            const fallbackEditors = ['admin@metaversotec.com'];
+
+            if (email && absoluteSuperAdmins.includes(email)) {
                 setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else if (email && fallbackEditors.includes(email)) {
+                setUserRole('editor');
                 setIsAuthorized(true);
             } else {
                 setIsAuthorized(false);

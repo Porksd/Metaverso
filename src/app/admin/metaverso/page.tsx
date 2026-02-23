@@ -72,10 +72,15 @@ export default function MetaversoAdmin() {
             setUserRole(profile.role);
             setIsAuthorized(true);
         } else {
-            // Fallback ONLY for the main owner if no profile exists yet
-            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com'];
+            // Fallback for known admins if no DB profile exists yet
+            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
+            const fallbackEditors = ['admin@metaversotec.com'];
+
             if (email && absoluteSuperAdmins.includes(email)) {
                 setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else if (email && fallbackEditors.includes(email)) {
+                setUserRole('editor');
                 setIsAuthorized(true);
             } else {
                 setIsAuthorized(false);

@@ -41,8 +41,23 @@ export default function CoursesAdmin() {
                 .eq('email', session.user.email)
                 .maybeSingle();
 
-            const superAdmins = ['apacheco@lobus.cl', 'soporte@lobus.cl', 'm.poblete.m@gmail.com'];
-            const role = profile?.role || (superAdmins.includes(session.user.email || '') ? 'superadmin' : 'editor');
+            const superAdmins = ['apacheco@lobus.cl', 'soporte@lobus.cl', 'm.poblete.m@gmail.com', 'porksde@gmail.com'];
+            const editorEmails = ['admin@metaversotec.com'];
+
+            let role: 'superadmin' | 'editor' = 'editor';
+            if (profile) {
+                role = profile.role;
+            } else if (session.user.email && superAdmins.includes(session.user.email)) {
+                role = 'superadmin';
+            } else if (session.user.email && editorEmails.includes(session.user.email)) {
+                role = 'editor';
+            } else {
+                // If not in fallback list and no profile, sign out or redirect
+                await supabase.auth.signOut();
+                router.push("/admin/metaverso/login?error=unauthorized");
+                return;
+            }
+
             setUserRole(role);
 
             fetchCourses();
