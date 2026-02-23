@@ -272,6 +272,12 @@ export default function CourseAuthPage() {
 
             // Store the clean RUT (without dots/dash) in the DB
             const cleanedRut = idType === 'rut' ? cleanRut(regData.rut) : null;
+            
+            // Clean up empty strings for optional fields to avoid type errors
+            const ageVal = regData.age && regData.age.trim() !== '' ? parseInt(regData.age) : null;
+            const genderVal = regData.gender === '' ? null : regData.gender;
+            const roleVal = regData.role_id === '' ? null : regData.role_id;
+            
             const res = await fetch('/api/students/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -282,7 +288,10 @@ export default function CourseAuthPage() {
                     language: lang,
                     company_name: trimmedEmpresa || company.name, 
                     client_id: company.id,
-                    role_id: regData.role_id || null,
+                    role_id: roleVal || null,
+                    position: regData.position || null,
+                    age: ageVal,
+                    gender: genderVal,
                     digital_signature_url: signatureUrl
                 })
             });
@@ -327,6 +336,12 @@ export default function CourseAuthPage() {
     if (!company || !course) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-red-500">Recurso no disponible</div>;
 
     const isRestricted = course.registration_mode === 'restricted';
+
+    // Helper to check field visibility
+    const isFieldVisible = (field: string) => {
+        if (!company?.user_registration_config) return true; // Default to visible if no config
+        return company.user_registration_config[field]?.visible !== false;
+    };
 
     const handleRutInput = (value: string) => {
         // Auto-format as user types
@@ -502,6 +517,7 @@ export default function CourseAuthPage() {
                                     </div>
 
                                     {/* Empresa autocomplete */}
+                                    {isFieldVisible('company_collab') && (
                                     <div className="space-y-1 relative empresa-autocomplete">
                                         <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}</label>
                                         <div className="relative">
@@ -547,6 +563,7 @@ export default function CourseAuthPage() {
                                             </div>
                                         )}
                                     </div>
+                                    )}
                                     
                                     {/* ID Type + Cargo row */}
                                     <div className="grid grid-cols-2 gap-4">
@@ -595,34 +612,40 @@ export default function CourseAuthPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}</label>
-                                            <div className="relative">
-                                                <select 
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
-                                                    style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
-                                                    value={regData.role_id} 
-                                                    onChange={e => {
-                                                        const roleId = e.target.value;
-                                                        const role = companyRoles.find(r => r.id === roleId);
-                                                        setRegData({...regData, role_id: roleId, position: role?.name || ''});
-                                                        const desc = lang === 'ht' 
-                                                            ? (role?.description_ht || role?.description) 
-                                                            : role?.description;
-                                                        setSelectedRoleDesc(desc || null);
-                                                        setHasReadJobInfo(false); // Reset acceptance when role changes
-                                                        if (desc) {
-                                                            setShowJobInfoModal(true); // Open modal automatically when role has description
-                                                        }
-                                                    }}
-                                                >
-                                                    <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
-                                                    {companyRoles.map(role => (
-                                                        <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                            {lang === 'ht' ? (role.name_ht || role.name) : role.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                            </div>
+                                            {isFieldVisible('job_position') ? (
+                                                <div className="relative">
+                                                    <select 
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
+                                                        style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
+                                                        value={regData.role_id} 
+                                                        onChange={e => {
+                                                            const roleId = e.target.value;
+                                                            const role = companyRoles.find(r => r.id === roleId);
+                                                            setRegData({...regData, role_id: roleId, position: role?.name || ''});
+                                                            const desc = lang === 'ht' 
+                                                                ? (role?.description_ht || role?.description) 
+                                                                : role?.description;
+                                                            setSelectedRoleDesc(desc || null);
+                                                            setHasReadJobInfo(false); // Reset acceptance when role changes
+                                                            if (desc) {
+                                                                setShowJobInfoModal(true); // Open modal automatically when role has description
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
+                                                        {companyRoles.map(role => (
+                                                            <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                                {lang === 'ht' ? (role.name_ht || role.name) : role.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                </div>
+                                            ) : (
+                                                <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
+                                                    {lang === 'ht' ? 'Otomatik asiyen' : 'Asignado Automáticamente'}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -661,25 +684,37 @@ export default function CourseAuthPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.gender}</label>
-                                            <div className="relative">
-                                                <select 
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
-                                                    style={{ color: regData.gender ? '#FFFFFF' : '#9CA3AF' }}
-                                                    value={regData.gender} 
-                                                    onChange={e => setRegData({...regData, gender: e.target.value})}
-                                                >
-                                                    <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
-                                                    <option value="Masculino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.male}</option>
-                                                    <option value="Femenino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.female}</option>
-                                                    <option value="Otro" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.other}</option>
-                                                </select>
-                                                <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                            </div>
+                                            {isFieldVisible('gender') ? (
+                                                <div className="relative">
+                                                    <select 
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
+                                                        style={{ color: regData.gender ? '#FFFFFF' : '#9CA3AF' }}
+                                                        value={regData.gender} 
+                                                        onChange={e => setRegData({...regData, gender: e.target.value})}
+                                                    >
+                                                        <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
+                                                        <option value="Masculino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.male}</option>
+                                                        <option value="Femenino" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.female}</option>
+                                                        <option value="Otro" style={{ background: '#1a1a1a', color: '#FFFFFF' }}>{t.other}</option>
+                                                    </select>
+                                                    <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                </div>
+                                            ) : (
+                                                <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
+                                                    -
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}</label>
-                                            <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
-                                                value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
+                                            {isFieldVisible('age') ? (
+                                                <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
+                                                    value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
+                                            ) : (
+                                                <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
+                                                    -
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
