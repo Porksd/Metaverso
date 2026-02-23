@@ -28,19 +28,57 @@ export default function SurveyEngine({ surveyId, studentId, enrollmentId, onComp
     const [answers, setAnswers] = useState<Record<string, any>>({});
     const [loading, setLoading] = useState(true);
     const [submitted, setSubmitted] = useState(false);
+    const [metadata, setMetadata] = useState<any>(null);
 
     useEffect(() => {
-        const fetchSurvey = async () => {
-            const { data } = await supabase
+        const fetchSurveyAndMetadata = async () => {
+            // 1. Fetch Questions
+            const { data: qData } = await supabase
                 .from('survey_questions')
                 .select('*')
                 .eq('survey_id', surveyId)
                 .order('order_index');
-            if (data) setQuestions(data);
+            if (qData) setQuestions(qData);
+
+            // 2. Fetch Metadata (Student, Company, Course)
+            const { data: enrollment } = await supabase
+                .from('enrollments')
+                .select(`
+                    id,
+                    courses (id, name),
+                    students (
+                        id, 
+                        first_name, 
+                        last_name, 
+                        rut, 
+                        passport, 
+                        position, 
+                        company_name,
+                        client_id,
+                        companies (name)
+                    )
+                `)
+                .eq('id', enrollmentId)
+                .single();
+
+            if (enrollment) {
+                const s = enrollment.students as any;
+                const c = enrollment.courses as any;
+                setMetadata({
+                    fecha: new Date().toISOString(),
+                    empresa_principal: s.companies?.name || 'N/A',
+                    nombre_completo: `${s.first_name} ${s.last_name}`,
+                    identificacion: s.rut || s.passport || 'N/A',
+                    cargo: s.position || 'N/A',
+                    empresa_colaboradora: s.company_name || 'N/A',
+                    nombre_curso: c.name || 'N/A'
+                });
+            }
+
             setLoading(false);
         };
-        fetchSurvey();
-    }, [surveyId]);
+        fetchSurveyAndMetadata();
+    }, [surveyId, enrollmentId]);
 
     const handleAnswer = (questionId: string, value: any) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -58,7 +96,7 @@ export default function SurveyEngine({ surveyId, studentId, enrollmentId, onComp
             survey_id: surveyId,
             student_id: studentId,
             enrollment_id: enrollmentId,
-            answers: answers
+            answers: { ...answers, _metadata: metadata }
         }]);
 
         if (error) {

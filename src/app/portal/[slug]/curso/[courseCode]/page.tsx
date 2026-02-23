@@ -52,6 +52,7 @@ export default function CourseAuthPage() {
     const [companyRoles, setCompanyRoles] = useState<any[]>([]);
     const [selectedRoleDesc, setSelectedRoleDesc] = useState<string | null>(null);
     const [lang, setLang] = useState<'es' | 'ht'>('es');
+    const [idType, setIdType] = useState<'rut' | 'passport'>('rut');
     const [rutError, setRutError] = useState<string | null>(null);
     const [companiesList, setCompaniesList] = useState<any[]>([]);
     const [empresaInput, setEmpresaInput] = useState('');
@@ -81,8 +82,9 @@ export default function CourseAuthPage() {
             login: 'Ingresar', register: 'Registrarse', email: 'Email Corporativo', password: 'Contraseña',
             loginBtn: 'Iniciar Sesión', verifying: 'Verificando...', name: 'Nombre', surname: 'Apellido',
             rut: 'RUT', cargo: 'Cargo', gender: 'Género', age: 'Edad', select: 'Seleccione',
+            passport: 'Pasaporte',
             male: 'Masculino', female: 'Femenino', other: 'Otro', language: 'Idioma',
-            empresa: 'Empresa', empresaPh: 'Escribe para buscar o agregar...',
+            empresa: 'Empresa Colaboradora', empresaPh: 'Escribe para buscar o agregar...',
             continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios',
             invalidRut: 'RUT inválido. Verifica el número.',
             digitalSign: 'Firma Digital', signDesc: 'Dibuja tu firma para aceptar el consentimiento de datos.',
@@ -98,8 +100,9 @@ export default function CourseAuthPage() {
             login: 'Konekte', register: 'Enskri', email: 'Imèl Antrepriz', password: 'Modpas',
             loginBtn: 'Konekte', verifying: 'Verifikasyon...', name: 'Non', surname: 'Siyati',
             rut: 'RUT', cargo: 'Pòs', gender: 'Sèks', age: 'Laj', select: 'Chwazi',
+            passport: 'Paspò',
             male: 'Gason', female: 'Fi', other: 'Lòt', language: 'Lang',
-            empresa: 'Antrepriz', empresaPh: 'Ekri pou chèche oswa ajoute...',
+            empresa: 'Antrepriz Kolaboratè', empresaPh: 'Ekri pou chèche oswa ajoute...',
             continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo',
             invalidRut: 'RUT envalid. Verifye nimewo a.',
             digitalSign: 'Siyati Dijital', signDesc: 'Desine siyati ou pou aksepte konsantman done yo.',
@@ -246,13 +249,14 @@ export default function CourseAuthPage() {
             }
 
             // Store the clean RUT (without dots/dash) in the DB
-            const cleanedRut = cleanRut(regData.rut);
+            const cleanedRut = idType === 'rut' ? cleanRut(regData.rut) : null;
             const res = await fetch('/api/students/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...regData,
                     rut: cleanedRut,
+                    passport: idType === 'passport' ? regData.passport : null,
                     language: lang,
                     company_name: trimmedEmpresa || company.name, 
                     client_id: company.id,
@@ -522,20 +526,49 @@ export default function CourseAuthPage() {
                                         )}
                                     </div>
                                     
-                                    {/* RUT + Cargo row */}
+                                    {/* ID Type + Cargo row */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.rut}</label>
-                                            <input 
-                                                type="text" 
-                                                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
-                                                placeholder="12.345.678-9"
-                                                required 
-                                                value={regData.rut} 
-                                                onChange={e => handleRutInput(e.target.value)} 
-                                            />
-                                            {rutError && (
-                                                <p className="text-[10px] text-red-400 font-bold">{rutError}</p>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+                                                    {idType === 'rut' ? t.rut : t.passport}
+                                                </label>
+                                                <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setIdType('rut')}
+                                                        className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'rut' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                    >RUT</button>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => setIdType('passport')}
+                                                        className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'passport' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                    >PAS</button>
+                                                </div>
+                                            </div>
+                                            {idType === 'rut' ? (
+                                                <>
+                                                    <input 
+                                                        type="text" 
+                                                        className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
+                                                        placeholder="12.345.678-9"
+                                                        required 
+                                                        value={regData.rut} 
+                                                        onChange={e => handleRutInput(e.target.value)} 
+                                                    />
+                                                    {rutError && (
+                                                        <p className="text-[10px] text-red-400 font-bold">{rutError}</p>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
+                                                    placeholder="A1234567"
+                                                    required 
+                                                    value={regData.passport} 
+                                                    onChange={e => setRegData({...regData, passport: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')})} 
+                                                />
                                             )}
                                         </div>
                                         <div className="space-y-1">
@@ -629,11 +662,12 @@ export default function CourseAuthPage() {
                                     </div>
 
                                     <button onClick={() => {
-                                        if(!regData.email || !regData.password || !regData.rut) {
+                                        const hasId = idType === 'rut' ? regData.rut : regData.passport;
+                                        if(!regData.email || !regData.password || !hasId) {
                                             setError(t.required); return;
                                         }
                                         // Validate RUT before proceeding
-                                        if (!validateRut(regData.rut)) {
+                                        if (idType === 'rut' && !validateRut(regData.rut)) {
                                             setRutError(t.invalidRut);
                                             setError(t.invalidRut);
                                             return;
