@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { ChevronLeft, LogOut, ShieldCheck, UserCog } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function AdminSidebar({ children }: { children: React.ReactNode }) {
+export default function AdminSidebar({ children, title }: { children: React.ReactNode, title?: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -70,8 +70,17 @@ export default function AdminSidebar({ children }: { children: React.ReactNode }
                             <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center">
                                 <ShieldCheck className="w-4 h-4 text-brand" />
                             </div>
-                            <span className="text-xs font-black uppercase tracking-tighter">
-                                Metaverso <span className="text-brand">Admin</span>
+                            <span className="text-xs font-black uppercase tracking-tighter flex flex-col">
+                                {title ? (
+                                    <>
+                                        <span className="text-[8px] text-white/40 leading-none">Metaverso Admin</span>
+                                        <span className="text-brand text-[11px] leading-tight">{title}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        Metaverso <span className="text-brand">Admin</span>
+                                    </>
+                                )}
                             </span>
                         </div>
                     </div>

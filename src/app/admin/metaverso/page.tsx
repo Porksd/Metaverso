@@ -514,7 +514,7 @@ export default function MetaversoAdmin() {
     );
 
     return (
-        <AdminSidebar>
+        <AdminSidebar title="Dashboard Maestro">
             <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans pt-20">
             <div className="max-w-7xl mx-auto space-y-10">
 

@@ -250,7 +250,7 @@ export default function CoursesAdmin() {
     });
 
     return (
-        <AdminSidebar>
+        <AdminSidebar title="Gestión de Cursos">
             <div className="p-8 text-white min-h-screen pt-20">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
