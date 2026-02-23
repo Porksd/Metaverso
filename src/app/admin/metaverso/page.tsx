@@ -6,7 +6,7 @@ import {
     Building2, Users, BookOpen, Layers, Plus, Search,
     Settings, Save, Upload, Trash2, PieChart, ShieldCheck, X,
     ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe,
-    Copy, Check, Medal, UserCog, Award, Loader2
+    Copy, Check, Medal, UserCog, Award, Loader2, LogIn, ListChecks, ToggleLeft, ToggleRight
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -32,6 +32,7 @@ export default function MetaversoAdmin() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [certData, setCertData] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState<string | null>(null);
+    const [fieldsConfigModal, setFieldsConfigModal] = useState<any>(null); // New state for fields config
 
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
@@ -488,6 +489,22 @@ export default function MetaversoAdmin() {
         }
     };
 
+    const handleSaveConfig = async (configRef: any) => {
+        if (!configRef?.id || !configRef?.user_registration_config) return;
+        
+        const { error } = await supabase
+            .from('companies')
+            .update({ user_registration_config: configRef.user_registration_config })
+            .eq('id', configRef.id);
+            
+        if (error) {
+            alert("Error al guardar configuración: " + error.message);
+        } else {
+            setFieldsConfigModal(null);
+            fetchCompanies();
+        }
+    };
+
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
@@ -655,6 +672,13 @@ export default function MetaversoAdmin() {
                                             {company.slug && (
                                                 <>
                                                     <button 
+                                                        onClick={() => setFieldsConfigModal(company)}
+                                                        className="p-2.5 rounded-xl bg-white/5 text-white/40 border border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20 transition-all"
+                                                        title="Configuración Campos de Registro"
+                                                    >
+                                                        <UserCog className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
                                                         onClick={() => {
                                                             localStorage.setItem('empresa_id', company.id);
                                                             localStorage.setItem('empresa_name', company.name);
@@ -664,7 +688,7 @@ export default function MetaversoAdmin() {
                                                         className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20 hover:bg-brand hover:text-black transition-all"
                                                         title="Entrar como Admin a este Portal"
                                                     >
-                                                        <UserCog className="w-4 h-4" />
+                                                        <LogIn className="w-4 h-4" />
                                                     </button>
                                                     <button 
                                                         onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
@@ -887,6 +911,89 @@ export default function MetaversoAdmin() {
                             </div>
                         </div>
                     </section>
+                )}
+
+                {/* Modal: Configuración de Campos de Usuario */}
+                {fieldsConfigModal && (
+                    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass p-8 w-full max-w-lg space-y-6 border-brand/20">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-black tracking-tighter text-brand">/config_campos</h3>
+                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Personalizar Formulario de Registro</p>
+                                </div>
+                                <button onClick={() => setFieldsConfigModal(null)} className="p-2 rounded-lg bg-white/5 hover:bg-white/10"><X className="w-5 h-5 text-white/40" /></button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                                    <div className="grid grid-cols-4 gap-4 text-[9px] font-black uppercase text-white/40 mb-2 border-b border-white/10 pb-2">
+                                        <div className="col-span-2">Campo</div>
+                                        <div className="text-center">Visible</div>
+                                        <div className="text-center">Obligatorio</div>
+                                    </div>
+                                    
+                                    {[
+                                        { key: 'company_collab', label: 'Empresa Colaboradora' },
+                                        { key: 'job_position', label: 'Cargo / Puesto' },
+                                        { key: 'gender', label: 'Género' },
+                                        { key: 'age', label: 'Edad' }
+                                    ].map((field) => {
+                                        const currentConfig = fieldsConfigModal.user_registration_config || {};
+                                        // Defaults: Visible=false, Required=false mostly safely? No, usually true for some system fields.
+                                        // Assuming migration default was true.
+                                        const fieldConfig = currentConfig[field.key] || { visible: false, required: false };
+
+                                        return (
+                                            <div key={field.key} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-white/5 last:border-0">
+                                                <div className="col-span-2 text-xs font-bold text-white/80">{field.label}</div>
+                                                <div className="flex justify-center">
+                                                    <button 
+                                                        onClick={() => {
+                                                            const newConfig = { 
+                                                                ...currentConfig, 
+                                                                [field.key]: { ...fieldConfig, visible: !fieldConfig.visible } 
+                                                            };
+                                                            setFieldsConfigModal({ ...fieldsConfigModal, user_registration_config: newConfig });
+                                                        }}
+                                                        className={`w-10 h-5 rounded-full relative transition-colors ${fieldConfig.visible ? 'bg-brand' : 'bg-white/10'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-black transition-all ${fieldConfig.visible ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
+                                                <div className="flex justify-center">
+                                                    <button 
+                                                        onClick={() => {
+                                                            const newConfig = { 
+                                                                ...currentConfig, 
+                                                                [field.key]: { ...fieldConfig, required: !fieldConfig.required } 
+                                                            };
+                                                            setFieldsConfigModal({ ...fieldsConfigModal, user_registration_config: newConfig });
+                                                        }}
+                                                        disabled={!fieldConfig.visible}
+                                                        className={`w-10 h-5 rounded-full relative transition-colors ${!fieldConfig.visible ? 'opacity-30 cursor-not-allowed' : ''} ${fieldConfig.required ? 'bg-red-500' : 'bg-white/10'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${fieldConfig.required ? 'left-6' : 'left-1'}`} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="text-[10px] text-white/30 italic px-2">
+                                    * La configuración "Visible" determina si el campo aparece en el formulario de creación de trabajador para esta empresa. "Obligatorio" impide guardar sin el dato.
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => handleSaveConfig(fieldsConfigModal)}
+                                className="w-full py-4 bg-white text-black font-black uppercase text-xs rounded-xl shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                            >
+                                <Save className="w-4 h-4" /> Guardar Configuración
+                            </button>
+                        </motion.div>
+                    </div>
                 )}
 
                 {/* Modal: Edición de Empresa */}

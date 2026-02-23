@@ -15,6 +15,42 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
 
+// Utility functions for RUT validation
+const cleanRut = (rut: string) => {
+    return rut.replace(/[^0-9kK]/g, "").toUpperCase();
+};
+
+const validateRut = (rut: string) => {
+    if (!rut) return false;
+    const clean = cleanRut(rut);
+    if (clean.length < 2) return false;
+
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    let sum = 0;
+    let multiplier = 2;
+
+    for (let i = body.length - 1; i >= 0; i--) {
+        sum += parseInt(body[i]) * multiplier;
+        multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+
+    const expectedDv = 11 - (sum % 11);
+    const calculatedDv = expectedDv === 11 ? "0" : expectedDv === 10 ? "K" : expectedDv.toString();
+
+    return calculatedDv === dv;
+};
+
+const formatRut = (rut: string) => {
+    const clean = cleanRut(rut);
+    if (clean.length < 2) return clean;
+    
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    
+    return `${body}-${dv}`;
+};
+
 export default function EmpresaAdmin() {
     const router = useRouter();
     const [role, setRole] = useState<'manager' | 'trainer'>('manager');
@@ -41,7 +77,8 @@ export default function EmpresaAdmin() {
     const [newStudent, setNewStudent] = useState<any>({ 
         first_name: "", 
         last_name: "", 
-        rut: "", 
+        rut: "",
+        doc_type: "RUT",
         email: "", 
         password: "", 
         company_name: "", 
@@ -213,19 +250,32 @@ export default function EmpresaAdmin() {
         }
         
         if (!newStudent.first_name || !newStudent.last_name || !newStudent.rut) {
-            alert("Por favor complete los campos obligatorios (Nombre, Apellido, RUT)");
+            alert("Por favor complete los campos obligatorios (Nombre, Apellido, ID/RUT)");
             return;
+        }
+
+        // Validación de RUT Chileno
+        if (!newStudent.doc_type || newStudent.doc_type === 'RUT') {
+            if (!validateRut(newStudent.rut)) {
+                alert("El RUT ingresado no es válido. Por favor verifique el dígito verificador.");
+                return;
+            }
+            // Formatear RUT antes de guardar
+            newStudent.rut = formatRut(newStudent.rut); 
         }
 
         const payload = { 
             first_name: newStudent.first_name,
             last_name: newStudent.last_name,
-            rut: newStudent.rut,
+            rut: newStudent.rut, // Se guarda el RUT o Pasaporte aquí
             email: newStudent.email || null,
             password: newStudent.password || '123456',
             client_id: companyId, 
             company_name: newStudent.company_name || companyName,
-            role_id: newStudent.role_id
+            role_id: newStudent.role_id,
+            // Nota: Si la tabla 'students' no tiene columna 'doc_type', este dato se perderá,
+            // pero la validación ya ocurrió. Si se requiere persistir el tipo, se debe agregar la columna.
+            // Por ahora asumimos que solo se valida.
         };
 
         console.log("Intentando crear alumno con payload:", payload);
@@ -281,6 +331,8 @@ export default function EmpresaAdmin() {
 
     const [showCompanyManager, setShowCompanyManager] = useState(false);
     const [allCompanies, setAllCompanies] = useState<any[]>([]);
+    const [editingCompanyListId, setEditingCompanyListId] = useState<string | null>(null);
+    const [editingCompanyListName, setEditingCompanyListName] = useState("");
 
     const fetchCompanyList = async () => {
         try {
@@ -801,9 +853,54 @@ export default function EmpresaAdmin() {
                                 </div>
                             </div>
 
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase text-white/40 ml-2">RUT (Sin puntos con guión) *</label>
-                                <input placeholder="12345678-9" value={newStudent.rut} onChange={(e) => setNewStudent({ ...newStudent, rut: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" />
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-4">
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Tipo de Documento: </label>
+                                    <div className="flex bg-white/5 p-1 rounded-lg">
+                                        <button 
+                                            onClick={() => setNewStudent({...newStudent, doc_type: 'RUT'})}
+                                            className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                        >
+                                            RUT Chileno
+                                        </button>
+                                        <button 
+                                            onClick={() => setNewStudent({...newStudent, doc_type: 'PASSPORT'})}
+                                            className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${newStudent.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
+                                        >
+                                            Pasaporte
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">
+                                        {(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'RUT (Sin puntos, con guión) *' : 'Pasaporte / ID Extranjero *'}
+                                    </label>
+                                    <input 
+                                        placeholder={(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? "12345678-K" : "A1234567"} 
+                                        value={newStudent.rut} 
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setNewStudent({ ...newStudent, rut: val });
+                                            
+                                            // Validación visual en tiempo real para RUT
+                                            if (!newStudent.doc_type || newStudent.doc_type === 'RUT') {
+                                                if (val.includes('.')) {
+                                                    // Opcional: Auto-limpiar puntos o mostrar warning
+                                                }
+                                            }
+                                        }} 
+                                        className={`w-full bg-white/5 border p-3 rounded-xl text-sm uppercase ${
+                                            // Simple validación visual
+                                            (!newStudent.doc_type || newStudent.doc_type === 'RUT') && newStudent.rut && !/^[0-9]+-[0-9kK]{1}$/.test(newStudent.rut) 
+                                                ? 'border-red-500/50 text-red-200' 
+                                                : 'border-white/10'
+                                        }`} 
+                                    />
+                                    {(!newStudent.doc_type || newStudent.doc_type === 'RUT') && (
+                                        <p className="text-[9px] text-white/30 ml-2">Formato: 12345678-K (Sin puntos)</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -1121,9 +1218,46 @@ export default function EmpresaAdmin() {
                             </div>
                             <div className="max-h-60 overflow-auto space-y-2">
                                 {allCompanies.map(c => (
-                                    <div key={c.id} className="flex justify-between items-center bg-white/5 p-4 rounded-xl mb-2 text-sm">
-                                        <span>{c.name_es}</span>
-                                        <button onClick={async () => { await supabase.from('companies_list').delete().eq('id', c.id); fetchCompanyList(); }} className="text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                    <div key={c.id} className="flex justify-between items-center bg-white/5 p-4 rounded-xl mb-2 text-sm gap-2">
+                                        {editingCompanyListId === c.id ? (
+                                            <input 
+                                                value={editingCompanyListName} 
+                                                onChange={(e) => setEditingCompanyListName(e.target.value)}
+                                                className="bg-black/20 border border-brand/50 p-2 rounded text-white flex-1 text-sm focus:outline-none focus:border-brand"
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <span className="flex-1">{c.name_es}</span>
+                                        )}
+                                        
+                                        <div className="flex gap-2">
+                                            {editingCompanyListId === c.id ? (
+                                                <>
+                                                    <button onClick={async () => {
+                                                        const { error } = await supabase.from('companies_list').update({ name_es: editingCompanyListName }).eq('id', c.id);
+                                                        if(error) alert("Error al actualizar: "+error.message);
+                                                        setEditingCompanyListId(null);
+                                                        fetchCompanyList();
+                                                    }} className="text-brand hover:scale-110 transition-transform" title="Guardar"><CheckCircle2 className="w-4 h-4" /></button>
+                                                    
+                                                    <button onClick={() => {
+                                                        setEditingCompanyListId(null);
+                                                    }} className="text-white/40 hover:text-white transition-colors" title="Cancelar"><X className="w-4 h-4" /></button>
+                                                </>
+                                            ) : (
+                                                <button onClick={() => {
+                                                    setEditingCompanyListId(c.id);
+                                                    setEditingCompanyListName(c.name_es);
+                                                }} className="text-brand hover:text-white transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
+                                            )}
+
+                                            <button onClick={async () => { 
+                                                if(confirm('¿Eliminar esta empresa de la lista?')) {
+                                                    await supabase.from('companies_list').delete().eq('id', c.id); 
+                                                    fetchCompanyList(); 
+                                                }
+                                            }} className="text-red-500 hover:text-red-400 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

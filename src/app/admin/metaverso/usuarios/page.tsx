@@ -26,6 +26,7 @@ export default function AdminUsersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<Partial<AdminProfile> | null>(null);
+    const [dbError, setDbError] = useState(false);
 
     useEffect(() => {
         checkAuth();
@@ -61,13 +62,19 @@ export default function AdminUsersPage() {
 
     const loadAdmins = async () => {
         setLoading(true);
+        setDbError(false);
         const { data, error } = await supabase
             .from('admin_profiles')
             .select('*')
             .order('created_at', { ascending: false });
         
         if (data) setAdmins(data);
-        if (error) console.error("Error loading admins:", error);
+        if (error) {
+            console.error("Error loading admins:", error);
+            if (error.code === '42P01' || error.code === 'PGRST205' || (error.message || '').includes('not find') || (error.message || '').includes('does not exist')) {
+                setDbError(true);
+            }
+        }
         setLoading(false);
     };
 
@@ -136,7 +143,16 @@ export default function AdminUsersPage() {
                         </div>
                         <button
                             onClick={() => { setEditingAdmin(null); setShowForm(true); }}
-                            className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                            
+                {dbError && (
+                    <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-500 text-xs font-bold mb-6 flex items-center gap-3">
+                        <Shield className="w-5 h-5 shrink-0" />
+                        <div>
+                            <p className="uppercase tracking-wider">Error de Base de Datos</p>
+                            <p className="font-normal opacity-70">La tabla de perfiles administrativos no existe. Ejecute la migración 030.</p>
+                        </div>
+                    </div>
+                )}className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
                         >
                             <UserPlus className="w-4 h-4" /> Agregar Administrador
                         </button>

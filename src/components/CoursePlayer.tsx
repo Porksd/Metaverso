@@ -647,7 +647,9 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             <div className="flex justify-between items-center gap-4">
                                 <div>
                                     <span className="text-brand text-xs font-bold">{t.slide} {activeModuleIndex + 1} {t.of} {modules.length}</span>
-                                    <h1 className={`text-2xl md:text-3xl font-black mt-1 ${isLightBg ? 'text-slate-900' : 'text-white'}`}>{currentModule.title}</h1>
+                                    <h1 className={`text-2xl md:text-3xl font-black mt-1 ${isLightBg ? 'text-slate-900' : 'text-white'}`}>
+                                        {(language === 'ht' && currentModule.title_ht) ? currentModule.title_ht : currentModule.title}
+                                    </h1>
                                 </div>
                                 
                                 {/* Biblioteca */}
@@ -697,14 +699,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                 color: item.content?.color || (isLightBg ? '#0f172a' : '#fff')
                                             }}
                                         >
-                                            {item.content?.text}
+                                            {(language === 'ht' && item.content?.text_ht) ? item.content?.text_ht : item.content?.text}
                                         </h2>
                                     )}
 
                                     {/* Texto */}
                                     {item.type === 'text' && !item.content?.isHeader && (
                                         <div className={`prose max-w-none p-6 rounded-xl border ${isLightBg ? 'prose-slate bg-black/5 border-black/10' : 'prose-invert bg-white/5 border-white/10'}`}>
-                                            <div dangerouslySetInnerHTML={{ __html: item.content?.html || item.content?.text || '' }} />
+                                            <div dangerouslySetInnerHTML={{ __html: (language === 'ht' && (item.content?.html_ht || item.content?.text_ht)) ? (item.content?.html_ht || item.content?.text_ht) : (item.content?.html || item.content?.text || '') }} />
                                         </div>
                                     )}
 
@@ -720,7 +722,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         <div className={`rounded-xl overflow-hidden bg-black border ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
                                             <VideoPlayer
                                                 ref={(el) => { if (el) videoRefs.current.set(item.id, el); }}
-                                                src={item.content?.url}
+                                                src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url}
                                                 onEnded={() => handleItemCompletion(item.id)}
                                             />
                                         </div>
@@ -736,7 +738,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                                 ref={(el) => { if (el) audioRefs.current.set(item.id, el); }}
                                                 controls
                                                 className="flex-1"
-                                                src={item.content?.url}
+                                                src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url}
                                                 onEnded={() => handleItemCompletion(item.id)}
                                             />
                                         </div>
@@ -745,8 +747,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     {/* PDF */}
                                     {item.type === 'pdf' && (
                                         <div className="space-y-4">
-                                            <iframe src={item.content?.url} className={`w-full h-[600px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
-                                            <a href={item.content?.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 rounded-lg text-sm font-bold transition-all">
+                                            <iframe src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url} className={`w-full h-[600px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
+                                            <a href={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 rounded-lg text-sm font-bold transition-all">
                                                 <FileIcon className="w-4 h-4" />
                                                 {t.open_pdf}
                                             </a>
@@ -956,11 +958,12 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 {scormModalItem && (
                     <div className="fixed inset-0 z-[200]">
                         <ScormPlayer
-                            courseUrl={scormModalItem.content.url}
+                            courseUrl={(language === 'ht' && scormModalItem.content.url_ht) ? scormModalItem.content.url_ht : scormModalItem.content.url}
                             courseTitle={currentModule.title || "Actividad"}
                             user={enrollment?.students || { id: studentId }}
                             enrollment={enrollment}
                             courseId={courseId}
+                            language={language}
                             onClose={() => setScormModalItem(null)}
                             onComplete={(score) => {
                                 handleEvaluationItemScore(scormModalItem.id, score, 'scorm', score >= 60);
