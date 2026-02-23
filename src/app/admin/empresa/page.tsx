@@ -913,21 +913,22 @@ export default function EmpresaAdmin() {
                                     const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
                                     // Si no hay tabla de asignaciones, mostramos todo por defecto
                                     const isVisible = assignment ? assignment.is_visible : (c.role_company_assignments === undefined ? true : false);
+                                    const isInactive = c.active === false;
                                     
                                     return (
-                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
+                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible || isInactive ? 'opacity-50' : ''}`}>
                                             <div className="flex justify-between items-center mb-1">
                                                 <div className="flex-1">
-                                                    <span className="font-bold text-sm text-white">{c.name}</span>
+                                                    <span className={`font-bold text-sm ${isInactive ? 'text-white/40' : 'text-white'}`}>{c.name}</span>
                                                     <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
-                                                    {!c.company_id ? (
-                                                        <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
-                                                    ) : (
-                                                        <span className="ml-2 text-[8px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded font-bold uppercase">Especial</span>
+                                                    <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                                    {isInactive && (
+                                                        <span className="ml-2 text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold uppercase">Desactivado por Admin</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button 
+                                                        disabled={isInactive}
                                                         onClick={async () => {
                                                             if (assignment) {
                                                                 await supabase.from('role_company_assignments').update({ is_visible: !isVisible }).eq('id', assignment.id);
@@ -936,8 +937,8 @@ export default function EmpresaAdmin() {
                                                             }
                                                             fetchData();
                                                         }}
-                                                        className={`p-2 rounded-lg transition-all ${isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
-                                                        title={isVisible ? 'Ocultar' : 'Mostrar'}
+                                                        className={`p-2 rounded-lg transition-all ${isInactive ? 'cursor-not-allowed opacity-20' : isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
+                                                        title={isInactive ? 'Inactivo por Administrador' : isVisible ? 'Ocultar' : 'Mostrar'}
                                                     >
                                                         {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                                     </button>
@@ -953,16 +954,21 @@ export default function EmpresaAdmin() {
                                 {cargos.filter(c => c.company_id === companyId).map(c => {
                                     const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
                                     const isVisible = assignment ? assignment.is_visible : true; // Defaults to visible if owned
+                                    const isInactive = c.active === false;
 
                                     return (
-                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
+                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible || isInactive ? 'opacity-50' : ''}`}>
                                             <div className="flex justify-between items-center mb-1">
                                                 <div className="flex-1">
-                                                    <span className="font-bold text-sm text-white">{c.name}</span>
+                                                    <span className={`font-bold text-sm ${isInactive ? 'text-white/40' : 'text-white'}`}>{c.name}</span>
                                                     <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
+                                                    {isInactive && (
+                                                        <span className="ml-2 text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold uppercase">Desactivado por Admin</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button 
+                                                        disabled={isInactive}
                                                         onClick={async () => {
                                                             if (assignment) {
                                                                 await supabase.from('role_company_assignments').update({ is_visible: !isVisible }).eq('id', assignment.id);
@@ -971,26 +977,36 @@ export default function EmpresaAdmin() {
                                                             }
                                                             fetchData();
                                                         }}
-                                                        className={`p-2 rounded-lg transition-all ${isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
-                                                        title={isVisible ? 'Ocultar' : 'Mostrar'}
+                                                        className={`p-2 rounded-lg transition-all ${isInactive ? 'cursor-not-allowed opacity-20' : isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
+                                                        title={isInactive ? 'Inactivo por Administrador' : isVisible ? 'Ocultar' : 'Mostrar'}
                                                     >
                                                         {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                                     </button>
-                                                    <button onClick={() => {
-                                                        setEditingCargo(c);
-                                                        setCargoDesc(c.description || "");
-                                                        setCargoDescHT(c.description_ht || "");
-                                                        // Pre-fill the form inputs
-                                                        setTimeout(() => {
-                                                            const n = document.getElementById('newCargoName') as HTMLInputElement;
-                                                            const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
-                                                            if(n) n.value = c.name || '';
-                                                            if(nHT) nHT.value = c.name_ht || '';
-                                                        }, 50);
-                                                    }} className="p-2 text-white/20 hover:text-brand transition-colors" title="Editar">
+                                                    <button 
+                                                        disabled={isInactive}
+                                                        onClick={() => {
+                                                            setEditingCargo(c);
+                                                            setCargoDesc(c.description || "");
+                                                            setCargoDescHT(c.description_ht || "");
+                                                            // Pre-fill the form inputs
+                                                            setTimeout(() => {
+                                                                const n = document.getElementById('newCargoName') as HTMLInputElement;
+                                                                const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
+                                                                if(n) n.value = c.name || '';
+                                                                if(nHT) nHT.value = c.name_ht || '';
+                                                            }, 50);
+                                                        }} 
+                                                        className={`p-2 transition-colors ${isInactive ? 'cursor-not-allowed text-white/5' : 'text-white/20 hover:text-brand'}`} 
+                                                        title="Editar"
+                                                    >
                                                         <Pencil className="w-4 h-4" />
                                                     </button>
-                                                    <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="p-2 text-white/20 hover:text-red-500 transition-colors" title="Eliminar">
+                                                    <button 
+                                                        disabled={isInactive}
+                                                        onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} 
+                                                        className={`p-2 transition-colors ${isInactive ? 'cursor-not-allowed text-white/5' : 'text-white/20 hover:text-red-500'}`} 
+                                                        title="Eliminar"
+                                                    >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>

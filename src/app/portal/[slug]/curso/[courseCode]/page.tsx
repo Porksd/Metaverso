@@ -153,13 +153,15 @@ export default function CourseAuthPage() {
                     // Fallback to basic visibility: roles of this company or global roles
                     const { data: allRoles } = await supabase
                         .from('company_roles')
-                        .select('id, name, name_ht, description, description_ht, company_id')
+                        .select('id, name, name_ht, description, description_ht, company_id, active')
                         .or(`company_id.eq.${comp.id},company_id.is.null`)
                         .eq('active', true) // Only active roles
                         .order('name');
                     setCompanyRoles(allRoles || []);
                 } else {
-                    const filteredRoles = (assignedRoles || []).map((ar: any) => ar.company_roles).filter(Boolean);
+                    const filteredRoles = (assignedRoles || [])
+                        .map((ar: any) => ar.company_roles)
+                        .filter((r: any) => r && r.active !== false); // Strictly filter out inactive
                     setCompanyRoles(filteredRoles || []);
                 }
 
