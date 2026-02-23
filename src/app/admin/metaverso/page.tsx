@@ -16,6 +16,7 @@ import CompanyConfig from "@/components/CompanyConfig";
 import CertificateCanvas from "@/components/CertificateCanvas";
 import jsPDF from "jspdf";
 import AdminSidebar from "@/components/AdminSidebar";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -952,11 +953,12 @@ export default function MetaversoAdmin() {
                                 </div>
                                 <div className="space-y-1.5 col-span-2">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Mensaje de Bienvenida Portal</label>
-                                    <textarea 
-                                        value={editingCompany.welcome_message || ""} 
-                                        onChange={(e) => setEditingCompany({ ...editingCompany, welcome_message: e.target.value })} 
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none min-h-[80px]" 
-                                    />
+                                    <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 min-h-[200px]">
+                                        <RichTextEditor
+                                            content={editingCompany.welcome_message || ""}
+                                            onChange={(html) => setEditingCompany({ ...editingCompany, welcome_message: html })}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="space-y-1.5 col-span-2 border-t border-white/10 pt-4">
