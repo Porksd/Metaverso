@@ -19,9 +19,50 @@ export default function EmpresaPortalLogin() {
         secondary_color?: string
     } | null>(null);
     const [errorMsg, setErrorMsg] = useState("");
+    const [isAuthenticating, setIsAuthenticating] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
+        const checkMasterAccess = async () => {
+            setIsAuthenticating(true);
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
+                const email = session.user.email?.toLowerCase();
+                // Check if meta admin (SuperAdmin or Editor)
+                const { data: profile } = await supabase
+                    .from('admin_profiles')
+                    .select('role')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl', 'apacheco@metaversotec.com'];
+                const editors = ['admin@metaversotec.com'];
+
+                if (profile || (email && [...absoluteSuperAdmins, ...editors].includes(email))) {
+                    // Valid master session, attempt auto-redirect if company matches
+                    if (slug) {
+                        const { data: company } = await supabase
+                            .from('companies')
+                            .select('id, name')
+                            .eq('slug', slug)
+                            .single();
+                        
+                        if (company) {
+                            localStorage.setItem('empresa_id', company.id);
+                            localStorage.setItem('empresa_name', company.name);
+                            localStorage.setItem('empresa_slug', slug as string);
+                            localStorage.setItem('is_master_admin', 'true');
+                            console.log("Acceso Maestro detectado: Redirigiendo al Dashboard...");
+                            router.push("/admin/empresa");
+                            return;
+                        }
+                    }
+                }
+            }
+            setIsAuthenticating(false);
+        };
+
         const fetchCompany = async () => {
             if (!slug) return;
             
@@ -38,8 +79,9 @@ export default function EmpresaPortalLogin() {
             }
         };
         
+        checkMasterAccess();
         fetchCompany();
-    }, [slug]);
+    }, [slug, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,6 +115,13 @@ export default function EmpresaPortalLogin() {
     if (errorMsg) return (
         <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-6">
             <p className="text-red-500 font-bold">{errorMsg}</p>
+        </div>
+    );
+
+    if (isAuthenticating) return (
+        <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="w-10 h-10 text-brand animate-spin" />
+            <p className="text-white/40 text-xs font-black uppercase tracking-widest">Validando Acceso Maestro...</p>
         </div>
     );
 
