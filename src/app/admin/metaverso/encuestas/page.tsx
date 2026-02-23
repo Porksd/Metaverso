@@ -68,10 +68,6 @@ export default function SurveysAdmin() {
                 return;
             }
         }
-                setIsAuthorized(false);
-                return;
-            }
-        }
         
         loadSurveys();
     };

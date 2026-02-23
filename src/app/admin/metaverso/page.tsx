@@ -82,10 +82,6 @@ export default function MetaversoAdmin() {
                 return;
             }
         }
-                setIsAuthorized(false);
-                return;
-            }
-        }
         
         fetchCompanies();
         fetchParticipants();
