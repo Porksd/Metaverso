@@ -87,9 +87,16 @@ export default function EmpresaAdmin() {
             if (stError) console.error("Error fetching students:", stError);
             setStudents(stData || []);
 
-            // Fetch ALL company roles (global + company-specific)
-            // Intentamos traer asignaciones, si falla traemos básico
-            const { data: cgData, error: cgError } = await supabase
+            // 1. Fetch assignments for this company to know which global/external roles are allowed
+            const { data: assignments, error: assignError } = await supabase
+                .from('role_company_assignments')
+                .select('role_id')
+                .eq('company_id', companyId);
+            
+            const assignedRoleIds = (assignments || []).map(a => a.role_id);
+
+            // 2. Fetch roles that are EITHER owned by the company OR assigned to it
+            let rolesQuery = supabase
                 .from('company_roles')
                 .select(`
                     *,
@@ -98,20 +105,22 @@ export default function EmpresaAdmin() {
                         is_visible,
                         company_id
                     )
-                `)
-                .or(`company_id.eq.${companyId},company_id.is.null`)
-                .order('name');
-            
-            if (cgError) {
-                const { data: basicCargos } = await supabase
-                    .from('company_roles')
-                    .select('*')
-                    .or(`company_id.eq.${companyId},company_id.is.null`)
-                    .order('name');
-                setCargos(basicCargos || []);
+                `);
+
+            if (assignError) {
+                // Fallback to old behavior if table doesn't exist
+                rolesQuery = rolesQuery.or(`company_id.eq.${companyId},company_id.is.null`);
             } else {
-                setCargos(cgData || []);
+                // Strictly owned or assigned
+                if (assignedRoleIds.length > 0) {
+                    rolesQuery = rolesQuery.or(`company_id.eq.${companyId},id.in.(${assignedRoleIds.map(id => `"${id}"`).join(',')})`);
+                } else {
+                    rolesQuery = rolesQuery.eq('company_id', companyId);
+                }
             }
+
+            const { data: cgData } = await rolesQuery.order('name');
+            setCargos(cgData || []);
 
             // Fetch ONLY assigned courses for this company
             const { data: assignedData, error: assignedError } = await supabase
@@ -897,10 +906,10 @@ export default function EmpresaAdmin() {
 
                             {/* Lista de cargos */}
                             <div className="max-h-72 overflow-auto space-y-2 pr-2 custom-scrollbar">
-                                {cargos.filter(c => !c.company_id).length > 0 && (
-                                    <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-2">Cargos Globales (Admin Central)</p>
+                                {cargos.filter(c => !c.company_id || c.company_id !== companyId).length > 0 && (
+                                    <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-2">Cargos Globales / Administrador</p>
                                 )}
-                                {cargos.filter(c => !c.company_id).map(c => {
+                                {cargos.filter(c => !c.company_id || c.company_id !== companyId).map(c => {
                                     const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
                                     // Si no hay tabla de asignaciones, mostramos todo por defecto
                                     const isVisible = assignment ? assignment.is_visible : (c.role_company_assignments === undefined ? true : false);
@@ -911,7 +920,11 @@ export default function EmpresaAdmin() {
                                                 <div className="flex-1">
                                                     <span className="font-bold text-sm text-white">{c.name}</span>
                                                     <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
-                                                    <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                                    {!c.company_id ? (
+                                                        <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                                    ) : (
+                                                        <span className="ml-2 text-[8px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded font-bold uppercase">Especial</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button 
@@ -934,12 +947,12 @@ export default function EmpresaAdmin() {
                                     );
                                 })}
 
-                                {cargos.filter(c => c.company_id).length > 0 && (
+                                {cargos.filter(c => c.company_id === companyId).length > 0 && (
                                     <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-4">Cargos de esta Empresa</p>
                                 )}
-                                {cargos.filter(c => c.company_id).map(c => {
+                                {cargos.filter(c => c.company_id === companyId).map(c => {
                                     const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
-                                    const isVisible = assignment ? assignment.is_visible : (c.company_id === companyId); // Defaults to visible if owned
+                                    const isVisible = assignment ? assignment.is_visible : true; // Defaults to visible if owned
 
                                     return (
                                         <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
