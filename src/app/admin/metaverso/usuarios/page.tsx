@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
 
 interface AdminProfile {
     id: string;
@@ -120,28 +121,26 @@ export default function AdminUsersPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans">
-            <div className="max-w-5xl mx-auto space-y-10">
-                
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <button onClick={() => router.push('/admin/metaverso')} className="flex items-center gap-2 text-white/40 hover:text-brand transition-colors text-[10px] font-black uppercase tracking-widest mb-4">
-                            <ArrowLeft className="w-3 h-3" /> Volver al Control Maestro
+        <AdminSidebar title="Gestión de Accesos">
+            <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans pt-20">
+                <div className="max-w-5xl mx-auto space-y-10">
+                    
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-4">
+                                <ShieldCheck className="w-10 h-10 text-brand" />
+                                Control de Acceso
+                            </h1>
+                            <p className="text-white/40 font-medium text-sm mt-1">Gestión de usuarios administradores y niveles de permiso</p>
+                        </div>
+                        <button
+                            onClick={() => { setEditingAdmin(null); setShowForm(true); }}
+                            className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                        >
+                            <UserPlus className="w-4 h-4" /> Agregar Administrador
                         </button>
-                        <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-4">
-                            <ShieldCheck className="w-10 h-10 text-brand" />
-                            Control de Acceso
-                        </h1>
-                        <p className="text-white/40 font-medium text-sm mt-1">Gestión de usuarios administradores y niveles de permiso</p>
                     </div>
-                    <button
-                        onClick={() => { setEditingAdmin(null); setShowForm(true); }}
-                        className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
-                    >
-                        <UserPlus className="w-4 h-4" /> Agregar Administrador
-                    </button>
-                </div>
 
                 {/* List */}
                 <div className="space-y-4">
@@ -270,7 +269,8 @@ export default function AdminUsersPage() {
                     )}
                 </AnimatePresence>
 
+                </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }

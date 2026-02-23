@@ -157,7 +157,7 @@ export default function SurveysAdmin() {
     );
 
     return (
-        <AdminSidebar title="Gestión de Encuestas">
+        <AdminSidebar>
             <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans pt-20">
                 <div className="max-w-6xl mx-auto space-y-8">
                     
@@ -330,6 +330,7 @@ export default function SurveysAdmin() {
                         </div>
                     )}
                 </AnimatePresence>
+                </div>
             </div>
         </AdminSidebar>
     );

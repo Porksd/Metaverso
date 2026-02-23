@@ -124,6 +124,7 @@ export default function JobPositionsAdmin() {
         const positionData = {
             name: formData.get('name') as string,
             name_ht: formData.get('name_ht') as string,
+            description: formData.get('description') as string,
             code: (formData.get('code') as string) || null,
             active: formData.get('active') === 'on'
         };
@@ -362,6 +363,17 @@ export default function JobPositionsAdmin() {
                                             defaultValue={isEditing?.name_ht}
                                             placeholder="Ej: Sipèvizè teren"
                                             className="w-full bg-transparent p-0 text-white/60 font-medium focus:outline-none placeholder:text-white/10"
+                                        />
+                                    </div>
+
+                                    <div className="border-b border-white/5 pb-2">
+                                        <label className="text-[10px] font-black uppercase text-white/20 block mb-1">Descripción</label>
+                                        <textarea
+                                            name="description"
+                                            rows={2}
+                                            defaultValue={isEditing?.description}
+                                            placeholder="Resumen del cargo..."
+                                            className="w-full bg-transparent p-0 text-white/60 font-medium focus:outline-none placeholder:text-white/10 resize-none"
                                         />
                                     </div>
 

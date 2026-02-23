@@ -515,7 +515,7 @@ export default function MetaversoAdmin() {
 
     return (
         <AdminSidebar>
-            <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans">
+            <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans pt-20">
             <div className="max-w-7xl mx-auto space-y-10">
 
                 {/* Header Master */}
@@ -529,21 +529,6 @@ export default function MetaversoAdmin() {
                     </div>
 
                     <div className="flex gap-4">
-                        {userRole === 'superadmin' && (
-                            <button
-                                onClick={() => router.push('/admin/metaverso/usuarios')}
-                                className="bg-white/5 text-white/40 px-6 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-brand/10 hover:text-brand transition-all border border-white/5 flex items-center gap-2"
-                                title="Gestionar Usuarios Administradores"
-                            >
-                                <UserCog className="w-4 h-4" /> Usuarios Admin
-                            </button>
-                        )}
-                        <button
-                            onClick={handleLogout}
-                            className="bg-white/5 text-white/40 px-6 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/5"
-                        >
-                            Cerrar Sesión
-                        </button>
                         <button
                             onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000" })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
@@ -696,7 +681,7 @@ export default function MetaversoAdmin() {
                                             <button onClick={() => setSignatureModal(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Firmas y Certificados">
                                                 <Medal className="w-4 h-4" />
                                             </button>
-                                            {(userRole === 'superadmin' || userRole === 'editor') && (
+                                            {userRole === 'superadmin' && (
                                                 <button onClick={() => handleDeleteCompany(company)} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20" title="Eliminar Empresa">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -1241,6 +1226,7 @@ export default function MetaversoAdmin() {
                     </div>
                 )}
 
+                </div>
             </div>
         </AdminSidebar>
     );

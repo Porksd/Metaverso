@@ -10,6 +10,7 @@ export default function AdminSidebar({ children }: { children: React.ReactNode }
     const router = useRouter();
     const pathname = usePathname();
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
     useEffect(() => {
@@ -23,6 +24,7 @@ export default function AdminSidebar({ children }: { children: React.ReactNode }
             }
 
             const email = session.user.email?.toLowerCase();
+            setUserEmail(email || null);
             const { data: profile } = await supabase.from('admin_profiles').select('role').eq('email', email).maybeSingle();
 
             const superAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl', 'apacheco@metaversotec.com'];
@@ -74,27 +76,35 @@ export default function AdminSidebar({ children }: { children: React.ReactNode }
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {userRole === 'superadmin' && (
-                            <button 
-                                onClick={() => router.push('/admin/metaverso/usuarios')}
-                                className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all"
-                                title="Gestión de Usuarios"
-                            >
-                                <UserCog className="w-4 h-4" />
-                            </button>
+                    <div className="flex items-center gap-4">
+                        {userEmail && (
+                            <div className="hidden md:flex flex-col items-end">
+                                <span className="text-[9px] font-black uppercase text-white/40 tracking-widest">Identificado como:</span>
+                                <span className="text-[10px] font-bold text-brand">{userEmail}</span>
+                            </div>
                         )}
-                        <button 
-                            onClick={async () => {
-                                await supabase.auth.signOut();
-                                localStorage.clear();
-                                router.push('/admin/metaverso/login');
-                            }}
-                            className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-black transition-all"
-                            title="Cerrar Sesión"
-                        >
-                            <LogOut className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+                            {userRole === 'superadmin' && (
+                                <button 
+                                    onClick={() => router.push('/admin/metaverso/usuarios')}
+                                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all hover:bg-brand/10 hover:text-brand"
+                                    title="Gestión de Usuarios"
+                                >
+                                    <UserCog className="w-4 h-4" />
+                                </button>
+                            )}
+                            <button 
+                                onClick={async () => {
+                                    await supabase.auth.signOut();
+                                    localStorage.clear();
+                                    router.push('/admin/metaverso/login');
+                                }}
+                                className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-black transition-all"
+                                title="Cerrar Sesión"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>

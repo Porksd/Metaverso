@@ -250,7 +250,7 @@ export default function CoursesAdmin() {
     });
 
     return (
-        <AdminSidebar title="Gestión de Cursos">
+        <AdminSidebar>
             <div className="p-8 text-white min-h-screen pt-20">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
@@ -394,7 +394,6 @@ export default function CoursesAdmin() {
                 </div>
             )}
 
-            {/* Create Modal */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsCreateModalOpen(false)} />
@@ -530,10 +529,10 @@ export default function CoursesAdmin() {
                                 <Medal className="w-4 h-4" />
                                 {editingCourseId ? 'Actualizar Parametros' : 'Inicializar Curso'}
                             </button>
-                        </div>
                     </div>
                 </div>
             )}
+            </div>
         </AdminSidebar>
     );
 }
