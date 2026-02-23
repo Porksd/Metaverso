@@ -15,6 +15,7 @@ import ContentUploader from "@/components/ContentUploader";
 import CompanyConfig from "@/components/CompanyConfig";
 import CertificateCanvas from "@/components/CertificateCanvas";
 import jsPDF from "jspdf";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -513,7 +514,8 @@ export default function MetaversoAdmin() {
     );
 
     return (
-        <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans">
+        <AdminSidebar>
+            <div className="min-h-screen bg-transparent text-white p-4 md:p-10 font-sans">
             <div className="max-w-7xl mx-auto space-y-10">
 
                 {/* Header Master */}
@@ -1240,6 +1242,6 @@ export default function MetaversoAdmin() {
                 )}
 
             </div>
-        </div>
+        </AdminSidebar>
     );
 }

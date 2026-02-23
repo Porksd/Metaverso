@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Plus, Trash2, Edit2, Search, Briefcase, Info, X, ChevronRight, Check, ShieldAlert, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
 import RichTextEditor from "@/components/RichTextEditor";
 
 interface JobPosition {
@@ -186,25 +187,26 @@ export default function JobPositionsAdmin() {
     );
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <AdminSidebar title="Gestión de Cargos">
+            <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 pt-20">
+                <div className="max-w-6xl mx-auto space-y-8">
 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-3">
-                            <Briefcase className="w-8 h-8 text-brand" />
-                            Gestión de Cargos
-                        </h1>
-                        <p className="text-white/40 font-medium">Administra las posiciones y perfiles para el registro de alumnos</p>
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-3">
+                                <Briefcase className="w-8 h-8 text-brand" />
+                                Gestión de Cargos
+                            </h1>
+                            <p className="text-white/40 font-medium">Administra las posiciones y perfiles para el registro de alumnos</p>
+                        </div>
+                        <button
+                            onClick={() => { setIsEditing(null); setShowForm(true); }}
+                            className="bg-brand text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-[0_0_20px_rgba(49,210,45,0.3)]"
+                        >
+                            <Plus className="w-4 h-4" /> Nuevo Cargo
+                        </button>
                     </div>
-                    <button
-                        onClick={() => { setIsEditing(null); setShowForm(true); }}
-                        className="bg-brand text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-[0_0_20px_rgba(49,210,45,0.3)]"
-                    >
-                        <Plus className="w-4 h-4" /> Nuevo Cargo
-                    </button>
-                </div>
 
                 {/* Search and Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -428,6 +430,7 @@ export default function JobPositionsAdmin() {
                 <div className="w-1 h-1 bg-white/20 rounded-full" />
                 <span className="text-brand">Base de Datos de Cargos</span>
             </div>
-        </div>
+            </div>
+        </AdminSidebar>
     );
 }

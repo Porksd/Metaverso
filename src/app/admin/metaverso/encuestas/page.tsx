@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
 import SurveyBuilder from "@/components/SurveyBuilder";
 
 interface Survey {
@@ -156,31 +157,31 @@ export default function SurveysAdmin() {
     );
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans">
-            <div className="max-w-6xl mx-auto space-y-8">
-                
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <div className="flex items-center gap-2 text-brand text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-                             <BarChart3 className="w-3 h-3" /> Sistema de Retroalimentación
+        <AdminSidebar title="Gestión de Encuestas">
+            <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans pt-20">
+                <div className="max-w-6xl mx-auto space-y-8">
+                    
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-brand text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                                 <BarChart3 className="w-3 h-3" /> Sistema de Retroalimentación
+                            </div>
+                            <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-3">
+                                <ClipboardList className="w-8 h-8 text-brand" />
+                                Gestión de Encuestas
+                            </h1>
+                            <p className="text-white/40 font-medium text-sm">Crea plantillas de encuestas para medir la satisfacción de los alumnos</p>
                         </div>
-                        <h1 className="text-3xl font-black uppercase tracking-tight flex items-center gap-3">
-                            <ClipboardList className="w-8 h-8 text-brand" />
-                            Gestión de Encuestas
-                        </h1>
-                        <p className="text-white/40 font-medium text-sm">Crea plantillas de encuestas para medir la satisfacción de los alumnos</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => { setIsEditing(null); setShowForm(true); }}
+                                className="bg-brand text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                            >
+                                <Plus className="w-4 h-4" /> Nueva Encuesta
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={() => router.push('/admin/metaverso')} className="px-6 py-3 rounded-xl border border-white/10 text-white/40 font-black uppercase text-[10px] hover:text-white transition-all">Volver</button>
-                        <button
-                            onClick={() => { setIsEditing(null); setShowForm(true); }}
-                            className="bg-brand text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
-                        >
-                            <Plus className="w-4 h-4" /> Nueva Encuesta
-                        </button>
-                    </div>
-                </div>
 
                 {/* Main Content */}
                 <div className="space-y-4">
@@ -330,6 +331,6 @@ export default function SurveysAdmin() {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }

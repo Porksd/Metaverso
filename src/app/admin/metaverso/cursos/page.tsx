@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { LogOut, BookOpen, Edit, Plus, Search, ArrowRight, X, Building2, Save, Settings, Check, Trash2, Medal } from "lucide-react";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function CoursesAdmin() {
     const router = useRouter();
@@ -249,48 +250,43 @@ export default function CoursesAdmin() {
     });
 
     return (
-        <div className="p-8 text-white min-h-screen">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <div>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-brand mb-1">
-                        <BookOpen className="w-3 h-3" /> Ecosistema Educativo
+        <AdminSidebar title="Gestión de Cursos">
+            <div className="p-8 text-white min-h-screen pt-20">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase text-brand mb-1">
+                            <BookOpen className="w-3 h-3" /> Ecosistema Educativo
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tight">Gestión de <span className="text-brand">Cursos</span></h1>
+                        <p className="text-white/40 text-sm">Central de contenido, evaluaciones y despliegue multi-empresa.</p>
                     </div>
-                    <h1 className="text-4xl font-black tracking-tight">Gestión de <span className="text-brand">Cursos</span></h1>
-                    <p className="text-white/40 text-sm">Central de contenido, evaluaciones y despliegue multi-empresa.</p>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <button
+                            onClick={() => {
+                                setNewCourse({ 
+                                    name: '', 
+                                    code: '', 
+                                    company_ids: [], 
+                                    registration_mode: 'restricted',
+                                    passing_score: 90,
+                                    weight_quiz: 80,
+                                    weight_scorm: 20
+                                });
+                                setEditingCourseId(null);
+                                setIsCreateModalOpen(true);
+                            }}
+                            className="flex-1 md:flex-none bg-brand text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-2 hover:bg-white transition-all shadow-lg shadow-brand/10"
+                        >
+                            <Plus className="w-4 h-4" /> Nuevo Curso
+                        </button>
+                        <button
+                            onClick={() => router.push('/admin/metaverso/encuestas')}
+                            className="bg-white/5 border border-white/10 text-white/40 px-6 py-3 rounded-xl font-black uppercase text-[10px] hover:bg-brand/10 hover:text-brand transition-all flex items-center gap-2"
+                        >
+                            <Settings className="w-4 h-4" /> Gestión de Encuestas
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <button
-                        onClick={() => {
-                            setNewCourse({ 
-                                name: '', 
-                                code: '', 
-                                company_ids: [], 
-                                registration_mode: 'restricted',
-                                passing_score: 90,
-                                weight_quiz: 80,
-                                weight_scorm: 20
-                            });
-                            setEditingCourseId(null);
-                            setIsCreateModalOpen(true);
-                        }}
-                        className="flex-1 md:flex-none bg-brand text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] flex items-center justify-center gap-2 hover:bg-white transition-all shadow-lg shadow-brand/10"
-                    >
-                        <Plus className="w-4 h-4" /> Nuevo Curso
-                    </button>
-                    <button
-                        onClick={() => router.push('/admin/metaverso/encuestas')}
-                        className="bg-white/5 border border-white/10 text-white/40 px-6 py-3 rounded-xl font-black uppercase text-[10px] hover:bg-brand/10 hover:text-brand transition-all flex items-center gap-2"
-                    >
-                        <Settings className="w-4 h-4" /> Gestión de Encuestas
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-white/5 border border-white/10 text-white/40 px-4 py-3 rounded-xl font-bold uppercase text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-2"
-                    >
-                        <LogOut className="w-4 h-4" /> Salir
-                    </button>
-                </div>
-            </div>
 
             {/* Filters & Search */}
             <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -538,6 +534,6 @@ export default function CoursesAdmin() {
                     </div>
                 </div>
             )}
-        </div>
+        </AdminSidebar>
     );
 }
