@@ -529,6 +529,7 @@ export default function CoursesAdmin() {
                                 <Medal className="w-4 h-4" />
                                 {editingCourseId ? 'Actualizar Parametros' : 'Inicializar Curso'}
                             </button>
+                        </div>
                     </div>
                 </div>
             )}
