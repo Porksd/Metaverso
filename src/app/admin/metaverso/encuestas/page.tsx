@@ -52,18 +52,22 @@ export default function SurveysAdmin() {
             .from('admin_profiles')
             .select('role')
             .eq('email', email)
-            .single();
+            .maybeSingle();
 
         if (profile) {
             setUserRole(profile.role);
             setIsAuthorized(true);
         } else {
             // Fallback
-            const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
+            const allowedEmails = ['apacheco@lobus.cl', 'porksde@gmail.com'];
             if (email && allowedEmails.includes(email)) {
                 setUserRole('superadmin');
                 setIsAuthorized(true);
             } else {
+                setIsAuthorized(false);
+                return;
+            }
+        }
                 setIsAuthorized(false);
                 return;
             }
@@ -125,6 +129,7 @@ export default function SurveysAdmin() {
     };
 
     const handleDeleteSurvey = async (id: string) => {
+        if (userRole !== 'superadmin') return alert("No tienes permisos de SuperAdmin para eliminar encuestas.");
         if (!confirm("¿Seguro que desea eliminar esta encuesta? Se borrarán todas sus preguntas y respuestas asociadas.")) return;
         await supabase.from('surveys').delete().eq('id', id);
         loadSurveys();

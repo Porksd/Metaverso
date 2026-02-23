@@ -19,7 +19,7 @@ import {
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
 import * as XLSX from 'xlsx';
-import { Download, Filter, Search as SearchIcon, FileSpreadsheet } from "lucide-react";
+import { Download, Filter, Search as SearchIcon, FileSpreadsheet, ShieldAlert, Trash2 } from "lucide-react";
 
 ChartJS.register(
     CategoryScale,
@@ -42,20 +42,51 @@ export default function SurveyStats() {
     const [filteredResponses, setFilteredResponses] = useState<any[]>([]);
     const [totalEnrollmentsCount, setTotalEnrollmentsCount] = useState(0);
     const [loading, setLoading] = useState(true);
-
-    // Filters State
-    const [filters, setFilters] = useState({
-        startDate: '',
-        endDate: '',
-        course: '',
-        company: '',
-        colabCompany: '',
-        position: ''
-    });
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
 
     useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            router.push(`/admin/metaverso/login?returnUrl=/admin/metaverso/encuestas/${surveyId}/stats`);
+            return;
+        }
+
+        const email = session.user.email?.toLowerCase();
+        const { data: profile } = await supabase
+            .from('admin_profiles')
+            .select('role')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (profile) {
+            setUserRole(profile.role);
+            setIsAuthorized(true);
+        } else {
+            const allowedEmails = ['apacheco@lobus.cl', 'porksde@gmail.com'];
+            if (email && allowedEmails.includes(email)) {
+                setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+                return;
+            }
+        }
+        
         fetchData();
-    }, [surveyId]);
+    };
+
+    const handleDeleteResponse = async (id: string) => {
+        if (!confirm("¿Eliminar esta respuesta permanentemente?")) return;
+        const { error } = await supabase.from('survey_responses').delete().eq('id', id);
+        if (error) alert("Error: " + error.message);
+        else fetchData();
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -275,6 +306,20 @@ export default function SurveyStats() {
         return { sortedCompanies, sortedCourses };
     };
 
+    if (isAuthorized === null) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-brand font-black animate-pulse uppercase tracking-widest text-xs">Analizando Reportes...</div>
+        </div>
+    );
+
+    if (isAuthorized === false) return (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center space-y-6">
+            <ShieldAlert className="w-20 h-20 text-red-500" />
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase text-white">Acceso Restringido</h1>
+            <button onClick={() => router.push("/admin/metaverso/encuestas")} className="bg-white text-black px-8 py-4 rounded-xl font-black uppercase text-xs">Regresar</button>
+        </div>
+    );
+
     if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-brand font-black animate-pulse">ANALIZANDO DATOS...</div>;
 
     const { sortedCompanies, sortedCourses } = getGeneralStats();
@@ -383,17 +428,25 @@ export default function SurveyStats() {
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">RUT/Passport</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Empresa Colab.</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Curso</th>
+                                    {userRole === 'superadmin' && <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5 text-right">Acciones</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {filteredResponses.map((r, idx) => (
-                                    <tr key={idx} className="hover:bg-white/[0.01] transition-colors">
+                                    <tr key={idx} className="hover:bg-white/[0.01] transition-colors group">
                                         <td className="px-6 py-4 text-xs text-white/60">{new Date(r.displayData.fecha).toLocaleDateString()}</td>
                                         <td className="px-6 py-4 text-xs text-white/60 uppercase font-medium">{r.displayData.empresa}</td>
                                         <td className="px-6 py-4 text-xs font-bold text-white">{r.displayData.nombre}</td>
                                         <td className="px-6 py-4 text-xs text-white/40">{r.displayData.identificacion}</td>
                                         <td className="px-6 py-4 text-xs text-white/60">{r.displayData.colab_empresa}</td>
                                         <td className="px-6 py-4 text-xs text-brand/80 font-medium">{r.displayData.curso}</td>
+                                        {userRole === 'superadmin' && (
+                                            <td className="px-6 py-4 text-right">
+                                                <button onClick={() => handleDeleteResponse(r.id)} className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

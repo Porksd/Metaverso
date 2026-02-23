@@ -66,18 +66,22 @@ export default function MetaversoAdmin() {
             .from('admin_profiles')
             .select('role')
             .eq('email', email)
-            .single();
+            .maybeSingle();
 
         if (profile) {
             setUserRole(profile.role);
             setIsAuthorized(true);
         } else {
-            // Fallback for hardcoded admins if table is empty or during migration
-            const allowedAdmins = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
-            if (email && allowedAdmins.includes(email)) {
+            // Fallback ONLY for the main owner if no profile exists yet
+            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com'];
+            if (email && absoluteSuperAdmins.includes(email)) {
                 setUserRole('superadmin');
                 setIsAuthorized(true);
             } else {
+                setIsAuthorized(false);
+                return;
+            }
+        }
                 setIsAuthorized(false);
                 return;
             }
@@ -617,7 +621,7 @@ export default function MetaversoAdmin() {
                                                         className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20'}`}
                                                         title="Copiar Portal Alumnos"
                                                     >
-                                                        {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Medal className="w-4 h-4" />}
+                                                        {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                                                     </button>
                                                     <button 
                                                         onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
@@ -632,7 +636,7 @@ export default function MetaversoAdmin() {
                                                 <Settings className="w-4 h-4" />
                                             </button>
                                             <button onClick={() => setSignatureModal(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Firmas y Certificados">
-                                                <Save className="w-4 h-4" />
+                                                <Medal className="w-4 h-4" />
                                             </button>
                                             {userRole === 'superadmin' && (
                                                 <button onClick={() => handleDeleteCompany(company)} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20" title="Eliminar Empresa">

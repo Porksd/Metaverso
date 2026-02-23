@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { LogOut, BookOpen, Edit, Plus, Search, ArrowRight, X, Building2, Save, Settings, Check, Trash2 } from "lucide-react";
+import { LogOut, BookOpen, Edit, Plus, Search, ArrowRight, X, Building2, Save, Settings, Check, Trash2, Medal } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CoursesAdmin() {
@@ -11,6 +11,7 @@ export default function CoursesAdmin() {
     const [companies, setCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newCourse, setNewCourse] = useState({ 
         name: '', 
@@ -28,13 +29,24 @@ export default function CoursesAdmin() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                // Redirect to login with proper returnUrl
                 const returnUrl = encodeURIComponent(window.location.pathname);
                 router.push(`/admin/metaverso/login?returnUrl=${returnUrl}`);
-            } else {
-                fetchCourses();
-                fetchCompanies();
+                return;
             }
+
+            // RBAC Check
+            const { data: profile } = await supabase
+                .from('admin_profiles')
+                .select('role')
+                .eq('email', session.user.email)
+                .maybeSingle();
+
+            const superAdmins = ['apacheco@lobus.cl', 'soporte@lobus.cl', 'm.poblete.m@gmail.com'];
+            const role = profile?.role || (superAdmins.includes(session.user.email || '') ? 'superadmin' : 'editor');
+            setUserRole(role);
+
+            fetchCourses();
+            fetchCompanies();
         };
         checkSession();
     }, []);
@@ -124,6 +136,9 @@ export default function CoursesAdmin() {
     };
 
     const handleDeleteCourse = async (course: any) => {
+        if (userRole !== 'superadmin') {
+            return alert("No tienes permisos para eliminar cursos. Contacta a un SuperAdmin.");
+        }
         // 1. Verificar alumnos
         const { count: enrollmentCount, error: enrollError } = await supabase
             .from('enrollments')
@@ -345,13 +360,15 @@ export default function CoursesAdmin() {
                                 >
                                     <Settings className="w-4 h-4" />
                                 </button>
-                                <button
-                                    onClick={() => handleDeleteCourse(course)}
-                                    className="p-3 bg-red-500/5 text-red-500/40 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all"
-                                    title="Eliminar Curso"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                {userRole === 'superadmin' && (
+                                    <button
+                                        onClick={() => handleDeleteCourse(course)}
+                                        className="p-3 bg-red-500/5 text-red-500/40 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                        title="Eliminar Curso"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -499,7 +516,7 @@ export default function CoursesAdmin() {
                                 onClick={handleSaveCourse}
                                 className="w-full bg-brand text-black font-black uppercase py-4 rounded-xl mt-4 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-brand/20"
                             >
-                                <Save className="w-4 h-4" />
+                                <Medal className="w-4 h-4" />
                                 {editingCourseId ? 'Actualizar Parametros' : 'Inicializar Curso'}
                             </button>
                         </div>

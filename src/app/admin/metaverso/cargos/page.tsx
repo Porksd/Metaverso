@@ -33,6 +33,7 @@ export default function JobPositionsAdmin() {
     const [companies, setCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<JobPosition | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -54,21 +55,31 @@ export default function JobPositionsAdmin() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-            console.log("No session found, redirecting to login...");
             router.push("/admin/metaverso/login?returnUrl=/admin/metaverso/cargos");
             return;
         }
 
-        // Check for metaverso admin email or developer email
-        const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
-        if (!allowedEmails.includes(session.user.email || '')) {
-            console.log("Unauthorized email:", session.user.email);
-            // Optional: redirect to a generic unauthorized page or login
-            router.push("/admin/metaverso/login");
-            return;
+        const email = session.user.email?.toLowerCase();
+        const { data: profile } = await supabase
+            .from('admin_profiles')
+            .select('role')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (profile) {
+            setUserRole(profile.role);
+            setIsAuthorized(true);
+        } else {
+            const allowedEmails = ['apacheco@lobus.cl', 'porksde@gmail.com'];
+            if (email && allowedEmails.includes(email)) {
+                setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+                return;
+            }
         }
         
-        setIsAuthorized(true);
         loadPositions();
     };
 
@@ -142,6 +153,7 @@ export default function JobPositionsAdmin() {
     };
 
     const handleDelete = async (id: string) => {
+        if (userRole !== 'superadmin') return alert("No tienes permisos de SuperAdmin para eliminar cargos.");
         if (!confirm("¿Seguro que deseas eliminar este cargo?")) return;
         await supabase.from('company_roles').delete().eq('id', id);
         loadPositions();
@@ -266,12 +278,14 @@ export default function JobPositionsAdmin() {
                                                     >
                                                         <Edit2 className="w-4 h-4" />
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(pos.id)}
-                                                        className="p-2 hover:bg-red-500/20 rounded-lg text-white/60 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    {userRole === 'superadmin' && (
+                                                        <button
+                                                            onClick={() => handleDelete(pos.id)}
+                                                            className="p-2 hover:bg-red-500/20 rounded-lg text-white/60 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
