@@ -143,20 +143,21 @@ export default function AdminUsersPage() {
                         </div>
                         <button
                             onClick={() => { setEditingAdmin(null); setShowForm(true); }}
-                            
-                {dbError && (
-                    <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-500 text-xs font-bold mb-6 flex items-center gap-3">
-                        <Shield className="w-5 h-5 shrink-0" />
-                        <div>
-                            <p className="uppercase tracking-wider">Error de Base de Datos</p>
-                            <p className="font-normal opacity-70">La tabla de perfiles administrativos no existe. Ejecute la migración 030.</p>
-                        </div>
-                    </div>
-                )}className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                            className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
                         >
                             <UserPlus className="w-4 h-4" /> Agregar Administrador
                         </button>
                     </div>
+
+                    {dbError && (
+                        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-500 text-xs font-bold mb-6 flex items-center gap-3">
+                            <Shield className="w-5 h-5 shrink-0" />
+                            <div>
+                                <p className="uppercase tracking-wider">Error de Base de Datos</p>
+                                <p className="font-normal opacity-70">La tabla de perfiles administrativos no existe. Ejecute la migración 030.</p>
+                            </div>
+                        </div>
+                    )}
 
                 {/* List */}
                 <div className="space-y-4">
