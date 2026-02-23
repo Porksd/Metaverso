@@ -13,8 +13,14 @@ export default function EmpresaLogin() {
     const router = useRouter();
 
     useEffect(() => {
-        // Clear previous session and supabase auth if any
+        // Clear previous session if it's NOT a Meta Admin
         const clearSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const { data: profile } = await supabase.from('admin_profiles').select('role').eq('email', session.user.email?.toLowerCase()).maybeSingle();
+                if (profile) return; // Keep Meta Admin session
+            }
+            
             await supabase.auth.signOut();
             localStorage.removeItem('empresa_id');
             localStorage.removeItem('empresa_name');

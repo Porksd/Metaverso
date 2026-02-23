@@ -661,6 +661,17 @@ export default function MetaversoAdmin() {
                                             {company.slug && (
                                                 <>
                                                     <button 
+                                                        onClick={() => {
+                                                            localStorage.setItem('empresa_id', company.id);
+                                                            localStorage.setItem('empresa_name', company.name);
+                                                            router.push(`/admin/empresa/portal/${company.slug}`);
+                                                        }}
+                                                        className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20 hover:bg-brand hover:text-black transition-all"
+                                                        title="Entrar como Admin a este Portal"
+                                                    >
+                                                        <UserCog className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
                                                         onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
                                                         className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20'}`}
                                                         title="Copiar Portal Alumnos"
@@ -682,7 +693,7 @@ export default function MetaversoAdmin() {
                                             <button onClick={() => setSignatureModal(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Firmas y Certificados">
                                                 <Medal className="w-4 h-4" />
                                             </button>
-                                            {userRole === 'superadmin' && (
+                                            {(userRole === 'superadmin' || userRole === 'editor') && (
                                                 <button onClick={() => handleDeleteCompany(company)} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20" title="Eliminar Empresa">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -831,7 +842,7 @@ export default function MetaversoAdmin() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                     <button onClick={() => setEditingStudent(p)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/20 hover:text-brand border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Editar Perfil"><Settings className="w-3.5 h-3.5" /></button>
-                                                    {userRole === 'superadmin' && (
+                                                    {(userRole === 'superadmin' || userRole === 'editor') && (
                                                         <button onClick={() => handleDeleteStudent(p.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Eliminar Registro"><Trash2 className="w-3.5 h-3.5" /></button>
                                                     )}
                                                 </td>

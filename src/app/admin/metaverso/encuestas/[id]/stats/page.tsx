@@ -443,7 +443,7 @@ export default function SurveyStats() {
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">RUT/Passport</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Empresa Colab.</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Curso</th>
-                                    {userRole === 'superadmin' && <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5 text-right">Acciones</th>}
+                                    {(userRole === 'superadmin' || userRole === 'editor') && <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5 text-right">Acciones</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -455,7 +455,7 @@ export default function SurveyStats() {
                                         <td className="px-6 py-4 text-xs text-white/40">{r.displayData.identificacion}</td>
                                         <td className="px-6 py-4 text-xs text-white/60">{r.displayData.colab_empresa}</td>
                                         <td className="px-6 py-4 text-xs text-brand/80 font-medium">{r.displayData.curso}</td>
-                                        {userRole === 'superadmin' && (
+                                        {(userRole === 'superadmin' || userRole === 'editor') && (
                                             <td className="px-6 py-4 text-right">
                                                 <button onClick={() => handleDeleteResponse(r.id)} className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 opacity-0 group-hover:opacity-100 transition-all">
                                                     <Trash2 className="w-3.5 h-3.5" />

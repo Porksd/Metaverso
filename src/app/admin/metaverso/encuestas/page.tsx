@@ -232,7 +232,7 @@ export default function SurveysAdmin() {
                                         <BarChart3 className="w-3 h-3" /> Estadísticas
                                     </button>
                                     <div className="w-px h-6 bg-white/10 mx-2" />
-                                    {userRole === 'superadmin' && (
+                                    {(userRole === 'superadmin' || userRole === 'editor') && (
                                         <button 
                                             onClick={() => handleResetSurveyData(survey.id, survey.title_es)} 
                                             className={`p-2.5 rounded-xl bg-white/5 hover:bg-orange-500/10 text-white/20 hover:text-orange-400 border border-white/5 transition-all ${isResetting === survey.id ? 'animate-pulse' : ''}`}
@@ -242,7 +242,7 @@ export default function SurveysAdmin() {
                                         </button>
                                     )}
                                     <button onClick={() => { setIsEditing(survey); setShowForm(true); }} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border border-white/5 transition-all"><Settings className="w-4 h-4" /></button>
-                                    {userRole === 'superadmin' && (
+                                    {(userRole === 'superadmin' || userRole === 'editor') && (
                                         <button onClick={() => handleDeleteSurvey(survey.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/5 transition-all"><Trash2 className="w-4 h-4" /></button>
                                     )}
                                 </div>

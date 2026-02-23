@@ -34,6 +34,8 @@ export default function EmpresaAdmin() {
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
+    const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
+    const [masterRole, setMasterRole] = useState<'superadmin' | 'editor' | null>(null);
     const [newStudent, setNewStudent] = useState<any>({ 
         first_name: "", 
         last_name: "", 
@@ -62,10 +64,37 @@ export default function EmpresaAdmin() {
         
         const checkAuth = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            // Si hay una sesión activa de Supabase, la cerramos para evitar conflictos de tokens (Error 401)
-            // ya que el Portal Corporativo opera de forma dinámica sin Auth estándar de Supabase.
+            
             if (session) {
-                console.warn("Sesión de Supabase detectada en Portal Corporativo. Cerrando sesión para evitar errores 401...");
+                // Verificar si es un Meta Admin (SuperAdmin o Editor)
+                const email = session.user.email?.toLowerCase();
+                const { data: profile } = await supabase
+                    .from('admin_profiles')
+                    .select('role')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl', 'apacheco@metaversotec.com'];
+                const editors = ['admin@metaversotec.com'];
+
+                let roleToSet: 'superadmin' | 'editor' | null = null;
+                if (profile) {
+                    roleToSet = profile.role as 'superadmin' | 'editor';
+                } else if (email && absoluteSuperAdmins.includes(email)) {
+                    roleToSet = 'superadmin';
+                } else if (email && editors.includes(email)) {
+                    roleToSet = 'editor';
+                }
+
+                if (roleToSet) {
+                    setIsMasterAdmin(true);
+                    setMasterRole(roleToSet);
+                    console.log(`Acceso Maestro Detectado: ${roleToSet}. Omitiendo cierre de sesión.`);
+                    return;
+                }
+
+                // Si no es un Meta Admin, cerramos la sesión para evitar conflictos (flujo original)
+                console.warn("Sesión de Supabase común detectada. Cerrando sesión...");
                 await supabase.auth.signOut();
             }
         };
@@ -314,9 +343,9 @@ export default function EmpresaAdmin() {
                                 <input type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none" />
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => setShowCompanyManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2"><BookOpen className="w-4 h-4" /> Empresas</button>
-                                <button onClick={() => setShowCargoManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2"><Shield className="w-4 h-4" /> Cargos</button>
-                                <button onClick={() => setIsCreating(true)} className="p-4 bg-brand text-black rounded-2xl text-[10px] font-black uppercase flex items-center gap-2"><UserPlus className="w-4 h-4" /> Nuevo</button>
+                                <button onClick={() => setShowCompanyManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><BookOpen className="w-4 h-4" /> Empresas Colaboradoras</button>
+                                <button onClick={() => setShowCargoManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><Shield className="w-4 h-4" /> Cargos</button>
+                                <button onClick={() => setIsCreating(true)} className="p-4 bg-brand text-black rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-brand/10"><UserPlus className="w-4 h-4" /> Nuevo</button>
                             </div>
                         </div>
 
@@ -1023,14 +1052,15 @@ export default function EmpresaAdmin() {
                 {showCompanyManager && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
                         <div className="glass p-10 w-full max-w-lg space-y-6">
-                            <h3 className="text-xl font-black uppercase">Gestionar Empresas</h3>
+                            <h3 className="text-xl font-black uppercase text-brand">Empresas Colaboradoras</h3>
+                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Gestionar listado de empresas sub-contratistas</p>
                             <div className="flex gap-2">
-                                <input id="newCompanyName" placeholder="Nombre Empresa..." className="flex-1 bg-white/5 p-3 rounded-xl text-sm" />
+                                <input id="newCompanyName" placeholder="Nombre Empresa Colaboradora..." className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white" />
                                 <button onClick={() => { 
                                     const i = document.getElementById('newCompanyName') as HTMLInputElement; 
                                     if(i.value) handleCreateCompany(i.value); 
                                     i.value = ""; 
-                                }} className="bg-brand text-black px-4 rounded-xl font-black text-[10px]">Agregar</button>
+                                }} className="bg-brand text-black px-6 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition-all">Agregar</button>
                             </div>
                             <div className="max-h-60 overflow-auto space-y-2">
                                 {allCompanies.map(c => (
