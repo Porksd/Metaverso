@@ -414,7 +414,7 @@ export default function SurveyStats() {
                         </div>
                         <div className="flex items-end">
                             <button 
-                                onClick={() => setFilters({ startDate: '', endDate: '', course: '', company: '', colabCompany: '', position: '' })}
+                                onClick={() => setFilters({ startDate: '', endDate: '', course: '', company: '', colabCompany: '', position: '', search: '' })}
                                 className="w-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white py-2 rounded-xl text-[10px] font-black uppercase transition-all"
                             > Limpiar Filtros </button>
                         </div>
