@@ -74,6 +74,7 @@ export default function JobPositionsAdmin() {
 
     const loadPositions = async () => {
         setLoading(true);
+        // Intentar cargar con asignaciones, si falla (tabla no existe), cargar básico
         const { data, error } = await supabase
             .from('company_roles')
             .select(`
@@ -85,7 +86,16 @@ export default function JobPositionsAdmin() {
             `)
             .order('name');
 
-        if (data) setPositions(data as any);
+        if (error) {
+            console.error("Error loading assignments, falling back to basic:", error);
+            const { data: basicData } = await supabase
+                .from('company_roles')
+                .select('*')
+                .order('name');
+            if (basicData) setPositions(basicData as any);
+        } else if (data) {
+            setPositions(data as any);
+        }
         setLoading(false);
     };
 

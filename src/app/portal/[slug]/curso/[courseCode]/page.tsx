@@ -143,14 +143,25 @@ export default function CourseAuthPage() {
                 setCourse(crs);
 
                 // 3. Fetch ONLY assigned and visible company roles for this company
-                const { data: assignedRoles } = await supabase
+                const { data: assignedRoles, error: assignErr } = await supabase
                     .from('role_company_assignments')
                     .select('role_id, company_roles(*)')
                     .eq('company_id', comp.id)
                     .eq('is_visible', true);
                 
-                const filteredRoles = (assignedRoles || []).map((ar: any) => ar.company_roles).filter(Boolean);
-                setCompanyRoles(filteredRoles || []);
+                if (assignErr || !assignedRoles || assignedRoles.length === 0) {
+                    // Fallback to basic visibility: roles of this company or global roles
+                    const { data: allRoles } = await supabase
+                        .from('company_roles')
+                        .select('id, name, name_ht, description, description_ht, company_id')
+                        .or(`company_id.eq.${comp.id},company_id.is.null`)
+                        .eq('active', true) // Only active roles
+                        .order('name');
+                    setCompanyRoles(allRoles || []);
+                } else {
+                    const filteredRoles = (assignedRoles || []).map((ar: any) => ar.company_roles).filter(Boolean);
+                    setCompanyRoles(filteredRoles || []);
+                }
 
                 // 4b. Fetch companies_list for Empresa autocomplete
                 const { data: clData } = await supabase

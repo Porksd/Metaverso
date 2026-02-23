@@ -88,7 +88,8 @@ export default function EmpresaAdmin() {
             setStudents(stData || []);
 
             // Fetch ALL company roles (global + company-specific)
-            const { data: cgData } = await supabase
+            // Intentamos traer asignaciones, si falla traemos básico
+            const { data: cgData, error: cgError } = await supabase
                 .from('company_roles')
                 .select(`
                     *,
@@ -99,7 +100,17 @@ export default function EmpresaAdmin() {
                 `)
                 .or(`company_id.eq.${companyId},company_id.is.null`)
                 .order('name');
-            setCargos(cgData || []);
+            
+            if (cgError) {
+                const { data: basicCargos } = await supabase
+                    .from('company_roles')
+                    .select('*')
+                    .or(`company_id.eq.${companyId},company_id.is.null`)
+                    .order('name');
+                setCargos(basicCargos || []);
+            } else {
+                setCargos(cgData || []);
+            }
 
             // Fetch ONLY assigned courses for this company
             const { data: assignedData, error: assignedError } = await supabase
@@ -890,7 +901,8 @@ export default function EmpresaAdmin() {
                                 )}
                                 {cargos.filter(c => !c.company_id).map(c => {
                                     const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
-                                    const isVisible = assignment ? assignment.is_visible : false;
+                                    // Si no hay tabla de asignaciones, mostramos todo por defecto
+                                    const isVisible = assignment ? assignment.is_visible : (c.role_company_assignments === undefined ? true : false);
                                     
                                     return (
                                         <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
