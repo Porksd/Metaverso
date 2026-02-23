@@ -41,6 +41,7 @@ export default function JobPositionsAdmin() {
     const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
     const [descRich, setDescRich] = useState("");
     const [descRichHT, setDescRichHT] = useState("");
+    const [descLang, setDescLang] = useState<'es' | 'ht'>('es'); // 'es' or 'ht'
 
     useEffect(() => {
         checkAuth();
@@ -124,7 +125,8 @@ export default function JobPositionsAdmin() {
         const positionData = {
             name: formData.get('name') as string,
             name_ht: formData.get('name_ht') as string,
-            description: formData.get('description') as string,
+            description: descRich,
+            description_ht: descRichHT,
             code: (formData.get('code') as string) || null,
             active: formData.get('active') === 'on'
         };
@@ -202,7 +204,13 @@ export default function JobPositionsAdmin() {
                             <p className="text-white/40 font-medium">Administra las posiciones y perfiles para el registro de alumnos</p>
                         </div>
                         <button
-                            onClick={() => { setIsEditing(null); setShowForm(true); }}
+                            onClick={() => { 
+                                setIsEditing(null); 
+                                setDescRich("");
+                                setDescRichHT("");
+                                setSelectedCompanies([]);
+                                setShowForm(true); 
+                            }}
                             className="bg-brand text-black px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-[0_0_20px_rgba(49,210,45,0.3)]"
                         >
                             <Plus className="w-4 h-4" /> Nuevo Cargo
@@ -280,6 +288,8 @@ export default function JobPositionsAdmin() {
                                                     <button
                                                         onClick={() => { 
                                                             setIsEditing(pos); 
+                                                            setDescRich(pos.description || "");
+                                                            setDescRichHT(pos.description_ht || "");
                                                             setSelectedCompanies(pos.role_company_assignments?.map(as => as.company_id) || []);
                                                             setShowForm(true); 
                                                         }}
@@ -366,15 +376,43 @@ export default function JobPositionsAdmin() {
                                         />
                                     </div>
 
-                                    <div className="border-b border-white/5 pb-2">
-                                        <label className="text-[10px] font-black uppercase text-white/20 block mb-1">Descripción</label>
-                                        <textarea
-                                            name="description"
-                                            rows={2}
-                                            defaultValue={isEditing?.description}
-                                            placeholder="Resumen del cargo..."
-                                            className="w-full bg-transparent p-0 text-white/60 font-medium focus:outline-none placeholder:text-white/10 resize-none"
-                                        />
+                                    <div className="border-b border-white/5 pb-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="text-[10px] font-black uppercase text-white/20 block">Descripción del Cargo</label>
+                                            <div className="flex bg-white/5 rounded-lg p-1 gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDescLang('es')}
+                                                    className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${descLang === 'es' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Español
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDescLang('ht')}
+                                                    className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${descLang === 'ht' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Haitiano (Creole)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 min-h-[200px]">
+                                            {descLang === 'es' ? (
+                                                <RichTextEditor
+                                                    content={descRich}
+                                                    onChange={setDescRich}
+                                                />
+                                            ) : (
+                                                <RichTextEditor
+                                                    content={descRichHT}
+                                                    onChange={setDescRichHT}
+                                                />
+                                            )}
+                                        </div>
+                                        <p className="text-[9px] text-white/20 mt-2 italic text-right">
+                                            {descLang === 'es' ? 'Edita el contenido principal en español.' : 'Traduce el contenido para los trabajadores haitianos.'}
+                                        </p>
                                     </div>
 
                                     <div className="space-y-4">
