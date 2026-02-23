@@ -44,6 +44,15 @@ export default function SurveyStats() {
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
     const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [filters, setFilters] = useState({
+        startDate: '',
+        endDate: '',
+        course: '',
+        company: '',
+        colabCompany: '',
+        position: '',
+        search: ''
+    });
 
     useEffect(() => {
         checkAuth();
