@@ -6,7 +6,7 @@ import {
     Building2, Users, BookOpen, Layers, Plus, Search,
     Settings, Save, Upload, Trash2, PieChart, ShieldCheck, X,
     ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe,
-    Copy, Check
+    Copy, Check, Medal, UserCog
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -45,6 +45,7 @@ export default function MetaversoAdmin() {
     const [isCreatingStudent, setIsCreatingStudent] = useState(false);
 
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
 
     useEffect(() => {
         checkAuth();
@@ -59,14 +60,29 @@ export default function MetaversoAdmin() {
         }
 
         const email = session.user.email?.toLowerCase();
-        // Allow the main developer/admin emails
-        const allowedAdmins = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
-        if (!email || !allowedAdmins.includes(email)) {
-            setIsAuthorized(false);
-            return;
+        
+        // 1. Check in admin_profiles table
+        const { data: profile } = await supabase
+            .from('admin_profiles')
+            .select('role')
+            .eq('email', email)
+            .single();
+
+        if (profile) {
+            setUserRole(profile.role);
+            setIsAuthorized(true);
+        } else {
+            // Fallback for hardcoded admins if table is empty or during migration
+            const allowedAdmins = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
+            if (email && allowedAdmins.includes(email)) {
+                setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+                return;
+            }
         }
         
-        setIsAuthorized(true);
         fetchCompanies();
         fetchParticipants();
         fetchCourses();
@@ -463,6 +479,15 @@ export default function MetaversoAdmin() {
                     </div>
 
                     <div className="flex gap-4">
+                        {userRole === 'superadmin' && (
+                            <button
+                                onClick={() => router.push('/admin/metaverso/usuarios')}
+                                className="bg-white/5 text-white/40 px-6 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-brand/10 hover:text-brand transition-all border border-white/5 flex items-center gap-2"
+                                title="Gestionar Usuarios Administradores"
+                            >
+                                <UserCog className="w-4 h-4" /> Usuarios Admin
+                            </button>
+                        )}
                         <button
                             onClick={handleLogout}
                             className="bg-white/5 text-white/40 px-6 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-red-500/10 hover:text-red-400 transition-all border border-white/5"
@@ -592,7 +617,7 @@ export default function MetaversoAdmin() {
                                                         className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20'}`}
                                                         title="Copiar Portal Alumnos"
                                                     >
-                                                        {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                                                        {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Medal className="w-4 h-4" />}
                                                     </button>
                                                     <button 
                                                         onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
@@ -609,9 +634,11 @@ export default function MetaversoAdmin() {
                                             <button onClick={() => setSignatureModal(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Firmas y Certificados">
                                                 <Save className="w-4 h-4" />
                                             </button>
-                                                                <button onClick={() => handleDeleteCompany(company)} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20" title="Eliminar Empresa">
-                                                                    <Trash2 className="w-4 h-4" />
-                                                                </button>
+                                            {userRole === 'superadmin' && (
+                                                <button onClick={() => handleDeleteCompany(company)} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all border border-red-500/20" title="Eliminar Empresa">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -738,7 +765,9 @@ export default function MetaversoAdmin() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                     <button onClick={() => setEditingStudent(p)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/20 hover:text-brand border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Editar Perfil"><Settings className="w-3.5 h-3.5" /></button>
-                                                    <button onClick={() => handleDeleteStudent(p.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Eliminar Registro"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                    {userRole === 'superadmin' && (
+                                                        <button onClick={() => handleDeleteStudent(p.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Eliminar Registro"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         );

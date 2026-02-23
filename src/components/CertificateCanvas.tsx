@@ -326,44 +326,6 @@ export default function CertificateCanvas({
                     ctx.fillText(sig.role, sigX, sigY + 45);
                 }
             }
-                for (let i = 0; i < validSigs.length; i++) {
-                    const sig = validSigs[i];
-                    const xCenter = ML + spacing * i + spacing / 2;
-                    let sY = sigAreaTop;
-
-                    if (sig.url) {
-                        const sigImg = await loadImage(sig.url);
-                        if (sigImg) {
-                            const sw = 200;
-                            const sh = 90;
-                            ctx.drawImage(sigImg, xCenter - sw / 2, sY, sw, sh);
-                            sY += sh + 10;
-                        } else {
-                            sY += 100;
-                        }
-                    } else {
-                        sY += 100;
-                    }
-
-                    // Línea
-                    ctx.beginPath();
-                    ctx.moveTo(xCenter - 120, sY);
-                    ctx.lineTo(xCenter + 120, sY);
-                    ctx.strokeStyle = LINE_LT;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                    sY += 24;
-
-                    ctx.textAlign = "center";
-                    ctx.font = "bold 18px 'Arial', sans-serif";
-                    ctx.fillStyle = BLACK;
-                    ctx.fillText(sig.name || "", xCenter, sY);
-                    sY += 20;
-                    ctx.font = "15px 'Arial', sans-serif";
-                    ctx.fillStyle = LIGHT;
-                    ctx.fillText(sig.role || "", xCenter, sY);
-                }
-            }
 
             // ── Borde inferior decorativo ──
             ctx.fillStyle = ACCENT;

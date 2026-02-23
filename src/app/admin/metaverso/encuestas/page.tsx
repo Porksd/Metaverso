@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { 
     Plus, Trash2, Edit2, Search, ClipboardList, 
-    X, Check, ShieldAlert, BarChart3, Globe, Settings 
+    X, Check, ShieldAlert, BarChart3, Globe, Settings,
+    Clock, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,8 @@ export default function SurveysAdmin() {
     const [surveys, setSurveys] = useState<Survey[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [isResetting, setIsResetting] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<Survey | null>(null);
     const [showForm, setShowForm] = useState(false);
@@ -42,14 +45,50 @@ export default function SurveysAdmin() {
             return;
         }
 
-        const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
-        if (!allowedEmails.includes(session.user.email?.toLowerCase() || '')) {
-            setIsAuthorized(false);
-            return;
+        const email = session.user.email?.toLowerCase();
+        
+        // Check in admin_profiles table
+        const { data: profile } = await supabase
+            .from('admin_profiles')
+            .select('role')
+            .eq('email', email)
+            .single();
+
+        if (profile) {
+            setUserRole(profile.role);
+            setIsAuthorized(true);
+        } else {
+            // Fallback
+            const allowedEmails = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
+            if (email && allowedEmails.includes(email)) {
+                setUserRole('superadmin');
+                setIsAuthorized(true);
+            } else {
+                setIsAuthorized(false);
+                return;
+            }
         }
         
-        setIsAuthorized(true);
         loadSurveys();
+    };
+
+    const handleResetSurveyData = async (surveyId: string, title: string) => {
+        if (!confirm(`¿Deseas RESETEAR todos los datos de la encuesta "${title}"? Esta acción eliminará permanentemente todas las respuestas recolectadas hasta ahora.`)) return;
+        
+        setIsResetting(surveyId);
+        try {
+            const { error } = await supabase
+                .from('survey_responses')
+                .delete()
+                .eq('survey_id', surveyId);
+
+            if (error) throw error;
+            alert("Respuestas reseteadas correctamente.");
+        } catch (err: any) {
+            alert("Error al resetear datos: " + err.message);
+        } finally {
+            setIsResetting(null);
+        }
     };
 
     const loadSurveys = async () => {
@@ -187,9 +226,19 @@ export default function SurveysAdmin() {
                                         <BarChart3 className="w-3 h-3" /> Estadísticas
                                     </button>
                                     <div className="w-px h-6 bg-white/10 mx-2" />
-                                    <button disabled className="p-2.5 rounded-xl bg-white/5 text-white/20 border border-white/5"><Globe className="w-4 h-4" /></button>
+                                    {userRole === 'superadmin' && (
+                                        <button 
+                                            onClick={() => handleResetSurveyData(survey.id, survey.title_es)} 
+                                            className={`p-2.5 rounded-xl bg-white/5 hover:bg-orange-500/10 text-white/20 hover:text-orange-400 border border-white/5 transition-all ${isResetting === survey.id ? 'animate-pulse' : ''}`}
+                                            title="Resetear Datos de Encuesta"
+                                        >
+                                            {isResetting === survey.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
+                                        </button>
+                                    )}
                                     <button onClick={() => { setIsEditing(survey); setShowForm(true); }} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border border-white/5 transition-all"><Settings className="w-4 h-4" /></button>
-                                    <button onClick={() => handleDeleteSurvey(survey.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/5 transition-all"><Trash2 className="w-4 h-4" /></button>
+                                    {userRole === 'superadmin' && (
+                                        <button onClick={() => handleDeleteSurvey(survey.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 border border-white/5 transition-all"><Trash2 className="w-4 h-4" /></button>
+                                    )}
                                 </div>
                             </motion.div>
                         ))}

@@ -222,8 +222,6 @@ export default function CourseAuthPage() {
             // Si llegamos aquí, las credenciales son válidas. 
             // Proceder con el login del estudiante...
             localStorage.setItem('student_session', JSON.stringify(student));
-                throw new Error("Credenciales inválidas. Verifica tu email/RUT y contraseña.");
-            }
 
             // Verificar Inscripción (Enrollment)
             const { data: enrollment } = await supabase
