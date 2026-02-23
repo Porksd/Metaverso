@@ -169,6 +169,16 @@ export default function AdminUsersPage() {
                             <tbody className="divide-y divide-white/5">
                                 {loading ? (
                                     <tr><td colSpan={4} className="px-6 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">Sincronizando Usuarios...</td></tr>
+                                ) : filteredAdmins.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="px-6 py-20 text-center space-y-4">
+                                            <Mail className="w-12 h-12 text-white/10 mx-auto" />
+                                            <div className="space-y-1">
+                                                <p className="text-white/40 font-black uppercase tracking-widest text-xs">No hay administradores registrados</p>
+                                                <p className="text-white/20 text-[10px] font-medium max-w-xs mx-auto">Usa el botón "Agregar Administrador" para registrar correos en la base de datos y asignar roles (Editor/SuperAdmin).</p>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ) : filteredAdmins.map(admin => (
                                     <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
                                         <td className="px-6 py-5">
