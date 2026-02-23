@@ -30,6 +30,7 @@ export default function EmpresaAdmin() {
     const [isCreating, setIsCreating] = useState(false);
     const [cargoDesc, setCargoDesc] = useState("");
     const [cargoDescHT, setCargoDescHT] = useState("");
+    const [descLang, setDescLang] = useState<'es' | 'ht'>('es');
     const [certData, setCertData] = useState<any>(null);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
@@ -878,6 +879,41 @@ export default function EmpresaAdmin() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name || ''} />
                                         <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name_ht || ''} />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">Descripción</p>
+                                            <div className="flex bg-white/5 rounded-lg p-1 gap-1">
+                                                <button
+                                                    onClick={() => setDescLang('es')}
+                                                    className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${descLang === 'es' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Español
+                                                </button>
+                                                <button
+                                                    onClick={() => setDescLang('ht')}
+                                                    className={`px-3 py-1 rounded-md text-[10px] font-black uppercase transition-all ${descLang === 'ht' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Haitiano (Creole)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 min-h-[200px]">
+                                            {descLang === 'es' ? (
+                                                <RichTextEditor
+                                                    content={cargoDesc}
+                                                    onChange={setCargoDesc}
+                                                />
+                                            ) : (
+                                                <RichTextEditor
+                                                    content={cargoDescHT}
+                                                    onChange={setCargoDescHT}
+                                                />
+                                            )}
+                                        </div>
+                                        <p className="text-[9px] text-white/20 italic text-right">
+                                            {descLang === 'es' ? 'Edita el contenido principal en español.' : 'Traduce el contenido para los trabajadores haitianos.'}
+                                        </p>
                                     </div>
                                     <div className="flex gap-3">
                                         <button
