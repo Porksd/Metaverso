@@ -53,7 +53,7 @@ export default function AdminSidebar({ children, title }: { children: React.Reac
     if (isAuthorized === false) return null;
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white flex flex-col">
+        <div className="min-h-screen bg-transparent text-white flex flex-col">
             {/* Nav Bar Superior (Sticky p/ navegación rápida) */}
             <header className="sticky top-0 z-[100] bg-black/60 backdrop-blur-xl border-b border-white/5 p-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
