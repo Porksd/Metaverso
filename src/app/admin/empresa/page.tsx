@@ -36,6 +36,7 @@ export default function EmpresaAdmin() {
     const [companyName, setCompanyName] = useState<string>("Cargando...");
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
     const [masterRole, setMasterRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
     const [newStudent, setNewStudent] = useState<any>({ 
         first_name: "", 
         last_name: "", 
@@ -49,10 +50,15 @@ export default function EmpresaAdmin() {
     useEffect(() => {
         const storedId = localStorage.getItem('empresa_id');
         const storedName = localStorage.getItem('empresa_name');
+        const storedMaster = localStorage.getItem('is_master_admin');
         
         if (!storedId) {
             window.location.href = "/admin/empresa/login";
             return;
+        }
+
+        if (storedMaster === 'true') {
+            setIsMasterAdmin(true);
         }
 
         setCompanyId(storedId);
@@ -63,6 +69,7 @@ export default function EmpresaAdmin() {
         if (!companyId) return;
         
         const checkAuth = async () => {
+            setIsAuthenticating(true);
             const { data: { session } } = await supabase.auth.getSession();
             
             if (session) {
@@ -89,14 +96,20 @@ export default function EmpresaAdmin() {
                 if (roleToSet) {
                     setIsMasterAdmin(true);
                     setMasterRole(roleToSet);
+                    localStorage.setItem('is_master_admin', 'true');
                     console.log(`Acceso Maestro Detectado: ${roleToSet}. Omitiendo cierre de sesión.`);
+                    setIsAuthenticating(false);
                     return;
                 }
 
                 // Si no es un Meta Admin, cerramos la sesión para evitar conflictos (flujo original)
                 console.warn("Sesión de Supabase común detectada. Cerrando sesión...");
                 await supabase.auth.signOut();
+            } else if (localStorage.getItem('is_master_admin') === 'true') {
+                // Si esperábamos ser master admin pero no hay sesión, algo falló o expiró
+                // pero no bloqueamos por ahora para permitir el flujo normal de contraseña si falló el cross-login
             }
+            setIsAuthenticating(false);
         };
         checkAuth();
         fetchData();
@@ -305,6 +318,14 @@ export default function EmpresaAdmin() {
         }
         else fetchCompanyList();
     };
+
+    if (!companyId) return null;
+
+    if (isAuthenticating) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-brand font-black animate-pulse uppercase tracking-widest">Validando Acceso Maestro...</div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-transparent text-white p-4 md:p-8 font-sans">

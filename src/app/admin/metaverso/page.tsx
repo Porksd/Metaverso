@@ -664,6 +664,7 @@ export default function MetaversoAdmin() {
                                                         onClick={() => {
                                                             localStorage.setItem('empresa_id', company.id);
                                                             localStorage.setItem('empresa_name', company.name);
+                                                            localStorage.setItem('is_master_admin', 'true');
                                                             router.push(`/admin/empresa/portal/${company.slug}`);
                                                         }}
                                                         className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20 hover:bg-brand hover:text-black transition-all"
