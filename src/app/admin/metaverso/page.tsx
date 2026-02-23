@@ -6,13 +6,15 @@ import {
     Building2, Users, BookOpen, Layers, Plus, Search,
     Settings, Save, Upload, Trash2, PieChart, ShieldCheck, X,
     ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe,
-    Copy, Check, Medal, UserCog
+    Copy, Check, Medal, UserCog, Award, Loader2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ContentUploader from "@/components/ContentUploader";
 import CompanyConfig from "@/components/CompanyConfig";
+import CertificateCanvas from "@/components/CertificateCanvas";
+import jsPDF from "jspdf";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -26,6 +28,8 @@ export default function MetaversoAdmin() {
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
     const [courseModes, setCourseModes] = useState<Record<string, string>>({});
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [certData, setCertData] = useState<any>(null);
+    const [isGeneratingCert, setIsGeneratingCert] = useState<string | null>(null);
 
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
@@ -97,6 +101,45 @@ export default function MetaversoAdmin() {
     const fetchRoles = async () => {
         const { data } = await supabase.from('company_roles').select('*').order('name');
         setRoles(data || []);
+    };
+
+    const handleDownloadCert = async (student: any, enrollment: any) => {
+        setIsGeneratingCert(enrollment.id);
+        try {
+            // Get detailed company info
+            const { data: company, error: compErr } = await supabase
+                .from('companies')
+                .select('*')
+                .eq('id', student.client_id)
+                .maybeSingle();
+
+            if (compErr) throw compErr;
+            if (!company) throw new Error("No se encontró la empresa asociada al alumno.");
+
+            const signatures = [
+                { url: company.signature_url_1, name: company.signature_name_1, role: company.signature_role_1 },
+                { url: company.signature_url_2, name: company.signature_name_2, role: company.signature_role_2 },
+                { url: company.signature_url_3, name: company.signature_name_3, role: company.signature_role_3 }
+            ].filter(s => s.url);
+
+            setCertData({
+                studentName: `${student.first_name || ''} ${student.last_name || ''}`.trim(),
+                rut: student.rut || student.passport || student.id || 'N/A',
+                courseName: enrollment.courses?.name || 'Capacitación',
+                date: new Date(enrollment.completed_at || enrollment.updated_at).toLocaleDateString('es-CL'),
+                score: enrollment.best_score || 100,
+                signatures,
+                companyLogo: company.logo_url,
+                companyName: company.name,
+                jobPosition: student.company_roles?.name || student.position || 'Participante',
+                studentSignature: student.digital_signature_url
+            });
+        } catch (e: any) {
+            console.error("Error generating cert:", e);
+            alert("Error al generar certificado: " + e.message);
+        } finally {
+            setIsGeneratingCert(null);
+        }
     };
 
     useEffect(() => {
@@ -759,14 +802,32 @@ export default function MetaversoAdmin() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    {(() => {
-                                                        const isAprobado = p.enrollments?.some((e: any) => e.status === 'completed' && (e.best_score === null || e.best_score >= 70));
-                                                        const isReprobado = p.enrollments?.some((e: any) => e.status === 'failed' || (e.status === 'completed' && e.best_score !== null && e.best_score < 70));
-                                                        
-                                                        if (isAprobado) return <span className="px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-brand/10 text-brand border-brand/20">✓ Certificado</span>;
-                                                        if (isReprobado) return <span className="px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-red-500/10 text-red-400 border-red-500/20">✕ No Aprobado</span>;
-                                                        return <span className="px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-white/5 text-white/40 border-white/10">⋯ En Proceso</span>;
-                                                    })()}
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {p.enrollments?.map((e: any, eIdx: number) => {
+                                                            const isAprobado = e.status === 'completed' && (e.best_score === null || e.best_score >= 70);
+                                                            if (isAprobado) return (
+                                                                <button
+                                                                    key={eIdx}
+                                                                    onClick={() => handleDownloadCert(p, e)}
+                                                                    disabled={isGeneratingCert === e.id}
+                                                                    className="flex items-center gap-1 px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black transition-all"
+                                                                    title={`Descargar Certificado: ${e.courses?.name}`}
+                                                                >
+                                                                    {isGeneratingCert === e.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Award className="w-2.5 h-2.5" />}
+                                                                    <span>Certificado</span>
+                                                                </button>
+                                                            );
+                                                            return null;
+                                                        })}
+                                                        {(() => {
+                                                            const hasCert = p.enrollments?.some((e: any) => e.status === 'completed' && (e.best_score === null || e.best_score >= 70));
+                                                            if (hasCert) return null;
+
+                                                            const isReprobado = p.enrollments?.some((e: any) => e.status === 'failed' || (e.status === 'completed' && e.best_score !== null && e.best_score < 70));
+                                                            if (isReprobado) return <span className="px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-red-500/10 text-red-400 border-red-500/20">✕ No Aprobado</span>;
+                                                            return <span className="px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-white/5 text-white/40 border-white/10">⋯ En Proceso</span>;
+                                                        })()}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                     <button onClick={() => setEditingStudent(p)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/20 hover:text-brand border border-white/10 transition-all opacity-0 group-hover:opacity-100" title="Editar Perfil"><Settings className="w-3.5 h-3.5" /></button>
@@ -1144,6 +1205,25 @@ export default function MetaversoAdmin() {
                                 {editingStudent?.id ? 'Actualizar Ficha de Alumno' : 'Registrar Nuevo Participante'}
                             </button>
                         </motion.div>
+                    </div>
+                )}
+
+                {certData && (
+                    <div className="hidden">
+                        <CertificateCanvas 
+                            {...certData} 
+                            onReady={(blob) => {
+                                const reader = new FileReader(); 
+                                reader.readAsDataURL(blob);
+                                reader.onloadend = () => { 
+                                    const base64data = reader.result as string;
+                                    const pdf = new jsPDF("p", "px", [1414, 2000]);
+                                    pdf.addImage(base64data, "PNG", 0, 0, 1414, 2000); 
+                                    pdf.save(`Certificado_${certData.rut}_${certData.courseName.replace(/\s+/g, '_')}.pdf`); 
+                                    setCertData(null); 
+                                };
+                            }} 
+                        />
                     </div>
                 )}
 
