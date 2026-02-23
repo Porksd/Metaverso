@@ -204,15 +204,24 @@ export default function CourseAuthPage() {
         setError(null);
         try {
             // Intentar login manual consultando la tabla de estudiantes
-            // El administrador crea estudiantes directamente en la tabla 'students' sin crear registro en auth.users
+            // Buscamos coincidencia exacta de email/rut y password
             const { data: student, error: studentError } = await supabase
                 .from('students')
                 .select('*')
-                .or(`email.eq.${loginData.email},rut.eq.${loginData.email}`)
                 .eq('password', loginData.password)
-                .single();
+                .or(`email.eq.${loginData.email},rut.eq.${loginData.email}`)
+                .maybeSingle();
 
             if (studentError || !student) {
+                console.error("Login detail error:", studentError);
+                setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
+                setActionLoading(false);
+                return;
+            }
+
+            // Si llegamos aquí, las credenciales son válidas. 
+            // Proceder con el login del estudiante...
+            localStorage.setItem('student_session', JSON.stringify(student));
                 throw new Error("Credenciales inválidas. Verifica tu email/RUT y contraseña.");
             }
 

@@ -95,7 +95,7 @@ export default function CertificateCanvas({
             ctx.fillStyle = ACCENT;
             ctx.fillRect(0, 0, W, 6);
 
-            let Y = 60;
+            let Y = 80;
 
             // ── 1. Logo de empresa ──
             if (companyLogo) {
@@ -107,12 +107,12 @@ export default function CertificateCanvas({
                     const lw = logoImg.width * ratio;
                     const lh = logoImg.height * ratio;
                     ctx.drawImage(logoImg, CX - lw / 2, Y, lw, lh);
-                    Y += lh + 30;
+                    Y += lh + 40;
                 } else {
-                    Y += 140;
+                    Y += 160;
                 }
             } else {
-                Y += 80;
+                Y += 100;
             }
 
             // ── 2. Línea decorativa superior ──
@@ -129,7 +129,7 @@ export default function CertificateCanvas({
             ctx.lineTo(MR - 100, Y);
             ctx.stroke();
             ctx.restore();
-            Y += 50;
+            Y += 70;
 
             // ── 3. Título ──
             ctx.textAlign = "center";
@@ -152,11 +152,11 @@ export default function CertificateCanvas({
             ctx.lineTo(MR - 100, Y);
             ctx.stroke();
             ctx.restore();
-            Y += 60;
+            Y += 80;
 
             // ── 4. Párrafo introductorio ──
             ctx.textAlign = "left";
-            ctx.font = "22px 'Georgia', serif";
+            ctx.font = "24px 'Georgia', serif";
             ctx.fillStyle = DARK;
             const cargoText = jobPosition || "";
             const introText = jobPosition
@@ -165,27 +165,27 @@ export default function CertificateCanvas({
             const introLines = wrapText(ctx, introText, contentW);
             for (const line of introLines) {
                 ctx.fillText(line, ML, Y);
-                Y += 34;
+                Y += 40;
             }
-            Y += 25;
+            Y += 40;
 
             // ── 5. Nombre del curso ──
             ctx.textAlign = "center";
-            ctx.font = "bold 38px 'Georgia', serif";
+            ctx.font = "bold 42px 'Georgia', serif";
             ctx.fillStyle = BLACK;
             const courseLines = wrapText(ctx, courseName, contentW - 60);
             for (const line of courseLines) {
                 ctx.fillText(line, CX, Y);
-                Y += 50;
+                Y += 55;
             }
-            Y += 30;
+            Y += 60;
 
             // ── 6. Encabezado datos ──
             ctx.textAlign = "left";
             ctx.font = "italic 20px 'Georgia', serif";
             ctx.fillStyle = LIGHT;
             ctx.fillText("Los siguientes son los datos obtenidos en su participación:", ML, Y);
-            Y += 35;
+            Y += 40;
 
             // ── 7. Tabla de datos (solo campos con valor) ──
             const allRows: [string, string | undefined | null][] = [
@@ -200,7 +200,7 @@ export default function CertificateCanvas({
             ];
             // Filter out rows with no data
             const rows = allRows.filter(([, v]) => v != null && v !== '') as [string, string][];
-            const rowH = 44;
+            const rowH = 48;
             const tableH = rows.length * rowH + 24;
             const labelColW = 280;
 
@@ -212,19 +212,16 @@ export default function CertificateCanvas({
             ctx.fillStyle = ACCENT;
             ctx.fillRect(ML, Y, 4, tableH);
 
-            Y += 28; // padding top
+            Y += rowH - 15; // padding top
             for (let i = 0; i < rows.length; i++) {
                 const [label, value] = rows[i];
 
-                // línea separadora suave entre filas
+                // NO dibujamos líneas separadoras horizontales para evitar superposición visual si Y no es exacto
+                /*
                 if (i > 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(ML + 20, Y - 14);
-                    ctx.lineTo(MR - 20, Y - 14);
-                    ctx.strokeStyle = LINE_LT;
-                    ctx.lineWidth = 0.5;
-                    ctx.stroke();
+                    ctx.beginPath(); ...
                 }
+                */
 
                 ctx.font = "20px 'Arial', sans-serif";
                 ctx.fillStyle = MID;
@@ -236,14 +233,13 @@ export default function CertificateCanvas({
 
                 Y += rowH;
             }
-            Y += 30; // padding bottom extra
+            Y += 60; // Separación tras tabla
 
             // ── 8. Consentimiento ──
-            Y += 20;
             ctx.font = "bold 22px 'Arial', sans-serif";
             ctx.fillStyle = BLACK;
             ctx.fillText("CONSENTIMIENTO", ML, Y);
-            Y += 35;
+            Y += 40;
 
             ctx.font = "17px 'Arial', sans-serif";
             ctx.fillStyle = MID;
@@ -251,11 +247,11 @@ export default function CertificateCanvas({
             const consentLines = wrapText(ctx, consentText, contentW);
             for (const line of consentLines) {
                 ctx.fillText(line, ML, Y);
-                Y += 26;
+                Y += 30;
             }
-            Y += 30;
+            Y += 80; // Espacio mayor antes de la firma del alumno para que no quede pegada
 
-            // ── 9. Firma del alumno (centrada) ──
+            // ── 9. Firma del alumno (CENTRADDA Y SUBIDA) ──
             if (studentSignature) {
                 const stuSigImg = await loadImage(studentSignature);
                 if (stuSigImg) {
@@ -289,15 +285,47 @@ export default function CertificateCanvas({
                     ctx.fillStyle = LIGHT;
                     ctx.fillText("✓ Acepto el tratamiento de mis datos personales", CX, Y);
                     ctx.textAlign = "left";
-                    Y += 50;
+                    Y += 100; // Espacio notable antes de las firmas de la empresa
                 }
             }
 
             // ── 10. Firmas empresa (abajo) ──
-            const sigAreaTop = Math.max(Y + 30, H - 300);
+            const sigAreaTop = H - 280; // Posición fija abajo para las firmas de la empresa
             const validSigs = signatures.filter(s => s.url || s.name);
             if (validSigs.length > 0) {
                 const spacing = contentW / validSigs.length;
+                for (let i = 0; i < validSigs.length; i++) {
+                    const sig = validSigs[i];
+                    const sigX = ML + (spacing * i) + (spacing / 2);
+                    let sigY = sigAreaTop;
+
+                    if (sig.url) {
+                        const sigImg = await loadImage(sig.url);
+                        if (sigImg) {
+                            const sw = 220;
+                            const sh = 100;
+                            ctx.drawImage(sigImg, sigX - sw / 2, sigY - sh - 10, sw, sh);
+                        }
+                    }
+
+                    // Línea firma empresa
+                    ctx.beginPath();
+                    ctx.moveTo(sigX - 100, sigY);
+                    ctx.lineTo(sigX + 100, sigY);
+                    ctx.strokeStyle = BLACK;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Nombre y rol
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = BLACK;
+                    ctx.font = "bold 17px 'Arial', sans-serif";
+                    ctx.fillText(sig.name, sigX, sigY + 25);
+                    ctx.fillStyle = LIGHT;
+                    ctx.font = "14px 'Arial', sans-serif";
+                    ctx.fillText(sig.role, sigX, sigY + 45);
+                }
+            }
                 for (let i = 0; i < validSigs.length; i++) {
                     const sig = validSigs[i];
                     const xCenter = ML + spacing * i + spacing / 2;
