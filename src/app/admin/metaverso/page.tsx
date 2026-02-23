@@ -558,6 +558,12 @@ export default function MetaversoAdmin() {
                     >
                         Gestión de Encuestas
                     </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/cursos')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
+                    >
+                        Gestión de Cursos
+                    </button>
                 </div>
 
                 {view === 'companies' ? (
