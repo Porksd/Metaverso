@@ -80,6 +80,7 @@ export default function JobPositionsAdmin() {
             .select(`
                 *,
                 role_company_assignments (
+                    id,
                     company_id,
                     companies (name)
                 )

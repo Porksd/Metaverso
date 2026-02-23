@@ -94,6 +94,7 @@ export default function EmpresaAdmin() {
                 .select(`
                     *,
                     role_company_assignments (
+                        id,
                         is_visible,
                         company_id
                     )
