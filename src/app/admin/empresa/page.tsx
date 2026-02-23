@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
     Users, BookOpen, Search, Download, CheckCircle2,
-    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil
+    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil, Eye, EyeOff
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import CertificateCanvas from "@/components/CertificateCanvas";
@@ -24,6 +24,7 @@ export default function EmpresaAdmin() {
     const [courses, setCourses] = useState<any[]>([]);
     const [isEditing, setIsEditing] = useState<any>(null);
     const [showCargoManager, setShowCargoManager] = useState(false);
+    const [showCreateCargo, setShowCreateCargo] = useState(false);
     const [editingCargo, setEditingCargo] = useState<any>(null);
     const [showConfig, setShowConfig] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
@@ -89,7 +90,13 @@ export default function EmpresaAdmin() {
             // Fetch ALL company roles (global + company-specific)
             const { data: cgData } = await supabase
                 .from('company_roles')
-                .select('*')
+                .select(`
+                    *,
+                    role_company_assignments (
+                        is_visible,
+                        company_id
+                    )
+                `)
                 .or(`company_id.eq.${companyId},company_id.is.null`)
                 .order('name');
             setCargos(cgData || []);
@@ -779,32 +786,33 @@ export default function EmpresaAdmin() {
                 {showCargoManager && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
                         <div className="glass p-10 w-full max-w-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
-                            <h3 className="text-xl font-black uppercase tracking-tight text-brand">Gestionar Cargos</h3>
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-xl font-black uppercase tracking-tight text-brand">Gestionar Cargos</h3>
+                                {!showCreateCargo && !editingCargo && (
+                                    <button 
+                                        onClick={() => setShowCreateCargo(true)}
+                                        className="bg-brand text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:scale-105 transition-all"
+                                    >
+                                        + Crear Nuevo Cargo
+                                    </button>
+                                )}
+                            </div>
                             
                             {/* Formulario crear/editar */}
-                            <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4">
-                                <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">
-                                    {editingCargo ? '✏️ Editando Cargo' : 'Añadir Nuevo Cargo'}
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name || ''} />
-                                    <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name_ht || ''} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Descripción (ES)</label>
-                                        <RichTextEditor content={cargoDesc} onChange={setCargoDesc} />
+                            {(showCreateCargo || editingCargo) && (
+                                <div className="bg-white/5 p-6 rounded-2xl border border-white/5 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                                    <p className="text-[10px] font-black uppercase text-white/30 tracking-widest">
+                                        {editingCargo ? '✏️ Editando Cargo' : 'Añadir Nuevo Cargo'}
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input id="newCargoName" placeholder="Nombre (Español)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name || ''} />
+                                        <input id="newCargoNameHT" placeholder="Nombre (Creole)..." className="bg-white/5 p-3 rounded-xl text-sm border border-white/10 text-white" defaultValue={editingCargo?.name_ht || ''} />
                                     </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Descripción (HT)</label>
-                                        <RichTextEditor content={cargoDescHT} onChange={setCargoDescHT} />
-                                    </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    {editingCargo && (
+                                    <div className="flex gap-3">
                                         <button
                                             onClick={() => {
                                                 setEditingCargo(null);
+                                                setShowCreateCargo(false);
                                                 setCargoDesc("");
                                                 setCargoDescHT("");
                                                 const n = document.getElementById('newCargoName') as HTMLInputElement;
@@ -812,132 +820,158 @@ export default function EmpresaAdmin() {
                                                 if(n) n.value = '';
                                                 if(nHT) nHT.value = '';
                                             }}
-                                            className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all"
+                                            className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all text-center"
                                         >
                                             Cancelar
                                         </button>
-                                    )}
-                                    <button 
-                                        onClick={async () => { 
-                                            const n = document.getElementById('newCargoName') as HTMLInputElement; 
-                                            const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
-                                            
-                                            if(!n.value || !companyId) return; 
-                                            
-                                            if (editingCargo) {
-                                                // Update existing
-                                                const { error } = await supabase.from('company_roles').update({ 
-                                                    name: n.value, 
-                                                    name_ht: nHT.value || null,
-                                                    description: cargoDesc || null,
-                                                    description_ht: cargoDescHT || null
-                                                }).eq('id', editingCargo.id);
-                                                if(error) alert(error.message);
-                                                else {
-                                                    setEditingCargo(null);
-                                                    setCargoDesc("");
-                                                    setCargoDescHT("");
-                                                    n.value = ''; nHT.value = '';
-                                                    fetchData();
+                                        <button 
+                                            onClick={async () => { 
+                                                const n = document.getElementById('newCargoName') as HTMLInputElement; 
+                                                const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement; 
+                                                
+                                                if(!n.value || !companyId) return; 
+                                                
+                                                if (editingCargo) {
+                                                    // Update existing
+                                                    const { error } = await supabase.from('company_roles').update({ 
+                                                        name: n.value, 
+                                                        name_ht: nHT.value || null,
+                                                        description: cargoDesc || null,
+                                                        description_ht: cargoDescHT || null
+                                                    }).eq('id', editingCargo.id);
+                                                    if(error) alert(error.message);
+                                                    else {
+                                                        setEditingCargo(null);
+                                                        setCargoDesc("");
+                                                        setCargoDescHT("");
+                                                        n.value = ''; nHT.value = '';
+                                                        fetchData();
+                                                    }
+                                                } else {
+                                                    // Insert new
+                                                    const { data: newRole, error } = await supabase.from('company_roles').insert({ 
+                                                        name: n.value, 
+                                                        name_ht: nHT.value || null,
+                                                        description: cargoDesc || null,
+                                                        description_ht: cargoDescHT || null,
+                                                        company_id: companyId 
+                                                    }).select(); 
+                                                    
+                                                    if(error) alert(error.message); 
+                                                    else {
+                                                        if (newRole && newRole[0]) {
+                                                            // Auto assign to company
+                                                            await supabase.from('role_company_assignments').insert({
+                                                                role_id: newRole[0].id,
+                                                                company_id: companyId,
+                                                                is_visible: true
+                                                            });
+                                                        }
+                                                        n.value = ''; nHT.value = '';
+                                                        setCargoDesc("");
+                                                        setCargoDescHT("");
+                                                        setShowCreateCargo(false);
+                                                        fetchData(); 
+                                                    }
                                                 }
-                                            } else {
-                                                // Insert new
-                                                const {error} = await supabase.from('company_roles').insert({ 
-                                                    name: n.value, 
-                                                    name_ht: nHT.value || null,
-                                                    description: cargoDesc || null,
-                                                    description_ht: cargoDescHT || null,
-                                                    company_id: companyId 
-                                                }); 
-                                                if(error) alert(error.message); 
-                                                else {
-                                                    n.value = ''; nHT.value = '';
-                                                    setCargoDesc("");
-                                                    setCargoDescHT("");
-                                                    fetchData(); 
-                                                }
-                                            }
-                                        }} 
-                                        className="flex-1 bg-brand text-black py-4 rounded-xl font-black text-xs uppercase hover:scale-[1.02] transition-all"
-                                    >
-                                        {editingCargo ? 'Guardar Cambios' : 'Agregar Cargo'}
-                                    </button>
+                                            }} 
+                                            className="flex-1 bg-brand text-black py-4 rounded-xl font-black text-xs uppercase hover:scale-[1.02] transition-all"
+                                        >
+                                            {editingCargo ? 'Guardar Cambios' : 'Agregar Cargo'}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Lista de cargos */}
                             <div className="max-h-72 overflow-auto space-y-2 pr-2 custom-scrollbar">
                                 {cargos.filter(c => !c.company_id).length > 0 && (
                                     <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-2">Cargos Globales (Admin Central)</p>
                                 )}
-                                {cargos.filter(c => !c.company_id).map(c => (
-                                    <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'}`}>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div className="flex-1">
-                                                <span className="font-bold text-sm text-white">{c.name}</span>
-                                                <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
-                                                <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                {cargos.filter(c => !c.company_id).map(c => {
+                                    const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
+                                    const isVisible = assignment ? assignment.is_visible : false;
+                                    
+                                    return (
+                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-sm text-white">{c.name}</span>
+                                                    <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
+                                                    <span className="ml-2 text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Global</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button 
+                                                        onClick={async () => {
+                                                            if (assignment) {
+                                                                await supabase.from('role_company_assignments').update({ is_visible: !isVisible }).eq('id', assignment.id);
+                                                            } else {
+                                                                await supabase.from('role_company_assignments').insert({ role_id: c.id, company_id: companyId, is_visible: true });
+                                                            }
+                                                            fetchData();
+                                                        }}
+                                                        className={`p-2 rounded-lg transition-all ${isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
+                                                        title={isVisible ? 'Ocultar' : 'Mostrar'}
+                                                    >
+                                                        {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                        {(c.description || c.description_ht) && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
-                                                <div>
-                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
-                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description || 'N/A' }} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
-                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description_ht || 'N/A' }} />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                    );
+                                })}
 
                                 {cargos.filter(c => c.company_id).length > 0 && (
                                     <p className="text-[9px] font-black uppercase text-white/20 tracking-widest mb-1 mt-4">Cargos de esta Empresa</p>
                                 )}
-                                {cargos.filter(c => c.company_id).map(c => (
-                                    <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'}`}>
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div className="flex-1">
-                                                <span className="font-bold text-sm text-white">{c.name}</span>
-                                                <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <button onClick={() => {
-                                                    setEditingCargo(c);
-                                                    setCargoDesc(c.description || "");
-                                                    setCargoDescHT(c.description_ht || "");
-                                                    // Pre-fill the form inputs
-                                                    setTimeout(() => {
-                                                        const n = document.getElementById('newCargoName') as HTMLInputElement;
-                                                        const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
-                                                        if(n) n.value = c.name || '';
-                                                        if(nHT) nHT.value = c.name_ht || '';
-                                                    }, 50);
-                                                }} className="text-white/20 hover:text-brand transition-colors" title="Editar">
-                                                    <Pencil className="w-4 h-4" />
-                                                </button>
-                                                <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="text-white/20 hover:text-red-500 transition-colors" title="Eliminar">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                {cargos.filter(c => c.company_id).map(c => {
+                                    const assignment = c.role_company_assignments?.find((a: any) => a.company_id === companyId);
+                                    const isVisible = assignment ? assignment.is_visible : (c.company_id === companyId); // Defaults to visible if owned
+
+                                    return (
+                                        <div key={c.id} className={`bg-white/5 p-4 rounded-xl border ${editingCargo?.id === c.id ? 'border-brand/50' : 'border-white/5'} ${!isVisible ? 'opacity-50' : ''}`}>
+                                            <div className="flex justify-between items-center mb-1">
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-sm text-white">{c.name}</span>
+                                                    <span className="text-[10px] text-white/20 ml-2 italic">{c.name_ht || 'Sin nombre Creole'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button 
+                                                        onClick={async () => {
+                                                            if (assignment) {
+                                                                await supabase.from('role_company_assignments').update({ is_visible: !isVisible }).eq('id', assignment.id);
+                                                            } else {
+                                                                await supabase.from('role_company_assignments').insert({ role_id: c.id, company_id: companyId, is_visible: false });
+                                                            }
+                                                            fetchData();
+                                                        }}
+                                                        className={`p-2 rounded-lg transition-all ${isVisible ? 'text-brand bg-brand/10' : 'text-white/20 bg-white/5'}`}
+                                                        title={isVisible ? 'Ocultar' : 'Mostrar'}
+                                                    >
+                                                        {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                                    </button>
+                                                    <button onClick={() => {
+                                                        setEditingCargo(c);
+                                                        setCargoDesc(c.description || "");
+                                                        setCargoDescHT(c.description_ht || "");
+                                                        // Pre-fill the form inputs
+                                                        setTimeout(() => {
+                                                            const n = document.getElementById('newCargoName') as HTMLInputElement;
+                                                            const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
+                                                            if(n) n.value = c.name || '';
+                                                            if(nHT) nHT.value = c.name_ht || '';
+                                                        }, 50);
+                                                    }} className="p-2 text-white/20 hover:text-brand transition-colors" title="Editar">
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={async () => { if(confirm('¿Eliminar cargo?')) { await supabase.from('company_roles').delete().eq('id', c.id); fetchData(); } }} className="p-2 text-white/20 hover:text-red-500 transition-colors" title="Eliminar">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                        {(c.description || c.description_ht) && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 mt-2 border-t border-white/5 pt-2">
-                                                <div>
-                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (ES)</p>
-                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description || 'N/A' }} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] font-black text-white/20 uppercase mb-1">Tip (HT)</p>
-                                                    <div className="text-[10px] text-white/40 italic line-clamp-2 overflow-hidden prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: c.description_ht || 'N/A' }} />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                             <button onClick={() => { setShowCargoManager(false); setEditingCargo(null); setCargoDesc(""); setCargoDescHT(""); }} className="w-full p-4 bg-white/5 rounded-xl uppercase font-black text-[10px] hover:bg-white/10 transition-colors">Cerrar</button>
                         </div>

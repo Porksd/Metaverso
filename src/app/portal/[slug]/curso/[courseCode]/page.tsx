@@ -142,13 +142,15 @@ export default function CourseAuthPage() {
 
                 setCourse(crs);
 
-                // 3. Fetch ALL company roles for Cargo selector
-                // Global roles + company-specific roles (dedup by name, company ones take priority)
-                const { data: allRoles } = await supabase
-                    .from('company_roles')
-                    .select('id, name, name_ht, description, description_ht, company_id')
-                    .order('name');
-                setCompanyRoles(allRoles || []);
+                // 3. Fetch ONLY assigned and visible company roles for this company
+                const { data: assignedRoles } = await supabase
+                    .from('role_company_assignments')
+                    .select('role_id, company_roles(*)')
+                    .eq('company_id', comp.id)
+                    .eq('is_visible', true);
+                
+                const filteredRoles = (assignedRoles || []).map((ar: any) => ar.company_roles).filter(Boolean);
+                setCompanyRoles(filteredRoles || []);
 
                 // 4b. Fetch companies_list for Empresa autocomplete
                 const { data: clData } = await supabase

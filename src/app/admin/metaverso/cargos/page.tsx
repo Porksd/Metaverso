@@ -19,22 +19,36 @@ interface JobPosition {
     companies?: {
         name: string;
     };
+    role_company_assignments?: {
+        company_id: string;
+        companies: {
+            name: string;
+        }
+    }[];
 }
 
 export default function JobPositionsAdmin() {
     const router = useRouter();
     const [positions, setPositions] = useState<JobPosition[]>([]);
+    const [companies, setCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<JobPosition | null>(null);
     const [showForm, setShowForm] = useState(false);
+    const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
     const [descRich, setDescRich] = useState("");
     const [descRichHT, setDescRichHT] = useState("");
 
     useEffect(() => {
         checkAuth();
+        loadCompanies();
     }, []);
+
+    const loadCompanies = async () => {
+        const { data } = await supabase.from('companies').select('id, name').order('name');
+        if (data) setCompanies(data);
+    };
 
     const checkAuth = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -62,7 +76,13 @@ export default function JobPositionsAdmin() {
         setLoading(true);
         const { data, error } = await supabase
             .from('company_roles')
-            .select('*, companies(name)')
+            .select(`
+                *,
+                role_company_assignments (
+                    company_id,
+                    companies (name)
+                )
+            `)
             .order('name');
 
         if (data) setPositions(data as any);
@@ -76,22 +96,37 @@ export default function JobPositionsAdmin() {
             name: formData.get('name') as string,
             name_ht: formData.get('name_ht') as string,
             code: (formData.get('code') as string) || null,
-            description: descRich || null,
-            description_ht: descRichHT || null,
             active: formData.get('active') === 'on'
         };
+
+        let roleId = isEditing?.id;
 
         if (isEditing) {
             await supabase.from('company_roles').update(positionData).eq('id', isEditing.id);
         } else {
-            // New global roles have company_id = null by default in our insert logic
-            await supabase.from('company_roles').insert(positionData);
+            const { data, error } = await supabase.from('company_roles').insert(positionData).select();
+            if (data && data[0]) roleId = data[0].id;
+        }
+
+        if (roleId) {
+            // Update assignments
+            // First delete old ones
+            await supabase.from('role_company_assignments').delete().eq('role_id', roleId);
+            
+            // Insert new ones
+            if (selectedCompanies.length > 0) {
+                const assignments = selectedCompanies.map(cId => ({
+                    role_id: roleId,
+                    company_id: cId,
+                    is_visible: true
+                }));
+                await supabase.from('role_company_assignments').insert(assignments);
+            }
         }
 
         setShowForm(false);
         setIsEditing(null);
-        setDescRich("");
-        setDescRichHT("");
+        setSelectedCompanies([]);
         loadPositions();
     };
 
@@ -173,8 +208,7 @@ export default function JobPositionsAdmin() {
                                     <tr className="bg-white/5 border-b border-white/10">
                                         <th className="p-6 text-xs uppercase font-black text-white/40">Código</th>
                                         <th className="p-6 text-xs uppercase font-black text-white/40">Nombre (ES / HT)</th>
-                                        <th className="p-6 text-xs uppercase font-black text-white/40">Empresa</th>
-                                        <th className="p-6 text-xs uppercase font-black text-white/40">Descripción (ES / HT)</th>
+                                        <th className="p-6 text-xs uppercase font-black text-white/40">Empresas Asignadas</th>
                                         <th className="p-6 text-xs uppercase font-black text-white/40 text-center">Estado</th>
                                         <th className="p-6 text-xs uppercase font-black text-white/40 text-right">Acciones</th>
                                     </tr>
@@ -188,18 +222,17 @@ export default function JobPositionsAdmin() {
                                                 <div className="text-[10px] text-white/20 italic">{pos.name_ht || '-'}</div>
                                             </td>
                                             <td className="p-6">
-                                                {pos.company_id ? (
-                                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-400">
-                                                        <Building2 className="w-3 h-3" />
-                                                        {pos.companies?.name || 'Empresa'}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-[10px] font-black uppercase text-brand/60">Global</div>
-                                                )}
-                                            </td>
-                                            <td className="p-6 max-w-xs">
-                                                <div className="text-xs text-white/40 line-clamp-1 italic prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: pos.description || 'Sin descripción' }} />
-                                                <div className="text-[10px] text-white/10 line-clamp-1 italic prose prose-invert prose-xs" dangerouslySetInnerHTML={{ __html: pos.description_ht || '-' }} />
+                                                <div className="flex flex-wrap gap-1">
+                                                    {pos.role_company_assignments && pos.role_company_assignments.length > 0 ? (
+                                                        pos.role_company_assignments.map((as, idx) => (
+                                                            <span key={idx} className="bg-blue-500/10 text-blue-400 text-[9px] px-2 py-0.5 rounded-md border border-blue-500/20 font-black uppercase">
+                                                                {as.companies?.name || 'Empresa'}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-[9px] font-black uppercase text-white/20 italic">Sin asignar</span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="p-6">
                                                 <div className="flex justify-center">
@@ -215,8 +248,7 @@ export default function JobPositionsAdmin() {
                                                     <button
                                                         onClick={() => { 
                                                             setIsEditing(pos); 
-                                                            setDescRich(pos.description || ""); 
-                                                            setDescRichHT(pos.description_ht || ""); 
+                                                            setSelectedCompanies(pos.role_company_assignments?.map(as => as.company_id) || []);
                                                             setShowForm(true); 
                                                         }}
                                                         className="p-2 hover:bg-white/10 rounded-lg text-white/60 hover:text-white transition-colors"
@@ -300,14 +332,29 @@ export default function JobPositionsAdmin() {
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-white/20 block">Descripción (ES) / Tip</label>
-                                            <RichTextEditor content={descRich} onChange={setDescRich} />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-white/20 block">Descripción (HT) / Tip</label>
-                                            <RichTextEditor content={descRichHT} onChange={setDescRichHT} />
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase text-white/20 block italic">Asignar a Empresas</label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-4 bg-white/5 rounded-2xl border border-white/10 custom-scrollbar">
+                                            {companies.map(company => (
+                                                <label key={company.id} className="flex items-center gap-3 cursor-pointer group">
+                                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${selectedCompanies.includes(company.id) ? 'bg-brand border-brand' : 'border-white/20'}`}>
+                                                        {selectedCompanies.includes(company.id) && <Check className="w-3 h-3 text-black" />}
+                                                    </div>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="hidden"
+                                                        checked={selectedCompanies.includes(company.id)}
+                                                        onChange={() => {
+                                                            if (selectedCompanies.includes(company.id)) {
+                                                                setSelectedCompanies(selectedCompanies.filter(id => id !== company.id));
+                                                            } else {
+                                                                setSelectedCompanies([...selectedCompanies, company.id]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className={`text-[11px] font-bold uppercase transition-colors ${selectedCompanies.includes(company.id) ? 'text-white' : 'text-white/40 group-hover:text-white/60'}`}>{company.name}</span>
+                                                </label>
+                                            ))}
                                         </div>
                                     </div>
 
