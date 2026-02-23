@@ -1026,11 +1026,11 @@ export default function MetaversoAdmin() {
 
                     <div className="glass p-8 space-y-6 border-brand/20 border-dashed text-brand">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-lg font-black uppercase tracking-tight">Gestión de Participantes</h4>
-                            <div className="p-2 rounded-lg bg-brand/10 text-brand"><Users className="w-5 h-5" /></div>
+                            <h4 className="text-lg font-black uppercase tracking-tight">Gestión de Cargos</h4>
+                            <div className="p-2 rounded-lg bg-brand/10 text-brand"><Layers className="w-5 h-5" /></div>
                         </div>
-                        <p className="text-white/40 text-sm leading-relaxed">Administra la base de datos global de alumnos, edita sus perfiles, asigna empresas y descarga certificados.</p>
-                        <button onClick={() => setView('participants')} className="w-full py-4 rounded-xl border-2 border-brand/20 hover:border-brand/50 text-brand font-black uppercase tracking-widest text-xs transition-all">Ir a Participantes</button>
+                        <p className="text-white/40 text-sm leading-relaxed">Administra los cargos disponibles en la plataforma para asignar roles laborales a los participantes y definir sus funciones.</p>
+                        <button onClick={() => router.push('/admin/metaverso/cargos')} className="w-full py-4 rounded-xl border-2 border-brand/20 hover:border-brand/50 text-brand font-black uppercase tracking-widest text-xs transition-all">Gestor de Cargos</button>
                     </div>
                 </section>
 
