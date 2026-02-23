@@ -278,24 +278,6 @@ export default function SurveyStats() {
     if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-brand font-black animate-pulse">ANALIZANDO DATOS...</div>;
 
     const { sortedCompanies, sortedCourses } = getGeneralStats();
-                if (idx !== -1) counts[idx]++;
-            });
-            return {
-                labels,
-                datasets: [{
-                    label: 'Votos',
-                    data: counts,
-                    backgroundColor: 'rgba(54, 162, 235, 0.4)',
-                    borderColor: '#36A2EB',
-                    borderWidth: 1,
-                }]
-            };
-        }
-
-        return null;
-    };
-
-    if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-brand font-black animate-pulse">ANALIZANDO DATOS...</div>;
 
     return (
         <div className="min-h-screen bg-[#060606] text-white p-6 md:p-10 font-sans">
