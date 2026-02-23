@@ -378,6 +378,7 @@ export default function SurveyStats() {
                             <thead>
                                 <tr className="bg-white/[0.02]">
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Fecha</th>
+                                    <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Empresa</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Alumno</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">RUT/Passport</th>
                                     <th className="px-6 py-4 text-[10px] font-black uppercase text-white/30 border-b border-white/5">Empresa Colab.</th>
@@ -388,6 +389,7 @@ export default function SurveyStats() {
                                 {filteredResponses.map((r, idx) => (
                                     <tr key={idx} className="hover:bg-white/[0.01] transition-colors">
                                         <td className="px-6 py-4 text-xs text-white/60">{new Date(r.displayData.fecha).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4 text-xs text-white/60 uppercase font-medium">{r.displayData.empresa}</td>
                                         <td className="px-6 py-4 text-xs font-bold text-white">{r.displayData.nombre}</td>
                                         <td className="px-6 py-4 text-xs text-white/40">{r.displayData.identificacion}</td>
                                         <td className="px-6 py-4 text-xs text-white/60">{r.displayData.colab_empresa}</td>
