@@ -24,7 +24,7 @@ export default function MetaversoLanding() {
         {
             href: "/admin/metaverso/cargos",
             title: "Cargos",
-            description: "Define perfiles y asignación formativa por rol.",
+            description: "Define perfiles y asignacion formativa por rol.",
             cta: "Abrir Cargos",
             icon: Briefcase
         },
@@ -38,7 +38,7 @@ export default function MetaversoLanding() {
         {
             href: "/admin/metaverso/encuestas",
             title: "Encuestas",
-            description: "Revisa feedback, métricas e indicadores de satisfacción.",
+            description: "Revisa feedback, metricas e indicadores de satisfaccion.",
             cta: "Abrir Encuestas",
             icon: BarChart3
         }
@@ -54,8 +54,8 @@ export default function MetaversoLanding() {
                 playsInline
                 poster="/app_background.jpg"
             >
-                <source src="/techvideo02.mp4?v=admin-hub-1" type="video/mp4" />
-                <source src="/techvideo01.mov?v=admin-hub-1" type="video/quicktime" />
+                <source src="/techvideo02.mp4?v=admin-hub-2" type="video/mp4" />
+                <source src="/techvideo01.mov?v=admin-hub-2" type="video/quicktime" />
             </video>
 
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.84)_50%,rgba(2,6,23,0.95)_100%)]" />
@@ -74,8 +74,8 @@ export default function MetaversoLanding() {
                         <span className="block text-brand">de administradores</span>
                     </h1>
                     <p className="max-w-4xl mx-auto text-white/65 text-sm md:text-lg font-medium leading-relaxed">
-                        Gestión completa del ecosistema: empresas, cargos, cursos y encuestas.
-                        Desde aquí accedes a todos los módulos operativos.
+                        Gestion completa del ecosistema: empresas, cargos, cursos y encuestas.
+                        Desde aqui accedes a todos los modulos operativos.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">

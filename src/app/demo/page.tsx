@@ -6,6 +6,7 @@ import {
     BarChart3,
     BookOpen,
     Briefcase,
+    Building2,
     CheckCircle2,
     GraduationCap,
     ShieldCheck,
@@ -18,30 +19,30 @@ export default function CommercialPresentation() {
     const accessCards = [
         {
             href: "/demo/empresa-vista",
-            title: "Operacion Ejecutiva",
-            description: "Control global de empresas, cupos, cumplimiento y acceso a decisiones criticas.",
+            title: "Operación Ejecutiva",
+            description: "Control global de empresas, cupos, cumplimiento y acceso a decisiones críticas.",
             cta: "Entrar al Panel",
             icon: ShieldCheck
         },
         {
             href: "/demo/empresa-vista",
             title: "Arquitectura de Cursos",
-            description: "Disena rutas formativas, banco evaluativo y estandarizacion tecnica de contenidos.",
-            cta: "Disenar Oferta",
+            description: "Diseña rutas formativas, banco evaluativo y estandarización técnica de contenidos.",
+            cta: "Diseñar Oferta",
             icon: BookOpen
         },
         {
             href: "/demo/empresa-vista",
             title: "Gobierno de Roles",
-            description: "Define perfiles laborales y controla la asignacion de aprendizaje por funcion.",
+            description: "Define perfiles laborales y controla la asignación de aprendizaje por función.",
             cta: "Configurar Roles",
             icon: Briefcase
         },
         {
             href: "/demo/empresa-vista",
-            title: "Inteligencia de Satisfaccion",
-            description: "Mide percepcion, detecta fricciones y transforma feedback en planes de mejora.",
-            cta: "Analizar Senales",
+            title: "Inteligencia de Satisfacción",
+            description: "Mide percepción, detecta fricciones y transforma feedback en planes de mejora.",
+            cta: "Analizar Señales",
             icon: BarChart3
         }
     ] as const;
@@ -56,8 +57,8 @@ export default function CommercialPresentation() {
                 playsInline
                 poster="/app_background.jpg"
             >
-                <source src="/techvideo02.mp4?v=demo-home-3" type="video/mp4" />
-                <source src="/techvideo01.mov?v=demo-home-3" type="video/quicktime" />
+                <source src="/techvideo02.mp4?v=demo-home-4" type="video/mp4" />
+                <source src="/techvideo01.mov?v=demo-home-4" type="video/quicktime" />
             </video>
 
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.84)_50%,rgba(2,6,23,0.95)_100%)]" />
@@ -72,12 +73,12 @@ export default function CommercialPresentation() {
                         <ShieldCheck className="w-4 h-4" /> Ecosistema Metaverso Otec
                     </div>
                     <h1 className="text-4xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[0.95]">
-                        Vende confianza, escala capacitacion
+                        Vende confianza, escala capacitación
                         <span className="block text-brand">y demuestra control en vivo</span>
                     </h1>
                     <p className="max-w-4xl mx-auto text-white/65 text-sm md:text-lg font-medium leading-relaxed">
-                        Plataforma corporativa para gestionar formacion, cumplimiento y desempeno con evidencia trazable por empresa,
-                        colaborador y curso. Disenada para convencer en la demo y sostener la operacion diaria.
+                        Plataforma corporativa para gestionar formación, cumplimiento y desempeño con evidencia trazable por empresa,
+                        colaborador y curso. Diseñada para convencer en la demo y sostener la operación diaria.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
@@ -115,7 +116,7 @@ export default function CommercialPresentation() {
                         </div>
                         <ol className="space-y-3">
                             {[
-                                "Muestra control global en Operacion Ejecutiva",
+                                "Muestra control global en Operación Ejecutiva",
                                 "Explora vistas de empresa y alumno con datos precargados",
                                 "Cierra con insights de encuestas y mejora continua"
                             ].map((step, index) => (
@@ -171,7 +172,7 @@ export default function CommercialPresentation() {
                 </div>
 
                 <footer className="text-center pt-4 pb-2">
-                    <p className="text-white/25 text-[10px] font-black uppercase tracking-[0.16em]">Metaverso Otec | Demostracion Comercial - Plataforma de formacion corporativa orientada a resultados</p>
+                    <p className="text-white/25 text-[10px] font-black uppercase tracking-[0.16em]">Metaverso Otec | Demostración Comercial - Plataforma de formacion corporativa orientada a resultados</p>
                 </footer>
             </div>
         </div>
