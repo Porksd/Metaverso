@@ -124,9 +124,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             if (type === 'quiz') {
                 console.log('[CoursePlayer] Setting Quiz Score:', score);
                 setQuizScore(score);
-                if (passed) {
-                    setEvaluationPassed(true);
-                }
             }
             if (type === 'scorm') {
                 console.log('[CoursePlayer] Setting SCORM Score:', score);
@@ -313,10 +310,10 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         setSurveyDone(true);
                     }
 
-                    // Detectar evaluación aprobada desde MÚLTIPLES fuentes (robustez si la columna last_exam_passed no existe aún)
+                    // Considerar evaluación aprobada solo con señal explícita de aprobación
+                    // (evita falsos positivos cuando solo existe registro de quiz realizado).
                     const examPassed = data.last_exam_passed === true || 
-                        data.status === 'completed' || 
-                        !!quizProgressEntry;
+                        data.status === 'completed';
                     
                     if (examPassed) {
                         setEvaluationPassed(true);
@@ -511,6 +508,18 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         const pendingItems = currentItems.filter((item: ModuleItem) => {
             // Estos elementos NO bloquean el botón:
             if (['text', 'image', 'pdf', 'header'].includes(item.type)) return false;
+
+            // En módulos de contenido, los quiz son formativos por defecto.
+            // Solo bloquean si el módulo es de evaluación o si vienen marcados como obligatorios.
+            if (item.type === 'quiz') {
+                const quizRequired = currentModule.type === 'evaluation' ||
+                    item.content?.is_mandatory === true ||
+                    item.content?.required === true ||
+                    item.content?.must_pass === true;
+
+                if (!quizRequired) return false;
+                return !itemsCompleted.has(item.id);
+            }
             
             // Estos elementos SÍ bloquean hasta que se dispara handleItemCompletion:
             // - video (onEnded o 90%)
@@ -931,13 +940,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         </button>
 
                         <button
-                            onClick={() => {
-                                if (activeModuleIndex === modules.length - 1) {
-                                    window.location.href = '/admin/empresa/alumnos/cursos';
-                                } else {
-                                    handleNext();
-                                }
-                            }}
+                            onClick={handleNext}
                             disabled={mode !== 'preview' && !moduleCompleted}
                             style={{ 
                                 opacity: (mode !== 'preview' && !moduleCompleted) ? 0.3 : 1,

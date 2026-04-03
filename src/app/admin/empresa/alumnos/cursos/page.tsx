@@ -409,6 +409,7 @@ export default function CoursesPage() {
                                             courseId={activeCourse.course.id}
                                             studentId={user.id}
                                             onComplete={() => {
+                                                setActiveCourse(null);
                                                 fetchEnrollments(user.id, user.client_id);
                                             }}
                                             className="h-full"
