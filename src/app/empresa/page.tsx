@@ -15,8 +15,8 @@ export default function EmpresaLanding() {
                 playsInline
                 poster="/empresa_background.jpg"
             >
-                <source src="/techvideo02.mp4" type="video/mp4" />
                 <source src="/techvideo01.mov" type="video/quicktime" />
+                <source src="/techvideo02.mp4" type="video/mp4" />
             </video>
 
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.55)_0%,rgba(2,6,23,0.88)_100%)] z-0" />
