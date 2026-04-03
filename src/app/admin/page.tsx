@@ -13,6 +13,7 @@ import {
     Sparkles
 } from "lucide-react";
 import Link from "next/link";
+import CommercialDemoGuide from "@/components/CommercialDemoGuide";
 
 export default function MetaversoLanding() {
     const accessCards = [
@@ -87,6 +88,10 @@ export default function MetaversoLanding() {
                         <Link href="/admin/empresa/alumnos/login" className="px-6 py-3 rounded-xl bg-white/5 border border-white/15 text-white font-black uppercase tracking-widest text-[11px] hover:border-cyan-400/40 hover:text-cyan-300 transition-colors inline-flex items-center justify-center gap-2">
                             Ver Experiencia Alumno <GraduationCap className="w-4 h-4" />
                         </Link>
+                    </div>
+
+                    <div className="pt-2 flex justify-center">
+                        <CommercialDemoGuide />
                     </div>
                 </header>
 
