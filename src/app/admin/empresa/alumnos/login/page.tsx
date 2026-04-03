@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowRight, ShieldCheck, Zap, Terminal } from "lucide-react";
+import { User, Lock, ArrowRight, ShieldCheck, Zap, CheckCircle2, GraduationCap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Globe } from "lucide-react";
 
@@ -89,7 +89,21 @@ export default function StudentLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        <div className="min-h-screen text-white flex items-center justify-center p-4 md:p-8 relative overflow-hidden font-sans">
+            <video
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/alumno_background.jpg"
+            >
+                <source src="/techvideo02.mp4" type="video/mp4" />
+                <source src="/techvideo01.mov" type="video/quicktime" />
+            </video>
+
+            <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.9)_100%)]" />
+
             {/* Selector de Idioma */}
             <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2 backdrop-blur-md">
                 <Globe className="w-4 h-4 text-white/40" />
@@ -104,23 +118,36 @@ export default function StudentLogin() {
             </div>
 
             {/* Background Premium */}
-            <div className="fixed inset-0 z-0">
-                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-blue-600/10 rounded-full blur-[160px] animate-pulse pointer-events-none" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-brand/5 rounded-full blur-[140px] pointer-events-none" />
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-cyan-500/12 rounded-full blur-[160px] animate-pulse" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-brand/8 rounded-full blur-[140px]" />
             </div>
 
-            <div className="max-w-md w-full relative z-10 space-y-8">
+            <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center space-y-4"
+                    className="space-y-5"
                 >
-                    <div className="w-20 h-20 bg-gradient-to-br from-brand to-blue-500 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_40px_rgba(49,210,45,0.3)] border border-white/10">
-                        <ShieldCheck className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 bg-gradient-to-br from-brand to-cyan-400 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(49,210,45,0.3)] border border-white/10">
+                        <GraduationCap className="w-10 h-10 text-slate-950" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black tracking-tighter">{t.title}</h1>
-                        <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-2">{t.subtitle}</p>
+                        <p className="text-cyan-300 text-[10px] font-black uppercase tracking-[0.2em]">Portal de aprendizaje corporativo</p>
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tight mt-2 leading-[0.95]">{t.title}<span className="block text-brand">con trazabilidad real</span></h1>
+                        <p className="text-white/65 text-sm md:text-base font-medium mt-4 max-w-lg">Cada avance queda registrado, cada curso aporta evidencia y cada colaborador visualiza su ruta de desarrollo profesional.</p>
+                    </div>
+
+                    <div className="space-y-2.5">
+                        {[
+                            "Estado de cursos y evaluaciones en tiempo real",
+                            "Certificados descargables con respaldo auditable",
+                            "Experiencia guiada para completar formacion sin friccion"
+                        ].map((item) => (
+                            <p key={item} className="text-sm text-white/75 flex items-start gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-brand mt-0.5" /> {item}
+                            </p>
+                        ))}
                     </div>
                 </motion.div>
 
@@ -128,7 +155,7 @@ export default function StudentLogin() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="glass p-8 rounded-[2rem] border-white/5 shadow-2xl relative overflow-hidden"
+                    className="glass p-8 rounded-[2rem] border-white/10 shadow-2xl relative overflow-hidden bg-black/35"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-[50px] pointer-events-none" />
 
@@ -181,13 +208,13 @@ export default function StudentLogin() {
                         </div>
                     </form>
                 </motion.div>
-
-                <footer className="text-center">
-                    <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                        <Zap className="w-3 h-3" /> Powered by Metaverso Otec
-                    </p>
-                </footer>
             </div>
+
+            <footer className="absolute bottom-4 left-0 right-0 text-center z-10">
+                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                    <ShieldCheck className="w-3 h-3" /> Powered by Metaverso Otec
+                </p>
+            </footer>
         </div>
     );
 }
