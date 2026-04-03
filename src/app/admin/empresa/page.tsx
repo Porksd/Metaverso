@@ -321,24 +321,37 @@ export default function EmpresaAdmin() {
         return 0;
     });
 
-    const handleLogout = async () => {
-        const slug = getStoredCompanyValue('empresa_slug');
+    const returnToMasterAdmin = () => {
         const masterReturnUrl = sessionStorage.getItem('master_return_url') || '/admin/metaverso';
-        const isMasterContext = sessionStorage.getItem('is_master_admin') === 'true';
-        const masterEntryMode = sessionStorage.getItem('master_entry_mode');
+        clearCompanyContext({ clearLocalStorage: false });
 
-        if (isMasterContext) {
-            clearCompanyContext({ clearLocalStorage: false });
-
-            if (masterEntryMode === 'new-tab') {
-                window.close();
-                window.setTimeout(() => {
-                    router.push(masterReturnUrl);
-                }, 150);
-                return;
+        const openerWindow = window.opener as Window | null;
+        if (openerWindow && !openerWindow.closed) {
+            try {
+                openerWindow.focus();
+                openerWindow.location.href = masterReturnUrl;
+            } catch (error) {
+                console.warn('No se pudo enfocar/actualizar la pestaña origen:', error);
             }
 
-            router.push(masterReturnUrl);
+            window.close();
+
+            // Fallback: si el navegador bloquea window.close(), forzamos salida inmediata
+            window.setTimeout(() => {
+                window.location.replace(masterReturnUrl);
+            }, 220);
+            return;
+        }
+
+        window.location.replace(masterReturnUrl);
+    };
+
+    const handleLogout = async () => {
+        const slug = getStoredCompanyValue('empresa_slug');
+        const isMasterContext = sessionStorage.getItem('is_master_admin') === 'true';
+
+        if (isMasterContext) {
+            returnToMasterAdmin();
             return;
         }
 
@@ -427,8 +440,7 @@ export default function EmpresaAdmin() {
                         {isMasterAdmin && (
                             <button
                                 onClick={() => {
-                                    clearCompanyContext({ clearLocalStorage: false });
-                                    router.push(sessionStorage.getItem('master_return_url') || '/admin/metaverso');
+                                    returnToMasterAdmin();
                                 }}
                                 className="p-3 rounded-2xl bg-brand/10 border border-brand/20 text-brand hover:bg-brand hover:text-black transition-all"
                                 title={`Volver a Metaverso Admin${masterRole ? ` (${masterRole})` : ''}`}
@@ -437,8 +449,8 @@ export default function EmpresaAdmin() {
                             </button>
                         )}
                         <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 text-[10px] font-black uppercase">
-                            <button onClick={() => setRole('manager')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'manager' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Vista Gerente</button>
-                            <button onClick={() => setRole('trainer')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'trainer' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Vista Capacitador</button>
+                            <button onClick={() => setRole('manager')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'manager' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Vista General</button>
+                            <button onClick={() => setRole('trainer')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'trainer' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Gestión de Alumnos</button>
                         </div>
                         <button onClick={() => setShowConfig(true)} className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-brand transition-all" title="Configuración de Firmas">
                             <Settings className="w-5 h-5" />

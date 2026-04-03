@@ -674,7 +674,7 @@ export default function MetaversoAdmin() {
                                                     <button 
                                                         onClick={() => {
                                                             const portalUrl = `/admin/empresa/portal/${company.slug}`;
-                                                            const portalWindow = window.open(portalUrl, '_blank', 'noopener');
+                                                            const portalWindow = window.open(portalUrl, 'metaverso-company-admin');
 
                                                             if (portalWindow) {
                                                                 portalWindow.focus();

@@ -51,7 +51,7 @@ export default function EmpresaPortalLogin() {
                             sessionStorage.setItem('empresa_slug', slug as string);
                             sessionStorage.setItem('is_master_admin', 'true');
                             sessionStorage.setItem('master_role', role);
-                            sessionStorage.setItem('master_entry_mode', 'new-tab');
+                            sessionStorage.setItem('master_entry_mode', 'managed-tab');
                             sessionStorage.setItem('master_return_url', '/admin/metaverso');
                             console.log("Acceso Maestro detectado: Redirigiendo al Dashboard...");
                             router.push("/admin/empresa");
