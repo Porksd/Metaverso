@@ -6,8 +6,19 @@ import Link from "next/link";
 
 export default function MetaversoLanding() {
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center p-6 font-sans">
-            <div className="max-w-4xl w-full space-y-12">
+        <div className="min-h-screen relative text-white flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
+            <img
+                src="/app_background.jpg"
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none"
+            />
+            <div className="absolute inset-0 z-0 bg-black/70" />
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand/8 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-20%] w-[50%] h-[50%] bg-brand/5 rounded-full blur-[120px]" />
+            </div>
+            <div className="max-w-4xl w-full space-y-12 relative z-10">
 
                 <header className="text-center space-y-4">
                     <div className="flex items-center justify-center gap-2 text-brand text-xs font-black uppercase tracking-[0.3em] bg-brand/10 w-fit mx-auto px-4 py-1.5 rounded-full border border-brand/20">
