@@ -21,6 +21,7 @@ interface DemoStep {
     context: string;
     cta: string;
     ctaHref: string;
+    ctaDemoHref?: string;
     icon: any;
     highlights: string[];
 }
@@ -33,6 +34,7 @@ const DEMO_STEPS: DemoStep[] = [
             "El cliente ve de un vistazo: cantidad de empresas activas, cupos utilizados vs. disponibles, y capacidad de profundizar en cualquier empresa.",
         cta: "Ver Panel de Control",
         ctaHref: "/admin/metaverso",
+        ctaDemoHref: "/demo/empresa-vista",
         icon: BarChart3,
         highlights: [
             "Dashboard con KPIs por empresa",
@@ -48,6 +50,7 @@ const DEMO_STEPS: DemoStep[] = [
             "Demuestra: cursos diseñados, cargos disponibles y cómo se vinculan para crear rutas certificables que generan evidencia para auditorías.",
         cta: "Explorar Cursos y Cargos",
         ctaHref: "/admin/metaverso/cursos",
+        ctaDemoHref: "/demo/empresa-vista",
         icon: BookOpen,
         highlights: [
             "Banco de cursos con evaluaciones",
@@ -58,11 +61,12 @@ const DEMO_STEPS: DemoStep[] = [
     },
     {
         title: "Decisiones con Inteligencia",
-        description: "Cierra con feedba visualización de insights: encuestas, cumplimiento y mejora continua.",
+        description: "Cierra con visualización de insights: encuestas, cumplimiento y mejora continua.",
         context:
             "Muestra que la plataforma no sólo ejecuta: recopila, analiza y propone mejoras. El cliente ve sostenibilidad operativa.",
         cta: "Consultar Indicadores",
         ctaHref: "/admin/metaverso/encuestas",
+        ctaDemoHref: "/demo/empresa-vista",
         icon: Target,
         highlights: [
             "Encuestas de satisfacción y feedback",
@@ -73,12 +77,17 @@ const DEMO_STEPS: DemoStep[] = [
     }
 ];
 
-export default function CommercialDemoGuide() {
+type CommercialDemoGuideProps = {
+    isDemo?: boolean;
+};
+
+export default function CommercialDemoGuide({ isDemo = false }: CommercialDemoGuideProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
 
     const step = DEMO_STEPS[currentStep];
     const StepIcon = step.icon;
+    const stepHref = isDemo ? step.ctaDemoHref || step.ctaHref : step.ctaHref;
 
     const handleNext = () => {
         if (currentStep < DEMO_STEPS.length - 1) {
@@ -164,14 +173,14 @@ export default function CommercialDemoGuide() {
 
                             <div className="flex items-center gap-3">
                                 <Link
-                                    href={step.ctaHref}
+                                    href={stepHref}
                                     onClick={handleClose}
                                     className="flex-1 px-4 py-3 rounded-xl bg-cyan-400 text-slate-950 font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-transform text-center"
                                 >
                                     {step.cta}
                                 </Link>
                                 <button
-                                    onClick={() => window.open(step.ctaHref, "_blank")}
+                                    onClick={() => window.open(stepHref, "_blank")}
                                     className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white/60 hover:text-white transition-colors font-bold text-[11px] uppercase"
                                     title="Abrir en nueva pestaña"
                                 >
