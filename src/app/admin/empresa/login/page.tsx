@@ -4,15 +4,20 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Building2, Lock, ArrowRight, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { resolveAdminRole } from "@/lib/adminAuth";
+
+const DEMO_COMPANY_EMAIL = "demo.empresa@metaverso.cl";
+const DEMO_COMPANY_PASSWORD = "MetaEmpresa#2026!";
 
 export default function EmpresaLogin() {
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isDemoMode = searchParams.get("demo") === "1";
 
     useEffect(() => {
         // Clear previous session if it's NOT a Meta Admin
@@ -31,6 +36,13 @@ export default function EmpresaLogin() {
         };
         clearSession();
     }, []);
+
+    useEffect(() => {
+        if (isDemoMode) {
+            setEmail(DEMO_COMPANY_EMAIL);
+            setPass(DEMO_COMPANY_PASSWORD);
+        }
+    }, [isDemoMode]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -83,6 +95,11 @@ export default function EmpresaLogin() {
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-6">
+                    {isDemoMode && (
+                        <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-cyan-300">
+                            Credenciales demo de empresa precargadas
+                        </div>
+                    )}
                     <div className="space-y-4">
                         <div className="relative group">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-brand transition-colors" />

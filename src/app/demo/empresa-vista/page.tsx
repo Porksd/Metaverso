@@ -105,7 +105,7 @@ export default function DemoEmpresaPortal() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <Link href="/demo/alumno-login" className="group">
+                        <Link href="/admin/empresa/login?demo=1" className="group">
                             <motion.div whileHover={{ y: -5 }} className="glass p-10 h-full border-white/10 hover:border-cyan-300/40 transition-all space-y-6 relative overflow-hidden bg-black/30">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-25 transition-opacity">
                                     <Settings2 className="w-32 h-32" />
@@ -118,7 +118,7 @@ export default function DemoEmpresaPortal() {
                                     <p className="text-white/55 text-sm leading-relaxed">Visualiza el avance de formacion por colaborador, rol y cumplimiento de objetivos de capacitacion.</p>
                                 </div>
                                 <div className="flex items-center gap-2 text-cyan-300 text-xs font-black uppercase tracking-widest pt-4">
-                                    Explorar Datos <ArrowRight className="w-4 h-4" />
+                                    Abrir Admin Empresa <ArrowRight className="w-4 h-4" />
                                 </div>
                             </motion.div>
                         </Link>

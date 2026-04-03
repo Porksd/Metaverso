@@ -7,8 +7,8 @@ import { supabase } from "@/lib/supabase";
 import { Globe } from "lucide-react";
 import Link from "next/link";
 
-const DEMO_RUT = "11.111.111-1";
-const DEMO_PASSWORD = "demo123";
+const DEMO_RUT = "27.654.321-4";
+const DEMO_PASSWORD = "MetaAlumno#2026!";
 
 const translations: any = {
     es: {
