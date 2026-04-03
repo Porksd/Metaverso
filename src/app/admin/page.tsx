@@ -29,7 +29,7 @@ export default function MetaversoLanding() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Link href="/admin/metaverso/login?target=empresas" className="group">
+                    <Link href="/admin/metaverso" className="group">
                         <motion.div whileHover={{ scale: 1.02 }} className="glass p-8 h-full border-brand/20 hover:border-brand transition-all space-y-6 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <ShieldCheck className="w-24 h-24" />

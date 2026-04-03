@@ -34,7 +34,7 @@ export default function AdminSidebar({ children, title }: { children: React.Reac
                 setIsAuthorized(true);
             } else {
                 setIsAuthorized(false);
-                if (!pathname.includes('/login')) router.push("/admin/metaverso/login?error=unauthorized");
+                    if (!pathname.includes('/login')) router.push("/admin");
             }
         };
         checkAuth();
@@ -100,7 +100,7 @@ export default function AdminSidebar({ children, title }: { children: React.Reac
                                 onClick={async () => {
                                     await supabase.auth.signOut();
                                     localStorage.clear();
-                                    router.push('/admin/metaverso/login');
+                                    router.push('/admin');
                                 }}
                                 className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-black transition-all"
                                 title="Cerrar Sesión"

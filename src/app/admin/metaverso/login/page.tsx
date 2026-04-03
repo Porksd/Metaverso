@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldCheck, Lock, ArrowRight, User } from "lucide-react";
+import { ShieldCheck, Lock, ArrowRight, User, ChevronLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
@@ -105,6 +105,15 @@ function LoginForm() {
                 <p className="text-center text-[10px] text-white/20 font-black uppercase tracking-widest relative">
                     Restricted Area - Unauthorized attempts are logged
                 </p>
+
+                    <div className="relative text-center">
+                        <button
+                            onClick={() => router.push("/admin")}
+                            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white/50 transition-colors"
+                        >
+                            <ChevronLeft className="w-3 h-3" /> Volver al Inicio
+                        </button>
+                    </div>
             </motion.div>
         </div>
     );

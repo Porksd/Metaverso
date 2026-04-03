@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Building2, Lock, ArrowRight, Mail, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { resolveAdminRole } from "@/lib/adminAuth";
@@ -64,8 +65,14 @@ export default function EmpresaLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-6 font-sans">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass p-12 w-full max-w-md border-white/5 space-y-8 bg-white/[0.02] relative overflow-hidden">
+        <div className="min-h-screen relative text-white flex items-center justify-center p-6 font-sans overflow-hidden">
+            <img src="/app_background.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
+            <div className="absolute inset-0 z-0 bg-black/70" />
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand/8 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-20%] w-[50%] h-[50%] bg-brand/5 rounded-full blur-[120px]" />
+            </div>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass p-12 w-full max-w-md border-white/5 space-y-8 bg-black/60 relative overflow-hidden z-10">
 
                 <div className="text-center space-y-4">
                     <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20">
@@ -114,6 +121,12 @@ export default function EmpresaLogin() {
                 <div className="pt-4 flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-white/20">
                     <span>Metaverso Corporativo</span>
                     <span className="text-brand/40">V3.0.0</span>
+                </div>
+
+                <div className="text-center">
+                    <Link href="/admin" className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white/50 transition-colors">
+                        ← Volver al Inicio
+                    </Link>
                 </div>
             </motion.div>
         </div>
