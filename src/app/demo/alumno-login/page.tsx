@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowRight, ShieldCheck, Zap, CheckCircle2, GraduationCap, ArrowLeft } from "lucide-react";
+import { CheckCircle2, GraduationCap, ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Globe } from "lucide-react";
 import Link from "next/link";
@@ -13,33 +13,31 @@ const DEMO_PASSWORD = "demo123";
 const translations: any = {
     es: {
         title: "Acceso Corporativo",
-        subtitle: "Plataforma de Capacitación",
         rut_label: "RUT o Email",
         rut_placeholder: "12.345.678-9 o correo@empresa.cl",
         pass_label: "Clave de Acceso",
         pass_placeholder: "••••••",
-        login_btn: "Iniciar Sesión",
+        login_btn: "Iniciar Sesion",
         verifying: "Verificando...",
-        no_account: "¿Aún no tienes cuenta?",
+        no_account: "Aun no tienes cuenta?",
         register_btn: "Registrarme Ahora",
         error_not_found: "Usuario no encontrado. Verifique su RUT o Email.",
-        error_wrong_pass: "Contraseña incorrecta.",
+        error_wrong_pass: "Contrasena incorrecta.",
         demo_preset: "Credenciales demo precargadas",
-        back_to_presentation: "Volver a Presentación"
+        back_to_presentation: "Volver a Presentacion"
     },
     ht: {
-        title: "Aksè Kòporatif",
-        subtitle: "Platfòm Fòmasyon",
-        rut_label: "RUT oswa Imèl",
+        title: "Akse Koporatif",
+        rut_label: "RUT oswa Imel",
         rut_placeholder: "12.345.678-9 oswa mail@konpayi.cl",
-        pass_label: "Modpas Aksè",
+        pass_label: "Modpas Akse",
         pass_placeholder: "••••••",
         login_btn: "Konekte",
         verifying: "Verifye...",
-        no_account: "Ou pa gen kont ankò?",
+        no_account: "Ou pa gen kont anko?",
         register_btn: "Enskri kounye a",
-        error_not_found: "Itilizatè pa jwenn. Tcheke RUT ou oswa Imèl ou.",
-        error_wrong_pass: "Modpas kòrèk.",
+        error_not_found: "Itilizate pa jwenn. Tcheke RUT ou oswa Imel ou.",
+        error_wrong_pass: "Modpas korek.",
         demo_preset: "Kredansyal demo prechaje",
         back_to_presentation: "Retounen nan Prezantasyon"
     }
@@ -59,28 +57,24 @@ export default function DemoStudentLogin() {
 
         const identifier = rut.trim();
 
-        // Buscar estudiante
         const { data: student, error } = await supabase
-            .from('students')
-            .select('*, companies:client_id(*)')
+            .from("students")
+            .select("*, companies:client_id(*)")
             .or(`rut.eq.${identifier},email.eq.${identifier}`)
             .single();
 
         if (error || !student) {
-            console.error("Login error:", error);
             alert(t.error_not_found);
             setLoading(false);
             return;
         }
 
-        // 2. Verificar password
         if (student.password !== password) {
             alert(t.error_wrong_pass);
             setLoading(false);
             return;
         }
 
-        // 3. Guardar sesión y redirigir
         localStorage.setItem("user", JSON.stringify(student));
         window.location.href = "/admin/empresa/alumnos/cursos";
     };
@@ -101,16 +95,14 @@ export default function DemoStudentLogin() {
 
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.9)_100%)]" />
 
-            {/* Botón de retorno */}
             <Link href="/demo" className="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-semibold hover:bg-white/20 transition-colors">
                 <ArrowLeft className="w-4 h-4" /> {t.back_to_presentation}
             </Link>
 
-            {/* Selector de Idioma */}
             <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2 backdrop-blur-md">
                 <Globe className="w-4 h-4 text-white/40" />
-                <select 
-                    value={lang} 
+                <select
+                    value={lang}
                     onChange={(e) => setLang(e.target.value)}
                     className="bg-transparent border-none text-xs font-bold uppercase tracking-widest outline-none cursor-pointer text-white/70 hover:text-white transition-colors"
                 >
@@ -119,18 +111,13 @@ export default function DemoStudentLogin() {
                 </select>
             </div>
 
-            {/* Background Premium */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-cyan-500/12 rounded-full blur-[160px] animate-pulse" />
                 <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-brand/8 rounded-full blur-[140px]" />
             </div>
 
             <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
-                >
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-400/20 border border-cyan-300/40">
                         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-cyan-300">{t.demo_preset}</span>
@@ -165,9 +152,7 @@ export default function DemoStudentLogin() {
                 >
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div>
-                            <label className="block text-[10px] font-black uppercase tracking-[0.18em] text-white/60 mb-2">
-                                {t.rut_label}
-                            </label>
+                            <label className="block text-[10px] font-black uppercase tracking-[0.18em] text-white/60 mb-2">{t.rut_label}</label>
                             <input
                                 type="text"
                                 value={rut}
@@ -178,9 +163,7 @@ export default function DemoStudentLogin() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black uppercase tracking-[0.18em] text-white/60 mb-2">
-                                {t.pass_label}
-                            </label>
+                            <label className="block text-[10px] font-black uppercase tracking-[0.18em] text-white/60 mb-2">{t.pass_label}</label>
                             <input
                                 type="password"
                                 value={password}
@@ -198,10 +181,6 @@ export default function DemoStudentLogin() {
                             {loading ? t.verifying : t.login_btn}
                         </button>
                     </form>
-
-                    <p className="text-center text-white/50 text-sm">
-                        {t.no_account} <button className="text-cyan-400 font-bold hover:text-cyan-300">{t.register_btn}</button>
-                    </p>
                 </motion.div>
             </div>
         </div>

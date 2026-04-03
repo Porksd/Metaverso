@@ -3,46 +3,43 @@
 import { motion } from "framer-motion";
 import {
     ArrowRight,
-    BarChart3,
-    BookOpen,
-    Briefcase,
     Building2,
-    CheckCircle2,
+    Briefcase,
+    BookOpen,
+    BarChart3,
     GraduationCap,
-    ShieldCheck,
-    Sparkles
+    ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
-import CommercialDemoGuide from "@/components/CommercialDemoGuide";
 
 export default function MetaversoLanding() {
-    const accessCards = [
+    const modules = [
         {
             href: "/admin/metaverso",
-            title: "Operación Ejecutiva",
-            description: "Control global de empresas, cupos, cumplimiento y acceso a decisiones críticas.",
-            cta: "Entrar al Panel",
-            icon: ShieldCheck
-        },
-        {
-            href: "/admin/metaverso/cursos",
-            title: "Arquitectura de Cursos",
-            description: "Diseña rutas formativas, banco evaluativo y estandarización técnica de contenidos.",
-            cta: "Diseñar Oferta",
-            icon: BookOpen
+            title: "Empresas",
+            description: "Administra empresas, cupos y acceso operativo.",
+            cta: "Abrir Empresas",
+            icon: Building2
         },
         {
             href: "/admin/metaverso/cargos",
-            title: "Gobierno de Roles",
-            description: "Define perfiles laborales y controla la asignación de aprendizaje por función.",
-            cta: "Configurar Roles",
+            title: "Cargos",
+            description: "Define perfiles y asignación formativa por rol.",
+            cta: "Abrir Cargos",
             icon: Briefcase
         },
         {
+            href: "/admin/metaverso/cursos",
+            title: "Cursos",
+            description: "Gestiona contenidos, evaluaciones y rutas.",
+            cta: "Abrir Cursos",
+            icon: BookOpen
+        },
+        {
             href: "/admin/metaverso/encuestas",
-            title: "Inteligencia de Satisfacción",
-            description: "Mide percepción, detecta fricciones y transforma feedback en planes de mejora.",
-            cta: "Analizar Señales",
+            title: "Encuestas",
+            description: "Revisa feedback, métricas e indicadores de satisfacción.",
+            cta: "Abrir Encuestas",
             icon: BarChart3
         }
     ] as const;
@@ -57,8 +54,8 @@ export default function MetaversoLanding() {
                 playsInline
                 poster="/app_background.jpg"
             >
-                <source src="/techvideo01.mov" type="video/quicktime" />
-                <source src="/techvideo02.mp4" type="video/mp4" />
+                <source src="/techvideo02.mp4?v=admin-hub-1" type="video/mp4" />
+                <source src="/techvideo01.mov?v=admin-hub-1" type="video/quicktime" />
             </video>
 
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.84)_50%,rgba(2,6,23,0.95)_100%)]" />
@@ -70,81 +67,29 @@ export default function MetaversoLanding() {
 
                 <header className="pt-6 text-center space-y-5">
                     <div className="flex items-center justify-center gap-2 text-brand text-xs font-black uppercase tracking-[0.28em] bg-brand/10 w-fit mx-auto px-4 py-1.5 rounded-full border border-brand/20">
-                        <ShieldCheck className="w-4 h-4" /> Ecosistema Metaverso Otec
+                        <ShieldCheck className="w-4 h-4" /> Acceso Administrativo
                     </div>
                     <h1 className="text-4xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[0.95]">
-                        Vende confianza, escala capacitación
-                        <span className="block text-brand">y demuestra control en vivo</span>
+                        Panel central
+                        <span className="block text-brand">de administradores</span>
                     </h1>
                     <p className="max-w-4xl mx-auto text-white/65 text-sm md:text-lg font-medium leading-relaxed">
-                        Plataforma corporativa para gestionar formación, cumplimiento y desempeño con evidencia trazable por empresa,
-                        colaborador y curso. Diseñada para convencer en la demo y sostener la operación diaria.
+                        Gestión completa del ecosistema: empresas, cargos, cursos y encuestas.
+                        Desde aquí accedes a todos los módulos operativos.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                        <Link href="/empresa" className="px-6 py-3 rounded-xl bg-cyan-400 text-slate-950 font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-transform inline-flex items-center justify-center gap-2">
-                            Ver Experiencia Empresa <ArrowRight className="w-4 h-4" />
+                        <Link href="/admin/metaverso" className="px-6 py-3 rounded-xl bg-cyan-400 text-slate-950 font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-transform inline-flex items-center justify-center gap-2">
+                            Ir al Dashboard Admin <ArrowRight className="w-4 h-4" />
                         </Link>
-                        <Link href="/admin/empresa/alumnos/login" className="px-6 py-3 rounded-xl bg-white/5 border border-white/15 text-white font-black uppercase tracking-widest text-[11px] hover:border-cyan-400/40 hover:text-cyan-300 transition-colors inline-flex items-center justify-center gap-2">
-                            Ver Experiencia Alumno <GraduationCap className="w-4 h-4" />
+                        <Link href="/demo" className="px-6 py-3 rounded-xl bg-white/5 border border-white/15 text-white font-black uppercase tracking-widest text-[11px] hover:border-cyan-400/40 hover:text-cyan-300 transition-colors inline-flex items-center justify-center gap-2">
+                            Abrir Presentacion Demo <GraduationCap className="w-4 h-4" />
                         </Link>
-                    </div>
-
-                    <div className="pt-2 flex justify-center">
-                        <CommercialDemoGuide />
                     </div>
                 </header>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                    {[
-                        { label: "Empresas activas", value: "30+" },
-                        { label: "Cursos trazables", value: "120+" },
-                        { label: "Cobertura operativa", value: "24/7" },
-                        { label: "Decisiones con datos", value: "Tiempo real" }
-                    ].map((kpi) => (
-                        <div key={kpi.label} className="rounded-2xl border border-white/15 bg-black/30 backdrop-blur-md px-5 py-4">
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-black text-cyan-300/85">{kpi.label}</p>
-                            <p className="mt-2 text-2xl font-black text-white">{kpi.value}</p>
-                        </div>
-                    ))}
-                </div>
-
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="glass rounded-3xl p-6 md:p-8 border-white/10 space-y-4 bg-black/25">
-                        <div className="inline-flex items-center gap-2 text-[10px] uppercase font-black tracking-[0.22em] text-cyan-300">
-                            <Sparkles className="w-3.5 h-3.5" /> Ruta sugerida para demo comercial
-                        </div>
-                        <ol className="space-y-3">
-                            {[
-                                "Muestra control global en Operación Ejecutiva",
-                                "Explica trazabilidad por cargos y cursos",
-                                "Cierra con insights de encuestas y mejora continua"
-                            ].map((step, index) => (
-                                <li key={step} className="flex items-start gap-3 text-sm text-white/85">
-                                    <span className="mt-0.5 w-6 h-6 rounded-full bg-cyan-400/20 border border-cyan-300/40 text-cyan-200 text-xs font-black flex items-center justify-center">{index + 1}</span>
-                                    <span>{step}</span>
-                                </li>
-                            ))}
-                        </ol>
-                    </div>
-
-                    <div className="glass rounded-3xl p-6 md:p-8 border-white/10 bg-black/25">
-                        <p className="text-[10px] uppercase tracking-[0.22em] font-black text-brand">Valor que percibe el cliente empresa</p>
-                        <div className="mt-4 space-y-3 text-sm text-white/75">
-                            <p className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-brand mt-0.5" /> Evidencia clara para auditorias y certificaciones.</p>
-                            <p className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-brand mt-0.5" /> Seguimiento por colaborador, rol y brecha de cumplimiento.</p>
-                            <p className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-brand mt-0.5" /> Decisiones de formacion con indicadores de avance reales.</p>
-                        </div>
-                        <div className="mt-6">
-                            <Link href="/empresa" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand text-black font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-transform">
-                                Iniciar Recorrido Comercial <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {accessCards.map((card, index) => {
+                    {modules.map((card, index) => {
                         const Icon = card.icon;
                         return (
                             <Link href={card.href} className="group" key={card.title}>
@@ -172,7 +117,7 @@ export default function MetaversoLanding() {
                 </div>
 
                 <footer className="text-center pt-4 pb-2">
-                    <p className="text-white/25 text-[10px] font-black uppercase tracking-[0.16em]">Metaverso Otec | Plataforma de formacion corporativa orientada a resultados</p>
+                    <p className="text-white/25 text-[10px] font-black uppercase tracking-[0.16em]">Metaverso Otec | Panel administrativo central</p>
                 </footer>
             </div>
         </div>

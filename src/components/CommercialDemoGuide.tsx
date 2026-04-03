@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X,
     ChevronRight,
     ChevronLeft,
     BarChart3,
-    Users,
     BookOpen,
     CheckCircle2,
     Zap,
@@ -159,7 +158,7 @@ export default function CommercialDemoGuide({ isDemo = false }: CommercialDemoGu
                             </div>
 
                             <div className="rounded-2xl border border-white/10 bg-black/30 p-5 space-y-3">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Lo que explicarás aquí:</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Lo que explicaras aqui:</p>
                                 <p className="text-white/75 leading-relaxed">{step.context}</p>
                                 <div className="pt-2 space-y-2.5">
                                     {step.highlights.map((highlight) => (
@@ -182,7 +181,7 @@ export default function CommercialDemoGuide({ isDemo = false }: CommercialDemoGu
                                 <button
                                     onClick={() => window.open(stepHref, "_blank")}
                                     className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white/60 hover:text-white transition-colors font-bold text-[11px] uppercase"
-                                    title="Abrir en nueva pestaña"
+                                    title="Abrir en nueva pestana"
                                 >
                                     ↗
                                 </button>
@@ -221,7 +220,7 @@ export default function CommercialDemoGuide({ isDemo = false }: CommercialDemoGu
                             </div>
 
                             <p className="text-[10px] text-white/20 uppercase tracking-[0.15em] text-center">
-                                Tip: Abre en nueva pestaña para comparar pasos en paralelo
+                                Tip: Abre en nueva pestana para comparar pasos en paralelo
                             </p>
                         </motion.div>
                     </motion.div>
