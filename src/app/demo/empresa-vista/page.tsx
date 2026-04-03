@@ -10,6 +10,9 @@ export default function DemoEmpresaPortal() {
     const DEMO_COMPANY_ID = "99999999-9999-9999-9999-999999999999";
     const [company, setCompany] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const cleanWelcomeMessage = (company?.welcome_message || "Muestra a tu equipo una operación de capacitación robusta: avance visible, evidencia auditable y foco en desempeño real.")
+        .replace(/<[^>]*>/g, "")
+        .trim();
 
     useEffect(() => {
         const fetchCompany = async () => {
@@ -42,7 +45,19 @@ export default function DemoEmpresaPortal() {
 
     return (
         <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 md:p-10 font-sans relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 to-black z-0" />
+            <video
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/empresa_background.jpg"
+            >
+                <source src="/techvideo01.mov?v=demo-empresa-1" type="video/quicktime" />
+                <source src="/techvideo02.mp4?v=demo-empresa-1" type="video/mp4" />
+            </video>
+
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.9)_100%)] z-0" />
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-12%] right-[-10%] w-[45%] h-[45%] bg-cyan-400/14 rounded-full blur-[130px]" />
                 <div className="absolute bottom-[-20%] left-[-15%] w-[55%] h-[55%] bg-brand/12 rounded-full blur-[140px]" />
@@ -64,7 +79,7 @@ export default function DemoEmpresaPortal() {
                             <ShieldCheck className="w-3.5 h-3.5" /> Portal Corporativo Demo
                         </div>
                         <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-[0.95]">{company.welcome_title || "Formación con control"}<span className="block text-brand">resultados y trazabilidad</span></h1>
-                        <p className="text-white/65 text-base md:text-lg font-medium max-w-3xl">{company.welcome_message || "Muestra a tu equipo una operación de capacitación robusta: avance visible, evidencia auditable y foco en desempeño real."}</p>
+                        <p className="text-white/65 text-base md:text-lg font-medium max-w-3xl">{cleanWelcomeMessage}</p>
                     </header>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -91,7 +106,7 @@ export default function DemoEmpresaPortal() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="group">
+                        <Link href="/demo/alumno-login" className="group">
                             <motion.div whileHover={{ y: -5 }} className="glass p-10 h-full border-white/10 hover:border-cyan-300/40 transition-all space-y-6 relative overflow-hidden bg-black/30">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-25 transition-opacity">
                                     <Settings2 className="w-32 h-32" />
@@ -107,9 +122,9 @@ export default function DemoEmpresaPortal() {
                                     Explorar Datos <ArrowRight className="w-4 h-4" />
                                 </div>
                             </motion.div>
-                        </div>
+                        </Link>
 
-                        <div className="group">
+                        <Link href="/admin/metaverso/encuestas" className="group">
                             <motion.div whileHover={{ y: -5 }} className="glass p-10 h-full border-white/10 hover:border-cyan-300/40 transition-all space-y-6 relative overflow-hidden bg-black/30">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-25 transition-opacity">
                                     <BarChart3 className="w-32 h-32" />
@@ -125,7 +140,7 @@ export default function DemoEmpresaPortal() {
                                     Ver Reportes <ArrowRight className="w-4 h-4" />
                                 </div>
                             </motion.div>
-                        </div>
+                        </Link>
                     </div>
 
                     <div className="text-center space-y-4">

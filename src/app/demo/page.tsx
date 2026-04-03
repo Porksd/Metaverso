@@ -57,8 +57,8 @@ export default function CommercialPresentation() {
                 playsInline
                 poster="/app_background.jpg"
             >
-                <source src="/techvideo01.mov" type="video/quicktime" />
-                <source src="/techvideo02.mp4" type="video/mp4" />
+                <source src="/techvideo01.mov?v=demo-home-2" type="video/quicktime" />
+                <source src="/techvideo02.mp4?v=demo-home-2" type="video/mp4" />
             </video>
 
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.42)_0%,rgba(2,6,23,0.84)_50%,rgba(2,6,23,0.95)_100%)]" />
