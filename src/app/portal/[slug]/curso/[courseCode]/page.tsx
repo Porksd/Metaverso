@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import CompanyLogo from "@/components/CompanyLogo";
 import { Lock, ArrowLeft, LogIn, UserPlus, Building2, Globe, Info, ChevronDown, Search, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import SignatureCanvas from "@/components/SignatureCanvas";
@@ -332,8 +333,8 @@ export default function CourseAuthPage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white/20">Cargando...</div>;
-    if (!company || !course) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-red-500">Recurso no disponible</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-white/20" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Cargando...</div>;
+    if (!company || !course) return <div className="min-h-screen flex items-center justify-center text-red-500" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Recurso no disponible</div>;
 
     const isRestricted = course.registration_mode === 'restricted';
 
@@ -369,9 +370,12 @@ export default function CourseAuthPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row bg-[#050505]">
+        <div className="relative min-h-screen flex flex-col md:flex-row">
+            {/* Background image */}
+            <img src="/alumno_background.jpg" alt="" aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
             {/* Left Panel: Context */}
-            <div className="w-full md:w-1/2 p-10 flex flex-col relative overflow-hidden bg-[#0a0a0a]">
+            <div className="w-full md:w-1/2 p-10 flex flex-col relative z-10 overflow-hidden bg-[#0a0a0a]/90">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-brand/5 blur-[120px] rounded-full" />
                 </div>
@@ -381,8 +385,17 @@ export default function CourseAuthPage() {
                         <ArrowLeft className="w-4 h-4" /> {t.backPortal}
                     </button>
 
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-                        {company.logo_url ? <img src={company.logo_url} className="w-12 h-12 object-contain" /> : <Building2 className="w-8 h-8 text-white/40" />}
+                    <div className="mb-6">
+                        <CompanyLogo
+                            src={company.logo_url}
+                            darkSrc={company.logo_url_dark}
+                            lightSrc={company.logo_url_light}
+                            alt={company.name || "Empresa"}
+                            surface="light"
+                            frameClassName="w-16 h-16 rounded-2xl p-3"
+                            imageClassName="w-full h-full object-contain"
+                            iconClassName="w-8 h-8 text-slate-700"
+                        />
                     </div>
 
                     <h1 className="text-4xl font-black uppercase text-white mb-2">{course.name}</h1>
@@ -403,7 +416,7 @@ export default function CourseAuthPage() {
             </div>
 
             {/* Right Panel: Auth Forms */}
-            <div className="w-full md:w-1/2 bg-black border-l border-white/5 flex items-center justify-center p-6 md:p-12 relative">
+            <div className="w-full md:w-1/2 bg-black/80 border-l border-white/5 flex items-center justify-center p-6 md:p-12 relative z-10">
                 <div className="w-full max-w-md space-y-6">
                     
                     {/* Language Switcher — always visible */}

@@ -17,13 +17,18 @@ function LoginForm() {
     const returnUrl = searchParams.get('returnUrl') || "/admin/metaverso";
 
     const handleLogin = async (e: React.FormEvent) => {
-        // ... (rest of the handleLogin logic same as before)
         e.preventDefault();
         setLoading(true);
 
+        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedPass = pass.trim();
+
+        // Prevent stale/corrupted refresh tokens from interfering with current login.
+        await supabase.auth.signOut({ scope: 'local' });
+
         const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: pass
+            email: normalizedEmail,
+            password: normalizedPass
         });
 
         if (error) {
@@ -38,10 +43,18 @@ function LoginForm() {
     };
 
     return (
-        <div className="min-h-screen bg-[#060606] text-white flex items-center justify-center p-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen text-white flex items-center justify-center p-6 font-sans relative overflow-hidden">
+
+            <img
+                src="/app_background.jpg"
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none"
+            />
+            <div className="absolute inset-0 z-0 bg-black/65" />
 
             {/* Background Aesthetics - MASTER LOGIN */}
-            <div className="fixed inset-0 z-0">
+            <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand/10 rounded-full blur-[120px] animate-pulse" />
                 <div className="absolute bottom-[-10%] left-[-20%] w-[50%] h-[50%] bg-brand/5 rounded-full blur-[120px]" />
             </div>
@@ -100,8 +113,15 @@ function LoginForm() {
 export default function MetaversoLogin() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#030303] flex items-center justify-center">
-                <div className="text-white/20 animate-pulse uppercase tracking-widest text-xs font-black">
+            <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+                <img
+                    src="/app_background.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none"
+                />
+                <div className="absolute inset-0 z-0 bg-black/65" />
+                <div className="relative z-10 text-white/20 animate-pulse uppercase tracking-widest text-xs font-black">
                     Iniciando Sistema de Seguridad...
                 </div>
             </div>

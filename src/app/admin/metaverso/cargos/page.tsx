@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { resolveAdminRole } from "@/lib/adminAuth";
 import { Plus, Trash2, Edit2, Search, Briefcase, Info, X, ChevronRight, Check, ShieldAlert, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -62,30 +63,14 @@ export default function JobPositionsAdmin() {
         }
 
         const email = session.user.email?.toLowerCase();
-        const { data: profile } = await supabase
-            .from('admin_profiles')
-            .select('role')
-            .eq('email', email)
-            .maybeSingle();
+        const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso/cargos');
 
-        if (profile) {
-            setUserRole(profile.role);
+        if (role) {
+            setUserRole(role);
             setIsAuthorized(true);
         } else {
-            // Fallback for known admins if no DB profile exists yet
-            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
-            const fallbackEditors = ['admin@metaversotec.com'];
-
-            if (email && absoluteSuperAdmins.includes(email)) {
-                setUserRole('superadmin');
-                setIsAuthorized(true);
-            } else if (email && fallbackEditors.includes(email)) {
-                setUserRole('editor');
-                setIsAuthorized(true);
-            } else {
-                setIsAuthorized(false);
-                return;
-            }
+            setIsAuthorized(false);
+            return;
         }
         
         loadPositions();

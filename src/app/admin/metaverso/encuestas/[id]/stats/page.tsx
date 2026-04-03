@@ -20,6 +20,7 @@ import {
 import { Bar, Pie } from 'react-chartjs-2';
 import * as XLSX from 'xlsx';
 import { Download, Filter, Search as SearchIcon, FileSpreadsheet, ShieldAlert, Trash2 } from "lucide-react";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 ChartJS.register(
     CategoryScale,
@@ -67,30 +68,14 @@ export default function SurveyStats() {
         }
 
         const email = session.user.email?.toLowerCase();
-        const { data: profile } = await supabase
-            .from('admin_profiles')
-            .select('role')
-            .eq('email', email)
-            .maybeSingle();
+        const { role } = await resolveAdminRole(supabase, email, `/admin/metaverso/encuestas/${surveyId}/stats`);
 
-        if (profile) {
-            setUserRole(profile.role);
+        if (role) {
+            setUserRole(role);
             setIsAuthorized(true);
         } else {
-            // Fallback for known admins if no DB profile exists yet
-            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
-            const fallbackEditors = ['admin@metaversotec.com'];
-
-            if (email && absoluteSuperAdmins.includes(email)) {
-                setUserRole('superadmin');
-                setIsAuthorized(true);
-            } else if (email && fallbackEditors.includes(email)) {
-                setUserRole('editor');
-                setIsAuthorized(true);
-            } else {
-                setIsAuthorized(false);
-                return;
-            }
+            setIsAuthorized(false);
+            return;
         }
         
         fetchData();
@@ -214,11 +199,22 @@ export default function SurveyStats() {
         if (filters.position) {
             result = result.filter(r => r.displayData.cargo.toLowerCase().includes(filters.position.toLowerCase()));
         }
+        if (filters.search) {
+            const searchTerm = filters.search.toLowerCase();
+            result = result.filter(r => {
+                const name = (r.displayData.nombre || '').toLowerCase();
+                const id = (r.displayData.identificacion || '').toLowerCase();
+                return name.includes(searchTerm) || id.includes(searchTerm);
+            });
+        }
 
         setFilteredResponses(result);
     };
 
     const exportToExcel = () => {
+        const hasFilters = Object.values(filters).some(value => value.trim() !== '');
+        const exportScope = hasFilters ? 'filtrado' : 'completo';
+
         const dataToExport = filteredResponses.map(r => {
             const row: any = {
                 'Fecha': new Date(r.displayData.fecha).toLocaleDateString(),
@@ -241,7 +237,7 @@ export default function SurveyStats() {
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Resultados");
-        XLSX.writeFile(workbook, `Encuesta_${survey?.title_es}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.writeFile(workbook, `Encuesta_${survey?.title_es}_${exportScope}_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     const getChartData = (question: any) => {
@@ -417,6 +413,13 @@ export default function SurveyStats() {
                         <div className="space-y-1">
                             <label className="text-[10px] font-bold text-white/30 uppercase">Cargo</label>
                             <input type="text" placeholder="Buscar..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm text-white" value={filters.position} onChange={e => setFilters({...filters, position: e.target.value})} />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-white/30 uppercase">Buscar Alumno / ID</label>
+                            <div className="relative">
+                                <SearchIcon className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input type="text" placeholder="Nombre o RUT/Pasaporte..." className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-white" value={filters.search} onChange={e => setFilters({...filters, search: e.target.value})} />
+                            </div>
                         </div>
                         <div className="flex items-end">
                             <button 

@@ -14,9 +14,11 @@ import { useRouter } from "next/navigation";
 import ContentUploader from "@/components/ContentUploader";
 import CompanyConfig from "@/components/CompanyConfig";
 import CertificateCanvas from "@/components/CertificateCanvas";
+import CompanyLogo from "@/components/CompanyLogo";
 import jsPDF from "jspdf";
 import AdminSidebar from "@/components/AdminSidebar";
 import RichTextEditor from "@/components/RichTextEditor";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 export default function MetaversoAdmin() {
     const router = useRouter();
@@ -67,32 +69,14 @@ export default function MetaversoAdmin() {
         }
 
         const email = session.user.email?.toLowerCase();
-        
-        // 1. Check in admin_profiles table
-        const { data: profile } = await supabase
-            .from('admin_profiles')
-            .select('role')
-            .eq('email', email)
-            .maybeSingle();
+        const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso');
 
-        if (profile) {
-            setUserRole(profile.role);
+        if (role) {
+            setUserRole(role);
             setIsAuthorized(true);
         } else {
-            // Fallback for known admins if no DB profile exists yet
-            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
-            const fallbackEditors = ['admin@metaversotec.com'];
-
-            if (email && absoluteSuperAdmins.includes(email)) {
-                setUserRole('superadmin');
-                setIsAuthorized(true);
-            } else if (email && fallbackEditors.includes(email)) {
-                setUserRole('editor');
-                setIsAuthorized(true);
-            } else {
-                setIsAuthorized(false);
-                return;
-            }
+            setIsAuthorized(false);
+            return;
         }
         
         fetchCompanies();
@@ -458,6 +442,8 @@ export default function MetaversoAdmin() {
             password: data.password,
             is_active: data.is_active,
             logo_url: data.logo_url,
+            logo_url_dark: data.logo_url_dark,
+            logo_url_light: data.logo_url_light,
             primary_color: data.primary_color,
             secondary_color: data.secondary_color
         };
@@ -548,7 +534,7 @@ export default function MetaversoAdmin() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000" })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "" })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -627,9 +613,16 @@ export default function MetaversoAdmin() {
                                     <tr key={company.id} className="hover:bg-white/[0.02] transition-all group">
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 overflow-hidden">
-                                                    {company.logo_url ? <img src={company.logo_url} className="w-full h-full object-contain p-1" /> : <Building2 className="w-5 h-5 text-brand" />}
-                                                </div>
+                                                <CompanyLogo
+                                                    src={company.logo_url}
+                                                    darkSrc={company.logo_url_dark}
+                                                    lightSrc={company.logo_url_light}
+                                                    alt={company.name}
+                                                    surface="light"
+                                                    frameClassName="w-10 h-10 rounded-lg p-1.5"
+                                                    imageClassName="w-full h-full object-contain"
+                                                    iconClassName="w-5 h-5 text-slate-700"
+                                                />
                                                 <div className="flex flex-col">
                                                     <span className="font-bold">{company.name}</span>
                                                     <span className="text-[10px] text-white/20 uppercase font-black">{company.email}</span>
@@ -680,13 +673,18 @@ export default function MetaversoAdmin() {
                                                     </button>
                                                     <button 
                                                         onClick={() => {
-                                                            localStorage.setItem('empresa_id', company.id);
-                                                            localStorage.setItem('empresa_name', company.name);
-                                                            localStorage.setItem('is_master_admin', 'true');
-                                                            router.push(`/admin/empresa/portal/${company.slug}`);
+                                                            const portalUrl = `/admin/empresa/portal/${company.slug}`;
+                                                            const portalWindow = window.open(portalUrl, '_blank', 'noopener');
+
+                                                            if (portalWindow) {
+                                                                portalWindow.focus();
+                                                                return;
+                                                            }
+
+                                                            router.push(portalUrl);
                                                         }}
                                                         className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20 hover:bg-brand hover:text-black transition-all"
-                                                        title="Entrar como Admin a este Portal"
+                                                        title="Abrir portal admin en nueva pestaña"
                                                     >
                                                         <LogIn className="w-4 h-4" />
                                                     </button>
@@ -1093,20 +1091,68 @@ export default function MetaversoAdmin() {
                                 </div>
 
                                 <div className="space-y-1.5 col-span-2">
-                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Logo Empresa</label>
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Logo Principal</label>
                                     <ContentUploader
                                         courseId={`company_${editingCompany.id || 'new'}`}
                                         sectionKey="logo"
-                                        label="Subir Logo Corporativo"
+                                        label="Subir Logo Base"
                                         accept="image/*"
                                         currentValue={editingCompany.logo_url}
                                         onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url: url })}
                                     />
-                                    {editingCompany.logo_url && (
-                                        <div className="mt-2 flex justify-center p-4 bg-white/5 rounded-xl border border-white/10">
-                                            <img src={editingCompany.logo_url} alt="Logo" className="h-12 max-w-xs object-contain" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Logo Oscuro</label>
+                                    <ContentUploader
+                                        courseId={`company_${editingCompany.id || 'new'}`}
+                                        sectionKey="logo_dark"
+                                        label="Para fondos claros"
+                                        accept="image/*"
+                                        currentValue={editingCompany.logo_url_dark}
+                                        onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_dark: url })}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Logo Claro</label>
+                                    <ContentUploader
+                                        courseId={`company_${editingCompany.id || 'new'}`}
+                                        sectionKey="logo_light"
+                                        label="Para fondos oscuros"
+                                        accept="image/*"
+                                        currentValue={editingCompany.logo_url_light}
+                                        onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_light: url })}
+                                    />
+                                </div>
+                                <div className="col-span-2 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Preview sobre placa clara</p>
+                                        <div className="flex justify-center">
+                                            <CompanyLogo
+                                                src={editingCompany.logo_url}
+                                                darkSrc={editingCompany.logo_url_dark}
+                                                lightSrc={editingCompany.logo_url_light}
+                                                alt={editingCompany.name || "Empresa"}
+                                                surface="light"
+                                                frameClassName="w-40 h-24 rounded-[1.75rem] p-4"
+                                                imageClassName="w-full h-full object-contain"
+                                            />
                                         </div>
-                                    )}
+                                    </div>
+                                    <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 space-y-3">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Preview sobre placa oscura</p>
+                                        <div className="flex justify-center">
+                                            <CompanyLogo
+                                                src={editingCompany.logo_url}
+                                                darkSrc={editingCompany.logo_url_dark}
+                                                lightSrc={editingCompany.logo_url_light}
+                                                alt={editingCompany.name || "Empresa"}
+                                                surface="dark"
+                                                frameClassName="w-40 h-24 rounded-[1.75rem] p-4"
+                                                imageClassName="w-full h-full object-contain"
+                                                iconClassName="w-10 h-10 text-slate-300"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

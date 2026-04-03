@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Building2, Plus, Edit, Trash2, Save, X, Upload, Copy, Check } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Copy, Check } from "lucide-react";
 import ContentUploader from "@/components/ContentUploader";
+import CompanyLogo from "@/components/CompanyLogo";
 
 export default function CompaniesAdmin() {
     const [companies, setCompanies] = useState<any[]>([]);
@@ -45,6 +46,8 @@ export default function CompaniesAdmin() {
             primary_color: editingCompany.primary_color,
             secondary_color: editingCompany.secondary_color,
             logo_url: editingCompany.logo_url,
+            logo_url_dark: editingCompany.logo_url_dark,
+            logo_url_light: editingCompany.logo_url_light,
             signature_name_1: editingCompany.signature_name_1,
             signature_role_1: editingCompany.signature_role_1,
             signature_url_1: editingCompany.signature_url_1,
@@ -87,7 +90,7 @@ export default function CompaniesAdmin() {
                     <p className="text-white/40">Configura logos, colores y firmas para los certificados</p>
                 </div>
                 <button
-                    onClick={() => { setEditingCompany({}); setShowModal(true); }}
+                    onClick={() => { setEditingCompany({ logo_url: "", logo_url_dark: "", logo_url_light: "" }); setShowModal(true); }}
                     className="bg-brand text-black px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-white transition-colors"
                 >
                     <Plus className="w-4 h-4" /> Nueva Empresa
@@ -98,13 +101,16 @@ export default function CompaniesAdmin() {
                 {companies.map(company => (
                     <div key={company.id} className="glass p-6 rounded-2xl border-white/10 hover:border-brand/30 transition-all group">
                         <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/5 rounded-xl overflow-hidden w-14 h-14 flex items-center justify-center border border-white/5">
-                                {company.logo_url ? (
-                                    <img src={company.logo_url} alt={company.name} className="w-full h-full object-contain" />
-                                ) : (
-                                    <Building2 className="w-8 h-8 text-brand" />
-                                )}
-                            </div>
+                            <CompanyLogo
+                                src={company.logo_url}
+                                darkSrc={company.logo_url_dark}
+                                lightSrc={company.logo_url_light}
+                                alt={company.name}
+                                surface="light"
+                                frameClassName="w-14 h-14 rounded-xl p-3"
+                                imageClassName="w-full h-full object-contain"
+                                iconClassName="w-8 h-8 text-slate-700"
+                            />
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => { setEditingCompany(company); setShowModal(true); }}
@@ -211,15 +217,72 @@ export default function CompaniesAdmin() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold mb-2">Logo Corporativo</label>
+                                        <label className="block text-xs font-bold mb-2">Logo Principal</label>
                                         <ContentUploader
                                             courseId={`company_${editingCompany.id || 'new'}`}
                                             sectionKey="logo"
-                                            label="Subir Logo"
+                                            label="Subir Logo Base"
                                             accept="image/*"
                                             currentValue={editingCompany.logo_url}
                                             onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url: url })}
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Logo Oscuro</label>
+                                        <ContentUploader
+                                            courseId={`company_${editingCompany.id || 'new'}`}
+                                            sectionKey="logo_dark"
+                                            label="Para fondos claros"
+                                            accept="image/*"
+                                            currentValue={editingCompany.logo_url_dark}
+                                            onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_dark: url })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold mb-2">Logo Claro</label>
+                                        <ContentUploader
+                                            courseId={`company_${editingCompany.id || 'new'}`}
+                                            sectionKey="logo_light"
+                                            label="Para fondos oscuros"
+                                            accept="image/*"
+                                            currentValue={editingCompany.logo_url_light}
+                                            onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_light: url })}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="space-y-4">
+                                <h3 className="text-sm font-black uppercase text-brand tracking-widest">Previsualización de Logos</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Placa clara</p>
+                                        <div className="flex justify-center">
+                                            <CompanyLogo
+                                                src={editingCompany.logo_url}
+                                                darkSrc={editingCompany.logo_url_dark}
+                                                lightSrc={editingCompany.logo_url_light}
+                                                alt={editingCompany.name || "Empresa"}
+                                                surface="light"
+                                                frameClassName="w-40 h-24 rounded-[1.75rem] p-4"
+                                                imageClassName="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 space-y-3">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Placa oscura</p>
+                                        <div className="flex justify-center">
+                                            <CompanyLogo
+                                                src={editingCompany.logo_url}
+                                                darkSrc={editingCompany.logo_url_dark}
+                                                lightSrc={editingCompany.logo_url_light}
+                                                alt={editingCompany.name || "Empresa"}
+                                                surface="dark"
+                                                frameClassName="w-40 h-24 rounded-[1.75rem] p-4"
+                                                imageClassName="w-full h-full object-contain"
+                                                iconClassName="w-10 h-10 text-slate-300"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </section>

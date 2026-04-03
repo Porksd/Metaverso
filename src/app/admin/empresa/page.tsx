@@ -14,6 +14,7 @@ import CompanyConfig from "@/components/CompanyConfig";
 import RichTextEditor from "@/components/RichTextEditor";
 import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 // Utility functions for RUT validation
 const cleanRut = (rut: string) => {
@@ -51,6 +52,21 @@ const formatRut = (rut: string) => {
     return `${body}-${dv}`;
 };
 
+const COMPANY_CONTEXT_KEYS = ["empresa_id", "empresa_name", "empresa_slug", "is_master_admin", "master_role", "master_return_url", "master_entry_mode"] as const;
+
+const getStoredCompanyValue = (key: (typeof COMPANY_CONTEXT_KEYS)[number]) => {
+    return sessionStorage.getItem(key) ?? localStorage.getItem(key);
+};
+
+const clearCompanyContext = ({ clearLocalStorage }: { clearLocalStorage: boolean }) => {
+    COMPANY_CONTEXT_KEYS.forEach((key) => {
+        sessionStorage.removeItem(key);
+        if (clearLocalStorage) {
+            localStorage.removeItem(key);
+        }
+    });
+};
+
 export default function EmpresaAdmin() {
     const router = useRouter();
     const [role, setRole] = useState<'manager' | 'trainer'>('manager');
@@ -86,9 +102,10 @@ export default function EmpresaAdmin() {
     });
 
     useEffect(() => {
-        const storedId = localStorage.getItem('empresa_id');
-        const storedName = localStorage.getItem('empresa_name');
-        const storedMaster = localStorage.getItem('is_master_admin');
+        const storedId = getStoredCompanyValue('empresa_id');
+        const storedName = getStoredCompanyValue('empresa_name');
+        const storedMaster = getStoredCompanyValue('is_master_admin');
+        const storedMasterRole = getStoredCompanyValue('master_role') as 'superadmin' | 'editor' | null;
         
         if (!storedId) {
             window.location.href = "/admin/empresa/login";
@@ -97,6 +114,9 @@ export default function EmpresaAdmin() {
 
         if (storedMaster === 'true') {
             setIsMasterAdmin(true);
+            if (storedMasterRole === 'superadmin' || storedMasterRole === 'editor') {
+                setMasterRole(storedMasterRole);
+            }
         }
 
         setCompanyId(storedId);
@@ -113,28 +133,13 @@ export default function EmpresaAdmin() {
             if (session) {
                 // Verificar si es un Meta Admin (SuperAdmin o Editor)
                 const email = session.user.email?.toLowerCase();
-                const { data: profile } = await supabase
-                    .from('admin_profiles')
-                    .select('role')
-                    .eq('email', email)
-                    .maybeSingle();
-
-                const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl', 'apacheco@metaversotec.com'];
-                const editors = ['admin@metaversotec.com'];
-
-                let roleToSet: 'superadmin' | 'editor' | null = null;
-                if (profile) {
-                    roleToSet = profile.role as 'superadmin' | 'editor';
-                } else if (email && absoluteSuperAdmins.includes(email)) {
-                    roleToSet = 'superadmin';
-                } else if (email && editors.includes(email)) {
-                    roleToSet = 'editor';
-                }
+                const { role: roleToSet } = await resolveAdminRole(supabase, email, '/admin/empresa');
 
                 if (roleToSet) {
                     setIsMasterAdmin(true);
                     setMasterRole(roleToSet);
-                    localStorage.setItem('is_master_admin', 'true');
+                    sessionStorage.setItem('is_master_admin', 'true');
+                    sessionStorage.setItem('master_role', roleToSet);
                     console.log(`Acceso Maestro Detectado: ${roleToSet}. Omitiendo cierre de sesión.`);
                     setIsAuthenticating(false);
                     return;
@@ -142,8 +147,8 @@ export default function EmpresaAdmin() {
 
                 // Si no es un Meta Admin, cerramos la sesión para evitar conflictos (flujo original)
                 console.warn("Sesión de Supabase común detectada. Cerrando sesión...");
-                await supabase.auth.signOut();
-            } else if (localStorage.getItem('is_master_admin') === 'true') {
+                await supabase.auth.signOut({ scope: 'local' });
+            } else if (sessionStorage.getItem('is_master_admin') === 'true' || localStorage.getItem('is_master_admin') === 'true') {
                 // Si esperábamos ser master admin pero no hay sesión, algo falló o expiró
                 // pero no bloqueamos por ahora para permitir el flujo normal de contraseña si falló el cross-login
             }
@@ -317,10 +322,28 @@ export default function EmpresaAdmin() {
     });
 
     const handleLogout = async () => {
-        const slug = localStorage.getItem('empresa_slug');
-        await supabase.auth.signOut();
-        window.sessionStorage.clear();
-        window.localStorage.clear();
+        const slug = getStoredCompanyValue('empresa_slug');
+        const masterReturnUrl = sessionStorage.getItem('master_return_url') || '/admin/metaverso';
+        const isMasterContext = sessionStorage.getItem('is_master_admin') === 'true';
+        const masterEntryMode = sessionStorage.getItem('master_entry_mode');
+
+        if (isMasterContext) {
+            clearCompanyContext({ clearLocalStorage: false });
+
+            if (masterEntryMode === 'new-tab') {
+                window.close();
+                window.setTimeout(() => {
+                    router.push(masterReturnUrl);
+                }, 150);
+                return;
+            }
+
+            router.push(masterReturnUrl);
+            return;
+        }
+
+        await supabase.auth.signOut({ scope: 'local' });
+        clearCompanyContext({ clearLocalStorage: true });
         
         if (slug) {
             router.push(`/admin/empresa/portal/${slug}`);
@@ -391,9 +414,28 @@ export default function EmpresaAdmin() {
                         <div>
                             <h1 className="text-2xl font-black">{companyName}</h1>
                             <p className="text-xs text-white/40 uppercase font-bold tracking-widest">Portal de Gestión Corporativa</p>
+                            {isMasterAdmin && (
+                                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand">
+                                    <Shield className="w-3.5 h-3.5" />
+                                    <span>Sesión Metaverso</span>
+                                    <span className="text-white/70">{masterRole === 'editor' ? 'Editor' : 'SuperAdmin'}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
+                        {isMasterAdmin && (
+                            <button
+                                onClick={() => {
+                                    clearCompanyContext({ clearLocalStorage: false });
+                                    router.push(sessionStorage.getItem('master_return_url') || '/admin/metaverso');
+                                }}
+                                className="p-3 rounded-2xl bg-brand/10 border border-brand/20 text-brand hover:bg-brand hover:text-black transition-all"
+                                title={`Volver a Metaverso Admin${masterRole ? ` (${masterRole})` : ''}`}
+                            >
+                                <Shield className="w-5 h-5" />
+                            </button>
+                        )}
                         <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 text-[10px] font-black uppercase">
                             <button onClick={() => setRole('manager')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'manager' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Vista Gerente</button>
                             <button onClick={() => setRole('trainer')} className={`px-6 py-2.5 rounded-xl transition-all ${role === 'trainer' ? 'bg-brand text-black shadow-lg' : 'text-white/40'}`}>Vista Capacitador</button>

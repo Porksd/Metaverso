@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Building2, ChevronRight, BookOpen, Lock, Globe } from "lucide-react";
+import { ChevronRight, BookOpen, Lock, Globe } from "lucide-react";
+import CompanyLogo from "@/components/CompanyLogo";
 
 export default function CompanyPortal() {
     const params = useParams();
@@ -65,28 +66,31 @@ export default function CompanyPortal() {
     if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>;
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
-            {/* Background Ambience */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-brand/5 to-transparent opacity-20" />
-                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[100px]" />
-            </div>
+        <div className="relative min-h-screen flex flex-col items-center justify-center p-6">
+            {/* Background image */}
+            <img src="/alumno_background.jpg" alt="" aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
+            <div className="absolute inset-0 z-0 bg-black/60" />
 
             <div className="relative z-10 w-full max-w-5xl space-y-12">
                 
                 {/* Header */}
                 <header className="text-center space-y-6">
                     {company.logo_url ? (
-                        <div className="w-48 h-24 mx-auto relative mb-8">
-                            <img 
-                                src={company.logo_url} 
-                                alt={company.name} 
-                                className="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                        <div className="mx-auto mb-8 flex justify-center">
+                            <CompanyLogo
+                                src={company.logo_url}
+                                darkSrc={company.logo_url_dark}
+                                lightSrc={company.logo_url_light}
+                                alt={company.name}
+                                surface="light"
+                                frameClassName="w-56 h-28 rounded-[2rem] p-5"
+                                imageClassName="w-full h-full object-contain"
                             />
                         </div>
                     ) : (
-                        <div className="w-24 h-24 mx-auto bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6">
-                            <Building2 className="w-10 h-10 text-white/40" />
+                        <div className="mx-auto mb-6 flex justify-center">
+                            <CompanyLogo alt={company.name} surface="light" frameClassName="w-24 h-24 rounded-3xl p-4" />
                         </div>
                     )}
 

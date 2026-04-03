@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Building2, Lock, ArrowRight, Mail, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 export default function EmpresaLogin() {
     const [email, setEmail] = useState("");
@@ -17,13 +18,14 @@ export default function EmpresaLogin() {
         const clearSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                const { data: profile } = await supabase.from('admin_profiles').select('role').eq('email', session.user.email?.toLowerCase()).maybeSingle();
-                if (profile) return; // Keep Meta Admin session
+                const { role } = await resolveAdminRole(supabase, session.user.email, '/admin/empresa/login');
+                if (role) return; // Keep Meta Admin session
             }
             
-            await supabase.auth.signOut();
+            await supabase.auth.signOut({ scope: 'local' });
             localStorage.removeItem('empresa_id');
             localStorage.removeItem('empresa_name');
+            localStorage.removeItem('empresa_slug');
             sessionStorage.clear();
         };
         clearSession();
@@ -44,6 +46,10 @@ export default function EmpresaLogin() {
             if (error || !data) {
                 alert("Credenciales incorrectas o empresa no registrada.");
             } else {
+                sessionStorage.removeItem('is_master_admin');
+                sessionStorage.removeItem('master_role');
+                sessionStorage.removeItem('master_entry_mode');
+                sessionStorage.removeItem('master_return_url');
                 localStorage.setItem('empresa_id', data.id);
                 localStorage.setItem('empresa_name', data.name);
                 if (data.slug) localStorage.setItem('empresa_slug', data.slug);

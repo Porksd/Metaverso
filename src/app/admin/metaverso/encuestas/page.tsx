@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
 import SurveyBuilder from "@/components/SurveyBuilder";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 interface Survey {
     id: string;
@@ -47,32 +48,14 @@ export default function SurveysAdmin() {
         }
 
         const email = session.user.email?.toLowerCase();
-        
-        // Check in admin_profiles table
-        const { data: profile } = await supabase
-            .from('admin_profiles')
-            .select('role')
-            .eq('email', email)
-            .maybeSingle();
+        const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso/encuestas');
 
-        if (profile) {
-            setUserRole(profile.role);
+        if (role) {
+            setUserRole(role);
             setIsAuthorized(true);
         } else {
-            // Fallback for known admins if no DB profile exists yet
-            const absoluteSuperAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl'];
-            const fallbackEditors = ['admin@metaversotec.com'];
-
-            if (email && absoluteSuperAdmins.includes(email)) {
-                setUserRole('superadmin');
-                setIsAuthorized(true);
-            } else if (email && fallbackEditors.includes(email)) {
-                setUserRole('editor');
-                setIsAuthorized(true);
-            } else {
-                setIsAuthorized(false);
-                return;
-            }
+            setIsAuthorized(false);
+            return;
         }
         
         loadSurveys();

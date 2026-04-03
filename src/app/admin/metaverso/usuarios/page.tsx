@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
+import { resolveAdminRole } from "@/lib/adminAuth";
 
 interface AdminProfile {
     id: string;
@@ -41,19 +42,14 @@ export default function AdminUsersPage() {
         }
 
         // Only superadmins can manage other admins
-        const { data: profile } = await supabase
-            .from('admin_profiles')
-            .select('role')
-            .eq('email', session.user.email?.toLowerCase())
-            .maybeSingle();
+        const email = session.user.email?.toLowerCase();
+        const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso/usuarios');
 
-        if (profile?.role !== 'superadmin') {
-            // Hardcoded fallback for the main admin to setup the first time
-            const allowedSuperAdmins = ['admin@metaversotec.com', 'porksde@gmail.com', 'apacheco@lobus.cl'];
-            if (!session.user.email || !allowedSuperAdmins.includes(session.user.email.toLowerCase())) {
-                setIsAuthorized(false);
-                return;
-            }
+        // Legacy fallback kept for historical bootstrap account.
+        const legacySuperAdmins = ['admin@metaversotec.com'];
+        if (role !== 'superadmin' && (!email || !legacySuperAdmins.includes(email))) {
+            setIsAuthorized(false);
+            return;
         }
         
         setIsAuthorized(true);

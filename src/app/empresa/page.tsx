@@ -6,7 +6,9 @@ import Link from "next/link";
 
 export default function EmpresaLanding() {
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center p-6 font-sans">
+        <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 font-sans relative" style={{ backgroundImage: 'url(/empresa_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <div className="absolute inset-0 bg-black/60 z-0" />
+            <div className="relative z-10 w-full flex flex-col items-center">
             <div className="max-w-4xl w-full space-y-12">
 
                 <header className="flex flex-col items-center text-center space-y-4">
@@ -56,6 +58,7 @@ export default function EmpresaLanding() {
                 <footer className="text-center pt-8">
                     <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">Powered by MetaversOtec | Future of Learning</p>
                 </footer>
+            </div>
             </div>
         </div>
     );

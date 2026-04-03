@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { resolveAdminRole } from "@/lib/adminAuth";
 import { LogOut, BookOpen, Edit, Plus, Search, ArrowRight, X, Building2, Save, Settings, Check, Trash2, Medal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
@@ -36,23 +37,8 @@ export default function CoursesAdmin() {
             }
 
             // RBAC Check
-            const { data: profile } = await supabase
-                .from('admin_profiles')
-                .select('role')
-                .eq('email', session.user.email)
-                .maybeSingle();
-
-            const superAdmins = ['apacheco@lobus.cl', 'soporte@lobus.cl', 'm.poblete.m@gmail.com', 'porksde@gmail.com'];
-            const editorEmails = ['admin@metaversotec.com'];
-
-            let role: 'superadmin' | 'editor' = 'editor';
-            if (profile) {
-                role = profile.role;
-            } else if (session.user.email && superAdmins.includes(session.user.email)) {
-                role = 'superadmin';
-            } else if (session.user.email && editorEmails.includes(session.user.email)) {
-                role = 'editor';
-            } else {
+            const { role } = await resolveAdminRole(supabase, session.user.email, '/admin/metaverso/cursos');
+            if (!role) {
                 // If not in fallback list and no profile, sign out or redirect
                 await supabase.auth.signOut();
                 router.push("/admin/metaverso/login?error=unauthorized");

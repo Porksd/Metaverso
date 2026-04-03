@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { resolveAdminRole } from "@/lib/adminAuth";
 import { ChevronLeft, LogOut, ShieldCheck, UserCog } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,15 +26,8 @@ export default function AdminSidebar({ children, title }: { children: React.Reac
 
             const email = session.user.email?.toLowerCase();
             setUserEmail(email || null);
-            const { data: profile } = await supabase.from('admin_profiles').select('role').eq('email', email).maybeSingle();
 
-            const superAdmins = ['apacheco@lobus.cl', 'porksde@gmail.com', 'm.poblete.m@gmail.com', 'soporte@lobus.cl', 'apacheco@metaversotec.com'];
-            const editors = ['admin@metaversotec.com'];
-
-            let role: string | null = null;
-            if (profile) role = profile.role;
-            else if (email && superAdmins.includes(email)) role = 'superadmin';
-            else if (email && editors.includes(email)) role = 'editor';
+            const { role } = await resolveAdminRole(supabase, email, 'AdminSidebar');
 
             if (role) {
                 setUserRole(role);
