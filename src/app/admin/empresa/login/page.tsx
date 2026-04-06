@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Building2, Lock, ArrowRight, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import { resolveAdminRole } from "@/lib/adminAuth";
 const DEMO_COMPANY_EMAIL = "demo.empresa@metaverso.cl";
 const DEMO_COMPANY_PASSWORD = "MetaEmpresa#2026!";
 
-export default function EmpresaLogin() {
+function EmpresaLoginContent() {
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
@@ -147,5 +147,13 @@ export default function EmpresaLogin() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+export default function EmpresaLogin() {
+    return (
+        <Suspense fallback={null}>
+            <EmpresaLoginContent />
+        </Suspense>
     );
 }
