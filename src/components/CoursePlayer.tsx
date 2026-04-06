@@ -544,6 +544,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             if (item.type === 'survey') {
                 const isMandatory = item.content?.is_mandatory;
                 if (!isMandatory) return false;
+                if (currentModule.type === 'evaluation' && !evaluationPassed) return false;
+                if (currentModule.type === 'evaluation' && !isPostEvaluationItemUnlocked(item)) return false;
+                return !itemsCompleted.has(item.id);
+            }
+
+            if (item.type === 'signature') {
+                if (currentModule.type === 'evaluation' && !evaluationPassed) return false;
+                if (currentModule.type === 'evaluation' && !isPostEvaluationItemUnlocked(item)) return false;
                 return !itemsCompleted.has(item.id);
             }
 
@@ -647,6 +655,22 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     }
 
     const isEvaluation = currentModule.type === 'evaluation';
+    const postEvaluationItems = isEvaluation
+        ? (currentModule.items || [])
+            .filter((item: ModuleItem) => item.type === 'survey' || item.type === 'signature')
+            .sort((a: ModuleItem, b: ModuleItem) => (a.order_index ?? 0) - (b.order_index ?? 0))
+        : [];
+    const postEvaluationItemIds = postEvaluationItems.map((item: ModuleItem) => item.id);
+    const isPostEvaluationItemUnlocked = (item: ModuleItem) => {
+        if (!isEvaluation || (item.type !== 'survey' && item.type !== 'signature')) return true;
+        if (!evaluationPassed) return false;
+
+        const currentIdx = postEvaluationItemIds.indexOf(item.id);
+        if (currentIdx <= 0) return true;
+
+        const previousItemIds = postEvaluationItemIds.slice(0, currentIdx);
+        return previousItemIds.every((prevId: string) => itemsCompleted.has(prevId));
+    };
 
     // Helper to detect light backgrounds (very basic check)
     const isLightBg = currentModule.settings?.bg_color && 
@@ -824,31 +848,43 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     {/* Survey */}
                                     {item.type === 'survey' && (
                                         <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden mt-6">
-                                            {evaluationPassed && !surveyDone && (
-                                                <div className="mx-6 mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                                                    <p className="text-yellow-500 text-xs md:text-sm font-bold text-center">{t.survey_pending_after_exam}</p>
+                                            {!evaluationPassed ? (
+                                                <div className="mx-6 my-6 p-4 bg-white/5 border border-white/10 rounded-xl">
+                                                    <p className="text-white/60 text-xs md:text-sm font-bold text-center">Debes aprobar la evaluación para desbloquear esta encuesta.</p>
                                                 </div>
+                                            ) : !isPostEvaluationItemUnlocked(item) ? (
+                                                <div className="mx-6 my-6 p-4 bg-white/5 border border-white/10 rounded-xl">
+                                                    <p className="text-white/60 text-xs md:text-sm font-bold text-center">Completa el paso anterior para continuar.</p>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {evaluationPassed && !surveyDone && (
+                                                        <div className="mx-6 mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                                                            <p className="text-yellow-500 text-xs md:text-sm font-bold text-center">{t.survey_pending_after_exam}</p>
+                                                        </div>
+                                                    )}
+                                                    <SurveyEngine 
+                                                        surveyId={item.content?.survey_id} 
+                                                        studentId={studentId}
+                                                        enrollmentId={enrollment?.id}
+                                                        onComplete={() => {
+                                                            handleItemCompletion(item.id);
+                                                            setSurveyDone(true);
+                                                            // Forzar guardado inmediato si ya estaba aprobado
+                                                            // IMPORTANTE: pasar surveyJustCompleted=true para que no vuelva a detectar encuesta pendiente
+                                                            if (approved || evaluationPassed) {
+                                                                let qw = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+                                                                let sw = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+                                                                const hasScorm = currentModule?.items?.some((it: any) => it.type === 'scorm');
+                                                                if (!hasScorm && sw > 0) { qw = 1; sw = 0; }
+                                                                const total = ((quizScore || 0) * qw) + (scormScore * sw);
+                                                                updateEnrollmentStatus('completed', Math.round(total), true);
+                                                            }
+                                                        }}
+                                                        language={language as any}
+                                                    />
+                                                </>
                                             )}
-                                            <SurveyEngine 
-                                                surveyId={item.content?.survey_id} 
-                                                studentId={studentId}
-                                                enrollmentId={enrollment?.id}
-                                                onComplete={() => {
-                                                    handleItemCompletion(item.id);
-                                                    setSurveyDone(true);
-                                                    // Forzar guardado inmediato si ya estaba aprobado
-                                                    // IMPORTANTE: pasar surveyJustCompleted=true para que no vuelva a detectar encuesta pendiente
-                                                    if (approved || evaluationPassed) {
-                                                        let qw = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
-                                                        let sw = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
-                                                        const hasScorm = currentModule?.items?.some((it: any) => it.type === 'scorm');
-                                                        if (!hasScorm && sw > 0) { qw = 1; sw = 0; }
-                                                        const total = ((quizScore || 0) * qw) + (scormScore * sw);
-                                                        updateEnrollmentStatus('completed', Math.round(total), true);
-                                                    }
-                                                }}
-                                                language={language as any}
-                                            />
                                         </div>
                                     )}
 
@@ -857,8 +893,16 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                                             <h3 className="text-xl font-bold mb-2">{t.signature_title}</h3>
                                             <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>{t.signature_desc}</p>
-                                            
-                                            {itemsCompleted.has(item.id) ? (
+
+                                            {!evaluationPassed ? (
+                                                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                                                    <p className="text-white/60 font-bold">Debes aprobar la evaluación para desbloquear la firma.</p>
+                                                </div>
+                                            ) : !isPostEvaluationItemUnlocked(item) ? (
+                                                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                                                    <p className="text-white/60 font-bold">Completa el paso anterior para continuar.</p>
+                                                </div>
+                                            ) : itemsCompleted.has(item.id) ? (
                                                 <div className="bg-brand/10 p-6 rounded-xl border border-brand/20 flex flex-col items-center gap-3">
                                                     <CheckCircle2 className="w-12 h-12 text-brand" />
                                                     <p className="text-brand font-bold">{t.signature_success}</p>

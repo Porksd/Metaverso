@@ -119,13 +119,12 @@ export default function CoursesPage() {
 
                 const scormProgress = progress?.find((p: any) => p.module_type === 'scorm');
                 const scormCompleted = !!scormProgress?.completed_at;
-                const quizProgressEntry = progress?.find((p: any) => p.module_type === 'quiz' && p.completed_at);
-                const quizCompleted = e.status === 'completed' || e.last_exam_passed === true || !!quizProgressEntry;
+                const evaluationApproved = e.status === 'completed' || e.last_exam_passed === true;
 
                 // Verificar manualmente si hay encuesta obligatoria
                 // Solo necesitamos verificar esto si el curso está completado o el examen aprobado
                 let hasMandatorySurvey = false;
-                if (quizCompleted || e.last_exam_passed) {
+                if (evaluationApproved) {
                     try {
                         // Obtener los modules IDs (course_modules.id ES el module_id referenciado por module_items)
                         const moduleIds = e.courses?.course_modules?.map((cm: any) => cm.id) || [];
@@ -150,24 +149,24 @@ export default function CoursesPage() {
                 const courseConfig = e.courses;
 
                 // Si ya aprobó evaluación final pero falta encuesta, el curso debe verse 100% completado.
-                if (quizCompleted) {
+                if (evaluationApproved) {
                     partialProgress = Math.max(partialProgress, 100);
                 }
 
                 // Solo si no hay progreso guardado en DB (Legacy o SCORM antiguo), calcular dinámicamente
-                if (partialProgress === 0 && !quizCompleted) {
+                if (partialProgress === 0 && !evaluationApproved) {
                     if (courseConfig?.scorm_weight && courseConfig?.quiz_weight) {
                         if (scormCompleted) partialProgress += parseFloat(courseConfig.scorm_weight);
-                        if (quizCompleted) partialProgress += parseFloat(courseConfig.quiz_weight);
+                        if (evaluationApproved) partialProgress += parseFloat(courseConfig.quiz_weight);
                     } else if (courseConfig?.config?.scorm_url && courseConfig?.config?.questions) {
                         if (scormCompleted) partialProgress = 50;
-                        if (quizCompleted) partialProgress = 100;
+                        if (evaluationApproved) partialProgress = 100;
                     } else {
-                        if (scormCompleted || quizCompleted) partialProgress = 100;
+                        if (scormCompleted || evaluationApproved) partialProgress = 100;
                     }
                 }
 
-                console.log('Calculated progress:', { scormCompleted, quizCompleted, partialProgress, dbProgress: e.progress });
+                console.log('Calculated progress:', { scormCompleted, evaluationApproved, partialProgress, dbProgress: e.progress });
 
                 return {
                     ...e,
@@ -626,11 +625,9 @@ export default function CoursesPage() {
                             // Verificar si existe contenido de encuesta obligatoria (YA CALCULADO EN FETCH)
                             const hasMandatorySurvey = enrollment.has_mandatory_survey;
 
-                            // Si 'last_exam_passed' no existe (undefined) pero status es completed, asumimos que NO hay examen pendiente
-                            // PERO si hay encuesta obligatoria y no está completada, es pending survey.
-                            // quizCompleted considera: status completed, last_exam_passed, o course_progress quiz completado
-                            const quizWasCompleted = enrollment.last_exam_passed === true || isCompleted || !!(enrollment.partial_progress >= 100);
-                            const surveyPending = quizWasCompleted && hasMandatorySurvey && !enrollment.survey_completed;
+                            // Mostrar "FALTA ENCUESTA" solo cuando la evaluación final fue aprobada realmente.
+                            const evaluationApproved = enrollment.last_exam_passed === true || isCompleted;
+                            const surveyPending = evaluationApproved && hasMandatorySurvey && !enrollment.survey_completed;
                             
                             const course = enrollment.course;
 
