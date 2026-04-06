@@ -485,7 +485,11 @@ export default function EmpresaAdmin() {
                                 <tbody className="divide-y divide-white/5">
                                     {sortedStudents.flatMap((st) => {
                                         // If student has no enrollments, show once
-                                        if (!st.enrollments || st.enrollments.length === 0) {
+                                        const validEnrollments = (st.enrollments || []).filter((en: any) =>
+                                            courses.some((c: any) => c.id === en.course_id)
+                                        );
+
+                                        if (!validEnrollments || validEnrollments.length === 0) {
                                             return [(
                                                 <tr key={`${st.id}-no-course`} className="hover:bg-white/[0.02] text-sm font-medium">
                                                     <td className="px-6 py-4"><p className="font-bold">{st.first_name} {st.last_name}</p><p className="text-[10px] text-white/40 font-mono">{st.rut} • {st.company_name}</p></td>
@@ -502,7 +506,7 @@ export default function EmpresaAdmin() {
                                         }
 
                                         // Show one row per enrollment (course)
-                                        return st.enrollments.map((en: any, idx: number) => {
+                                        return validEnrollments.map((en: any, idx: number) => {
                                             const course = courses.find(c => c.id === en.course_id);
                                             const courseName = course?.name || "Curso Desconocido";
 
