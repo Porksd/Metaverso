@@ -252,7 +252,7 @@ export default function DynamicCourseEditor() {
                 type: 'evaluation',
                 order_index: modules.length,
                 settings: {
-                    min_score: courseConfig?.passing_score || 90,
+                    min_score: courseConfig?.passing_score || 60,
                     quiz_percentage: courseConfig?.weight_quiz || 80,
                     scorm_percentage: courseConfig?.weight_scorm || 20,
                     requires_signature: false,
@@ -1222,7 +1222,7 @@ export default function DynamicCourseEditor() {
                                             type="number" 
                                             min="0" 
                                             max="100"
-                                            value={module.settings?.min_score || 90}
+                                            value={module.settings?.min_score || 60}
                                             onChange={(e) => {
                                                 const newMods = [...modules];
                                                 const idx = newMods.findIndex(m => m.id === module.id);
@@ -1307,7 +1307,7 @@ export default function DynamicCourseEditor() {
                                         {' + '}
                                         <span className="text-orange-400 font-bold">SCORM ({module.settings?.scorm_percentage ?? 20}%)</span>
                                         {' ≥ '}
-                                        <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 90}%</span>
+                                        <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 60}%</span>
                                         {' → '}
                                         <span className="text-green-400 font-bold">Certificado ✓</span>
                                     </p>

@@ -30,39 +30,29 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
         }
     }, [isLight]);
 
-    const getCoordinates = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+    const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) => {
         const rect = canvas.getBoundingClientRect();
-        let clientX, clientY;
-
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = (e as React.MouseEvent).clientX;
-            clientY = (e as React.MouseEvent).clientY;
-        }
 
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
         };
     };
 
-    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-        e.preventDefault(); // Prevent scrolling on touch devices
+    const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        canvas.setPointerCapture(e.pointerId);
         setIsDrawing(true);
         const { x, y } = getCoordinates(e, canvas);
         ctx.beginPath();
         ctx.moveTo(x, y);
     };
 
-    const draw = (e: React.MouseEvent | React.TouchEvent) => {
-        e.preventDefault(); // Prevent scrolling on touch devices
+    const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
         if (!isDrawing) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -75,7 +65,10 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
         setHasSignature(true);
     };
 
-    const stopDrawing = () => {
+    const stopDrawing = (e?: React.PointerEvent<HTMLCanvasElement>) => {
+        if (e && canvasRef.current?.hasPointerCapture(e.pointerId)) {
+            canvasRef.current.releasePointerCapture(e.pointerId);
+        }
         setIsDrawing(false);
     };
 
@@ -119,13 +112,11 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
                 <canvas
                     ref={canvasRef}
                     className="w-full h-full cursor-crosshair touch-none"
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
+                    onPointerDown={startDrawing}
+                    onPointerMove={draw}
+                    onPointerUp={stopDrawing}
+                    onPointerLeave={stopDrawing}
+                    onPointerCancel={stopDrawing}
                 />
                 {!hasSignature && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-white/20 text-xl font-bold uppercase select-none">

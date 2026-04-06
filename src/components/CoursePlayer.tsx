@@ -149,7 +149,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         const currentModule = modules[activeModuleIndex];
         let quizWeight = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
         let scormWeight = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
-        const minPass = currentModule?.settings?.min_score ?? enrollment?.courses?.config?.passing_score ?? 90;
+        const minPass = currentModule?.settings?.min_score ?? enrollment?.courses?.config?.passing_score ?? 60;
 
         // AUTO-AJUSTE: Si el módulo de evaluación NO tiene items SCORM, 
         // el peso del quiz debe ser 100% (no tiene sentido penalizar por un SCORM inexistente)
