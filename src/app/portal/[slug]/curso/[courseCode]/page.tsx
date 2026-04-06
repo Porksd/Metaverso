@@ -125,23 +125,25 @@ export default function CourseAuthPage() {
                 if (!comp) throw new Error("Empresa inválida.");
                 setCompany(comp);
 
-                // 2. Fetch Course
-                const { data: crs } = await supabase.from('courses').select('*').eq('code', courseCode).single();
-                if (!crs) throw new Error("Curso no encontrado.");
-
-                // Check Registration Mode from Relationship (company_courses)
-                const { data: assignment } = await supabase
+                // 2. Fetch course only if it is assigned to this company
+                const { data: assignment, error: assignmentError } = await supabase
                     .from('company_courses')
-                    .select('registration_mode')
+                    .select('registration_mode, courses!inner(*)')
                     .eq('company_id', comp.id)
-                    .eq('course_id', crs.id)
-                    .single();
+                    .eq('courses.code', courseCode)
+                    .maybeSingle();
 
-                // Respect assignment mode first, fallback to course global mode (if legacy), default to open
-                const trueMode = assignment?.registration_mode || crs.registration_mode || 'open';
-                crs.registration_mode = trueMode;
+                if (assignmentError) throw assignmentError;
+                if (!assignment?.courses) {
+                    throw new Error(lang === 'ht' ? 'Kou sa a pa disponib pou konpayi sa a.' : 'Este curso no está disponible para esta empresa.');
+                }
 
-                setCourse(crs);
+                const assignedCourse = Array.isArray(assignment.courses)
+                    ? assignment.courses[0]
+                    : assignment.courses;
+
+                const trueMode = assignment?.registration_mode || assignedCourse?.registration_mode || 'open';
+                setCourse({ ...assignedCourse, registration_mode: trueMode });
 
                 // 3. Fetch ONLY assigned and visible company roles for this company
                 const { data: assignedRoles, error: assignErr } = await supabase
@@ -206,16 +208,35 @@ export default function CourseAuthPage() {
         try {
             // Intentar login manual consultando la tabla de estudiantes
             // Buscamos coincidencia exacta de email/rut y password
+            const rawIdentifier = loginData.email.trim();
+            const normalizedIdentifier = rawIdentifier.toLowerCase();
+            const normalizedRut = cleanRut(rawIdentifier);
+
             const { data: student, error: studentError } = await supabase
                 .from('students')
                 .select('*')
                 .eq('password', loginData.password)
-                .or(`email.eq.${loginData.email},rut.eq.${loginData.email}`)
+                .eq('client_id', company.id)
+                .or(`email.eq.${normalizedIdentifier},rut.eq.${rawIdentifier},rut.eq.${normalizedRut}`)
                 .maybeSingle();
 
             if (studentError || !student) {
-                console.error("Login detail error:", studentError);
-                setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
+                const { data: foreignStudent } = await supabase
+                    .from('students')
+                    .select('id')
+                    .eq('password', loginData.password)
+                    .or(`email.eq.${normalizedIdentifier},rut.eq.${rawIdentifier},rut.eq.${normalizedRut}`)
+                    .neq('client_id', company.id)
+                    .maybeSingle();
+
+                if (foreignStudent) {
+                    setError(lang === 'es'
+                        ? 'Tu cuenta existe, pero pertenece a otra empresa. Debes ingresar con el portal correcto.'
+                        : 'Kont ou egziste, men li fè pati yon lòt konpayi. Ou dwe antre nan pòtal ki kòrèk la.');
+                } else {
+                    console.error("Login detail error:", studentError);
+                    setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
+                }
                 setActionLoading(false);
                 return;
             }
@@ -230,7 +251,7 @@ export default function CourseAuthPage() {
                 .select('*')
                 .eq('student_id', student.id)
                 .eq('course_id', course.id)
-                .single();
+                .maybeSingle();
 
             if (course.registration_mode === 'restricted' && !enrollment) {
                 throw new Error("⛔ No estás inscrito en este curso. Contacta a tu administrador para solicitar acceso.");
@@ -259,6 +280,12 @@ export default function CourseAuthPage() {
 
     const handleRegister = async () => {
         if (!signatureUrl) return setError(t.signRequired);
+        if (isRestricted) {
+            setError(lang === 'es'
+                ? 'Este curso es restringido: solo alumnos previamente registrados por el administrador pueden ingresar.'
+                : 'Kou sa a restren: sèlman elèv administratè a te anrejistre davans ka antre.');
+            return;
+        }
         setActionLoading(true);
         try {
             // If empresa was typed and doesn't exist, create it in companies_list
@@ -302,15 +329,7 @@ export default function CourseAuthPage() {
 
             alert("Registro exitoso. Iniciando sesión...");
             
-            // Auto-login
-            const { data: loginRes, error: loginErr } = await supabase.auth.signInWithPassword({
-                email: regData.email,
-                password: regData.password
-            });
-            
-            if (loginErr) throw loginErr;
-            
-            // Fetch student profile again to save to localstorage
+            // Save student profile in local storage for portal session
             localStorage.setItem('user', JSON.stringify(result.student));
             
             // Create Enrollment for this course automatically
@@ -462,7 +481,7 @@ export default function CourseAuthPage() {
                         </div>
                     )}
 
-                    {authMode === 'login' ? (
+                    {(isRestricted || authMode === 'login') ? (
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-black uppercase text-white/40 tracking-widest">{t.email}</label>

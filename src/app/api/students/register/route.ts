@@ -62,11 +62,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { data: existingStudentByEmail, error: existingStudentByEmailError } = await supabaseAdmin
+        let existingStudentByEmailQuery = supabaseAdmin
             .from('students')
             .select('id')
-            .eq('email', normalizedEmail)
-            .maybeSingle();
+            .eq('email', normalizedEmail);
+
+        if (client_id) {
+            existingStudentByEmailQuery = existingStudentByEmailQuery.eq('client_id', client_id);
+        }
+
+        const { data: existingStudentByEmail, error: existingStudentByEmailError } = await existingStudentByEmailQuery.maybeSingle();
 
         if (existingStudentByEmailError && !isMissingRowError(existingStudentByEmailError.message)) {
             console.error('Error checking existing student by email:', existingStudentByEmailError);
@@ -81,11 +86,16 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedRut) {
-            const { data: existingStudentByRut, error: existingStudentByRutError } = await supabaseAdmin
+            let existingStudentByRutQuery = supabaseAdmin
                 .from('students')
                 .select('id')
-                .eq('rut', normalizedRut)
-                .maybeSingle();
+                .eq('rut', normalizedRut);
+
+            if (client_id) {
+                existingStudentByRutQuery = existingStudentByRutQuery.eq('client_id', client_id);
+            }
+
+            const { data: existingStudentByRut, error: existingStudentByRutError } = await existingStudentByRutQuery.maybeSingle();
 
             if (existingStudentByRutError && !isMissingRowError(existingStudentByRutError.message)) {
                 console.error('Error checking existing student by RUT:', existingStudentByRutError);
@@ -101,11 +111,16 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedPassport) {
-            const { data: existingStudentByPassport, error: existingStudentByPassportError } = await supabaseAdmin
+            let existingStudentByPassportQuery = supabaseAdmin
                 .from('students')
                 .select('id')
-                .eq('passport', normalizedPassport)
-                .maybeSingle();
+                .eq('passport', normalizedPassport);
+
+            if (client_id) {
+                existingStudentByPassportQuery = existingStudentByPassportQuery.eq('client_id', client_id);
+            }
+
+            const { data: existingStudentByPassport, error: existingStudentByPassportError } = await existingStudentByPassportQuery.maybeSingle();
 
             if (existingStudentByPassportError && !isMissingRowError(existingStudentByPassportError.message)) {
                 console.error('Error checking existing student by passport:', existingStudentByPassportError);
@@ -134,29 +149,29 @@ export async function POST(request: NextRequest) {
         }
 
         const existingAuthUser = authUsersData.users.find((user) => user.email?.toLowerCase() === normalizedEmail);
-        if (existingAuthUser) {
-            return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
-        }
 
-        let authUser;
+        let authUser = existingAuthUser;
         let createdAuthUser = false;
-        const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
-            email: normalizedEmail,
-            password,
-            email_confirm: true,
-            user_metadata: {
-                full_name: `${first_name} ${last_name}`,
-                language
-            }
-        });
 
-        if (createError) {
-            if (createError.message.includes('already registered') || createError.message.includes('already exists')) {
-                return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
+        if (!existingAuthUser) {
+            const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+                email: normalizedEmail,
+                password,
+                email_confirm: true,
+                user_metadata: {
+                    full_name: `${first_name} ${last_name}`,
+                    language
+                }
+            });
+
+            if (createError) {
+                if (createError.message.includes('already registered') || createError.message.includes('already exists')) {
+                    return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
+                }
+
+                return NextResponse.json({ error: createError.message }, { status: 400 });
             }
 
-            return NextResponse.json({ error: createError.message }, { status: 400 });
-        } else {
             authUser = createData.user;
             createdAuthUser = true;
         }
