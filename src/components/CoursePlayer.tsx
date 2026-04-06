@@ -356,9 +356,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             // Si intentamos completar pero falto la encuesta, guardamos como in_progress + scores temporales
             const finalStatus = (status === 'completed' && hasPendingSurvey) ? 'in_progress' : status;
 
+            const previousBestScore = typeof enrollment.best_score === 'number' ? enrollment.best_score : null;
+            const bestScoreToPersist = previousBestScore !== null
+                ? Math.max(previousBestScore, totalScore)
+                : totalScore;
+
             const updatePayload: any = { 
                 status: finalStatus, 
-                best_score: totalScore,
+                best_score: bestScoreToPersist,
                 quiz_score: quizScore,
                 scorm_score: scormScore,
                 completed_at: finalStatus === 'completed' ? new Date().toISOString() : enrollment.completed_at
@@ -387,7 +392,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 .from('enrollments')
                 .update(updatePayload)
                 .eq('id', enrollment.id);
-            console.log("CoursePlayer: Enrollment status updated with scores:", { status: finalStatus, totalScore, quizScore, scormScore, hasPendingSurvey });
+            console.log("CoursePlayer: Enrollment status updated with scores:", {
+                status: finalStatus,
+                totalScore,
+                bestScoreToPersist,
+                quizScore,
+                scormScore,
+                hasPendingSurvey
+            });
         } catch (err) {
             console.error("Error updating enrollment status:", err);
         }
