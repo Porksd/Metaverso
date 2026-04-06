@@ -86,7 +86,7 @@ export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }:
                 options,
                 correctAnswer,
                 points: q.points || 10,
-                weight: q.weight || q.points || 1,
+                weight: typeof q.weight === 'number' && q.weight > 0 ? q.weight : 1,
                 feedback: q.feedback || ''
             };
         });

@@ -194,14 +194,14 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     };
 
     const finishQuiz = async () => {
-        // Weighted scoring: each question may have a weight (default 1).
-        // For single/truefalse: full weight if answer matches. For multiple: full weight only if all correct selected and no incorrect ones.
+        // Equal-weight scoring by default: each question contributes the same percentage.
+        // This avoids legacy point/weight data inflating results unexpectedly.
         let totalWeight = 0;
         let earnedWeight = 0;
         const perQuestion: Array<{ id: string; correct: boolean; weight: number }> = [];
 
         finalQuestions.forEach((q: Question) => {
-            const qWeight = typeof q.weight === 'number' && q.weight > 0 ? q.weight : 1;
+            const qWeight = 1;
             totalWeight += qWeight;
 
             const userAnswer = answers[q.id];
