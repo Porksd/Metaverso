@@ -221,22 +221,8 @@ export default function CourseAuthPage() {
                 .maybeSingle();
 
             if (studentError || !student) {
-                const { data: foreignStudent } = await supabase
-                    .from('students')
-                    .select('id')
-                    .eq('password', loginData.password)
-                    .or(`email.eq.${normalizedIdentifier},rut.eq.${rawIdentifier},rut.eq.${normalizedRut}`)
-                    .neq('client_id', company.id)
-                    .maybeSingle();
-
-                if (foreignStudent) {
-                    setError(lang === 'es'
-                        ? 'Tu cuenta existe, pero pertenece a otra empresa. Debes ingresar con el portal correcto.'
-                        : 'Kont ou egziste, men li fè pati yon lòt konpayi. Ou dwe antre nan pòtal ki kòrèk la.');
-                } else {
-                    console.error("Login detail error:", studentError);
-                    setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
-                }
+                console.error("Login detail error:", studentError);
+                setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
                 setActionLoading(false);
                 return;
             }
