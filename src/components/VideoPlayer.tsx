@@ -197,20 +197,24 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
                 </div>
             </div>
 
-            <button
-                type="button"
-                onClick={togglePlay}
-                aria-label={playing ? 'Pausar video' : 'Reproducir video'}
-                className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity ${showCenterControl || !playing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            <div
+                className={`absolute inset-0 z-20 flex items-center justify-center pointer-events-none transition-opacity ${showCenterControl || !playing ? 'opacity-100' : 'opacity-0'}`}
             >
-                <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-lg">
-                    {playing ? (
-                        <Pause className="w-6 h-6 text-white" />
-                    ) : (
-                        <Play className="w-6 h-6 text-white ml-1" />
-                    )}
+                <button
+                    type="button"
+                    onClick={togglePlay}
+                    aria-label={playing ? 'Pausar video' : 'Reproducir video'}
+                    className="pointer-events-auto"
+                >
+                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-lg">
+                        {playing ? (
+                            <Pause className="w-6 h-6 text-white" />
+                        ) : (
+                            <Play className="w-6 h-6 text-white ml-1" />
+                        )}
                     </div>
-            </button>
+                </button>
+            </div>
             
             {/* Indicador de video completado */}
             {completed && (
