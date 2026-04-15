@@ -30,7 +30,10 @@ export default function EmpresaPortalLogin() {
     const [isCompanyLoading, setIsCompanyLoading] = useState(true);
     const router = useRouter();
 
-    const resolveCompanyBySlug = async (fields: string) => {
+    const resolveCompanyBySlug = async (fields: string): Promise<{
+        name: string; id: string; slug?: string; logo_url?: string;
+        logo_url_dark?: string; logo_url_light?: string; primary_color?: string; secondary_color?: string;
+    } | null> => {
         const { data, error } = await supabase
             .from('companies')
             .select(fields)
@@ -38,7 +41,7 @@ export default function EmpresaPortalLogin() {
             .limit(1);
 
         if (error) throw error;
-        if (data && data.length > 0) return data[0];
+        if (data && data.length > 0) return data[0] as any;
 
         const { data: fallbackData, error: fallbackError } = await supabase
             .from('companies')
@@ -46,7 +49,7 @@ export default function EmpresaPortalLogin() {
             .not('slug', 'is', null);
 
         if (fallbackError) throw fallbackError;
-        return (fallbackData || []).find((company: any) => company.slug?.toString().trim().toLowerCase() === slug) || null;
+        return (fallbackData || []).find((company: any) => company.slug?.toString().trim().toLowerCase() === slug) ?? null;
     };
 
     useEffect(() => {
