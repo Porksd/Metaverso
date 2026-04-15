@@ -10,7 +10,8 @@ import CompanyLogo from "@/components/CompanyLogo";
 
 export default function CompanyPortal() {
     const params = useParams();
-    const slug = params.slug as string;
+    const rawSlug = params.slug;
+    const slug = decodeURIComponent((Array.isArray(rawSlug) ? rawSlug[0] : rawSlug || '').toString()).trim().toLowerCase();
 
     const [company, setCompany] = useState<any>(null);
     const [courses, setCourses] = useState<any[]>([]);
@@ -25,7 +26,7 @@ export default function CompanyPortal() {
                 const { data: comp, error: compError } = await supabase
                     .from('companies')
                     .select('*')
-                    .eq('slug', slug)
+                    .ilike('slug', slug)
                     .single();
 
                 if (compError || !comp) {
@@ -66,13 +67,13 @@ export default function CompanyPortal() {
     if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>;
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="relative min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
             {/* Background image */}
             <img src="/alumno_background.jpg" alt="" aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
             <div className="absolute inset-0 z-0 bg-black/60" />
 
-            <div className="relative z-10 w-full max-w-5xl space-y-12">
+            <div className="relative z-10 w-full max-w-5xl space-y-8 sm:space-y-12">
                 
                 {/* Header */}
                 <header className="text-center space-y-6">
@@ -84,7 +85,7 @@ export default function CompanyPortal() {
                                 lightSrc={company.logo_url_light}
                                 alt={company.name}
                                 surface="light"
-                                frameClassName="w-56 h-28 rounded-[2rem] p-5"
+                                frameClassName="w-40 h-24 sm:w-56 sm:h-28 rounded-[2rem] p-4 sm:p-5"
                                 imageClassName="w-full h-full object-contain"
                             />
                         </div>
@@ -95,10 +96,10 @@ export default function CompanyPortal() {
                     )}
 
                     <div className="space-y-4">
-                        <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight">
                             {company.welcome_title || company.name}
                         </h1>
-                        <p className="text-xl text-white/60 font-medium max-w-2xl mx-auto leading-relaxed">
+                        <p className="text-base sm:text-xl text-white/60 font-medium max-w-2xl mx-auto leading-relaxed">
                             {company.welcome_message || "Portal de Capacitación y Desarrollo Profesional"}
                         </p>
                     </div>
@@ -114,7 +115,7 @@ export default function CompanyPortal() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="glass p-8 rounded-3xl h-full border border-white/5 hover:border-brand/30 hover:bg-white/[0.03] transition-all group-hover:shadow-[0_0_30px_rgba(49,210,45,0.1)] relative overflow-hidden"
+                                className="glass p-5 sm:p-8 rounded-3xl h-full border border-white/5 hover:border-brand/30 hover:bg-white/[0.03] transition-all group-hover:shadow-[0_0_30px_rgba(49,210,45,0.1)] relative overflow-hidden"
                             >
                                 <div className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/5 text-white/40 group-hover:text-brand group-hover:border-brand/20 transition-colors">
                                     {course.code}

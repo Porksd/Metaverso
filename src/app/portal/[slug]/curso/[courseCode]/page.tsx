@@ -44,7 +44,8 @@ function validateRut(rut: string): boolean {
 export default function CourseAuthPage() {
     const params = useParams();
     const router = useRouter();
-    const slug = params.slug as string;
+    const rawSlug = params.slug;
+    const slug = decodeURIComponent((Array.isArray(rawSlug) ? rawSlug[0] : rawSlug || '').toString()).trim().toLowerCase();
     const courseCode = params.courseCode as string;
 
     const [loading, setLoading] = useState(true);
@@ -121,7 +122,7 @@ export default function CourseAuthPage() {
         const init = async () => {
             try {
                 // 1. Fetch Company
-                const { data: comp } = await supabase.from('companies').select('*').eq('slug', slug).single();
+                const { data: comp } = await supabase.from('companies').select('*').ilike('slug', slug).single();
                 if (!comp) throw new Error("Empresa inválida.");
                 setCompany(comp);
 
@@ -380,7 +381,7 @@ export default function CourseAuthPage() {
             <img src="/alumno_background.jpg" alt="" aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
             {/* Left Panel: Context */}
-            <div className="w-full md:w-1/2 p-10 flex flex-col relative z-10 overflow-hidden bg-[#0a0a0a]/90">
+            <div className="w-full md:w-1/2 p-5 sm:p-8 md:p-10 flex flex-col relative z-10 overflow-hidden bg-[#0a0a0a]/90">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-brand/5 blur-[120px] rounded-full" />
                 </div>
@@ -403,8 +404,8 @@ export default function CourseAuthPage() {
                         />
                     </div>
 
-                    <h1 className="text-4xl font-black uppercase text-white mb-2">{course.name}</h1>
-                    <p className="text-white/60 text-lg leading-relaxed mb-8">{course.description || (lang === 'ht' ? 'Konekte pou jwenn kontni a.' : 'Inicia sesión para acceder al contenido.')}</p>
+                    <h1 className="text-2xl sm:text-4xl font-black uppercase text-white mb-2">{course.name}</h1>
+                    <p className="text-white/60 text-sm sm:text-lg leading-relaxed mb-6 sm:mb-8">{course.description || (lang === 'ht' ? 'Konekte pou jwenn kontni a.' : 'Inicia sesión para acceder al contenido.')}</p>
 
                     <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                         <div className="flex items-center gap-3 mb-2">
@@ -421,7 +422,7 @@ export default function CourseAuthPage() {
             </div>
 
             {/* Right Panel: Auth Forms */}
-            <div className="w-full md:w-1/2 bg-black/80 border-l border-white/5 flex items-center justify-center p-6 md:p-12 relative z-10">
+            <div className="w-full md:w-1/2 bg-black/80 border-l border-white/5 flex items-center justify-center p-4 sm:p-6 md:p-12 relative z-10">
                 <div className="w-full max-w-md space-y-6">
                     
                     {/* Language Switcher — always visible */}
@@ -500,7 +501,7 @@ export default function CourseAuthPage() {
                         <div className="space-y-6">
                             {regStep === 1 && (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.name}</label>
                                             <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Juan" required 
@@ -513,7 +514,7 @@ export default function CourseAuthPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
                                             <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
@@ -584,7 +585,7 @@ export default function CourseAuthPage() {
                                     )}
                                     
                                     {/* ID Type + Cargo row */}
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
@@ -699,7 +700,7 @@ export default function CourseAuthPage() {
                                         </button>
                                     )}
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.gender}</label>
                                             {isFieldVisible('gender') ? (

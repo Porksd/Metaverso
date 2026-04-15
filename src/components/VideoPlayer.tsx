@@ -21,6 +21,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
     const [isYouTube, setIsYouTube] = useState(false);
     const [youtubeId, setYoutubeId] = useState('');
     const [completed, setCompleted] = useState(false);
+    const [showCenterControl, setShowCenterControl] = useState(false);
     const completedRef = useRef(false);
     
     // Expose control methods via ref
@@ -133,10 +134,17 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
 
     // Standard video player
     return (
-        <div className="relative group bg-black aspect-video flex items-center justify-center">
+        <div
+            className="relative group bg-black aspect-video flex items-center justify-center"
+            onMouseEnter={() => setShowCenterControl(true)}
+            onMouseLeave={() => setShowCenterControl(false)}
+            onTouchStart={() => setShowCenterControl(true)}
+        >
             <video
                 ref={videoRef}
                 className="w-full h-full object-contain"
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
                 onEnded={() => {
                     console.log('[VideoPlayer] Video terminado (evento onEnded)');
                     if (!completedRef.current && onEnded) {
@@ -157,9 +165,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
             </video>
 
             {/* Custom Controls Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 md:p-4">
                 <div className="flex items-center gap-4">
-                    <button onClick={togglePlay} className="text-white hover:text-brand transition-colors">
+                    <button type="button" onClick={togglePlay} className="text-white hover:text-brand transition-colors">
                         {playing ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                     </button>
 
@@ -174,7 +182,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
                         <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
                     </div>
 
-                    <button onClick={() => {
+                    <button type="button" onClick={() => {
                         if (videoRef.current) {
                             videoRef.current.muted = !muted;
                             setMuted(!muted);
@@ -183,19 +191,26 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
                         {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                     </button>
 
-                    <button onClick={() => videoRef.current?.requestFullscreen()} className="text-white hover:text-brand transition-colors">
+                    <button type="button" onClick={() => videoRef.current?.requestFullscreen()} className="text-white hover:text-brand transition-colors">
                         <Maximize className="w-5 h-5" />
                     </button>
                 </div>
             </div>
 
-            {!playing && (
-                <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
+            <button
+                type="button"
+                onClick={togglePlay}
+                aria-label={playing ? 'Pausar video' : 'Reproducir video'}
+                className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity ${showCenterControl || !playing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            >
+                <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 shadow-lg">
+                    {playing ? (
+                        <Pause className="w-6 h-6 text-white" />
+                    ) : (
                         <Play className="w-6 h-6 text-white ml-1" />
+                    )}
                     </div>
-                </button>
-            )}
+            </button>
             
             {/* Indicador de video completado */}
             {completed && (

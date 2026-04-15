@@ -9,13 +9,16 @@ import { resolveAdminRole } from "@/lib/adminAuth";
 import CompanyLogo from "@/components/CompanyLogo";
 
 export default function EmpresaPortalLogin() {
-    const { slug } = useParams();
+    const params = useParams();
+    const slugParam = params.slug;
+    const slug = decodeURIComponent((Array.isArray(slugParam) ? slugParam[0] : slugParam || '').toString()).trim().toLowerCase();
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
     const [companyInfo, setCompanyInfo] = useState<{
         name: string, 
         id: string,
+        slug?: string,
         logo_url?: string,
         logo_url_dark?: string,
         logo_url_light?: string,
@@ -24,63 +27,102 @@ export default function EmpresaPortalLogin() {
     } | null>(null);
     const [errorMsg, setErrorMsg] = useState("");
     const [isAuthenticating, setIsAuthenticating] = useState(true);
+    const [isCompanyLoading, setIsCompanyLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        const checkMasterAccess = async () => {
-            setIsAuthenticating(true);
-            const { data: { session } } = await supabase.auth.getSession();
-            
-            if (session) {
-                const email = session.user.email?.toLowerCase();
-                // Check if meta admin (SuperAdmin or Editor)
-                const { role } = await resolveAdminRole(supabase, email, '/admin/empresa/portal');
+    const resolveCompanyBySlug = async (fields: string) => {
+        const { data, error } = await supabase
+            .from('companies')
+            .select(fields)
+            .ilike('slug', slug)
+            .limit(1);
 
-                if (role) {
-                    // Valid master session, attempt auto-redirect if company matches
-                    if (slug) {
-                        const { data: company } = await supabase
-                            .from('companies')
-                            .select('id, name')
-                            .eq('slug', slug)
-                            .single();
-                        
-                        if (company) {
-                            sessionStorage.setItem('empresa_id', company.id);
-                            sessionStorage.setItem('empresa_name', company.name);
-                            sessionStorage.setItem('empresa_slug', slug as string);
-                            sessionStorage.setItem('is_master_admin', 'true');
-                            sessionStorage.setItem('master_role', role);
-                            sessionStorage.setItem('master_entry_mode', 'managed-tab');
-                            sessionStorage.setItem('master_return_url', '/admin/metaverso');
-                            console.log("Acceso Maestro detectado: Redirigiendo al Dashboard...");
-                            router.push("/admin/empresa");
-                            return;
-                        }
+        if (error) throw error;
+        if (data && data.length > 0) return data[0];
+
+        const { data: fallbackData, error: fallbackError } = await supabase
+            .from('companies')
+            .select(fields)
+            .not('slug', 'is', null);
+
+        if (fallbackError) throw fallbackError;
+        return (fallbackData || []).find((company: any) => company.slug?.toString().trim().toLowerCase() === slug) || null;
+    };
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        const bootstrap = async () => {
+            setIsAuthenticating(true);
+            setIsCompanyLoading(true);
+            setErrorMsg("");
+
+            if (!slug) {
+                if (!isCancelled) {
+                    setErrorMsg("Empresa no encontrada.");
+                    setIsCompanyLoading(false);
+                    setIsAuthenticating(false);
+                }
+                return;
+            }
+
+            try {
+                const company = await resolveCompanyBySlug('id, name, slug, logo_url, logo_url_dark, logo_url_light, primary_color, secondary_color');
+
+                if (isCancelled) return;
+
+                if (!company) {
+                    setCompanyInfo(null);
+                    setErrorMsg("Empresa no encontrada.");
+                    setIsCompanyLoading(false);
+                    setIsAuthenticating(false);
+                    return;
+                }
+
+                setCompanyInfo(company);
+                setIsCompanyLoading(false);
+
+                const { data: { session } } = await supabase.auth.getSession();
+                if (isCancelled) return;
+
+                if (session) {
+                    const email = session.user.email?.toLowerCase();
+                    const { role } = await resolveAdminRole(supabase, email, '/admin/empresa/portal');
+
+                    if (isCancelled) return;
+
+                    if (role) {
+                        sessionStorage.setItem('empresa_id', company.id);
+                        sessionStorage.setItem('empresa_name', company.name);
+                        sessionStorage.setItem('empresa_slug', company.slug || slug);
+                        sessionStorage.setItem('is_master_admin', 'true');
+                        sessionStorage.setItem('master_role', role);
+                        sessionStorage.setItem('master_entry_mode', 'managed-tab');
+                        sessionStorage.setItem('master_return_url', '/admin/metaverso');
+                        console.log("Acceso Maestro detectado: Redirigiendo al Dashboard...");
+                        router.push('/admin/empresa');
+                        return;
                     }
                 }
-            }
-            setIsAuthenticating(false);
-        };
-
-        const fetchCompany = async () => {
-            if (!slug) return;
-            
-            const { data, error } = await supabase
-                .from('companies')
-                .select('id, name, logo_url, logo_url_dark, logo_url_light, primary_color, secondary_color')
-                .eq('slug', slug)
-                .single();
-
-            if (error || !data) {
-                setErrorMsg("Empresa no encontrada.");
-            } else {
-                setCompanyInfo(data);
+            } catch (error) {
+                console.error('Error resolving company admin portal:', error);
+                if (!isCancelled) {
+                    setCompanyInfo(null);
+                    setErrorMsg("Empresa no encontrada.");
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsAuthenticating(false);
+                    setIsCompanyLoading(false);
+                }
             }
         };
-        
-        checkMasterAccess();
-        fetchCompany();
+
+        bootstrap();
+
+        return () => {
+            isCancelled = true;
+        };
     }, [slug, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -105,7 +147,7 @@ export default function EmpresaPortalLogin() {
                 sessionStorage.removeItem('master_return_url');
                 localStorage.setItem('empresa_id', data.id);
                 localStorage.setItem('empresa_name', data.name);
-                localStorage.setItem('empresa_slug', slug as string); // Store slug for logout redirect
+                localStorage.setItem('empresa_slug', companyInfo?.slug || slug); // Store canonical slug for logout redirect
                 router.push("/admin/empresa");
             }
         } catch (err) {
@@ -124,7 +166,7 @@ export default function EmpresaPortalLogin() {
         </div>
     );
 
-    if (isAuthenticating) return (
+    if (isAuthenticating || isCompanyLoading) return (
         <div className="relative min-h-screen flex flex-col items-center justify-center space-y-4">
             <img src="/empresa_background.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-center z-0" />
             <div className="absolute inset-0 bg-black/60 z-0" />

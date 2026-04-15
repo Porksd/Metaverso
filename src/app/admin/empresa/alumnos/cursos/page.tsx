@@ -374,13 +374,13 @@ export default function CoursesPage() {
                 {activeCourse && (
                     <div className="fixed inset-0 z-[100] bg-[#060606] flex flex-col overflow-hidden">
                         {/* Header Superior Consolidado */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl z-[110]">
+                        <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl z-[110]">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center border border-brand/20">
                                     <div className="w-2 h-2 rounded-full bg-brand animate-pulse shadow-[0_0_10px_#31D22D]" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">{activeCourse.course.name}</h3>
+                                    <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider line-clamp-1 max-w-[180px] sm:max-w-none">{activeCourse.course.name}</h3>
                                     <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">Plataforma de Capacitación</p>
                                 </div>
                             </div>
@@ -389,7 +389,7 @@ export default function CoursesPage() {
                                 className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white hover:text-brand transition-all border border-white/10 flex items-center gap-2 group"
                             >
                                 <span className="text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Cerrar</span>
-                                <X className="w-6 h-6" />
+                                <X className="w-5 h-5 sm:w-6 sm:h-6" />
                             </button>
                         </div>
 
@@ -528,7 +528,7 @@ export default function CoursesPage() {
                 )}
             </AnimatePresence>
 
-            <header className="sticky top-0 z-50 w-full bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-2xl">
+            <header className="sticky top-0 z-50 w-full bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/10 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-2xl">
                 <div className="flex items-center gap-4">
                     <img src="/logo-metaverso.png" alt="Logo" className="h-8 w-auto hover:opacity-80 transition-opacity" />
                     <div className="h-6 w-px bg-white/10 mx-2 hidden md:block" />
@@ -552,7 +552,7 @@ export default function CoursesPage() {
                         </select>
                     </div>
 
-                    <div className="flex flex-col items-end mr-2">
+                    <div className="hidden sm:flex flex-col items-end mr-2">
                         <span className="text-sm font-black tracking-tight">{user.first_name} {user.last_name}</span>
                         <span className="text-xs text-white/40 font-mono">{user.rut}</span>
                     </div>
@@ -562,8 +562,8 @@ export default function CoursesPage() {
                 </div>
             </header>
 
-            <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 space-y-10 relative z-10">
-                <section className="relative overflow-hidden rounded-[32px] p-8 md:p-14 glass border-brand/20 shadow-[0_0_80px_rgba(49,210,45,0.08)]">
+            <main className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-4 md:p-8 space-y-8 sm:space-y-10 relative z-10">
+                <section className="relative overflow-hidden rounded-[32px] p-5 sm:p-8 md:p-14 glass border-brand/20 shadow-[0_0_80px_rgba(49,210,45,0.08)]">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-brand/10 blur-[100px] -ml-32 -mt-32 pointer-events-none" />
                     <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] -mr-32 -mb-32 pointer-events-none" />
 
@@ -572,11 +572,11 @@ export default function CoursesPage() {
                             <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                             {companyInfo?.name} Training Hub
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
+                        <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter leading-none">
                             {t?.welcome},<br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-blue-400">{user.first_name}</span>
                         </h2>
-                        <p className="text-white/50 text-lg max-w-2xl font-medium leading-relaxed">
+                        <p className="text-white/50 text-sm sm:text-lg max-w-2xl font-medium leading-relaxed">
                             {t?.access_desc}
                         </p>
                     </motion.div>

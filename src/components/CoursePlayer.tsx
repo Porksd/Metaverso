@@ -682,7 +682,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
                 {/* Visual Stage / Diapositiva */}
                 <div 
-                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
+                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-40 md:pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
                     style={{ backgroundColor: currentModule.settings?.bg_color || '#0a0a0a' }}
                 >
                     <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 w-full">
@@ -955,7 +955,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             </div>
 
             {/* Footer de Navegación Profesional */}
-            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl relative">
+            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl sticky bottom-0">
                 {/* Slim Progress Bar on top of footer */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
                     <motion.div
@@ -966,17 +966,17 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     />
                 </div>
 
-                <div className="max-w-4xl mx-auto flex items-center justify-between py-5 px-4 md:px-8">
+                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 sm:py-5 px-3 sm:px-4 md:px-8">
                     {/* Info Módulo */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 w-full sm:w-auto">
                         <div className="flex flex-col">
                             <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.current_module}</span>
-                            <span className="text-sm font-bold text-white/90 truncate max-w-[200px]">
+                            <span className="text-sm font-bold text-white/90 truncate max-w-[170px] sm:max-w-[220px]">
                                 {activeModuleIndex + 1}. {currentModule?.title}
                             </span>
                         </div>
-                        <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-                        <div className="flex flex-col hidden sm:flex">
+                        <div className="h-8 w-px bg-white/10 hidden md:block"></div>
+                        <div className="flex flex-col hidden md:flex">
                             <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.progress}</span>
                             <span className="text-sm font-mono text-brand font-bold">
                                 {activeModuleIndex + 1}/{modules.length}
@@ -985,11 +985,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     </div>
 
                     {/* Botones de Navegación */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
                         <button
                             onClick={handlePrevious}
                             disabled={activeModuleIndex === 0}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
+                            className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
                         >
                             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             <span>{t.previous}</span>
@@ -1003,7 +1003,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 cursor: (mode !== 'preview' && !moduleCompleted) ? 'not-allowed' : 'pointer',
                                 backgroundColor: (mode !== 'preview' && !moduleCompleted) ? '#333' : '#31D22D'
                             }}
-                            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
+                            className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
                         >
                             <span>{activeModuleIndex === modules.length - 1 ? t.finish : t.next}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

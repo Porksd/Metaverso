@@ -105,7 +105,7 @@ export default function StudentLogin() {
             <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.9)_100%)]" />
 
             {/* Selector de Idioma */}
-            <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2 backdrop-blur-md">
+            <div className="fixed top-3 right-3 sm:top-6 sm:right-6 z-50 flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2 backdrop-blur-md">
                 <Globe className="w-4 h-4 text-white/40" />
                 <select 
                     value={lang} 
@@ -123,18 +123,18 @@ export default function StudentLogin() {
                 <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-brand/8 rounded-full blur-[140px]" />
             </div>
 
-            <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="w-full max-w-6xl relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-center pt-12 sm:pt-0">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                 >
                     <div className="w-20 h-20 bg-gradient-to-br from-brand to-cyan-400 rounded-3xl flex items-center justify-center shadow-[0_0_40px_rgba(49,210,45,0.3)] border border-white/10">
                         <GraduationCap className="w-10 h-10 text-slate-950" />
                     </div>
                     <div>
                         <p className="text-cyan-300 text-[10px] font-black uppercase tracking-[0.2em]">Portal de aprendizaje corporativo</p>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight mt-2 leading-[0.95]">{t.title}<span className="block text-brand">con trazabilidad real</span></h1>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mt-2 leading-[0.95]">{t.title}<span className="block text-brand">con trazabilidad real</span></h1>
                         <p className="text-white/65 text-sm md:text-base font-medium mt-4 max-w-lg">Cada avance queda registrado, cada curso aporta evidencia y cada colaborador visualiza su ruta de desarrollo profesional.</p>
                     </div>
 
@@ -155,7 +155,7 @@ export default function StudentLogin() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="glass p-8 rounded-[2rem] border-white/10 shadow-2xl relative overflow-hidden bg-black/35"
+                    className="glass p-5 sm:p-8 rounded-[2rem] border-white/10 shadow-2xl relative overflow-hidden bg-black/35"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-[50px] pointer-events-none" />
 
@@ -210,7 +210,7 @@ export default function StudentLogin() {
                 </motion.div>
             </div>
 
-            <footer className="absolute bottom-4 left-0 right-0 text-center z-10">
+            <footer className="absolute bottom-4 left-0 right-0 text-center z-10 hidden sm:block">
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
                     <ShieldCheck className="w-3 h-3" /> Powered by Metaverso Otec
                 </p>

@@ -84,13 +84,13 @@ function EmpresaLoginContent() {
                 <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand/8 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] left-[-20%] w-[50%] h-[50%] bg-brand/5 rounded-full blur-[120px]" />
             </div>
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass p-12 w-full max-w-md border-white/5 space-y-8 bg-black/60 relative overflow-hidden z-10">
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass p-6 sm:p-12 w-full max-w-md border-white/5 space-y-8 bg-black/60 relative overflow-hidden z-10">
 
                 <div className="text-center space-y-4">
                     <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-brand/20">
                         <Building2 className="w-10 h-10 text-brand" />
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight italic">Portal <span className="text-brand">Corporativo</span></h1>
+                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight italic">Portal <span className="text-brand">Corporativo</span></h1>
                     <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">Gestión de Capacitación LMS</p>
                 </div>
 

@@ -238,10 +238,10 @@ export default function StudentRegister() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
-            <div className="glass max-w-4xl w-full p-8 rounded-3xl border-white/10">
+            <div className="glass max-w-4xl w-full p-5 sm:p-8 rounded-3xl border-white/10">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-black mb-2">{t('title')}</h1>
+                    <h1 className="text-2xl sm:text-4xl font-black mb-2">{t('title')}</h1>
                     <p className="text-white/60 text-sm uppercase tracking-wider">{t('subtitle')}</p>
                 </div>
 
@@ -264,7 +264,7 @@ export default function StudentRegister() {
                     </div>
 
                     {/* Name Fields */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs text-white/40 uppercase font-bold mb-2">{t('firstName')}</label>
                             <input
@@ -300,7 +300,7 @@ export default function StudentRegister() {
                     </div>
 
                     {/* Gender and Age */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs text-white/40 uppercase font-bold mb-2">{t('gender')}</label>
                             <select

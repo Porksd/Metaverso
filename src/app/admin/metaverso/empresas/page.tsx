@@ -134,7 +134,10 @@ export default function CompaniesAdmin() {
                                     <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5">
                                         <code className="text-[10px] text-white/60 truncate flex-1">/portal/{company.slug || 'sin-slug'}</code>
                                         <button 
-                                            onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
+                                            onClick={() => {
+                                                const safeSlug = encodeURIComponent((company.slug || '').toString().trim().toLowerCase());
+                                                copyToClipboard(`${window.location.origin}/portal/${safeSlug}`, `${company.id}_portal`);
+                                            }}
                                             className="p-1 hover:bg-white/10 rounded transition-colors"
                                         >
                                             {copiedId === `${company.id}_portal` ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-white/40" />}
@@ -147,7 +150,10 @@ export default function CompaniesAdmin() {
                                     <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5">
                                         <code className="text-[10px] text-white/60 truncate flex-1">/admin/empresa/portal/{company.slug || 'sin-slug'}</code>
                                         <button 
-                                            onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
+                                            onClick={() => {
+                                                const safeSlug = encodeURIComponent((company.slug || '').toString().trim().toLowerCase());
+                                                copyToClipboard(`${window.location.origin}/admin/empresa/portal/${safeSlug}`, `${company.id}_admin`);
+                                            }}
                                             className="p-1 hover:bg-white/10 rounded transition-colors"
                                         >
                                             {copiedId === `${company.id}_admin` ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-white/40" />}

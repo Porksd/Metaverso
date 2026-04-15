@@ -673,7 +673,8 @@ export default function MetaversoAdmin() {
                                                     </button>
                                                     <button 
                                                         onClick={() => {
-                                                            const portalUrl = `/admin/empresa/portal/${company.slug}`;
+                                                            const safeSlug = encodeURIComponent((company.slug || '').toString().trim().toLowerCase());
+                                                            const portalUrl = `/admin/empresa/portal/${safeSlug}`;
                                                             const portalWindow = window.open(portalUrl, 'metaverso-company-admin');
 
                                                             if (portalWindow) {
@@ -689,14 +690,20 @@ export default function MetaversoAdmin() {
                                                         <LogIn className="w-4 h-4" />
                                                     </button>
                                                     <button 
-                                                        onClick={() => copyToClipboard(`${window.location.origin}/portal/${company.slug}`, `${company.id}_portal`)}
+                                                        onClick={() => {
+                                                            const safeSlug = encodeURIComponent((company.slug || '').toString().trim().toLowerCase());
+                                                            copyToClipboard(`${window.location.origin}/portal/${safeSlug}`, `${company.id}_portal`);
+                                                        }}
                                                         className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_portal` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20'}`}
                                                         title="Copiar Portal Alumnos"
                                                     >
                                                         {copiedId === `${company.id}_portal` ? <Check className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                                                     </button>
                                                     <button 
-                                                        onClick={() => copyToClipboard(`${window.location.origin}/admin/empresa/portal/${company.slug}`, `${company.id}_admin`)}
+                                                        onClick={() => {
+                                                            const safeSlug = encodeURIComponent((company.slug || '').toString().trim().toLowerCase());
+                                                            copyToClipboard(`${window.location.origin}/admin/empresa/portal/${safeSlug}`, `${company.id}_admin`);
+                                                        }}
                                                         className={`p-2.5 rounded-xl transition-all border ${copiedId === `${company.id}_admin` ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white'}`}
                                                         title="Copiar Panel Admin"
                                                     >
