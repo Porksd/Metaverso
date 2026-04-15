@@ -40,7 +40,7 @@ export default function EmpresaPortalLogin() {
             .limit(1);
 
         if (error) throw error;
-        if (data && data.length > 0) return data[0] as CompanyInfo;
+        if (data && data.length > 0) return data[0] as unknown as CompanyInfo;
 
         const { data: fallbackData, error: fallbackError } = await supabase
             .from('companies')
@@ -49,7 +49,7 @@ export default function EmpresaPortalLogin() {
 
         if (fallbackError) throw fallbackError;
 
-        const fallbackCompanies = (fallbackData ?? []) as CompanyInfo[];
+        const fallbackCompanies = (fallbackData ?? []) as unknown as CompanyInfo[];
         return fallbackCompanies.find((company) => company.slug?.toString().trim().toLowerCase() === slug) ?? null;
     };
 
