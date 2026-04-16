@@ -97,6 +97,7 @@ export default function CourseAuthPage() {
             openDesc: 'Puedes iniciar sesión con tu cuenta existente o crear una nueva para comenzar inmediatamente.',
             passMin: 'La contraseña debe tener al menos 6 caracteres',
             signRequired: 'Firma requerida.',
+            minAge: 'La edad minima para registrarse es 18 anos.',
         },
         ht: {
             login: 'Konekte', register: 'Enskri', email: 'Imèl Antrepriz', password: 'Modpas',
@@ -115,6 +116,7 @@ export default function CourseAuthPage() {
             openDesc: 'Ou ka konekte ak kont ou oswa kreye yon nouvo pou kòmanse imedyatman.',
             passMin: 'Modpas la dwe gen omwen 6 karaktè',
             signRequired: 'Siyati obligatwa.',
+            minAge: 'Laj minimom pou enskri se 18 ane.',
         }
     }[lang];
 
@@ -129,7 +131,7 @@ export default function CourseAuthPage() {
                 // 2. Fetch course only if it is assigned to this company
                 const { data: assignment, error: assignmentError } = await supabase
                     .from('company_courses')
-                    .select('registration_mode, courses!inner(*)')
+                    .select('registration_mode, use_generic_password, generic_password, courses!inner(*)')
                     .eq('company_id', comp.id)
                     .eq('courses.code', courseCode)
                     .maybeSingle();
@@ -144,7 +146,14 @@ export default function CourseAuthPage() {
                     : assignment.courses;
 
                 const trueMode = assignment?.registration_mode || assignedCourse?.registration_mode || 'open';
-                setCourse({ ...assignedCourse, registration_mode: trueMode });
+                const useGenericPass = assignment?.use_generic_password || false;
+                const genericPass = assignment?.generic_password || '';
+                setCourse({ ...assignedCourse, registration_mode: trueMode, use_generic_password: useGenericPass, generic_password: genericPass });
+
+                // Pre-fill generic password so registration uses it automatically
+                if (useGenericPass && genericPass) {
+                    setRegData(prev => ({ ...prev, password: genericPass }));
+                }
 
                 // 3. Fetch ONLY assigned and visible company roles for this company
                 const { data: assignedRoles, error: assignErr } = await supabase
@@ -207,29 +216,52 @@ export default function CourseAuthPage() {
         setActionLoading(true);
         setError(null);
         try {
-            // Intentar login manual consultando la tabla de estudiantes
-            // Buscamos coincidencia exacta de email/rut y password
             const rawIdentifier = loginData.email.trim();
             const normalizedIdentifier = rawIdentifier.toLowerCase();
             const normalizedRut = cleanRut(rawIdentifier);
 
+            // Step 1: Find student by identifier (NOT by password in query)
             const { data: student, error: studentError } = await supabase
                 .from('students')
                 .select('*')
-                .eq('password', loginData.password)
                 .eq('client_id', company.id)
                 .or(`email.eq.${normalizedIdentifier},rut.eq.${rawIdentifier},rut.eq.${normalizedRut}`)
                 .maybeSingle();
 
             if (studentError || !student) {
-                console.error("Login detail error:", studentError);
                 setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
                 setActionLoading(false);
                 return;
             }
 
-            // Si llegamos aquí, las credenciales son válidas. 
-            // Proceder con el login del estudiante...
+            // Step 2: Check if account is locked
+            if (student.is_locked) {
+                setError(lang === 'es' ? 'Tu cuenta está bloqueada por múltiples intentos fallidos. Contacta a tu administrador.' : 'Kont ou an bloke akòz plizyè tantativ ki echwe. Kontakte administratè ou.');
+                setActionLoading(false);
+                return;
+            }
+
+            // Step 3: Verify password (personal password OR generic password if enabled)
+            const genericAccepted = course?.use_generic_password && course.generic_password && loginData.password === course.generic_password;
+            if (student.password !== loginData.password && !genericAccepted) {
+                const newAttempts = (student.login_attempts || 0) + 1;
+                const maxAttempts = company?.max_login_attempts || 5;
+                const shouldLock = newAttempts >= maxAttempts;
+                await supabase.from('students').update({ login_attempts: newAttempts, is_locked: shouldLock }).eq('id', student.id);
+                if (shouldLock) {
+                    setError(lang === 'es' ? 'Has superado el límite de intentos. Tu cuenta ha sido bloqueada. Contacta al administrador.' : 'Ou depase limit tantativ yo. Kont ou an bloke. Kontakte administratè a.');
+                } else {
+                    setError(lang === 'es' ? `Contraseña incorrecta. Intento ${newAttempts}/${maxAttempts}.` : `Modpas envalid. Tantativ ${newAttempts}/${maxAttempts}.`);
+                }
+                setActionLoading(false);
+                return;
+            }
+
+            // Step 4: Correct password — reset failed attempts counter
+            if ((student.login_attempts || 0) > 0) {
+                await supabase.from('students').update({ login_attempts: 0 }).eq('id', student.id);
+            }
+
             localStorage.setItem('student_session', JSON.stringify(student));
 
             // Verificar Inscripción (Enrollment)
@@ -246,7 +278,6 @@ export default function CourseAuthPage() {
 
             if (!enrollment) {
                 // Si es 'open' y no tiene inscripción, lo inscribimos automáticamente
-                console.log("Inscripción automática para curso abierto...");
                 await supabase.from('enrollments').insert({
                     student_id: student.id,
                     course_id: course.id,
@@ -292,6 +323,12 @@ export default function CourseAuthPage() {
             const ageVal = regData.age && regData.age.trim() !== '' ? parseInt(regData.age) : null;
             const genderVal = regData.gender === '' ? null : regData.gender;
             const roleVal = regData.role_id === '' ? null : regData.role_id;
+
+            if (isFieldVisible('age') && (ageVal === null || Number.isNaN(ageVal) || ageVal < 18)) {
+                setError(t.minAge);
+                setActionLoading(false);
+                return;
+            }
             
             const res = await fetch('/api/students/register', {
                 method: 'POST',
@@ -522,6 +559,17 @@ export default function CourseAuthPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
+                                            {course?.use_generic_password ? (
+                                                <div className="relative">
+                                                    <input 
+                                                        type="password"
+                                                        readOnly
+                                                        value={regData.password}
+                                                        className="w-full bg-white/5 border border-brand/20 rounded-xl px-4 py-3 text-white/40 text-sm cursor-not-allowed"
+                                                    />
+                                                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand/40" />
+                                                </div>
+                                            ) : (
                                             <input 
                                                 type="password" 
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
@@ -532,6 +580,7 @@ export default function CourseAuthPage() {
                                                 onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
                                                 onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
                                                 value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
+                                            )}
                                         </div>
                                     </div>
 
@@ -727,8 +776,41 @@ export default function CourseAuthPage() {
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}</label>
                                             {isFieldVisible('age') ? (
-                                                <input type="number" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
-                                                    value={regData.age} onChange={e => setRegData({...regData, age: e.target.value})} />
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg"
+                                                        onClick={() => {
+                                                            const parsed = parseInt(regData.age || '18', 10);
+                                                            const current = Number.isNaN(parsed) ? 18 : parsed;
+                                                            const next = Math.max(18, current - 1);
+                                                            setRegData({ ...regData, age: String(next) });
+                                                        }}
+                                                        aria-label="Disminuir edad"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+                                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm text-center"
+                                                        value={regData.age || '18'}
+                                                        aria-label="Edad"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg"
+                                                        onClick={() => {
+                                                            const parsed = parseInt(regData.age || '18', 10);
+                                                            const current = Number.isNaN(parsed) ? 18 : parsed;
+                                                            const next = Math.min(100, current + 1);
+                                                            setRegData({ ...regData, age: String(next) });
+                                                        }}
+                                                        aria-label="Aumentar edad"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
                                             ) : (
                                                 <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
                                                     -
@@ -747,6 +829,13 @@ export default function CourseAuthPage() {
                                             setRutError(t.invalidRut);
                                             setError(t.invalidRut);
                                             return;
+                                        }
+                                        if (isFieldVisible('age')) {
+                                            const parsedAge = parseInt(regData.age, 10);
+                                            if (!regData.age || Number.isNaN(parsedAge) || parsedAge < 18) {
+                                                setError(t.minAge);
+                                                return;
+                                            }
                                         }
                                         // Specific check for Job Info acceptance
                                         if (selectedRoleDesc && !hasReadJobInfo) {
