@@ -8,6 +8,17 @@ import { supabase } from "@/lib/supabase";
 import { resolveAdminRole } from "@/lib/adminAuth";
 import CompanyLogo from "@/components/CompanyLogo";
 
+type CompanyInfo = {
+    name: string;
+    id: string;
+    slug?: string;
+    logo_url?: string;
+    logo_url_dark?: string;
+    logo_url_light?: string;
+    primary_color?: string;
+    secondary_color?: string;
+};
+
 export default function EmpresaPortalLogin() {
     const params = useParams();
     const slugParam = params.slug;
@@ -15,22 +26,13 @@ export default function EmpresaPortalLogin() {
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
-    const [companyInfo, setCompanyInfo] = useState<{
-        name: string, 
-        id: string,
-        slug?: string,
-        logo_url?: string,
-        logo_url_dark?: string,
-        logo_url_light?: string,
-        primary_color?: string,
-        secondary_color?: string
-    } | null>(null);
+    const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
     const [errorMsg, setErrorMsg] = useState("");
     const [isAuthenticating, setIsAuthenticating] = useState(true);
     const [isCompanyLoading, setIsCompanyLoading] = useState(true);
     const router = useRouter();
 
-    const resolveCompanyBySlug = async (fields: string) => {
+    const resolveCompanyBySlug = async (fields: string): Promise<CompanyInfo | null> => {
         const { data, error } = await supabase
             .from('companies')
             .select(fields)
@@ -38,7 +40,7 @@ export default function EmpresaPortalLogin() {
             .limit(1);
 
         if (error) throw error;
-        if (data && data.length > 0) return data[0];
+        if (data && data.length > 0) return data[0] as unknown as CompanyInfo;
 
         const { data: fallbackData, error: fallbackError } = await supabase
             .from('companies')
@@ -46,7 +48,8 @@ export default function EmpresaPortalLogin() {
             .not('slug', 'is', null);
 
         if (fallbackError) throw fallbackError;
-        return (fallbackData || []).find((company: any) => company.slug?.toString().trim().toLowerCase() === slug) || null;
+        const fallbackCompanies = (fallbackData ?? []) as unknown as CompanyInfo[];
+        return fallbackCompanies.find((company) => company.slug?.toString().trim().toLowerCase() === slug) ?? null;
     };
 
     useEffect(() => {
