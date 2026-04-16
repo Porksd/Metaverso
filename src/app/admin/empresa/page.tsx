@@ -165,7 +165,7 @@ export default function EmpresaAdmin() {
             // Fetch students with enrollments details
             const { data: stData, error: stError } = await supabase
                 .from('students')
-                .select('*, company_roles(name), enrollments(course_id, status, best_score, completed_at)')
+                .select('*, company_roles(name), enrollments(course_id, status, best_score, completed_at, current_attempt, max_attempts)')
                 .eq('client_id', companyId)
                 .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,rut.ilike.%${searchTerm}%`)
                 .order('last_name');
@@ -307,8 +307,19 @@ export default function EmpresaAdmin() {
 
     const handleDeleteStudent = async (id: string) => {
         if (!confirm("¿Eliminar trabajador?")) return;
-        await supabase.from('students').delete().eq('id', id);
-        fetchData();
+        try {
+            const response = await fetch(`/api/students/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert("Error al eliminar trabajador: " + (result.error || 'Error desconocido'));
+                return;
+            }
+
+            fetchData();
+        } catch (error: any) {
+            alert("Error al eliminar trabajador: " + (error?.message || 'Error inesperado'));
+        }
     };
 
     const sortedStudents = [...students].sort((a, b) => {
@@ -480,7 +491,7 @@ export default function EmpresaAdmin() {
                         <div className="glass overflow-hidden">
                             <table className="w-full text-left">
                                 <thead className="bg-white/5 text-[10px] font-black uppercase text-white/40">
-                                    <tr><th className="px-6 py-4">Colaborador</th><th className="px-6 py-4">Cargo</th><th className="px-6 py-4">Curso Asignado</th><th className="px-6 py-4">Estado</th><th className="px-6 py-4">Certificado</th><th className="px-6 py-4 text-right">Gestión</th></tr>
+                                    <tr><th className="px-6 py-4">Colaborador</th><th className="px-6 py-4">Cargo</th><th className="px-6 py-4">Curso Asignado</th><th className="px-6 py-4">Estado</th><th className="px-6 py-4">Intentos</th><th className="px-6 py-4">Certificado</th><th className="px-6 py-4">Bloqueado</th><th className="px-6 py-4 text-right">Gestión</th></tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {sortedStudents.flatMap((st) => {
@@ -497,6 +508,14 @@ export default function EmpresaAdmin() {
                                                     <td className="px-6 py-4"><span className="text-[8px] text-white/20 uppercase font-bold">Sin Cursos</span></td>
                                                     <td className="px-6 py-4">-</td>
                                                     <td className="px-6 py-4">-</td>
+                                                    <td className="px-6 py-4">-</td>
+                                                    <td className="px-6 py-4">
+                                                        {st.is_locked ? (
+                                                            <button onClick={async () => { await supabase.from('students').update({ is_locked: false, login_attempts: 0 }).eq('id', st.id); fetchData(); }} className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[9px] font-black hover:bg-red-500/20 transition-all"><Lock className="w-3 h-3" /> Desbloquear</button>
+                                                        ) : (
+                                                            <span className="text-[9px] text-white/20 font-bold">-</span>
+                                                        )}
+                                                    </td>
                                                     <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                         <button onClick={() => setIsEditing(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
                                                         <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400"><Trash2 className="w-4 h-4" /></button>
@@ -513,6 +532,9 @@ export default function EmpresaAdmin() {
                                             const isCompleted = en.status === 'completed';
                                             const statusText = isCompleted ? 'Completado' : en.status === 'in_progress' ? 'En Progreso' : 'No Iniciado';
                                             const statusColor = isCompleted ? 'text-brand' : en.status === 'in_progress' ? 'text-yellow-400' : 'text-white/40';
+                                            const attemptCount = en.current_attempt || 0;
+                                            const maxAttempts = en.max_attempts || course?.max_attempts || 3;
+                                            const attemptExhausted = attemptCount >= maxAttempts;
 
                                             return (
                                                 <tr key={`${st.id}-${en.course_id}`} className="hover:bg-white/[0.02] text-sm font-medium">
@@ -530,6 +552,11 @@ export default function EmpresaAdmin() {
                                                         <span className={`text-[10px] font-black uppercase ${statusColor}`}>
                                                             {statusText}
                                                             {isCompleted && en.best_score && ` (${en.best_score}%)`}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`text-[10px] font-black tabular-nums ${attemptExhausted ? 'text-red-400' : 'text-white/60'}`}>
+                                                            {attemptCount}/{maxAttempts}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -587,6 +614,16 @@ export default function EmpresaAdmin() {
                                                                 <span className="text-[8px] font-bold uppercase">Pendiente</span>
                                                             </div>
                                                         )}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {idx === 0 && st.is_locked ? (
+                                                            <button
+                                                                onClick={async () => { await supabase.from('students').update({ is_locked: false, login_attempts: 0 }).eq('id', st.id); fetchData(); }}
+                                                                className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[9px] font-black hover:bg-red-500/20 transition-all whitespace-nowrap"
+                                                            ><Lock className="w-3 h-3" /> Desbloquear</button>
+                                                        ) : idx === 0 ? (
+                                                            <span className="text-[9px] text-white/20 font-bold">—</span>
+                                                        ) : null}
                                                     </td>
                                                     <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                         {idx === 0 && (

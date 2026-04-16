@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edwiser-bridge-pro/shop",
+  "version": "0.1.0",
+  "title": "Edwiser Shop",
+  "category": "edwiser",
+  "icon": "store",
+  "description": "A clean, modern shop page for better course browsing.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "useBackgroundImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "backgroundImage": {
+      "type": "string"
+    },
+    "titleColor": {
+      "type": "string",
+      "default": "#fff"
+    },
+    "showBreadcrumb": {
+      "type": "boolean",
+      "default": true
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": "#162324"
+    },
+    "pageTitle": {
+      "type": "string",
+      "default": "Shop"
+    },
+    "productsPerPage": {
+      "type": "number",
+      "default": 8
+    },
+    "allowSort": {
+      "type": "boolean",
+      "default": true
+    },
+    "defaultSortOrder": {
+      "type": "string",
+      "default": "popularity"
+    },
+    "showResultCount": {
+      "type": "boolean",
+      "default": true
+    },
+    "defaultCardLayout": {
+      "type": "string",
+      "default": "grid",
+      "enum": [
+        "grid",
+        "list"
+      ]
+    },
+    "showCategory": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCourseDescription": {
+      "type": "boolean",
+      "default": true
+    },
+    "showRatings": {
+      "type": "boolean",
+      "default": true
+    },
+    "showEnrolled": {
+      "type": "boolean",
+      "default": true
+    },
+    "showView": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "edwiser-bridge-pro",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

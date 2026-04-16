@@ -1,0 +1,26 @@
+{
+    "name": "whitecube/php-prices",
+    "description": "A simple PHP library for complex monetary prices management",
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "brick/money": "0.5.*"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Whitecube\\Price\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Toon Van den Bos",
+            "email": "toon@whitecube.be"
+        }
+    ]
+}

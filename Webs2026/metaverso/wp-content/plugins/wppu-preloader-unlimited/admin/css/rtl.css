@@ -1,0 +1,29 @@
+body.wp-admin .onoffswitch-inner {
+	margin-right: 0;
+	margin-left: inherit;
+	text-align: left
+}
+body.wp-admin .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+  margin-right: -100%;
+}
+body.wp-admin .onoffswitch-switch {
+	left: 0;
+}
+body.wp-admin .toolTipD {
+	right: inherit;
+	left: 15px;
+}
+body.wp-admin .trendy_new_sp {
+  right: inherit;
+  left: 9px;
+}
+body.wp-admin .ui-tooltip .arrow {
+	left: inherit;
+	right: 50%;
+}
+.wppu_trendy_block {
+  direction: ltr;
+}
+.trendy-preloader-main-con .trendy_loading_text {
+	direction: rtl;
+}

@@ -61,8 +61,7 @@ export default function StudentLogin() {
             }
         }
 
-        // 1. Buscar alumno por RUT o Email
-        // Intentamos unir con 'companies' (client_id) que es la tabla activa
+        // 1. Buscar alumno por RUT o Email (sin filtrar por password en la query)
         const { data: student, error } = await supabase
             .from('students')
             .select('*, companies:client_id(*)')
@@ -70,20 +69,39 @@ export default function StudentLogin() {
             .single();
 
         if (error || !student) {
-            console.error("Login error:", error);
             alert(t.error_not_found);
             setLoading(false);
             return;
         }
 
-        // 2. Verificar password
-        if (student.password !== password) {
-            alert(t.error_wrong_pass);
+        // 2. Verificar si la cuenta está bloqueada
+        if (student.is_locked) {
+            alert(lang === 'es' ? 'Tu cuenta está bloqueada por múltiples intentos fallidos. Contacta a tu administrador.' : 'Kont ou an bloke akòz plizyè tantativ ki echwe. Kontakte administratè ou.');
             setLoading(false);
             return;
         }
 
-        // 3. Guardar sesión y redirigir
+        // 3. Verificar password
+        if (student.password !== password) {
+            const newAttempts = (student.login_attempts || 0) + 1;
+            const maxAttempts = student.companies?.max_login_attempts || 5;
+            const shouldLock = newAttempts >= maxAttempts;
+            await supabase.from('students').update({ login_attempts: newAttempts, is_locked: shouldLock }).eq('id', student.id);
+            if (shouldLock) {
+                alert(lang === 'es' ? 'Tu cuenta ha sido bloqueada por superar el límite de intentos. Contacta al administrador.' : 'Kont ou an bloke. Kontakte administratè a.');
+            } else {
+                alert(lang === 'es' ? `${t.error_wrong_pass} Intento ${newAttempts}/${maxAttempts}.` : `${t.error_wrong_pass} Tantativ ${newAttempts}/${maxAttempts}.`);
+            }
+            setLoading(false);
+            return;
+        }
+
+        // 4. Contraseña correcta — resetear contador de intentos
+        if ((student.login_attempts || 0) > 0) {
+            await supabase.from('students').update({ login_attempts: 0 }).eq('id', student.id);
+        }
+
+        // 5. Guardar sesión y redirigir
         localStorage.setItem("user", JSON.stringify(student));
         window.location.href = "/admin/empresa/alumnos/cursos";
     };

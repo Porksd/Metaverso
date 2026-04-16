@@ -1,0 +1,2 @@
+[01-Feb-2026 20:34:28 UTC] PHP Warning:  Undefined array key "wdm_eb_user_csv_nonce_field" in /home/metavers/public_html/web/wp-content/plugins/edwiser-bridge-pro/public/edwiser-multiple-users-course-purchase-upload-csv.php on line 18
+[21-Feb-2026 13:07:22 UTC] PHP Warning:  Undefined array key "wdm_eb_user_csv_nonce_field" in /home/metavers/public_html/web/wp-content/plugins/edwiser-bridge-pro/public/edwiser-multiple-users-course-purchase-upload-csv.php on line 18

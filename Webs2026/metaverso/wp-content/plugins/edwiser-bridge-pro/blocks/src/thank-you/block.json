@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "edwiser-bridge-pro/thank-you",
+	"version": "0.1.0",
+	"title": "Thank You",
+	"category": "edwiser",
+	"icon": "thumbs-up",
+	"description": "Thank-you page to enhance the post-enrollment experience.",
+	"example": {},
+	"supports": {
+		"html": false
+	},
+	"attributes": {
+		"showThankYouImage": {
+			"type": "boolean",
+			"default": true
+		},
+		"showYouMayLikeCourses": {
+			"type": "boolean",
+			"default": true
+		},
+		"thankYouImageId": {
+			"type": "number"
+		},
+		"thankYouImageUrl": {
+			"type": "string"
+		},
+		"thankYouImageAlt": {
+			"type": "string",
+			"default": "Thank you"
+		}
+	},
+	"textdomain": "edwiser-bridge-pro",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js"
+}

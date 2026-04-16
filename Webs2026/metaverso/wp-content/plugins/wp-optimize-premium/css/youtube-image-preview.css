@@ -1,0 +1,52 @@
+.wpo_youtube_preview_container {
+  cursor: pointer;
+  position: relative !important;
+  display: inline-block;
+  max-width: 100%;
+  top: 0;
+}
+
+.wpo_youtube_preview_container .wpo_youtube_preview {
+  height: auto;
+  position: inherit;
+  max-width: 100%;
+}
+
+.wpo_youtube_preview_container span.wpo_youtube_preview_overlay {
+  position: absolute;
+  text-align: center;
+  cursor: pointer;
+  display: block;
+  top: 33%;
+  left: 0;
+  right: 0;
+  opacity: 0.9;
+}
+
+.wpo_youtube_preview_container span.wpo_youtube_preview_overlay img {
+  position: relative;
+  width: 96px;
+  height: 96px;
+}
+
+@media only screen and (max-width: 426px) {
+  .wpo_youtube_preview_container span.wpo_youtube_preview_overlay {
+    top: 28%;
+  }
+}
+@media only screen and (max-width: 376px) {
+  .wpo_youtube_preview_container span.wpo_youtube_preview_overlay img {
+    width: 70px;
+    height: 70px;
+  }
+}
+/*Allows to fix interferences from parent css rules expecting iFrames which varies by themes
+Tested with the following themes: Twenty Twenty Four, Astra, BeShop and Calmly
+*/
+.ast-oembed-container.wpo_youtube_preview_override_parent {
+  padding-top: 0 !important;
+}
+
+.wp-block-embed__wrapper.wpo_youtube_preview_override_parent::before {
+  content: none !important;
+}

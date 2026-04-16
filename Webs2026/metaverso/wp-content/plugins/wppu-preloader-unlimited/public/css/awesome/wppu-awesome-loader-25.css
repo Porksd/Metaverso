@@ -1,0 +1,108 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+.wppu-awesome-loader-25 {
+  border: .1em currentcolor solid;
+  position: relative;
+  -webkit-animation: wppu-awesome-loader-25-1 5s linear infinite;
+          animation: wppu-awesome-loader-25-1 5s linear infinite;
+}
+.wppu-awesome-loader-25:after {
+  width: .2em;
+  height: .2em;
+  position: absolute;
+  content: "";
+  background-color: currentcolor;
+  bottom: calc(100% + .2em);
+  left: -.4em;
+  -webkit-animation: wppu-awesome-loader-25-2 1s ease-in-out infinite;
+          animation: wppu-awesome-loader-25-2 1s ease-in-out infinite;
+}
+
+@-webkit-keyframes wppu-awesome-loader-25-1 {
+  0% {
+    box-shadow: inset 0 0 0 0 currentcolor;
+  }
+  100% {
+    box-shadow: inset 0 -1em 0 0 currentcolor;
+  }
+}
+
+@keyframes wppu-awesome-loader-25-1 {
+  0% {
+    box-shadow: inset 0 0 0 0 currentcolor;
+  }
+  100% {
+    box-shadow: inset 0 -1em 0 0 currentcolor;
+  }
+}
+@-webkit-keyframes wppu-awesome-loader-25-2 {
+  25% {
+    left: calc(100% + .2em);
+    bottom: calc(100% + .2em);
+  }
+  50% {
+    left: calc(100% + .2em);
+    bottom: -.4em;
+  }
+  75% {
+    left: -.4em;
+    bottom: -.4em;
+  }
+  100% {
+    left: -.4em;
+    bottom: calc(100% + .2em);
+  }
+}
+@keyframes wppu-awesome-loader-25-2 {
+  25% {
+    left: calc(100% + .2em);
+    bottom: calc(100% + .2em);
+  }
+  50% {
+    left: calc(100% + .2em);
+    bottom: -.4em;
+  }
+  75% {
+    left: -.4em;
+    bottom: -.4em;
+  }
+  100% {
+    left: -.4em;
+    bottom: calc(100% + .2em);
+  }
+}

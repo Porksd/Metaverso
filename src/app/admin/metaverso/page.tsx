@@ -35,6 +35,15 @@ export default function MetaversoAdmin() {
     const [certData, setCertData] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState<string | null>(null);
     const [fieldsConfigModal, setFieldsConfigModal] = useState<any>(null); // New state for fields config
+    const [courseManagementModal, setCourseManagementModal] = useState<any>(null);
+    const [cmCourses, setCmCourses] = useState<any[]>([]);
+    const [cmAssignments, setCmAssignments] = useState<Record<string, {
+        enabled: boolean;
+        access_mode: string;
+        use_generic_password: boolean;
+        generic_password: string;
+        pass_saved: boolean;
+    }>>({}); 
 
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
@@ -480,7 +489,10 @@ export default function MetaversoAdmin() {
         
         const { error } = await supabase
             .from('companies')
-            .update({ user_registration_config: configRef.user_registration_config })
+            .update({ 
+                user_registration_config: configRef.user_registration_config,
+                max_login_attempts: configRef.max_login_attempts ?? 5
+            })
             .eq('id', configRef.id);
             
         if (error) {
@@ -489,6 +501,49 @@ export default function MetaversoAdmin() {
             setFieldsConfigModal(null);
             fetchCompanies();
         }
+    };
+
+    const openCourseManagement = async (company: any) => {
+        const [{ data: coursesData }, { data: assignData }] = await Promise.all([
+            supabase.from('courses').select('id, name, code').order('name'),
+            supabase.from('company_courses')
+                .select('course_id, registration_mode, use_generic_password, generic_password')
+                .eq('company_id', company.id)
+        ]);
+        const map: Record<string, any> = {};
+        (coursesData || []).forEach((course: any) => {
+            const a = (assignData || []).find((r: any) => r.course_id === course.id);
+            map[course.id] = {
+                enabled: !!a,
+                access_mode: a?.registration_mode || 'open',
+                use_generic_password: a?.use_generic_password || false,
+                generic_password: a?.generic_password || '',
+                pass_saved: false
+            };
+        });
+        setCmCourses(coursesData || []);
+        setCmAssignments(map);
+        setCourseManagementModal(company);
+    };
+
+    const saveCourseManagement = async () => {
+        if (!courseManagementModal) return;
+        await supabase.from('company_courses').delete().eq('company_id', courseManagementModal.id);
+        const rows = Object.entries(cmAssignments)
+            .filter(([, v]) => v.enabled)
+            .map(([courseId, v]) => ({
+                company_id: courseManagementModal.id,
+                course_id: courseId,
+                registration_mode: v.access_mode,
+                use_generic_password: v.use_generic_password,
+                generic_password: v.use_generic_password ? v.generic_password : null
+            }));
+        if (rows.length > 0) {
+            const { error } = await supabase.from('company_courses').insert(rows);
+            if (error) { alert('Error guardando cursos: ' + error.message); return; }
+        }
+        setCourseManagementModal(null);
+        fetchCompanies();
     };
 
     const handleLogout = async () => {
@@ -714,7 +769,7 @@ export default function MetaversoAdmin() {
                                             <button onClick={() => setEditingCompany(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
                                                 <Settings className="w-4 h-4" />
                                             </button>
-                                            <button onClick={() => setSignatureModal(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Firmas y Certificados">
+                                            <button onClick={() => openCourseManagement(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Gestión de Cursos">
                                                 <Medal className="w-4 h-4" />
                                             </button>
                                             {userRole === 'superadmin' && (
@@ -989,6 +1044,21 @@ export default function MetaversoAdmin() {
                                 <div className="text-[10px] text-white/30 italic px-2">
                                     * La configuración "Visible" determina si el campo aparece en el formulario de creación de trabajador para esta empresa. "Obligatorio" impide guardar sin el dato.
                                 </div>
+
+                                <div className="bg-white/5 p-4 rounded-xl border border-white/5 flex items-center justify-between gap-4">
+                                    <div>
+                                        <p className="text-xs font-black text-white/80">Intentos de Acceso</p>
+                                        <p className="text-[9px] text-white/30 mt-0.5">Intentos fallidos antes de bloquear la cuenta</p>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="99"
+                                        value={fieldsConfigModal.max_login_attempts ?? 5}
+                                        onChange={(e) => setFieldsConfigModal({ ...fieldsConfigModal, max_login_attempts: parseInt(e.target.value) || 1 })}
+                                        className="w-20 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-center text-brand font-black text-lg outline-none focus:border-brand/60"
+                                    />
+                                </div>
                             </div>
 
                             <button 
@@ -1168,15 +1238,93 @@ export default function MetaversoAdmin() {
                     </div>
                 )}
 
-                {/* Modal: Firmas Digitales (3 slots) */}
-                {signatureModal && (
-                    <CompanyConfig 
-                        companyId={signatureModal.id} 
-                        onClose={() => {
-                            setSignatureModal(null);
-                            fetchCompanies();
-                        }} 
-                    />
+                {/* Modal: Gestión de Cursos por Empresa */}
+                {courseManagementModal && (
+                    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass p-8 w-full max-w-xl space-y-6 border-brand/20 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-black tracking-tighter text-brand">Gestión de Cursos</h3>
+                                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">{courseManagementModal.name}</p>
+                                </div>
+                                <button onClick={() => setCourseManagementModal(null)} className="p-2 rounded-lg bg-white/5 hover:bg-white/10"><X className="w-5 h-5 text-white/40" /></button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {cmCourses.map((course: any) => {
+                                    const cfg = cmAssignments[course.id];
+                                    if (!cfg) return null;
+                                    return (
+                                        <div key={course.id}>
+                                            <div
+                                                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${cfg.enabled ? 'bg-brand/10 border-brand/30' : 'bg-white/5 border-white/5 hover:border-white/10'}`}
+                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], enabled: !prev[course.id].enabled } }))}
+                                            >
+                                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${cfg.enabled ? 'bg-brand border-brand' : 'border-white/20'}`}>
+                                                    {cfg.enabled && <Check className="w-3 h-3 text-black stroke-[3px]" />}
+                                                </div>
+                                                <span className="text-sm font-bold flex-1">{course.name}</span>
+                                                <span className="text-[9px] text-white/30 font-mono">{course.code}</span>
+                                            </div>
+                                            {cfg.enabled && (
+                                                <div className="ml-8 mt-1 mb-2 p-4 bg-black/20 rounded-xl border border-white/5 space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Acceso</span>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], access_mode: 'open' } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.access_mode === 'open' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >Abierto</button>
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], access_mode: 'restricted' } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.access_mode === 'restricted' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >Restringido</button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Pass</span>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], use_generic_password: false, pass_saved: false } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${!cfg.use_generic_password ? 'bg-brand/20 text-brand border border-brand/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >Normal</button>
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], use_generic_password: true, pass_saved: false } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.use_generic_password ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >Genérico</button>
+                                                        </div>
+                                                        {cfg.use_generic_password && (
+                                                            <div className="flex items-center gap-1.5 ml-1">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="contraseña genérica"
+                                                                    value={cfg.generic_password}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    onChange={(e) => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], generic_password: e.target.value, pass_saved: false } }))}
+                                                                    className="bg-black/40 border border-orange-500/30 rounded-lg px-3 py-1 text-xs text-orange-200 outline-none focus:border-orange-400 w-32"
+                                                                />
+                                                                {cfg.pass_saved && <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                {cmCourses.length === 0 && (
+                                    <p className="text-center text-white/30 text-xs py-6">No hay cursos disponibles.</p>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={saveCourseManagement}
+                                className="w-full py-4 bg-brand text-black font-black uppercase text-xs rounded-xl shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                            >
+                                <Save className="w-4 h-4" /> Guardar Asignaciones
+                            </button>
+                        </motion.div>
+                    </div>
                 )}
 
                 {/* Course Assignment */}

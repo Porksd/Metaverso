@@ -1,0 +1,21 @@
+#wppb-form-style-3-wrapper {
+    width: 470px;
+}
+
+
+#wppb-form-style-3-wrapper #wppbc-resend_activation {
+    order: 2;
+}
+
+#wppb-form-style-3-wrapper #wppbc-resend_activation li {
+    list-style: none;
+    margin-left: 0;
+}
+
+#wppb-form-style-3-wrapper #wppbc-resend_activation #wppbc-resend-activation-button {
+    width: 100%;
+}
+
+#wppb-form-style-3-wrapper #wppbc-resend_activation #username_email {
+    margin-bottom: 30px;
+}

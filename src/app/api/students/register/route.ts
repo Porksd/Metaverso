@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 const DUPLICATE_EMAIL_MESSAGE = 'Ya existe una cuenta registrada con este correo. Inicia sesion o recupera tu contrasena.';
-const DUPLICATE_DOCUMENT_MESSAGE = 'Ya existe un alumno registrado con este RUT o pasaporte.';
+const DUPLICATE_DOCUMENT_MESSAGE = 'Ya existe un alumno registrado con este RUT o pasaporte en esta empresa.';
 
 const isMissingRowError = (message?: string) => {
     if (!message) {
@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
             language = 'es'
         } = body;
 
+        const normalizedClientId = typeof client_id === 'string' ? client_id.trim() : '';
+
         const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
         const normalizedRut = typeof rut === 'string' ? rut.trim() : '';
         const normalizedPassport = typeof passport === 'string' ? passport.trim() : '';
@@ -62,16 +64,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        let existingStudentByEmailQuery = supabaseAdmin
+        let emailQuery = supabaseAdmin
             .from('students')
             .select('id')
             .eq('email', normalizedEmail);
 
-        if (client_id) {
-            existingStudentByEmailQuery = existingStudentByEmailQuery.eq('client_id', client_id);
+        if (normalizedClientId) {
+            emailQuery = emailQuery.eq('client_id', normalizedClientId);
         }
 
-        const { data: existingStudentByEmail, error: existingStudentByEmailError } = await existingStudentByEmailQuery.maybeSingle();
+        const { data: existingStudentByEmail, error: existingStudentByEmailError } = await emailQuery.maybeSingle();
 
         if (existingStudentByEmailError && !isMissingRowError(existingStudentByEmailError.message)) {
             console.error('Error checking existing student by email:', existingStudentByEmailError);
@@ -86,16 +88,16 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedRut) {
-            let existingStudentByRutQuery = supabaseAdmin
+            let rutQuery = supabaseAdmin
                 .from('students')
                 .select('id')
                 .eq('rut', normalizedRut);
 
-            if (client_id) {
-                existingStudentByRutQuery = existingStudentByRutQuery.eq('client_id', client_id);
+            if (normalizedClientId) {
+                rutQuery = rutQuery.eq('client_id', normalizedClientId);
             }
 
-            const { data: existingStudentByRut, error: existingStudentByRutError } = await existingStudentByRutQuery.maybeSingle();
+            const { data: existingStudentByRut, error: existingStudentByRutError } = await rutQuery.maybeSingle();
 
             if (existingStudentByRutError && !isMissingRowError(existingStudentByRutError.message)) {
                 console.error('Error checking existing student by RUT:', existingStudentByRutError);
@@ -111,16 +113,16 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedPassport) {
-            let existingStudentByPassportQuery = supabaseAdmin
+            let passportQuery = supabaseAdmin
                 .from('students')
                 .select('id')
                 .eq('passport', normalizedPassport);
 
-            if (client_id) {
-                existingStudentByPassportQuery = existingStudentByPassportQuery.eq('client_id', client_id);
+            if (normalizedClientId) {
+                passportQuery = passportQuery.eq('client_id', normalizedClientId);
             }
 
-            const { data: existingStudentByPassport, error: existingStudentByPassportError } = await existingStudentByPassportQuery.maybeSingle();
+            const { data: existingStudentByPassport, error: existingStudentByPassportError } = await passportQuery.maybeSingle();
 
             if (existingStudentByPassportError && !isMissingRowError(existingStudentByPassportError.message)) {
                 console.error('Error checking existing student by passport:', existingStudentByPassportError);
@@ -148,12 +150,29 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        let authUser;
+        let createdAuthUser = false;
         const existingAuthUser = authUsersData.users.find((user) => user.email?.toLowerCase() === normalizedEmail);
 
-        let authUser = existingAuthUser;
-        let createdAuthUser = false;
+        if (existingAuthUser) {
+            const { data: updatedAuthData, error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
+                existingAuthUser.id,
+                {
+                    password,
+                    email_confirm: true,
+                    user_metadata: {
+                        full_name: `${first_name} ${last_name}`,
+                        language
+                    }
+                }
+            );
 
-        if (!existingAuthUser) {
+            if (updateAuthError) {
+                return NextResponse.json({ error: updateAuthError.message }, { status: 400 });
+            }
+
+            authUser = updatedAuthData.user;
+        } else {
             const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
                 email: normalizedEmail,
                 password,
@@ -166,14 +185,40 @@ export async function POST(request: NextRequest) {
 
             if (createError) {
                 if (createError.message.includes('already registered') || createError.message.includes('already exists')) {
-                    return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
+                    const refreshedList = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+                    if (refreshedList.error) {
+                        return NextResponse.json({ error: refreshedList.error.message }, { status: 500 });
+                    }
+
+                    const raceAuthUser = refreshedList.data.users.find((user) => user.email?.toLowerCase() === normalizedEmail);
+                    if (!raceAuthUser) {
+                        return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
+                    }
+
+                    const { data: updatedAuthData, error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
+                        raceAuthUser.id,
+                        {
+                            password,
+                            email_confirm: true,
+                            user_metadata: {
+                                full_name: `${first_name} ${last_name}`,
+                                language
+                            }
+                        }
+                    );
+
+                    if (updateAuthError) {
+                        return NextResponse.json({ error: updateAuthError.message }, { status: 400 });
+                    }
+
+                    authUser = updatedAuthData.user;
+                } else {
+                    return NextResponse.json({ error: createError.message }, { status: 400 });
                 }
-
-                return NextResponse.json({ error: createError.message }, { status: 400 });
+            } else {
+                authUser = createData.user;
+                createdAuthUser = true;
             }
-
-            authUser = createData.user;
-            createdAuthUser = true;
         }
 
         if (!authUser) {
@@ -194,7 +239,7 @@ export async function POST(request: NextRequest) {
                 gender: gender || null,
                 age: age || null,
                 company_name: company_name || null,
-                client_id: client_id || null, // Insert FK
+                client_id: normalizedClientId || null, // Insert FK
                 role_id: role_id || null,     // Specific role FK
                 position: position || null,
                 digital_signature_url: digital_signature_url || null,

@@ -1,0 +1,566 @@
+# Copyright (C) 2022 WooNinjas
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: LearnDash Certificate Verify and Share\n"
+"POT-Creation-Date: 2024-03-13 11:23+0000\n"
+"PO-Revision-Date: 2025-03-19 09:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: Español\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;_x;_ex;_n;_nx;_n_noop;_nx_noop;esc_html__;"
+"esc_html_e;esc_html_x;esc_attr__;esc_attr_e;esc_attr_x\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: assets\n"
+"\n"
+"Report-Msgid-Bugs-To: \n"
+"X-Loco-Version: 2.6.11; wp-6.7.2"
+
+#: includes/init.php:59
+#, php-format
+msgid "%s plugin requires %s plugin activated."
+msgstr ""
+
+#: includes/frontend.php:822
+msgid "A security error has occurred. Please refresh the page and try again."
+msgstr ""
+
+#: templates/template-01.php:108 templates/template-02.php:95
+msgid "About The Course"
+msgstr ""
+
+#: templates/template-01.php:133 templates/template-02.php:120
+msgid "About The Group's Courses"
+msgstr ""
+
+#: templates/admin/license-settings.php:21
+msgid "Activate license"
+msgstr ""
+
+#: templates/admin/license-settings.php:9
+msgid "Active"
+msgstr ""
+
+#: includes/admin.php:343 templates/admin/activity_log.php:13
+msgid "Activity Logs"
+msgstr ""
+
+#: templates/social-buttons.php:63
+msgid "Add to Profile"
+msgstr ""
+
+#: includes/license/license-manager.php:340
+msgid "An error occurred, please try again."
+msgstr ""
+
+#: templates/admin/general-settings.php:5
+msgid "Available attributes"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:50
+#: templates/admin/email-notifications-settings.php:137
+#: templates/admin/email-notifications-settings.php:224
+msgid "BCC"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:60
+#: templates/admin/email-notifications-settings.php:147
+#: templates/admin/email-notifications-settings.php:234
+msgid "Body"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:40
+#: templates/admin/email-notifications-settings.php:127
+#: templates/admin/email-notifications-settings.php:214
+msgid "CC"
+msgstr ""
+
+#: includes/certificate-hooks.php:162 includes/certificate-hooks.php:236
+#: includes/certificate-hooks.php:269 templates/search-form-results.php:39
+msgid "Certificate"
+msgstr ""
+
+#: includes/metaboxes/cerificate-description.php:57
+msgid "Certificate Description"
+msgstr ""
+
+#: templates/admin/general-settings.php:66
+msgid "Certificate Expiry date format"
+msgstr ""
+
+#: templates/search-form.php:18
+msgid "Certificate ID"
+msgstr ""
+
+#: templates/admin/general-settings.php:56
+msgid "Certificate issue date format"
+msgstr ""
+
+#: templates/search-form-results.php:29 templates/search-form-results.php:39
+msgid "Certificate Type"
+msgstr ""
+
+#: templates/admin/settings-page.php:47
+msgid "Changelog"
+msgstr ""
+
+#: templates/admin/license-settings.php:23
+msgid "Check license"
+msgstr ""
+
+#: templates/admin/activity_log.php:33
+msgid "Clear Log"
+msgstr ""
+
+#: includes/frontend.php:354 includes/frontend.php:363
+msgid "Click here to view the certificate details"
+msgstr ""
+
+#: templates/admin/activity_log.php:21
+msgid "Copy to Clipboard"
+msgstr ""
+
+#: templates/search-form-results.php:28
+msgid "Course, Quiz or Group Certificate Title "
+msgstr ""
+
+#: templates/search-form-results.php:38
+msgid "Course, Quiz or Group Title"
+msgstr ""
+
+#: includes/admin.php:336 templates/admin/custom-css.php:6
+msgid "Custom CSS"
+msgstr ""
+
+#: templates/admin/custom-css.php:7
+msgid "Custom CSS for Verification templates."
+msgstr ""
+
+#: templates/admin/license-settings.php:24
+msgid "Deactivate license"
+msgstr ""
+
+#: includes/admin.php:350 templates/admin/debug_log.php:13
+msgid "Debug Logs"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:19
+#: templates/admin/email-notifications-settings.php:106
+#: templates/admin/email-notifications-settings.php:193
+msgid "Disable PDF"
+msgstr ""
+
+#: templates/admin/general-settings.php:15
+msgid "Display as inline or block. Default: true."
+msgstr ""
+
+#: includes/admin.php:123 templates/admin/settings-page.php:53
+msgid "Documentation"
+msgstr ""
+
+#: templates/admin/general-settings.php:58
+#: templates/admin/general-settings.php:68
+msgid "Documentation on date and time formatting"
+msgstr ""
+
+#: templates/admin/debug_log.php:18
+msgid "Download"
+msgstr ""
+
+#: templates/template-01.php:161 templates/template-02.php:149
+msgid "Download PDF"
+msgstr ""
+
+#: includes/admin.php:332
+msgid "Email Notifications"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:14
+#: templates/admin/email-notifications-settings.php:25
+#: templates/admin/email-notifications-settings.php:101
+#: templates/admin/email-notifications-settings.php:112
+#: templates/admin/email-notifications-settings.php:188
+#: templates/admin/email-notifications-settings.php:199
+#: templates/admin/general-settings.php:81
+#: templates/admin/general-settings.php:113
+#: templates/admin/general-settings.php:126
+msgid "Enable"
+msgstr ""
+
+#: templates/admin/general-settings.php:107
+msgid "Enable Activity Logs"
+msgstr ""
+
+#: templates/admin/general-settings.php:76
+msgid "Enable certificate image sharing on the social media."
+msgstr ""
+
+#: templates/admin/general-settings.php:120
+msgid "Enable Debug Logs"
+msgstr ""
+
+#: templates/admin/general-settings.php:108
+msgid "Enable this option to generate activity logs."
+msgstr ""
+
+#: templates/admin/general-settings.php:121
+msgid "Enable this option to generate debug logs."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:20
+#: templates/admin/email-notifications-settings.php:107
+#: templates/admin/email-notifications-settings.php:194
+msgid "Enable To donot attach Certificate PDF."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:9
+#: templates/admin/email-notifications-settings.php:96
+#: templates/admin/email-notifications-settings.php:183
+msgid "Enable to send certificate via email notification."
+msgstr ""
+
+#: templates/admin/license-settings.php:16
+msgid "Enter your license key here"
+msgstr ""
+
+#: templates/search-form-results.php:40
+msgid "Expired"
+msgstr ""
+
+#: templates/search-form-results.php:32 templates/search-form-results.php:42
+#: templates/template-01.php:99 templates/template-02.php:160
+msgid "Expiry Date"
+msgstr ""
+
+#: templates/admin/settings-page.php:50
+msgid "FAQ"
+msgstr ""
+
+#: includes/admin.php:328
+msgid "General"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://wooninjas.com"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://wooninjas.com/downloads/learndash-certificate-verify-share"
+msgstr ""
+
+#: templates/template-01.php:54 templates/template-02.php:54
+msgid "ID"
+msgstr ""
+
+#: templates/admin/general-settings.php:75
+msgid "Image social sharing"
+msgstr ""
+
+#: templates/admin/license-settings.php:9
+msgid "Inactive"
+msgstr ""
+
+#: templates/admin/general-settings.php:3
+#, php-format
+msgid ""
+"Insert the shortcode %s on any page on which you want to display the "
+"certificate verification page."
+msgstr ""
+
+#: templates/template-01.php:78 templates/template-02.php:85
+msgid "instructor"
+msgstr ""
+
+#: templates/search-form-results.php:31 templates/search-form-results.php:41
+#: templates/template-01.php:95 templates/template-02.php:156
+msgid "Issue Date"
+msgstr ""
+
+#: templates/template-01.php:55 templates/template-02.php:55
+msgid "Javascript must be enabled in the browser to see the certificate."
+msgstr ""
+
+#. Name of the plugin
+msgid "LearnDash Certificate Verify and Share"
+msgstr ""
+
+#: includes/admin.php:324
+msgid "License"
+msgstr ""
+
+#: includes/license/license-manager.php:330
+#, php-format
+msgid "License is not active for %s"
+msgstr ""
+
+#: templates/admin/license-settings.php:13
+msgid "License key"
+msgstr ""
+
+#: includes/admin.php:265
+msgid "License key has been activated."
+msgstr ""
+
+#: includes/admin.php:283 includes/license/license-manager.php:308
+msgid "License key has been deactivated."
+msgstr ""
+
+#: includes/license/license-manager.php:320
+msgid "License key has been disabled."
+msgstr ""
+
+#: includes/license/license-manager.php:323
+msgid "License key has been revoked."
+msgstr ""
+
+#: includes/license/license-manager.php:317
+msgid "License key has expired."
+msgstr ""
+
+#: includes/license/license-manager.php:336
+msgid "License key has reached its activation limit."
+msgstr ""
+
+#: includes/license/license-manager.php:306
+msgid "License key is inactive."
+msgstr ""
+
+#: includes/license/license-manager.php:333
+#, php-format
+msgid "License key is invalid for %s."
+msgstr ""
+
+#: includes/license/license-manager.php:314
+msgid "License key is invalid."
+msgstr ""
+
+#: includes/license/license-manager.php:326
+msgid "License key is missing."
+msgstr ""
+
+#: includes/license/license-manager.php:311
+msgid "License key is valid."
+msgstr ""
+
+#: includes/plugin.php:61
+msgid "License page"
+msgstr ""
+
+#: templates/admin/general-settings.php:87
+msgid "LinkedIn company ID"
+msgstr ""
+
+#: templates/admin/license-settings.php:17
+msgid "My account"
+msgstr ""
+
+#: templates/admin/settings-page.php:56
+msgid "Open a Support Ticket"
+msgstr ""
+
+#: templates/admin/settings-page.php:44
+msgid "Overview"
+msgstr ""
+
+#: templates/search-form-results.php:47
+#, php-format
+msgctxt "placeholder: certificate"
+msgid "This %1$s will never expire."
+msgstr ""
+
+#. placeholder: course.
+#: templates/template-01.php:47 templates/template-02.php:47
+#, php-format
+msgctxt "placeholder: certificate, Expiry Date"
+msgid "Sorry! This %1s expired on %2s."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:62
+#: templates/admin/email-notifications-settings.php:149
+#: templates/admin/email-notifications-settings.php:236
+#: templates/admin/general-settings.php:91
+msgid "Please enter your email notification content."
+msgstr ""
+
+#: templates/admin/license-settings.php:3
+msgid "Please enter your license key to get automatic updates."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:52
+#: templates/admin/email-notifications-settings.php:139
+#: templates/admin/email-notifications-settings.php:226
+msgid "Please type the bcc email."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:42
+#: templates/admin/email-notifications-settings.php:129
+#: templates/admin/email-notifications-settings.php:216
+msgid "Please type the cc email."
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:32
+#: templates/admin/email-notifications-settings.php:119
+#: templates/admin/email-notifications-settings.php:206
+msgid "Please type the email subject."
+msgstr ""
+
+#: includes/frontend.php:479
+msgid "Purchase PDF"
+msgstr ""
+
+#: templates/admin/general-settings.php:19
+#, php-format
+msgid "QR Code alignment. Available only for %s. Default: left."
+msgstr ""
+
+#: templates/template-01.php:125 templates/template-01.php:151
+#: templates/template-02.php:112 templates/template-02.php:138
+msgid "read more"
+msgstr ""
+
+#: templates/template-01.php:65 templates/template-02.php:73
+msgid "recipient"
+msgstr ""
+
+#: templates/admin/custom-css.php:19
+#: templates/admin/email-notifications-settings.php:265
+#: templates/admin/general-settings.php:134
+msgid "Save Settings"
+msgstr ""
+
+#: templates/search-form.php:21
+msgid "Search"
+msgstr ""
+
+#: templates/search-form.php:14
+msgid "Search Certificate by ID"
+msgstr ""
+
+#: templates/search-form-results.php:21
+msgid "Search Results"
+msgstr ""
+
+#: templates/template-01.php:55 templates/template-02.php:55
+msgid "See how to do it"
+msgstr ""
+
+#: templates/admin/general-settings.php:33
+#, php-format
+msgid "Select the page where the shortcode %s is inserted."
+msgstr ""
+
+#: templates/admin/general-settings.php:37
+msgid "Select..."
+msgstr ""
+
+#: includes/admin.php:114
+msgid "Settings"
+msgstr ""
+
+#: includes/admin.php:248
+msgid "Settings saved."
+msgstr ""
+
+#: templates/social-buttons.php:35
+#, php-format
+msgid "Share on %s"
+msgstr ""
+
+#: templates/admin/general-settings.php:11
+msgid "Size in px. Default: 100."
+msgstr ""
+
+#: templates/search-form-results.php:61
+msgid ""
+"Sorry! Nothing found. Certificate doesn’t exsist or it's ID is incorrect."
+msgstr ""
+
+#: templates/search-form-results.php:30 templates/search-form-results.php:40
+#: templates/admin/email-notifications-settings.php:8
+#: templates/admin/email-notifications-settings.php:95
+#: templates/admin/email-notifications-settings.php:182
+#: templates/admin/license-settings.php:7
+msgid "Status"
+msgstr ""
+
+#: templates/admin/email-notifications-settings.php:30
+#: templates/admin/email-notifications-settings.php:117
+#: templates/admin/email-notifications-settings.php:204
+msgid "Subject"
+msgstr ""
+
+#: includes/admin.php:124
+msgid "Support"
+msgstr ""
+
+#: includes/admin.php:416
+msgid "Template 01"
+msgstr ""
+
+#: includes/admin.php:417
+msgid "Template 02"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"This addon allows student to share their course certificates, quiz "
+"certificates, group certificates on FaceBook, Twitter, Linkedin, and social "
+"media visitors can verify the certificates shared on social media."
+msgstr ""
+
+#: templates/admin/general-settings.php:94
+msgid "This article will help you to find it"
+msgstr ""
+
+#: templates/admin/general-settings.php:23
+msgid "URL to be encoded. Default: Certificate URL."
+msgstr ""
+
+#: templates/search-form-results.php:27 templates/search-form-results.php:37
+msgid "User Name"
+msgstr ""
+
+#: templates/search-form-results.php:40
+msgid "Valid"
+msgstr ""
+
+#: templates/admin/general-settings.php:31
+msgid "Verification page"
+msgstr ""
+
+#: templates/admin/general-settings.php:46
+msgid "Verification page template"
+msgstr ""
+
+#: templates/search-form-results.php:59
+msgid "Verify Certificate"
+msgstr ""
+
+#. Author of the plugin
+msgid "WooNinjas"
+msgstr ""
+
+#: templates/admin/license-settings.php:17
+#, php-format
+msgid ""
+"You can find the license key for %s add-on in the purchase email or on the "
+"%s page."
+msgstr ""
+
+#: templates/admin/general-settings.php:5
+#, php-format
+msgid "You can use the shortcode %s inside certificates to add QR Code."
+msgstr ""
+
+#: templates/admin/general-settings.php:4
+#, php-format
+msgid ""
+"You can use the shortcode %s inside certificates to display its certificate "
+"ID."
+msgstr ""

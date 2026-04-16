@@ -1,0 +1,24 @@
+# Translation of Plugins - Import Settings into WordPress SEO Plugin – Rank Math - Stable (latest release) in Spanish (Spain)
+# This file is distributed under the same license as the Plugins - Import Settings into WordPress SEO Plugin – Rank Math - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2020-08-21 07:19:18+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/3.0.0-alpha.2\n"
+"Language: es\n"
+"Project-Id-Version: Plugins - Import Settings into WordPress SEO Plugin – Rank Math - Stable (latest release)\n"
+
+#. Author of the plugin
+msgid "WP All Import"
+msgstr "WP All Import"
+
+#. Plugin Name of the plugin
+msgid "WP All Import - Rank Math SEO Add-On"
+msgstr "WP All Import - Rank Math SEO Add-On"
+
+#. Description of the plugin
+msgid "An add-on to facilitate importing to Rank Math using WP All Import."
+msgstr "Una extensión para facilitar la importación a Rank Math usando WP All Import."

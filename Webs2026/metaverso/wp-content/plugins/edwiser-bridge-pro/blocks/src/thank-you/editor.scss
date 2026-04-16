@@ -1,0 +1,23 @@
+.eb__select-image {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+.eb__image-preview {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.eb__action-buttons {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  & button {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+}

@@ -1,0 +1,2995 @@
+# Copyright (C) 2025 WisdmLabs
+# This file is distributed under the GPL-2.0+.
+msgid ""
+msgstr ""
+"Project-Id-Version: Edwiser Bridge Pro 4.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/edwiser-bridge-"
+"pro\n"
+"Last-Translator: \n"
+"Language-Team: Español\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-03-27T06:50:04+00:00\n"
+"PO-Revision-Date: 2025-04-14 12:26+0000\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Domain: edwiser-bridge-pro\n"
+"\n"
+"Language: es_ES\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Loco-Version: 2.6.11; wp-6.7.2"
+
+#. Plugin Name of the plugin
+msgid "Edwiser Bridge Pro"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://edwiser.org/bridge/"
+msgstr ""
+
+#. Description of the plugin
+msgid ""
+"An enhanced e-commerce solution that extends Edwiser Bridge’s functionality, "
+"offering features like WooCommerce Integration, Single Sign On, Selective "
+"Synchronisation, and Bulk Purchase."
+msgstr ""
+
+#. Author of the plugin
+msgid "WisdmLabs"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://edwiser.org"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:64
+msgid "Bulk Purchase Refund"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:66
+#: admin/class-edwiser-bridge-pro-admin.php:829
+msgid "You cannot rollback this action!"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:68
+msgid "Refund Method:"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:72
+msgid "Select Refund Type"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:73
+msgid "Partial Refund"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:74
+msgid "Full Refund"
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:96
+msgid "Quantity to be refunded for "
+msgstr ""
+
+#: admin/class-eb-bp-users-refund-manager.php:119
+msgid ""
+"To do Full Refund please tick checkbox (This will unenroll users from group "
+"and delete group ):"
+msgstr ""
+
+#: admin/class-eb-pro-menu.php:90 admin/class-eb-pro-menu.php:91
+msgid "Manage Groups"
+msgstr ""
+
+#: admin/class-eb-pro-menu.php:106 admin/class-eb-pro-menu.php:107
+msgid "Custom User Fields"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:312
+msgid "Entered URL is invalid, Please check URL again."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:313
+msgid "Please enter URL."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:314
+msgid "Please select user role first."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:333
+#: includes/sso/class-single-sign-on.php:152
+msgid "Please set the same secret key on WordPress as well as on Moodle"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:356
+msgid "Select any course"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:380
+#: admin/class-edwiser-bridge-pro-admin.php:507
+#: admin/class-edwiser-bridge-pro-admin.php:558
+#: public/class-edwiser-multiple-users-course-purchase-public.php:702
+msgid "Save Changes"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:381
+#: admin/class-edwiser-bridge-pro-admin.php:497
+#: admin/class-edwiser-bridge-pro-admin.php:560
+#: public/class-bridge-woocommerce-public.php:90
+#: public/class-bridge-woocommerce-public.php:382
+#: public/class-edwiser-multiple-users-course-purchase-public.php:697
+#: public/class-edwiser-multiple-users-course-purchase-public.php:826
+msgid "Cancel"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:382
+#: admin/class-edwiser-bridge-pro-admin.php:561
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:352
+msgid "Option Value"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:383
+#: admin/class-edwiser-bridge-pro-admin.php:562
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:353
+msgid "Option Text"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:384
+#: admin/class-edwiser-bridge-pro-admin.php:563
+msgid "Field name should be unique and not empty."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:392
+msgid ""
+"Some users are enrolled to this course. By trashing they will be unenrolled. "
+"Do you still want to continue?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:393
+msgid ""
+"Some users are enrolled in the selected courses. By trashing they will be "
+"unenrolled. Do you still want to continue?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:470
+#: public/class-edwiser-multiple-users-course-purchase-public.php:670
+msgid "Add New User"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:471
+#: public/class-edwiser-multiple-users-course-purchase-public.php:671
+msgid "Remove User"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:472
+#: public/class-edwiser-multiple-users-course-purchase-public.php:672
+msgid "Remove User from Group?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:473
+#: public/class-edwiser-multiple-users-course-purchase-public.php:673
+msgid "Are you sure you want to remove user from group ?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:474
+#: public/class-edwiser-multiple-users-course-purchase-public.php:674
+msgid "Are you sure you want to delete this group ?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:475
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:84
+#: public/class-edwiser-multiple-users-course-purchase-public.php:675
+#: public/templates/enroll-users-page.php:98
+msgid "Delete Group"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:476
+#: public/class-edwiser-multiple-users-course-purchase-public.php:676
+msgid ""
+"This will unenroll all the users from group and also from the courses "
+"assigned to the group."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:477
+#: public/class-edwiser-multiple-users-course-purchase-public.php:677
+msgid "Enroll"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:478
+#: public/class-edwiser-multiple-users-course-purchase-public.php:678
+msgid "Enter First Name : * "
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:479
+#: public/class-edwiser-multiple-users-course-purchase-public.php:679
+msgid "Enter Last name : * "
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:480
+#: public/class-edwiser-multiple-users-course-purchase-public.php:680
+msgid "Enter E-mail ID : * "
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:481
+#: public/class-edwiser-multiple-users-course-purchase-public.php:681
+msgid "All fields marked with * are mandatory."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:482
+#: public/class-edwiser-multiple-users-course-purchase-public.php:682
+msgid ""
+"Please select a valid CSV file. Required headers are <b>First Name</b>, <b>"
+"Last Name</b>, <b>Username</b> and <b>Email</b>."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:483
+#: public/class-edwiser-multiple-users-course-purchase-public.php:683
+msgid "Invalid Email ID:"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:484
+#: public/class-edwiser-multiple-users-course-purchase-public.php:684
+msgid "user"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:485
+#: public/class-edwiser-multiple-users-course-purchase-public.php:685
+msgid "You can enroll only"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:486
+#: public/class-edwiser-multiple-users-course-purchase-public.php:686
+msgid "Please upload CSV file first."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:490
+#: public/class-edwiser-multiple-users-course-purchase-public.php:690
+msgid "Update User Data"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:491
+#: public/class-edwiser-multiple-users-course-purchase-public.php:691
+msgid "Sorry, No users Enrolled Yet"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:492
+#: public/class-edwiser-multiple-users-course-purchase-public.php:692
+msgid "Sorry, No products available"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:493
+#: public/class-edwiser-multiple-users-course-purchase-public.php:693
+msgid "Please enter quantity"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:494
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:225
+#: public/class-edwiser-multiple-users-course-purchase-public.php:694
+#: public/templates/associated-courses-product-page.php:19
+#: public/widgets/class-eb-pro-product-page-widget.php:482
+#: public/widgets/class-eb-pro-product-page-widget.php:512
+msgid "Associated Courses"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:495
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:217
+#: public/class-edwiser-multiple-users-course-purchase-public.php:695
+#: public/templates/enroll-users-page.php:148
+msgid "Enroll User"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:496
+#: public/class-edwiser-multiple-users-course-purchase-public.php:696
+msgid "Enroll New User"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:498
+#: includes/bulk-purchase/class-eb-bp-add-group.php:84
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:129
+#: public/templates/enroll-users-page.php:84
+msgid "Add Product"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:499
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:136
+msgid "Remove Product"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:500
+#: public/class-edwiser-multiple-users-course-enroll-users.php:672
+#: public/class-edwiser-multiple-users-course-enroll-users.php:891
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1149
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1256
+#: public/templates/enroll-users-page.php:91
+msgid "Add Quantity"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:501
+msgid "Remove Quantity"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:502
+#: public/class-edwiser-multiple-users-course-purchase-public.php:699
+msgid "OK"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:503
+#: public/class-edwiser-multiple-users-course-purchase-public.php:700
+msgid "Add Quantity In Group"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:504
+#: public/class-edwiser-multiple-users-course-purchase-public.php:701
+msgid "Add New Products In Group"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:505
+msgid "Remove Products From Group"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:506
+msgid "Remove Quantity From Group"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:508
+#: public/class-edwiser-multiple-users-course-purchase-public.php:703
+msgid "Close"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:509
+#: public/class-edwiser-multiple-users-course-purchase-public.php:704
+msgid "Insufficient Quantity. Please Add more quantity"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:510
+#: public/class-edwiser-multiple-users-course-purchase-public.php:705
+msgid "Please select the action."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:511
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:247
+#: public/class-edwiser-multiple-users-course-purchase-public.php:706
+msgid "Select Action"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:512
+#: public/class-edwiser-multiple-users-course-purchase-public.php:707
+msgid "Please select user to delete"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:513
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:252
+#: includes/selective-sync/class-eb-select-users-list-table.php:98
+#: public/class-edwiser-multiple-users-course-purchase-public.php:708
+msgid "Apply"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:514
+#: public/class-edwiser-multiple-users-course-purchase-public.php:709
+msgid "Error"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:515
+#: public/class-edwiser-multiple-users-course-purchase-public.php:710
+msgid "First"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:516
+#: public/class-edwiser-multiple-users-course-purchase-public.php:711
+msgid "Last"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:517
+#: public/class-edwiser-multiple-users-course-purchase-public.php:712
+msgid "Previous"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:518
+#: public/class-edwiser-multiple-users-course-purchase-public.php:713
+msgid "Next"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:519
+#: public/class-edwiser-multiple-users-course-purchase-public.php:714
+msgid "Remove"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:520
+#: public/class-edwiser-multiple-users-course-purchase-public.php:715
+msgid "Search:"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:521
+#: public/class-edwiser-multiple-users-course-purchase-public.php:716
+msgid "Course Progress:"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:522
+#: public/class-edwiser-multiple-users-course-purchase-public.php:717
+msgid "No entries to show"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:523
+#: public/class-edwiser-multiple-users-course-purchase-public.php:718
+msgid "Showing from"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:523
+#: public/class-edwiser-multiple-users-course-purchase-public.php:718
+msgid " to "
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:523
+#: public/class-edwiser-multiple-users-course-purchase-public.php:718
+msgid "from"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:527
+msgid "Group Name is required"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:528
+msgid "Group Manager Name is required"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:529
+msgid "Please select at least one product (Quantity may be zero)"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:530
+msgid "All Products can not be removed"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:559
+#: admin/settings/class-sso-settings-redirection.php:314
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:250
+msgid "Delete"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:564
+msgid "Option value and text should not be empty."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:565
+msgid "Saved"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:581
+msgid "Selective Courses"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:644
+#: admin/class-edwiser-bridge-pro-admin.php:648
+msgid "Products"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:679
+msgid "Synchronize Products"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:684
+msgid "WooCommerce Synchronization Options"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:685
+msgid "Create courses as products."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:694
+msgid "Update courses as products."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:703
+msgid "Publish synchronized products."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:712
+msgid "Synchronize categories."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:749
+msgid "Loading..."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:750
+msgid "Please select proper options."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:831
+msgid "Unenroll from purchased courses?"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:954
+msgid "Edwiser Group Purchase"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:961
+msgid "Enroll Students Page"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:962
+msgid "Select the page having shortcode [bridge_woo_enroll_users]."
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:968
+#: admin/settings/class-bridge-woocommerce-settings.php:106
+#: admin/settings/class-bridge-woocommerce-settings.php:196
+#: admin/settings/class-bridge-woocommerce-settings.php:228
+#: admin/settings/class-bridge-woocommerce-settings.php:245
+msgid "- Select a page -"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:973
+msgid "Group Purchase Label"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:974
+msgid "Group purchase checkbox label on woocommerce single product page"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:977
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:188
+msgid "Enable Group Purchase"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:982
+msgid "Group Manager Role"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:983
+msgid ""
+"This will assign Non Editing Teacher role to Group purchaser only If he "
+"enroll himself in the group. ( Role assignment will happen only on the "
+"WordPress side and not on Moodle. )"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:1013
+msgid "Bulk Purchase Shortcode Options"
+msgstr ""
+
+#: admin/class-edwiser-bridge-pro-admin.php:1018
+msgid ""
+"This shortcode shows all groups purchased by a user and also the users "
+"enrolled in it. This page also provides you to change cohort name and see "
+"all the associated courses to the group."
+msgstr ""
+
+#: admin/class-edwiser-bulk-purchase-product-settings.php:58
+msgid "Group Purchase"
+msgstr ""
+
+#: admin/class-edwiser-bulk-purchase-product-settings.php:61
+msgid "Allow user to purchase course product in bulk."
+msgstr ""
+
+#: admin/class-edwiser-bulk-purchase-product-settings.php:70
+msgid "Reuse quantity after user is removed from the group"
+msgstr ""
+
+#: admin/class-edwiser-bulk-purchase-product-settings.php:73
+msgid "User can reuse the seats again even after removing users from group."
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:12
+#: admin/settings/class-selective-synch-users-settings.php:33
+msgid ""
+"There is a problem while connecting to moodle server. Please, check your "
+"moodle connection or try"
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:12
+#: admin/settings/class-selective-synch-users-settings.php:33
+msgid " reloading"
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:12
+#: admin/settings/class-selective-synch-users-settings.php:33
+msgid " the page."
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:21
+msgid "All Categories"
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:25
+#: admin/partials/eb-select-moodle-course-list.php:87
+#: public/class-eb-bp-enroll-students-course-progress.php:44
+msgid "Course Name"
+msgstr ""
+
+#: admin/partials/eb-select-moodle-course-list.php:26
+#: admin/partials/eb-select-moodle-course-list.php:88
+#: public/widgets/class-eb-pro-product-page-widget.php:244
+msgid "Category"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:14
+msgid "Shop Page Template"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:15
+msgid ""
+"Customize the design of your entire shop page. This option allows you to "
+"apply consistent branding and layout across all your product listings, "
+"enhancing the overall shopping experience for your learners."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:20
+msgid "Product Page Template"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:21
+msgid ""
+"Tailor the design of the product page to showcase each product uniquely. "
+"This option enables you to highlight specific product features, benefits, "
+"and details, optimizing the presentation for better conversions and user "
+"engagement."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:34
+#: admin/settings/class-eb-pro-elementor-template-settings.php:38
+#: admin/settings/class-eb-pro-elementor-template-settings.php:70
+msgid "Templates"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:55
+msgid ""
+"Based on you license key, it seems that you have not installed the "
+"‘Elementor PRO’. Please download and install the ‘Elementor PRO’ to use "
+"below Edwiser bridge templates."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:79
+msgid ""
+"It seems that you have not enabled WooCommerce Integration Feature from "
+"Edwiser Bridge Pro Featuers. Please activate the ‘WooCommerce Integration’ "
+"to use below Edwiser bridge templates, from"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:79
+#: public/widgets/class-eb-pro-product-page-widget.php:188
+#: public/widgets/class-eb-pro-related-product-widget.php:197
+#: public/widgets/class-eb-pro-shop-page-widget.php:270
+msgid "here"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:87
+#: includes/bulk-purchase/class-eb-bp-group-table.php:288
+msgid "Edit"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:106
+msgid "Create Template"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:110
+msgid "Edit Template"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:111
+msgid "Use this template"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:136
+msgid ""
+"Restoring this page will revert it to its default state, undoing any "
+"customizations you may have made. Proceed with caution if you intend to "
+"revert to the original design."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:137
+msgid ""
+"Note: If you are setting this up for the first time, you can safely ignore "
+"this warning."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:149
+msgid "Are you sure you want to ‘Restore’ this page?"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:150
+#: admin/partials/html-elementor-templates.php:171
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:73
+#: includes/woo-int/class-bridge-woocommerce-order-manager.php:782
+#: public/widgets/class-eb-pro-product-page-widget.php:110
+#: public/widgets/class-eb-pro-product-page-widget.php:123
+#: public/widgets/class-eb-pro-product-page-widget.php:136
+#: public/widgets/class-eb-pro-product-page-widget.php:149
+#: public/widgets/class-eb-pro-product-page-widget.php:162
+#: public/widgets/class-eb-pro-product-page-widget.php:175
+#: public/widgets/class-eb-pro-related-product-widget.php:132
+#: public/widgets/class-eb-pro-related-product-widget.php:145
+#: public/widgets/class-eb-pro-related-product-widget.php:158
+#: public/widgets/class-eb-pro-related-product-widget.php:171
+#: public/widgets/class-eb-pro-related-product-widget.php:184
+#: public/widgets/class-eb-pro-shop-page-widget.php:137
+#: public/widgets/class-eb-pro-shop-page-widget.php:167
+#: public/widgets/class-eb-pro-shop-page-widget.php:205
+#: public/widgets/class-eb-pro-shop-page-widget.php:218
+#: public/widgets/class-eb-pro-shop-page-widget.php:231
+#: public/widgets/class-eb-pro-shop-page-widget.php:244
+#: public/widgets/class-eb-pro-shop-page-widget.php:257
+msgid "Yes"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:151
+#: admin/partials/html-elementor-templates.php:172
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:75
+#: public/widgets/class-eb-pro-product-page-widget.php:111
+#: public/widgets/class-eb-pro-product-page-widget.php:124
+#: public/widgets/class-eb-pro-product-page-widget.php:137
+#: public/widgets/class-eb-pro-product-page-widget.php:150
+#: public/widgets/class-eb-pro-product-page-widget.php:163
+#: public/widgets/class-eb-pro-product-page-widget.php:176
+#: public/widgets/class-eb-pro-related-product-widget.php:133
+#: public/widgets/class-eb-pro-related-product-widget.php:146
+#: public/widgets/class-eb-pro-related-product-widget.php:159
+#: public/widgets/class-eb-pro-related-product-widget.php:172
+#: public/widgets/class-eb-pro-related-product-widget.php:185
+#: public/widgets/class-eb-pro-shop-page-widget.php:138
+#: public/widgets/class-eb-pro-shop-page-widget.php:168
+#: public/widgets/class-eb-pro-shop-page-widget.php:206
+#: public/widgets/class-eb-pro-shop-page-widget.php:219
+#: public/widgets/class-eb-pro-shop-page-widget.php:232
+#: public/widgets/class-eb-pro-shop-page-widget.php:245
+#: public/widgets/class-eb-pro-shop-page-widget.php:258
+msgid "No"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:158
+msgid ""
+"This will overide your old template with the Edwiser Bridge’s new template. "
+"No data will be lost."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:170
+msgid "Are you sure you want to create this template?"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:194
+msgid "Looking for help?"
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:197
+msgid "For setup instructions, click here."
+msgstr ""
+
+#: admin/partials/html-elementor-templates.php:198
+msgid "Talk to us:"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:41
+msgid "Woo Integration"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:60
+msgid "WooCommerce Integration Options"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:67
+msgid "Enable Redirection"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:68
+msgid ""
+"This enables user to redirect to <strong>My Courses</strong> page after "
+"order completion."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:75
+msgid "Associated Courses Section"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:76
+msgid "This shows the associated courses section on the single product page."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:83
+msgid "One Click Checkout"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:84
+msgid ""
+"This enables <strong>Buy Now</strong> button for simple products. Using this,"
+" users will be directly redirected to <strong>Single Cart Checkout</strong> "
+"page and the product will be added to their cart."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:91
+msgid "Buy Now Button Text"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:92
+msgid ""
+"This text will be shown on <strong>Buy Now</strong> button. Default will be "
+"<strong>Buy Now</strong>."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:94
+#: public/class-bridge-woocommerce-public.php:457
+msgid "Buy Now"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:99
+msgid "Single Cart Checkout Page"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:100
+msgid ""
+"Add shortcode <code>[bridge_woo_single_cart_checkout]</code> in the selected "
+"page."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:115
+msgid "WooCommerce My Account Page Settings"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:121
+msgid "Enable Account Creation"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:122
+msgid ""
+"This enables <strong>User creation from woocommerce my account page.</strong>"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:129
+msgid "Disable Account Creation if payment failed"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:130
+msgid ""
+"This disables <strong>User creation from woocommerce checkout page.</strong> "
+"if payment is failed during order process. This also affects:\n"
+"\n"
+"\t\t\t\t\t\t\t<p>⚠️ User passwords will not synchronise from WordPress to "
+"Moodle, leading to a different Moodle password at enrolment, but will "
+"synchronise if changed later.</p>\n"
+"\n"
+"\t\t\t\t\t\t\t<p>⚠️ Custom fields added to the WooCommerce checkout will not "
+"synchronise if the payment fails, but will synchronise after successful "
+"enrolment.</p>\n"
+"\n"
+"\t\t\t\t\t\t\t<p>⚠️ This functionality is unavailable for WooCommerce "
+"Subscription users; enabling it will affect user enrolments.</p>\n"
+"\t\t\t\t\t\t\t"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:144
+msgid "Update My Account Fields On Moodle"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:145
+msgid ""
+"This enables updating fields on the Moodle from woocommerce My-account page."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:152
+msgid "Show My Courses Page On My Account Page"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:153
+msgid ""
+"This will show My Courses tab in the My-account page. <b>Note : </b> Please "
+"update permalinks once again after enabling this setting."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:160
+msgid "Enable Purchase Product For Someone Else"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:161
+msgid ""
+"This enables purchase course for someone else on checkout page. User will be "
+"able to enroll other users."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:177
+msgid "WooCommerce Subscriptions Settings"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:184
+msgid "On Subscription Expiration"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:185
+msgid "Select an action to perform on expiration of Product Subscription."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:209
+msgid "WooCommerce Membership Settings"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:216
+msgid "On Membership Expiration"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:217
+msgid "Select an action to perform on Membership expiration."
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:233
+msgid "On Membership Cancellation"
+msgstr ""
+
+#: admin/settings/class-bridge-woocommerce-settings.php:234
+msgid "Select an action to perform on Membership Cancellation."
+msgstr ""
+
+#: admin/settings/class-selective-synch-courses-settings.php:67
+msgid "Synchronization Options"
+msgstr ""
+
+#: admin/settings/class-selective-synch-courses-settings.php:68
+msgid "Update previously synchronized courses"
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:41
+msgid "Selective Sync"
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:93
+msgid "Course"
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:94
+msgid "Users"
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:143
+msgid "Select atleast one course to Synchronize."
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:144
+msgid "Courses synchronized successfully."
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:145
+msgid "There is a problem while connecting to moodle server."
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:146
+msgid "Unable to proceed request."
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:147
+msgid "Users creation and linking commpleted successfully."
+msgstr ""
+
+#: admin/settings/class-selective-synch-settings.php:148
+msgid ""
+"It will take some time please be patient and do not refresh or change the "
+"page."
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:40
+msgid "Synchronize Moodle Users"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:46
+msgid "Create Existing Moodle Users"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:47
+msgid ""
+"Check to create user accounts for all Moodle users in your WordPress site "
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:54
+msgid "Link all Moodle users"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:55
+msgid "This will link all processed Moodle users enrollment data."
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:65
+#: public/widgets/class-eb-pro-product-page-widget.php:781
+msgid "Submit"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:75
+msgid "Synchronize Selective Users"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:113
+msgid "username"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:116
+#: includes/selective-sync/class-eb-select-users-list-table.php:56
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:188
+#: public/class-bridge-woocommerce-public.php:620
+#: public/class-bridge-woocommerce-public.php:643
+#: public/widgets/class-eb-pro-product-page-widget.php:795
+msgid "Email"
+msgstr ""
+
+#: admin/settings/class-selective-synch-users-settings.php:135
+msgid "Search Users"
+msgstr ""
+
+#: admin/settings/class-sso-settings-general.php:33
+msgid "General Settings"
+msgstr ""
+
+#: admin/settings/class-sso-settings-general.php:38
+msgid "Secret Key"
+msgstr ""
+
+#: admin/settings/class-sso-settings-general.php:39
+msgid "Enter your secret key here."
+msgstr ""
+
+#: admin/settings/class-sso-settings-general.php:49
+msgid "Verify token with moodle"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:48
+msgid "User Roles"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:48
+msgid "Redirect"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:48
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:41
+msgid "Manage"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:69
+#: admin/settings/class-sso-settings-redirection.php:91
+msgid "Select a page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:79
+msgid "Common Login Redirect URL"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:87
+msgid "Default Login Page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:93
+msgid ""
+"Default Login Page for Login with WordPress button on moodle. Default page "
+"is "
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:93
+msgid "User Account"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:98
+#: admin/settings/class-sso-settings-redirection.php:103
+msgid "Enable user role based redirect"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:127
+msgid "User Role Based Redirection Settings"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:193
+msgid "URL"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:195
+msgid "Add"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:209
+msgid "Select user role"
+msgstr ""
+
+#: admin/settings/class-sso-settings-redirection.php:211
+msgid "Select Role"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:45
+msgid "Social Login Settings"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:51
+msgid "Google OAuth login "
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:53
+msgid "Select page on which you want to enable Google OAuth login"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:59
+#: admin/settings/class-sso-settings-social-login.php:118
+msgid "Select Page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:62
+#: admin/settings/class-sso-settings-social-login.php:121
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:249
+msgid "Disable"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:63
+#: admin/settings/class-sso-settings-social-login.php:122
+msgid "Edwiser user-account page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:64
+#: admin/settings/class-sso-settings-social-login.php:123
+msgid "WP login page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:65
+msgid "Edwiser user-account and WP login page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:67
+msgid "This enables Google OAuth login on the selected page."
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:84
+msgid "Client Id"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:85
+msgid "Enter your google OAuth client id here."
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:92
+msgid "Client Secret"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:93
+msgid "Enter your google OAuth app secret key here."
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:110
+msgid "Facebook login "
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:112
+msgid "Select page on which you want to enable Facebook login"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:124
+msgid "Edwiser user-account & WP login page"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:126
+msgid "This enables Facebook OAuth login on the selected page."
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:142
+msgid "App Id"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:143
+msgid "Enter your facebook app id here."
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:150
+msgid "App Secret"
+msgstr ""
+
+#: admin/settings/class-sso-settings-social-login.php:151
+msgid "Enter your facebook app Secret key here."
+msgstr ""
+
+#: admin/settings/class-sso-settings.php:56
+msgid "Single Sign On"
+msgstr ""
+
+#: admin/settings/class-sso-settings.php:68
+msgid "General"
+msgstr ""
+
+#: admin/settings/class-sso-settings.php:69
+msgid "Redirection"
+msgstr ""
+
+#: admin/settings/class-sso-settings.php:70
+msgid "Social login"
+msgstr ""
+
+#: edwiser-bridge-pro.php:92
+msgid "This Edwiser Bridge Pro Add-on plugin"
+msgstr ""
+
+#: edwiser-bridge-pro.php:92
+msgid "is not compatible"
+msgstr ""
+
+#: edwiser-bridge-pro.php:92
+msgid "with active Edwiser Bridge"
+msgstr ""
+
+#: edwiser-bridge-pro.php:92
+msgid "version"
+msgstr ""
+
+#: edwiser-bridge-pro.php:93
+msgid ""
+"Starting from Edwiser Bridge version 3.0.0 you no longer need to activate "
+"each add-on separately."
+msgstr ""
+
+#: edwiser-bridge-pro.php:94
+msgid ""
+"All the Edwiser Bridge Pro Add-ons plugin have been combined into a single "
+"plugin Edwiser Bridge Pro version 3.0.0. You can enable/disable Edwiser "
+"Bridge Pro features from"
+msgstr ""
+
+#: edwiser-bridge-pro.php:94
+msgid " here."
+msgstr ""
+
+#: edwiser-bridge-pro.php:117
+msgid ""
+"Edwiser Bridge Pro requires Edwiser Bridge plugin to be installed and "
+"activated."
+msgstr ""
+
+#: edwiser-bridge-pro.php:129
+msgid ""
+"Edwiser Bridge Pro requires Edwiser Bridge plugin version 3.0.0 or higher."
+msgstr ""
+
+#: edwiser-bridge-pro.php:144
+msgid "Edwiser Bridge Pro feature Woocommerce Integration is disabled"
+msgstr ""
+
+#: edwiser-bridge-pro.php:154
+msgid "Edwiser Bridge Pro feature Bulk Purchase is disabled"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:33
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:57
+msgid "Back"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:36
+msgid "Create New Group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:44
+msgid "Group Name* : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:52
+msgid "Group Manager* : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:56
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:96
+msgid "Select Group Manager"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:72
+msgid "Select Products : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:76
+msgid "No Products selected."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:92
+msgid "Create Group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:132
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:322
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:35
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:295
+#: public/class-edwiser-multiple-users-course-enroll-users.php:89
+#: public/widgets/class-eb-pro-product-page-widget.php:789
+msgid "Name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:133
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:323
+#: public/class-edwiser-multiple-users-course-enroll-users.php:90
+msgid "Email Id"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:134
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:324
+#: public/class-eb-bp-enroll-students-course-progress.php:45
+#: public/class-edwiser-multiple-users-course-enroll-users.php:91
+msgid "Progress"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:135
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:325
+#: public/class-edwiser-multiple-users-course-enroll-users.php:92
+msgid "Actions"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:161
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:351
+#: public/class-edwiser-multiple-users-course-enroll-users.php:118
+msgid "View Progress"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:162
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:352
+#: public/class-edwiser-multiple-users-course-enroll-users.php:119
+msgid "Edit user."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-add-group.php:163
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:353
+#: public/class-edwiser-multiple-users-course-enroll-users.php:120
+msgid "Unenroll user from Group."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-ajax-handler.php:172
+msgid "Unenrolled Successfully"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-cohort-manage-user.php:142
+msgid "Unenrolled successfully!"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-cohort-manage-user.php:147
+msgid "Unable to remove user from the cohort"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:69
+#: public/templates/enroll-users-page.php:122
+msgid "Group Details"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:76
+#: public/templates/enroll-users-page.php:197
+msgid "Group Name : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:83
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:109
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:209
+#: public/templates/enroll-users-page.php:203
+msgid "Update"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:91
+msgid "Group Manager : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:119
+#: public/templates/enroll-users-page.php:214
+msgid "Productwise Associated Courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:155
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:161
+#: public/templates/enroll-users-page.php:24
+msgid "   Users processed."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:170
+#: public/templates/enroll-users-page.php:33
+msgid "Please select Group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:186
+#: public/templates/enroll-users-page.php:117
+msgid "Enrollment Details"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:205
+msgid "Enrolled Users : "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:207
+msgid "Available Seats :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:221
+#: public/templates/enroll-users-page.php:152
+msgid "Enroll Multiple Users"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:233
+#: public/templates/enroll-users-page.php:160
+#: public/templates/enroll-users-page.php:171
+msgid "Download Sample CSV"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:266
+#: public/templates/enroll-users-page.php:232
+msgid "Enroll Users"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:272
+#: public/templates/enroll-users-page.php:238
+msgid "First name *"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:273
+#: public/templates/enroll-users-page.php:239
+msgid "Enter First name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:276
+#: public/templates/enroll-users-page.php:242
+msgid "Last name *"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:277
+#: public/templates/enroll-users-page.php:243
+msgid "Enter Last name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:280
+#: public/templates/enroll-users-page.php:246
+msgid "Email Address *"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-edit-group.php:281
+#: public/templates/enroll-users-page.php:247
+msgid "Enter Email Address"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:94
+msgid "Enroll student in bulk"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:112
+msgid "You have been enrolled in course"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:131
+msgid "You have been unenrolled from group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:150
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:206
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:750
+msgid "Group Deleted"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:170
+msgid "Order Refund"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:189
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:208
+msgid "New Group Created"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:203
+msgid "Bulk product purchase(courses)"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:204
+msgid "User enrolled in group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:205
+msgid "User unenrolled from group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:207
+msgid "Group Quantity Refund"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:220
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:233
+msgid "Enroll Students Page URL"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:221
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:234
+msgid "Name of the products purchased in bulk"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:222
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:235
+msgid "List of the courses associated with the product"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:223
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:225
+msgid "Enrolled courses list"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:224
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:228
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:230
+#: includes/bulk-purchase/class-eb-bp-group-table.php:54
+#: public/class-edwiser-multiple-users-course-purchase-public.php:173
+#: public/class-edwiser-multiple-users-course-purchase-public.php:181
+#: public/class-edwiser-multiple-users-course-purchase-public.php:189
+msgid "Group Name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:226
+msgid "Group manager display name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:227
+msgid "Group name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:229
+msgid "Group unenrolled courses list for users"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:231
+msgid "If the order is partial or full refunded"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:232
+msgid "Refunded Quantity"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:236
+msgid "Name of the newly created group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:356
+msgid "Enroll Students"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:391
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:465
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:224
+#: public/class-edwiser-multiple-users-course-enroll-users.php:680
+#: public/class-edwiser-multiple-users-course-enroll-users.php:780
+#: public/class-edwiser-multiple-users-course-enroll-users.php:899
+#: public/class-edwiser-multiple-users-course-enroll-users.php:974
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1063
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1157
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1264
+msgid "Product Name"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:392
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:466
+#: public/class-edwiser-multiple-users-course-enroll-users.php:683
+#: public/class-edwiser-multiple-users-course-enroll-users.php:783
+#: public/class-edwiser-multiple-users-course-enroll-users.php:901
+#: public/class-edwiser-multiple-users-course-enroll-users.php:976
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1065
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1159
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1266
+msgid "Quantity"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:421
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:485
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:268
+msgid "Test Product"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:685
+msgid "Your order {ORDER_ID} has been {BULK_REFUND_TYPE} refunded."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:692
+msgid "Hello {FIRST_NAME} {LAST_NAME},"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:696
+msgid ""
+"This is to inform you that, The quantity {REFUNDED_BULK_QUANTITY} of group "
+"{GROUP_NAME} has been refunded successfully, by {SITE_NAME}."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:700
+msgid "Order Details:"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:708
+msgid "Order Item"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:716
+msgid "Current Refunded Quantity"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:757
+msgid "Hi {FIRST_NAME}"
+msgstr ""
+
+#. translators: 1: Group name, 2: Site Name.
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:764
+msgid "Your Group %1$s is deleted from %2$s."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:796
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:861
+msgid "Start enrolling students in courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:803
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:868
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:945
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:999
+msgid "Hi {FIRST_NAME},"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:807
+msgid "Thank you for purchasing bulk products."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:817
+msgid "Associated courses :"
+msgstr ""
+
+#. translators: Page url.
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:832
+msgid "You can enroll students in the purchased products from %s."
+msgstr ""
+
+#. translators: Page url.
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:876
+msgid "We've created a new group purchase group called \"%s\"."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:881
+msgid "The products associated with this group are :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:891
+msgid "The courses associated with this group are :"
+msgstr ""
+
+#. translators: Page url.
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:906
+msgid "To enroll students, please use this link %s."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:910
+msgid ""
+"If you have any questions or concerns about this group purchase group or the "
+"enrollment process, feel free to reach out to us."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:938
+msgid "You have been successfully enrolled in {GROUP_NAME}"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:949
+msgid "You have been enrolled by {COHORT_MANAGER_DISP_NAME} to courses"
+msgstr ""
+
+#. translators: course page Url.
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:964
+msgid "You can access your courses from %s."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:992
+msgid "You have been unenrolled from {GROUP_NAME}"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-email-template-manager.php:1003
+msgid "You have been unenrolled by {COHORT_MANAGER_DISP_NAME} from courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:26
+msgid "Cohort"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:52
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:76
+msgid "View Details"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:118
+msgid "Group Manager :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:122
+msgid "Total Group Members :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:126
+msgid "Associated Courses :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:139
+msgid "User Name :"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-enrollment-manager.php:146
+msgid ""
+"  Unenrolling users from group this will unenroll users from all the "
+"associated courses."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:55
+msgid "Group Manager"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:56
+msgid "Enrolled Users"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:57
+msgid "Available Seats"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:58
+#: includes/woo-int/class-bridge-woocommerce-product-manager.php:157
+#: includes/woo-int/class-bridge-woocommerce-product-manager.php:301
+#: public/class-bridge-woocommerce-public.php:176
+#: public/templates/emails/associated-courses-order-email.php:47
+msgid "Courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:287
+msgid "ID "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:374
+msgid "Add New Group"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:399
+msgctxt "Delete the selected Groups"
+msgid "Delete"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:421
+msgid ""
+"No records selected to delete groups, Please select the records to delete"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-group-table.php:447
+msgid "Selected groups deleted successfully"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:83
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:92
+msgid "Cheatin&#8217; huh?"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:129
+msgid "Please wait processing request ...."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:142
+msgid "Search Groups"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:210
+msgid "users has been unenrolled successfully."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:216
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:233
+msgid "Dismiss this notice"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:227
+msgid "No users has been unenrolled"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:246
+msgid "Failed to unenroll user"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:255
+msgid " has been unenrolled from the "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-manage-groups.php:255
+msgid " course"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:41
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:58
+msgid "Group Enrollment"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-self-enroll.php:42
+msgid "yes"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:67
+#: public/class-edwiser-multiple-users-course-enroll-users.php:60
+#: public/class-edwiser-multiple-users-course-enroll-users.php:373
+#: public/class-edwiser-multiple-users-course-enroll-users.php:421
+#: public/class-edwiser-multiple-users-course-enroll-users.php:501
+#: public/class-edwiser-multiple-users-course-enroll-users.php:594
+#: public/class-edwiser-multiple-users-course-enroll-users.php:645
+#: public/class-edwiser-multiple-users-course-enroll-users.php:750
+#: public/class-edwiser-multiple-users-course-enroll-users.php:864
+#: public/class-edwiser-multiple-users-course-enroll-users.php:944
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1037
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1122
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1204
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1236
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1320
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1437
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1529
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1574
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:19
+msgid "Security check failed try reloading page"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:75
+msgid "Invalid user data."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:103
+msgid "Available sets quantity is less than requested quantity."
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:299
+msgid "Users with following email ids have been enrolled successfully"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:306
+msgid "Check enrolled users list "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:306
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:349
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:393
+#: public/class-edwiser-multiple-users-course-enroll-users.php:238
+#: public/class-edwiser-multiple-users-course-enroll-users.php:258
+msgid " here "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:310
+msgid "Successfully Enrolled Users List"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:321
+msgid "User with following email id have been enrolled successfully"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:342
+msgid "User with the following email ids already enrolled in the courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:349
+msgid " Check already enrolled users  "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:352
+msgid "Already users List"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:364
+msgid "User with the following email id already enrolled in the courses"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:386
+msgid "Some Error occured while enrolling users with following email ids:"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:393
+msgid "Unable to enroll users in group, Check users list  "
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:397
+msgid "Failed Enrollment Users"
+msgstr ""
+
+#: includes/bulk-purchase/class-eb-bp-user-manager.php:409
+msgid "Some Error occured while enrolling users with following email id:"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-frontend-handler.php:276
+msgid "Additional Fields"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:36
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:278
+msgid "Type"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:37
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:308
+msgid "Label"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:38
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:328
+msgid "Placeholder"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:39
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:379
+msgid "Required"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:40
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:368
+msgid "Enabled"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:188
+msgid "Edit Row"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:189
+msgid "Delete Row"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:215
+msgid "Currently no fields available."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:248
+msgid "Enable"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:253
+msgid " + Add Field"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:257
+msgid "Save Field order"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:273
+msgid "Field Settings"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:279
+msgid "Field type according to which fields will be shown on pages."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:283
+msgid "Text"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:284
+msgid "Number"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:285
+#: public/widgets/class-eb-pro-shop-page-widget.php:152
+msgid "Date"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:286
+msgid "Textarea"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:287
+msgid "Select"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:288
+msgid "Checkbox"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:296
+msgid "Field Name which should be same as the Moodle short name."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:299
+msgid "Field Name ( Moodle Short Name ) "
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:301
+msgid "Field name should be same as the "
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:301
+msgid "Moodle field short name. "
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:309
+msgid "Field label which will be shown on the pages for input fields."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:312
+msgid "Field Label"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:318
+msgid "Default Value"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:319
+msgid ""
+"Default value which will be shown while showing fields for thr first type, "
+"If field type is select then option value should be entered here."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:322
+msgid "Field Default value"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:329
+msgid "Placeholder shown for the fields."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:332
+msgid "Field Placeholder"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:338
+msgid "Class"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:339
+msgid "This class will get added on the Field wrapper element."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:342
+msgid "Field Css Class"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:348
+msgid "Options"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:349
+msgid "Options which will get displayed on the selected pages."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:364
+msgid ""
+"By default all pages shown on the checkout page enabling will enable fields "
+"for all selected pages."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:389
+msgid "Sync On Moodle"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:403
+msgid "Display on checkout page"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:412
+msgid "Display on Woocommerce registration page"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:421
+msgid "Display on My Account page"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:433
+msgid "Display on Edwiser registration page"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:442
+msgid "Display on Edwiser User Account page"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:462
+msgid "Delete Custom Field"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:465
+msgid "Are you sure you want to delete this custom field?"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:480
+msgid "Error while saving custom fields"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:484
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:546
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:589
+msgid "Invalid nonce"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:490
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:552
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:596
+msgid "No data found"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:499
+msgid "Field name is required"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:531
+msgid "Custom field saved successfully"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:542
+msgid "Error while deleting custom fields"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:561
+msgid "Custom field deleted successfully"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:585
+msgid "Error while performing bulk action"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-handler.php:624
+msgid "Bulk action performed successfully"
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-validation.php:95
+#: public/class-bridge-woocommerce-public.php:637
+#: public/class-bridge-woocommerce-public.php:640
+#: public/class-bridge-woocommerce-public.php:643
+msgid " is a required field."
+msgstr ""
+
+#: includes/custom-fields/class-edwiser-custom-field-validation.php:99
+msgid " is required!"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:42
+msgid "Security check or invalid offset value."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:59
+msgid "Please enable the create users option. "
+msgstr ""
+
+#. translators: Enter licesing key
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:212
+msgid ""
+"Processed  <b> %1$s <span class=\"eb-ss-total-users\"> / %2$s</span> </b> "
+"users"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:221
+msgid "and linking "
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:226
+msgid "Users creation "
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:226
+msgid "completed successfully."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:231
+msgid "click here"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:320
+msgid "Users with following email ids have been created successfully."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:323
+msgid ""
+"Users with following email ids have been created and linked successfully."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:341
+msgid "User with the following email ids already created."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:344
+msgid "Linked users with the following email ids which are already created."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:362
+msgid "Unable to create users with the following email ids."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-ajax-handler.php:365
+msgid ""
+"Error occred while creating or linking users with the following email ids."
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:52
+msgid "Moodle User Id"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:53
+msgid "Username"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:54
+#: public/class-bridge-woocommerce-public.php:612
+#: public/class-bridge-woocommerce-public.php:637
+msgid "First Name"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:55
+#: public/class-bridge-woocommerce-public.php:616
+#: public/class-bridge-woocommerce-public.php:640
+msgid "Last Name"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:57
+msgid "Synch Status"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:72
+msgid "Create selected users"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:76
+msgid "Create and link selected users"
+msgstr ""
+
+#: includes/selective-sync/class-eb-select-users-list-table.php:86
+#: includes/selective-sync/class-eb-select-users-list-table.php:89
+msgid "Bulk Actions"
+msgstr ""
+
+#: includes/selective-sync/selective-synch-functions.php:95
+msgid "Not Created"
+msgstr ""
+
+#: includes/selective-sync/selective-synch-functions.php:98
+#: public/widgets/class-eb-pro-product-page-widget.php:542
+msgid "Created"
+msgstr ""
+
+#: includes/selective-sync/selective-synch-functions.php:102
+msgid "Linked"
+msgstr ""
+
+#: includes/sso/class-eb-pro-sso.php:272
+msgid "This shortcode shows Facebook and Goodle+ icons for login."
+msgstr ""
+
+#: includes/sso/class-eb-pro-sso.php:280
+msgid ""
+"This shortcode redirects user to the Moodle site. This shortcode can take "
+"following parameters: "
+msgstr ""
+
+#: includes/sso/class-eb-pro-sso.php:283
+msgid "Moodle course id Example:"
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:193
+#: includes/sso/class-single-sign-on.php:222
+msgid "Please check your Edwiser Bridge Connection Settings first!"
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:220
+msgid ""
+"Web service function is not added into the external services. Please check "
+"your Edwiser Bridge Connection Settings first!"
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:242
+msgid "Token verified successfully !"
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:262
+msgid "Please check Moodle URL !"
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:275
+msgid "You don't have moodle account."
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:277
+msgid "Please login to view this page."
+msgstr ""
+
+#: includes/sso/class-single-sign-on.php:354
+msgid "Access Course"
+msgstr ""
+
+#: includes/sso/ebsso-functions.php:45 includes/sso/ebsso-functions.php:115
+msgid "Something went wrong"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:69
+msgid "Moodle Course Enrollment."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:89
+msgid "Course Enrollment."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:98
+msgid "Hi %s"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:106
+msgid ""
+"Thank you for your order. You have been successfully enrolled in the "
+"following courses."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:135
+msgid "Woocommerce Moodle Course Enrollment"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:146
+msgid "Products List"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-email-template-manager.php:269
+msgid "Test Course"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:97
+msgid "First name"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:102
+msgid "Last name"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:121
+msgid " First name is required!"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:124
+msgid " Last name is required!."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:188
+msgid " already exist on Moodle please use different email."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woo-my-account-compatibility.php:248
+msgid "My Courses"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:194
+msgid "Product( s ) created."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:196
+msgid ""
+"Courses for synchronization not found. All products may be already created."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:305
+msgid "Product( s ) updated."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:307
+msgid "Product for update not found."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:401
+msgid "Categories synchronized."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-course.php:403
+msgid ""
+"Courses for synchronisation could not be found. All products may have "
+"already been created or could be in the trash. If they are in the trash and "
+"you wish to re-sync them, please empty the WooCommerce Product trash folder."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-order-manager.php:782
+msgid "Course purchased for someone else: "
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-order-manager.php:783
+msgid "Enrolled User: "
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-product-manager.php:170
+msgid "Associate product with courses."
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-product-manager.php:229
+msgid "Product Options"
+msgstr ""
+
+#: includes/woo-int/class-bridge-woocommerce-product-manager.php:302
+msgid "Associate product with courses"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:91
+msgid "Resume"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:151
+msgid "Available courses"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:376
+#: public/class-edwiser-multiple-users-course-purchase-public.php:820
+msgid "You will be redirected to %s within next %s seconds."
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:377
+#: public/class-edwiser-multiple-users-course-purchase-public.php:821
+msgid "My Courses Page"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:608
+msgid "Purchase this product for someone else?"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:665
+#: public/class-bridge-woocommerce-public.php:688
+msgid "Subscription Expiry Date Access Control"
+msgstr ""
+
+#: public/class-bridge-woocommerce-public.php:666
+msgid ""
+"This setting allows you to specify whether the subscription expiration date "
+"should take precedence over the course expiration date."
+msgstr ""
+
+#: public/class-eb-bp-enroll-students-course-progress.php:40
+msgid "Course Progress"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:30
+#: public/class-edwiser-multiple-users-course-enroll-users.php:200
+#: public/class-edwiser-multiple-users-course-enroll-users.php:325
+msgid "Unable to update group name, due to security reasons.."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:48
+msgid "Group name successfully updated."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:50
+msgid "Unable to update group name."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:238
+msgid "Check successfully removed users from group "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:241
+#: public/class-edwiser-multiple-users-course-enroll-users.php:261
+msgid "Deleted Users"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:244
+#: public/class-edwiser-multiple-users-course-enroll-users.php:345
+msgid "User with email id  "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:248
+#: public/class-edwiser-multiple-users-course-enroll-users.php:345
+msgid " have been unenrolled successfully"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:258
+msgid "Unable to remove some users from group, Check complete list "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:264
+#: public/class-edwiser-multiple-users-course-enroll-users.php:360
+msgid "Sorry, unable to delete user with email id "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:492
+msgid "Invalid request parameters"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:535
+msgid "User data has been updated successfully."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:537
+msgid "Failed to update user on moodle."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:541
+msgid "User data is inappropriate."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:635
+msgid "Checkout page not found, Please contact admin"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:664
+#: public/class-edwiser-multiple-users-course-enroll-users.php:883
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1141
+msgid "'Sorry, currently there are no group products available '"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:679
+#: public/class-edwiser-multiple-users-course-enroll-users.php:898
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1156
+msgid "Sr. No."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:681
+#: public/class-edwiser-multiple-users-course-enroll-users.php:685
+#: public/class-edwiser-multiple-users-course-enroll-users.php:781
+#: public/class-edwiser-multiple-users-course-enroll-users.php:900
+#: public/class-edwiser-multiple-users-course-enroll-users.php:975
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1064
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1158
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1265
+msgid "Price"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:726
+#: public/class-edwiser-multiple-users-course-enroll-users.php:785
+#: public/class-edwiser-multiple-users-course-enroll-users.php:835
+msgid "Total"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:769
+#: public/class-edwiser-multiple-users-course-enroll-users.php:963
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1247
+msgid "Sorry, currently there are no group products available."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1052
+msgid "Sorry, currently there are no products available."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1370
+msgid "Group created successfully"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1388
+msgid "Group creation failed"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1515
+msgid "Products updated successfully"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1517
+msgid "All Products can not be removed from Group"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1560
+msgid "Quantity updated successfully"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1562
+msgid "Please enter valid quantity"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1592
+msgid "Group Manager updated successfully"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-enroll-users.php:1594
+msgid "Please select valid user"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:182
+#: public/class-edwiser-multiple-users-course-purchase-public.php:211
+msgid "Enter Group Name"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:210
+msgid "Group Name for "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:210
+msgid " ( "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:210
+msgid " ) product"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:240
+#: public/class-edwiser-multiple-users-course-purchase-public.php:248
+msgid "Please enter group name in Group Name fields."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:279
+msgid " Successfully enabled single group creation for group products."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:290
+msgid ""
+"To create same group for all the purchased group products, Please make their "
+"quantities same and update your cart."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:299
+msgid " Successfully disabled single group creation for group products."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:350
+msgid ""
+"To create same group for all the purchased group products, Please remove "
+"products added from the enroll-students page and those are : "
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:386
+msgid ""
+"Created group will not allow you to reuse the quantity if the users are "
+"unenrolled from group as there are some products which don't allow you to "
+"reuse quantity which are listed below:"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:438
+msgid "This will allow to create the same product for all the courses products"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:439
+msgid "Add all product in same group"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:457
+msgid "Group Purchase Enabled"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:512
+msgid "change associated courses."
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:512
+msgid "delete the product permanently."
+msgstr ""
+
+#. translators: Course action.
+#: public/class-edwiser-multiple-users-course-purchase-public.php:519
+msgid "This product is purchased by more than one user can't %s"
+msgstr ""
+
+#: public/class-edwiser-multiple-users-course-purchase-public.php:698
+msgid "Proceed to checkout"
+msgstr ""
+
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:33
+msgid ""
+"Invalid CSV file data please upload correct file or check the sample CSV for "
+"correct format"
+msgstr ""
+
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:57
+msgid ""
+"Insufficient quantity available please add more quantity or reduce CSV "
+"records"
+msgstr ""
+
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:66
+msgid "First Name "
+msgstr ""
+
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:71
+msgid "Last name "
+msgstr ""
+
+#: public/edwiser-multiple-users-course-purchase-upload-csv.php:76
+msgid "Email ID "
+msgstr ""
+
+#: public/templates/enroll-users-page.php:45
+msgid "Select Group:"
+msgstr ""
+
+#: public/templates/enroll-users-page.php:50
+msgid "Select Group"
+msgstr ""
+
+#: public/templates/enroll-users-page.php:139
+msgid "Enrolled Users ( Available Seats ) :"
+msgstr ""
+
+#: public/templates/enroll-users-page.php:266
+msgid "Login required to enroll users!"
+msgstr ""
+
+#: public/templates/enroll-users-page.php:269
+msgid "Sign in"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:43
+msgid "Edwiser Bridge Pro Product Page"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:78
+#: public/widgets/class-eb-pro-related-product-widget.php:66
+#: public/widgets/class-eb-pro-shop-page-widget.php:66
+msgid "Content"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:97
+msgid "Product ID"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:100
+msgid "Enter product ID"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:108
+#: public/widgets/class-eb-pro-related-product-widget.php:130
+#: public/widgets/class-eb-pro-shop-page-widget.php:203
+msgid "Show Category"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:121
+msgid "Show Ratings"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:134
+msgid "Show 'Created'"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:147
+msgid "Show 'Course Expiry'"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:160
+#: public/widgets/class-eb-pro-related-product-widget.php:169
+#: public/widgets/class-eb-pro-shop-page-widget.php:242
+msgid "Show 'Enrolled'"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:173
+msgid "Show 'Associated Courses'"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:188
+#: public/widgets/class-eb-pro-related-product-widget.php:197
+#: public/widgets/class-eb-pro-shop-page-widget.php:270
+msgid "To configure ‘Buy now’ button click"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:228
+msgid "All Courses"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:263
+#: public/widgets/class-eb-pro-product-page-widget.php:618
+msgid "Review"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:320
+#: public/widgets/class-eb-pro-related-product-widget.php:293
+#: public/widgets/class-eb-pro-related-product-widget.php:446
+#: public/widgets/class-eb-pro-shop-page-widget.php:476
+#: public/widgets/class-eb-pro-shop-page-widget.php:638
+msgid "Sale"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:417
+msgid "View Cart"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:551
+msgid "Enrolled Students"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:575
+msgid "Course Expiry"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:576
+msgid "Days"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:611
+#: public/widgets/class-eb-pro-product-page-widget.php:630
+msgid "Overview"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:650
+msgid "No reviews yet."
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:661
+msgid "Course rating"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:684
+#: public/widgets/class-eb-pro-shop-page-widget.php:155
+msgid "Rating"
+msgstr ""
+
+#. translators: %s is product title
+#: public/widgets/class-eb-pro-product-page-widget.php:775
+msgid "Add a review"
+msgstr ""
+
+#. translators: %s is product title
+#: public/widgets/class-eb-pro-product-page-widget.php:775
+msgid "Be the first to review &ldquo;%s&rdquo;"
+msgstr ""
+
+#. translators: %s is product title
+#: public/widgets/class-eb-pro-product-page-widget.php:777
+msgid "Leave a Reply to %s"
+msgstr ""
+
+#. translators: %s opening and closing link tags respectively
+#: public/widgets/class-eb-pro-product-page-widget.php:820
+msgid "You must be %1$slogged in%2$s to post a review."
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:825
+msgid "Add your ratings"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:826
+msgid "Rate&hellip;"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:827
+msgid "Perfect"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:828
+msgid "Good"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:829
+msgid "Average"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:830
+msgid "Not that bad"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:831
+msgid "Very poor"
+msgstr ""
+
+#: public/widgets/class-eb-pro-product-page-widget.php:835
+msgid "Add your review"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:38
+msgid "Edwiser Bridge Pro Related Products"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:74
+#: public/widgets/class-eb-pro-shop-page-widget.php:74
+msgid "Page Settings"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:84
+#: public/widgets/class-eb-pro-shop-page-widget.php:84
+msgid "Title"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:87
+msgid "Related Courses"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:94
+#: public/widgets/class-eb-pro-shop-page-widget.php:124
+msgid "Products Per Page"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:105
+#: public/widgets/class-eb-pro-shop-page-widget.php:178
+msgid "Default Layout"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:110
+#: public/widgets/class-eb-pro-shop-page-widget.php:183
+msgid "Grid"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:111
+#: public/widgets/class-eb-pro-shop-page-widget.php:184
+msgid "List"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:119
+#: public/widgets/class-eb-pro-shop-page-widget.php:192
+msgid "Course Card Settings"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:143
+#: public/widgets/class-eb-pro-shop-page-widget.php:216
+msgid "Show Short Description"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:156
+#: public/widgets/class-eb-pro-shop-page-widget.php:229
+msgid "Show Rating"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:182
+#: public/widgets/class-eb-pro-shop-page-widget.php:255
+msgid "Show View Button"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:390
+#: public/widgets/class-eb-pro-related-product-widget.php:542
+#: public/widgets/class-eb-pro-shop-page-widget.php:582
+#: public/widgets/class-eb-pro-shop-page-widget.php:734
+msgid "View"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:392
+#: public/widgets/class-eb-pro-related-product-widget.php:396
+#: public/widgets/class-eb-pro-related-product-widget.php:544
+#: public/widgets/class-eb-pro-related-product-widget.php:548
+#: public/widgets/class-eb-pro-shop-page-widget.php:584
+#: public/widgets/class-eb-pro-shop-page-widget.php:588
+#: public/widgets/class-eb-pro-shop-page-widget.php:736
+#: public/widgets/class-eb-pro-shop-page-widget.php:740
+msgid "Select options"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:394
+#: public/widgets/class-eb-pro-related-product-widget.php:546
+#: public/widgets/class-eb-pro-shop-page-widget.php:586
+#: public/widgets/class-eb-pro-shop-page-widget.php:738
+msgid "Sign up now"
+msgstr ""
+
+#: public/widgets/class-eb-pro-related-product-widget.php:398
+#: public/widgets/class-eb-pro-related-product-widget.php:550
+#: public/widgets/class-eb-pro-shop-page-widget.php:590
+#: public/widgets/class-eb-pro-shop-page-widget.php:742
+msgid "Read more"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:38
+msgid "Edwiser Bridge Pro Shop Page"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:87
+msgid "Shop"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:95
+msgid "Title Style"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:106
+msgid "Background"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:135
+msgid "Allow Sort"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:147
+msgid "Sort By"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:153
+msgid "Price: low to high"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:154
+msgid "Price: high to low"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:156
+msgid "Popularity"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:165
+msgid "Show Result Count"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:357
+msgid "Home"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:363
+msgid "We have found"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:363
+msgid "Courses for you"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:381
+msgid "Sort by popularity"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:382
+msgid "Sort by average rating"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:383
+msgid "Sort by newness"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:384
+msgid "Sort by price: low to high"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:385
+msgid "Sort by price: high to low"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:455
+#: public/widgets/class-eb-pro-shop-page-widget.php:468
+#: public/widgets/class-eb-pro-shop-page-widget.php:630
+msgid "Already enrolled"
+msgstr ""
+
+#: public/widgets/class-eb-pro-shop-page-widget.php:535
+#: public/widgets/class-eb-pro-shop-page-widget.php:696
+msgid "Enrolled"
+msgstr ""

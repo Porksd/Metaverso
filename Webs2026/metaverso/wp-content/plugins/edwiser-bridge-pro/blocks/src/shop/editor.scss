@@ -1,0 +1,29 @@
+.components-toggle-control {
+  .components-flex {
+    flex-direction: row-reverse !important;
+  }
+}
+
+.components-select-control,
+.components-base-control {
+  label {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+  }
+}
+
+.eb__fieldset-label {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+  margin-bottom: 8px;
+}
+
+.eb__color-picker .components-circular-option-picker__custom-clear-wrapper {
+  margin-top: 0 !important;
+}
+
+.eb__color-picker .components-circular-option-picker__clear {
+  height: 24px !important;
+}

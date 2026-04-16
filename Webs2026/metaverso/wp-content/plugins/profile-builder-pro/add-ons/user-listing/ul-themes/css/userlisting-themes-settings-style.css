@@ -1,0 +1,302 @@
+/* Admin Theme selection metabox */
+.wppb-ul-theme-screenshot {
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wppb-ul-theme-screenshot img {
+    width: 100%;
+}
+
+.wppb-ul-theme-preview {
+    width: 80px;
+    height: 35px;
+    position: absolute;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 19px;
+    color: #fff;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.wppb-ul-theme-preview:hover {
+    color: #fff;
+}
+
+.ul-themes-browser {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: start;
+    padding: 20px 0;
+}
+
+.wppb-ul-theme {
+    border: 1px solid #D2D1D1;
+    flex-basis: 155px;
+}
+
+.wppb-ul-theme .wppb-ul-theme-details {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.wppb-ul-theme .wppb-ul-theme-title {
+    flex-basis: 50%;
+    box-sizing: border-box;
+}
+
+.wppb-ul-theme .wppb-ul-theme-activate {
+    flex-basis: 50%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.wppb-ul-theme .wppb-ul-theme-activate button.reset {
+    display: none;
+}
+
+.wppb-ul-theme.active .wppb-ul-theme-activate button.reset {
+    display: none;
+    border: none;
+    box-shadow: none;
+    background-color: #e76054;
+    color: #FFFFFF;
+    font-weight: 500;
+    padding: 0 5px;
+}
+
+.wppb-ul-theme.active:hover .wppb-ul-theme-activate button.reset {
+    display: inline-block;
+}
+
+.wppb-ul-theme.active:hover .wppb-ul-theme-activate button.activate,
+.wppb-ul-theme .wppb-ul-theme-activate button.activate {
+    display: none;
+}
+
+.wppb-ul-theme:hover .wppb-ul-theme-activate button.activate {
+    display: inline-block;
+}
+
+.wppb-ul-theme .wppb-ul-theme-details {
+    height: 40px;
+    background: #FAFAFA;
+}
+
+.wppb-ul-theme .wppb-ul-theme-details .wppb-ul-theme-title h2 {
+    line-height: 40px !important;
+    padding: 0 5px !important;
+    color: #535252;
+    font-size: 12px !important;
+}
+
+.wppb-ul-theme.active .wppb-ul-theme-details h2 {
+    display: flex;
+    gap: 5px;
+}
+
+.wppb-ul-theme.active:hover .wppb-ul-theme-details h2 strong {
+    display: none;
+}
+
+.wppb-ul-theme.active {
+    border: 1px solid #3858E9;
+}
+
+
+.wppb-ul-theme:hover .wppb-ul-theme-screenshot .wppb-ul-theme-preview {
+    display: flex;
+}
+
+.wppb-ul-theme:hover .wppb-ul-theme-screenshot img {
+    opacity: 0.7;
+}
+
+.wppb-ul-theme.active:hover .wppb-ul-theme-details .wppb-ul-theme-title,
+.wppb-ul-theme.active .wppb-ul-theme-details .wppb-ul-theme-title {
+    border-right: none;
+}
+
+.wppb-ul-theme:hover .wppb-ul-theme-details .wppb-ul-theme-title {
+    border-right: 1px solid #D2D1D1;
+}
+
+.wppb-ul-theme-modal {
+    display: none;
+    padding: 16px 24px;
+}
+
+.wppb-ul-theme-modal .wppb-ul-theme-preview-image {
+    width: 100%;
+    height: auto;
+}
+
+.wppb-ul-theme-reset-modal {
+    display: none;
+}
+
+#default-info {
+    display: none;
+}
+
+.post-type-wppb-ul-cpt .ui-dialog-titlebar {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 40px;
+    text-transform: uppercase;
+    color: #1E1E1E;
+    padding: 0 12px;
+    height: 40px;
+}
+
+.ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.wppb-all-users-editor-overlay,
+.wppb-single-user-editor-overlay {
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 37px);
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 999 !important;
+    bottom: 0;
+}
+
+#wppb-all-users-file-path,
+#wppb-single-users-file-path {
+    font-style: italic;
+    margin: 0 20px 0 10px;
+}
+
+#wppb-all-users-file-label,
+#wppb-single-users-file-label {
+    font-weight: 600;
+}
+
+.wppb-ul-theme-reset-modal.ui-dialog-content {
+    padding: 0;
+    display: flex !important;
+    flex-direction: column;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-modal-content {
+    padding: 10px 25px;
+    flex-basis: 85%;
+    box-sizing: border-box;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-modal-content p.wppb-options-message {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1E1E1E;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-modal-content p.notice-content {
+    font-style: italic;
+    padding-top: 15px;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-modal-content p.notice-content strong {
+    color: #e76054;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-options {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons button {
+    width: 150px;
+    height: 40px !important;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons button:hover {
+    opacity: 0.9;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons button.cancel-reset {
+    background: #e76054;
+    color: #FFFFFF;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons button.confirm-reset {
+    background: #0068b2;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-options .wppb-options-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-options .wppb-options-wrapper label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.wppb-ul-theme-reset-modal .wppb-reset-buttons button:focus,
+.wppb-ul-theme-reset-modal .wppb-options-wrapper input[type=checkbox]:focus {
+    outline: none;
+    border-color: inherit;
+    box-shadow: none;
+}
+
+#wppb-user-notification {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+#wppb-user-notification p {
+    font-size: 16px;
+}
+
+.ui-dialog {
+    z-index: 1000 !important;
+}
+
+
+@media screen and (max-width:850px) {
+    .ul-themes-browser {
+        padding: 10px;
+        justify-content: space-evenly;
+    }
+}

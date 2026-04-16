@@ -1,0 +1,64 @@
+.vshm-radios input[type=radio] {
+    margin: 0 10px 0 0 !important;
+}
+
+.vshm-radios .vshm-radios__option {
+    padding: 2px 0;
+}
+
+.vshm-radios.mode-vshm-radios-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    display: grid;
+    column-gap: 16px;
+    row-gap: 16px;
+}
+
+.vshm-radios.mode-vshm-radios-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+    column-gap: 16px;
+    row-gap: 16px;
+}
+
+.vshm-radios.mode-vshm-radios-grid .vshm-radios__option input,
+.vshm-radios.mode-vshm-radios-grid-2 .vshm-radios__option input {
+    opacity: 0;
+}
+
+.vshm-radios__option > .vshm-radios__option__label__content {
+    padding: 2px;
+    font-weight: 600;
+}
+
+.vshm-radios.mode-vshm-radios-grid .vshm-radios__option .vshm-radios__option__label,
+.vshm-radios.mode-vshm-radios-grid-2 .vshm-radios__option .vshm-radios__option__label {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 100%;
+    border: 1px solid lightgrey;
+    position: relative;
+}
+
+.vshm-radios.mode-vshm-radios-grid .vshm-radios__option .vshm-radios__option__label:hover .vshm-radios__option__selector,
+.vshm-radios.mode-vshm-radios-grid-2 .vshm-radios__option .vshm-radios__option__label:hover .vshm-radios__option__selector,
+.vshm-radios.mode-vshm-radios-grid .vshm-radios__option .vshm-radios__option__label:focus .vshm-radios__option__selector,
+.vshm-radios.mode-vshm-radios-grid-2 .vshm-radios__option .vshm-radios__option__label:focus .vshm-radios__option__selector {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #9e9e9e;
+    display: block;
+    position: absolute;
+    top: -2px;
+    left: -2px;
+}
+
+.vshm-radios.mode-vshm-radios-grid .vshm-radios__option input:checked + .vshm-radios__option__selector,
+.vshm-radios.mode-vshm-radios-grid-2 .vshm-radios__option input:checked + .vshm-radios__option__selector {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #2196f3;
+    display: block;
+    position: absolute;
+    top: -2px;
+    left: -2px;
+}

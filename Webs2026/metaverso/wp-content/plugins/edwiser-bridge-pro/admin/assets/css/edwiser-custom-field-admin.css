@@ -1,0 +1,241 @@
+.eb_custom_fields_wrap{
+    margin: 15px;    
+}
+.eb_custom_field_tbl{
+    border-spacing: 0;
+    border: 1px solid #ccd0d4;
+    width: 100%;
+    background-color: #fff;
+    text-align: left;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 4%);
+}
+
+.eb_custom_field_tbl tr{
+    cursor: pointer;
+}
+
+.eb_custom_field_tbl *{
+    word-wrap: break-word;
+}
+
+.eb_custom_field_tbl tr th {
+    line-height: 1.4em;
+    border-bottom: 1px solid #ccd0d4;
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+    padding: 15px 10px;
+}
+
+.eb_custom_field_tbl tr td {
+    line-height: 1.4em;
+    /* border: 1px solid #ccd0d4; */
+    font-weight: 400;
+    color: #555;
+    font-size: 13px;
+    padding: 10px 10px;
+}
+
+.eb_custom_field_tbl>tbody>:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+.button-primary.eb_custom_field_btns, .eb_field_action_wrap .eb_custom_field_btns, .eb_custom_field_btns{
+    /*padding: 2px 15px;*/
+    border-radius: 2px;
+}
+
+.eb_field_action_wrap select.eb_custom_field_btns{
+    font-size: 13px;
+}
+
+
+.eb_field_bulk_action_wrap{
+    background-color: white;
+    padding: 12px;
+    display: flex;
+    border: 1px solid #ccd0d4;
+}
+
+.eb_field_bulk_action_wrap:first-of-type{
+    border-bottom: none;
+}
+
+    
+.eb_field_bulk_action_wrap:last-child{
+    border-top: none;
+}
+
+
+.eb_custom_fields_wrap{
+    margin: 15px;    
+}
+
+
+/*Field pop up fields*/
+
+.eb-cf-pop-up-lbl{
+    width: 25%;
+}
+
+.eb-cf-pop-up-lbl label{
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.eb-cf-pop-up-right-field{
+    width: 75%;
+}
+
+/*.eb-cf-pop-up-right-field select, .eb-cf-pop-up-right-field input[type='text']{*/
+.eb-cf-pop-up-right-field .eb-cf-pop-up-inp{
+    width: 90%;
+    max-width: 100%;
+    padding: 3px 10px;
+}
+
+.eb-cf-pop-up-fields{
+    display: flex;
+    padding: 5px 15px;
+}
+
+
+.eb-cf-dialog .ui-widget-header{
+    border: 0;
+    line-height: 22px;
+    border-bottom: 1px solid #ededed;
+    padding: 15px 12px 15px 30px;
+    font-size: 20px;
+    background-color: white;
+    text-align: left;
+}
+
+
+.eb-cf-dialog{
+    border: 1px solid #c5c5c5;
+    border-radius: 5px;
+    -webkit-box-shadow: 0 0 20px 5px rgb(0 0 0 / 80%);
+    box-shadow: 0 0 20px 5px rgb(0 0 0 / 80%);
+}
+
+.ui-dialog .ui-dialog-content.eb-cf-pop-up-cont{
+    padding: 20px 25px;
+}
+
+
+.eb-cf-dialog .eb-cf-dialog-btn{
+    border-radius: 3px;
+    padding: 4px 20px;
+    letter-spacing: 1px;
+    color: white;
+}
+
+
+.eb-cf-dialog .eb-cf-dialog-cancel-btn{
+    border-radius: 3px;
+    padding: 10px 20px;
+    letter-spacing: 1px;
+}
+
+
+
+.eb-cf-tbl-enabled-lbl{
+    text-align: center;
+}
+
+.eb-cf-pop-up-right-field .eb-cf-dialog-option-inp{
+    width: 39%;
+}
+
+.eb-cf-pop-up-right-field .eb-cf-dialog-option-btn{
+    width: 20%;
+}
+
+.eb-cf-dialog-option-btn span{
+    font-size: 23px;
+    padding: 3px 1px;
+    cursor: pointer;
+}
+
+.eb-cf-dialog-option-add-new{
+    color: #006799;
+}
+
+.eb-cf-dialog-option-remove, .eb-cf-dialog-option-first-remove{
+    color: red;
+}
+
+.eb-cf-dialog-option-inp{
+    margin-right: 3px;
+}
+
+.eb-cf-hide{
+    display: none;
+}
+
+
+.eb_field_action_left, .eb_field_action_right{
+    width: 50%;
+}
+
+.eb_field_action_right{
+    text-align: right;
+}
+
+
+.eb_cf_add_new_field_btn{
+    margin-right: 10px;
+}
+
+
+.eb-cf-pop-up-cont-wrap{
+    display: none;
+}
+
+
+.eb-cf-disable-row{
+    opacity: 0.4;
+}
+
+
+.eb-cf-pop-up-fields .eb-cf-pop-up-right-field .select2.select2-container {
+    width: 90% !important;
+}
+
+.eb-cf-edit{
+    color: #006799;
+}
+
+.eb-cf-remove{
+    color: #dc3232;
+}
+
+
+.eb-cf-dialog-tooltip{
+    vertical-align: middle;
+    padding-right: 5px;
+    float:  right;
+}
+
+
+.eb_cf_error_msg{
+    border: 1px solid red;
+    border-left: 5px solid #dc3232;
+    margin: 0px 15px 5px 15px;
+    padding: 7px 10px;
+    /* color: #dc3232; */
+    width: 85%;
+    display: none;
+}
+.eb_cf_delete_error_msg{
+    border: 1px solid red;
+    border-left: 5px solid #dc3232;
+    /* margin: 0px 15px 5px 15px; */
+    padding: 7px 10px;
+    /* color: #dc3232; */
+    width: 85%;
+    display: none;
+}
+
+.eb_field_action_left .eb_cf_bulk_action_btns, .eb_field_action_left .eb_cf_add_new_field_btn{
+    margin: 2px 2px;
+}

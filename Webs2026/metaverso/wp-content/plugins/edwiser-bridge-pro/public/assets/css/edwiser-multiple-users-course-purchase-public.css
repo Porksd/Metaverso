@@ -1,0 +1,1365 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+.ebbp_csv_enrollment_resp_msg,
+.ebbp_bulk_deleted_users_resp_msg {
+	display: none;
+}
+
+.ebbp_action_msg {
+	color: red;
+}
+
+#eb-lading-parent {
+	z-index: 5000;
+}
+
+.ebbp_csv_enroll_error_msg,
+.ebbp_bulk_deleted_users_parent {
+	border: 1px solid #ffcc00;
+	border-left: 5px solid #ffcc00;
+	padding: 5px 5px 5px 10px;
+	background: #fffefa;
+	/*margin: 15px; */
+}
+
+/********  FOR TESTING **********/
+
+#add-quantity-popup {
+	overflow-y: scroll;
+	/*overflow-y: hidden;*/
+	min-width: 400px;
+	/*padding: 20px 30px;*/
+	padding: 10px 30px 20px 30px;
+}
+
+.ebbp_csv_enroll_error_msg span,
+.ebbp_bulk_deleted_users_parent span {
+	color: #337ab7;
+	font-weight: 600;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#ebbp_csv_processed_users_count,
+#ebbp_csv_total_users_count {
+	font-weight: 600;
+	font-size: 18px;
+}
+
+.ebbp_csv_users_progress {
+	padding: 20px;
+	width: 300px;
+	background: #fcfcfc;
+	height: 125px;
+	text-align: center;
+	display: inline-block;
+	position: fixed;
+	z-index: 999;
+	margin: auto;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	color: green;
+	border-radius: 10px;
+}
+
+#ebbp_csv_users_progress_percent {
+	padding-top: 10px;
+	font-weight: 600;
+	font-size: 25px;
+	color: #337ab7;
+}
+
+@media only screen and (max-width: 600px) {
+	#bp-new-product,
+	#add-quantity {
+	width: 500px;
+	}
+
+	#add-quantity-popup {
+	overflow-x: scroll;
+	min-width: unset;
+	}
+}
+
+/******** END FOR TESTING **********/
+
+/*--------------------------------
+ * Course Progress CSS
+ *
+ *-------------------------------*/
+
+.ebbp_custom_field_tbl {
+	width: 80%;
+	margin: auto;
+	color: #1e1d1d;
+	border: 1px solid #efefef;
+}
+
+.ebbp_course_progress {
+	cursor: pointer;
+}
+
+#ebbp_custom_field_dialog_wrap
+	.ebbp_custom_field_tbl
+	.ebbp_custom_field_tbl_thead
+	tr
+	th {
+	color: #333333;
+	font-size: 16px;
+	font-weight: 600;
+	background-color: #f6f6f6;
+	padding: 15px 20px 15px 15px;
+	text-align: center;
+	border: none;
+}
+
+#ebbp_custom_field_dialog_wrap
+	.ebbp_custom_field_tbl
+	.ebbp_custom_field_tbl_thead
+	tr
+	th:first-of-type {
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+}
+
+#ebbp_custom_field_dialog_wrap
+	.ebbp_custom_field_tbl
+	.ebbp_custom_field_tbl_thead
+	tr
+	th:last-of-type {
+	border-bottom-right-radius: 3px;
+	border-top-right-radius: 3px;
+}
+
+.ebbp_custom_field_dialog {
+	overflow: hidden;
+	padding: 0px !important;
+	position: fixed;
+	z-index: 4001;
+	-webkit-box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8);
+	box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8);
+	border: 2px solid #001963 !important;
+}
+
+/**
+* Jquery Dialog box style override start
+*/
+
+.ebbp_custom_field_dialog .ui-dialog-content {
+	position: relative;
+	border: 0;
+	padding: 2% 10% 2% 10% !important;
+	background: none;
+	overflow: auto;
+}
+
+.ebbp_custom_field_dialog .ui-dialog-titlebar {
+	background: #04549e;
+	z-index: 9999;
+	color: black;
+}
+
+.ebbp_custom_field_dialog .ui-widget-header {
+	border: 0;
+	border-bottom: 1px solid #04549e;
+}
+
+.ebbp_custom_field_dialog .ui-dialog-buttonpane {
+	border-radius: 0px 0px 0px 0px;
+	margin-top: 0px;
+}
+
+.ebbp_custom_field_dialog .ui-dialog-buttonpane {
+	border-top: 1px solid #ddd;
+	margin-top: 0px;
+}
+
+.ebbp_custom_field_dialog > .ui-button {
+	padding: 0.5em 1em;
+}
+
+.ebbp_custom_field_tbl_body tr td {
+	padding: 15px 20px 15px 20px;
+	font-size: 16px;
+	text-align: center;
+	border-right: none;
+}
+
+.ebbp_custom_field_tbl_body tr:last-child td {
+	border: none;
+}
+
+/****************  COURSE PROGRESS END  *****************/
+
+#btn_add_new,
+#btn_enroll,
+#wdm_user_csv_upload {
+	margin: 1% !important;
+	width: 48%;
+}
+
+.eb_csv_enroll_tbl {
+	height: 300px;
+	border-radius: 5px;
+	margin: 15px;
+}
+
+.ebbp_csv_form_tbl_content {
+	height: 290px;
+	overflow-y: scroll;
+}
+
+.eb_csv_tbl_header {
+	display: flex;
+	background: #f3f3f3;
+	padding: 10px;
+	text-align: center;
+	border-radius: 5px;
+}
+
+.eb_csv_tbl_column {
+	width: 33%;
+}
+
+#enroll-user-form-csv .wdm_new_user {
+	display: flex;
+	border: none;
+	margin-bottom: 10px;
+	border: none;
+	padding: 15px 10px 0px 10px;
+}
+
+.wdm_new_user,
+.wdm_button {
+	list-style-type: none !important;
+	border: 1px solid #ddd;
+}
+.wdm_new_user label {
+	padding-left: 10px;
+	color: #333;
+	width: 200px;
+}
+.wdm_new_user input[type="text"],
+.wdm_new_user input[type="email"] {
+	height: 40px;
+	font-size: 16px !important;
+	width: 90%;
+	padding: 10px;
+	box-sizing: border-box;
+	border-style: solid;
+	border-color: #e1e1e1;
+}
+
+#enroll-user-form-csv .wdm_remove_user {
+	border: none;
+	color: red;
+	cursor: pointer;
+}
+
+.wdm_remove_user > label {
+	padding-left: 10px;
+}
+
+.wdm_new_user li,
+#wdm_eb_upload_csv li {
+	list-style-type: none !important;
+}
+.wdm_remove_user {
+	float: right;
+	padding-top: 10px;
+}
+
+#wdm_eb_message > p {
+	margin: 0 0px 1em;
+	padding: 5px;
+	font-size: 0.92em;
+	color: #777;
+	background-color: #f7f6f7;
+	border-left: 3px solid #a46497;
+}
+
+#wdm_csv_link {
+	color: #12539e;
+	text-decoration: none !important;
+}
+
+#wdm-eb-enroll-msg {
+	display: none;
+}
+
+.wdm_error_message {
+	border-left-color: red !important;
+	border-left: 5px solid red;
+	border-top: 1px solid red;
+	border-right: 1px solid red;
+	border-bottom: 1px solid red;
+	background-color: #ffffff;
+	padding: 5px 0px 5px 15px;
+	margin: 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+.wdm_enroll_warning_message {
+	border-left: 5px solid #ff5722;
+	border-top: 1px solid #ff5722;
+	border-right: 1px solid #ff5722;
+	border-bottom: 1px solid #ff5722;
+	background-color: #ffffff;
+	padding: 5px 0px 5px 15px;
+	margin: 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+.wdm_success_message {
+	border-left: 5px solid #4caf50;
+	border-top: 1px solid #00ff00;
+	border-right: 1px solid #00ff00;
+	border-bottom: 1px solid #00ff00;
+	background-color: #ffffff;
+	padding: 5px 0px 5px 15px;
+	margin: 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+.wdm_user_list ol {
+	margin: 0px !important;
+}
+.wdm_user_list ol li {
+	padding: 5px;
+	margin-left: 35px;
+	color: #000000;
+}
+.wdm_enroll_warning_message_lable {
+	color: #000000;
+	font-weight: bold;
+}
+#wdm_eb_enroll_user_page {
+	border: 1px solid #dddddd;
+	background-color: #ffffff;
+	padding: 10px;
+}
+.fa-times-circle {
+	color: #717171;
+	cursor: pointer;
+	margin-top: 0.1em;
+}
+.fa-times-circle:before {
+	font-size: 20px;
+}
+.fa-times-circle:hover {
+	color: red;
+}
+.wdm_success_msg_dismiss,
+.wdm_enroll_warning_msg_dismiss,
+.wdm_error_msg_dismiss,
+.wdm_select_course_msg_dismiss,
+.wdm_grp_update_msg_dismiss {
+	padding-right: 5px;
+	cursor: pointer;
+	float: right;
+}
+
+.loader {
+	display: block;
+	z-index: 999;
+	border: 5px solid rgba(33, 150, 243, 0.19);
+	position: fixed;
+	border-radius: 50%;
+	border-top: 5px solid #2196f3;
+	width: 30px;
+	height: 30px;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
+	margin-left: 10px;
+}
+
+@-webkit-keyframes spin {
+	0% {
+	-webkit-transform: rotate(0deg);
+	}
+	100% {
+	-webkit-transform: rotate(360deg);
+	}
+}
+
+@keyframes spin {
+	0% {
+	transform: rotate(0deg);
+	}
+	100% {
+	transform: rotate(360deg);
+	}
+}
+#wdm_eb_enroll_user_page hr {
+	border-bottom: 1px solid #dddddd;
+	margin: 25px 0px;
+}
+
+/**
+ * enroll user css
+ * @since 1.1.0
+ */
+
+#enroll-user-form-pop-up {
+	display: none;
+}
+.addnewuser-left {
+	float: left;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 35%;
+}
+
+.addnewuser-right {
+	float: right;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	width: 64%;
+}
+.wdm_select_course_msg {
+	border-left: 5px solid #cc0000;
+	border-top: 1px solid #ff3333;
+	border-right: 1px solid #ff3333;
+	border-bottom: 1px solid #ff3333;
+	background-color: #ffb3b340;
+	padding: 5px 0px 5px 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	display: none;
+}
+
+.wdm_error_msg {
+	border-left: 5px solid #cc0000;
+	border-top: 1px solid #ff3333;
+	border-right: 1px solid #ff3333;
+	border-bottom: 1px solid #ff3333;
+	background-color: #ffb3b340;
+	padding: 5px 0px 5px 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+#add-quantity-msg > p {
+	border-left: 5px solid red;
+	border-top: 1px solid red;
+	border-right: 1px solid red;
+	border-bottom: 1px solid red;
+	background-color: #ffffff;
+	padding: 5px 0px 5px 15px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+.pop-up-loader {
+	position: absolute;
+	z-index: 999;
+	margin-left: 44%;
+	bottom: 41%;
+}
+
+#popup-loding-icon {
+	display: none;
+}
+
+.role-drop-down {
+	width: 60%;
+}
+
+.edit-enrolled-user {
+	padding: 6px 23px;
+}
+
+.eb-lading-parent-wrap {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 0 auto;
+	background: rgba(0, 0, 0, 0.73);
+	z-index: 999;
+}
+
+.eb-loader-progsessing-anim {
+	border: 5px solid #ffffff;
+	border-top: 5px solid #07a3c3;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	vertical-align: middle;
+	display: inline-block;
+	position: fixed;
+	z-index: 999;
+	height: 2em;
+	width: 2em;
+	margin: auto;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
+@keyframes spin {
+	0% {
+	transform: rotate(0deg);
+	}
+	100% {
+	transform: rotate(360deg);
+	}
+}
+
+#add-quantity-inp {
+	margin-top: 1em;
+}
+
+/*
+ * Enroll students page css
+ */
+
+.ebbp_enroll_stu_action_wrap {
+	float: left;
+	padding: 10px;
+}
+
+/*
+ * ---------------------------------------------------
+ * Add new product in group pop-up table css
+ * ---------------------------------------------------
+ */
+
+#bp-new-product-table_wrapper
+	#bp-new-product-table_paginate
+	#bp-new-product-table_next:hover,
+#bp-new-product-table_wrapper
+	#bp-new-product-table_paginate
+	#bp-new-product-table_previous:hover,
+#bp-new-product-table_wrapper
+	#bp-new-product-table_paginate
+	.paginate_button:hover {
+	color: black !important;
+	background: #5151511a;
+	border: 1px solid transparent;
+}
+
+#bp-new-product-table thead th,
+#add-quantity-table thead th {
+	padding: 15px 10px 15px 10px;
+	text-align: center;
+	background-color: #9e9e9e57;
+	padding-bottom: 15px;
+	border: none;
+}
+
+#bp-new-product-table tbody td,
+#add-quantity-table thead td {
+	padding-top: 5px;
+	text-align: center;
+	border-top: 0px solid white;
+	padding-bottom: 0px;
+	margin-bottom: 5px;
+	border-bottom: 4px solid white;
+}
+
+#bp-new-product-table tbody tr > td {
+	border-top: 4px solid white;
+	border-bottom: 1px solid #80808021;
+	border-left: 0px;
+	border-right: 0px;
+}
+
+#bp-new-product-table thead tr th:first-child,
+#bp-new-product-table tfoot tr td:first-child,
+#add-quantity-table thead tr th:first-child,
+#add-quantity-table tfoot tr td:first-child {
+	border-bottom-left-radius: 4px;
+	border-top-left-radius: 4px;
+}
+
+#bp-new-product-table thead tr th:last-child,
+#bp-new-product-table tfoot tr td:last-child,
+#add-quantity-table thead tr th:last-child,
+#add-quantity-table tfoot tr td:last-child {
+	border-top-right-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+
+#bp-new-product-table tfoot tr td,
+#add-quantity-table tfoot tr td {
+	padding: 15px 18px 15px 18px;
+	border-top: none;
+	border: 0px;
+	background-color: #9e9e9e57;
+}
+
+#bp-new-product-table_filter label input {
+	border: 1px solid rgba(0, 0, 0, 0.28);
+	padding: 3px;
+	padding-left: 5px;
+}
+
+#bp-new-product-table_length label select {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#bp-new-product-table_length,
+#bp-new-product-table_filter {
+	padding-bottom: 10px;
+}
+
+#bp-new-product-table_paginate span .paginate_button.current {
+	padding: 4px 25px;
+	border: 1px solid #979797a1;
+}
+
+#bp-new-product-table_paginate {
+	padding-top: 10px;
+}
+
+#bp-new-product-table_info {
+	padding-top: 14px;
+}
+
+#add-quantity-table tr,
+#bp-new-product-table tr {
+	border-bottom: 1px solid #008080;
+	border: 0;
+}
+
+/*-------------------------------*/
+
+#bp-new-product-table {
+	table-layout: fixed;
+	margin: auto;
+	border: none;
+}
+
+#bp-new-product-table thead {
+	background: #f9f9f9;
+	display: table;
+	width: 100%;
+}
+
+#bp-new-product-table tbody {
+	height: 260px;
+	overflow: auto;
+	overflow-x: hidden;
+	display: block;
+	width: 100%;
+}
+
+#bp-new-product-table tfoot {
+	background: #f9f9f9;
+	display: table;
+	width: 100%;
+}
+
+#bp-new-product-table thead tr,
+#bp-new-product-table tbody tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+
+/*******************************************/
+#bp-new-product {
+	padding: 2%;
+}
+
+#add-quantity {
+	padding: 0% 3% 3% 3%;
+}
+
+#add-quantity-table tfoot tr td {
+	width: -webkit-fill-available;
+}
+
+#add-quantity-table tbody tr {
+	border-bottom: 1px solid #80808021;
+}
+
+#add-quantity-table tfoot tr {
+	border-radius: 4px;
+}
+
+#add-quantity-table tbody > tr:hover {
+	background: #c4dbf9 !important;
+}
+
+#add-quantity-table tbody tr td {
+	background-color: inherit;
+}
+
+.wdmProductName {
+	list-style-type: none;
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+
+.wdmProductName li {
+	padding-bottom: 0.5em;
+}
+
+.wdmProductName ul {
+	list-style-type: none;
+	margin: 0;
+	padding-left: 0;
+}
+.wdm_selected_products {
+	background: #fff;
+	padding: 2em;
+	font-size: 1em;
+	border: 1px solid #555;
+	width: 18px;
+	height: 18px;
+	margin: 0px 5px;
+}
+
+/**
+* Scrollbar custom style start
+*/
+.wdm-dialog-scroll::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+	border-radius: 10px;
+	background-color: #f5f5f5;
+}
+
+.wdm-dialog-scroll::-webkit-scrollbar {
+	width: 5px;
+	background-color: #f5f5f5;
+}
+
+.wdm-dialog-scroll::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: #003d4c;
+}
+
+.wdm-dialog-scroll::-webkit-scrollbar-thumb:active {
+	background-color: #015042;
+	border: 1px solid #024e48;
+}
+/**
+* Scrollbar custom style end
+*/
+
+.wdm-add-prod_qty {
+	display: table;
+	padding: 0.7em;
+	float: right;
+}
+.wdm-item-price {
+	display: inline-flex;
+}
+
+.add-quantity-total-price-wrap {
+	text-align: center;
+}
+
+/*
+ * -------------------------------------------------------
+ * Add quantity pop-up table style start
+ * -------------------------------------------------------
+ */
+
+/**
+* Dialog table style start
+*/
+#add-quantity-table th:last-child {
+	padding-right: 10px;
+}
+
+#add-quantity-table th:first-child,
+#add-quantity-table td:first-child {
+	padding-left: 10px;
+}
+
+#add-quantity-table tbody {
+	max-height: 40%;
+	overflow: auto;
+}
+
+#add-quantity-table tbody td {
+	margin: auto;
+}
+#add-quantity-table tbody {
+	width: 100%;
+	overflow-y: auto;
+	max-height: 250px;
+}
+
+#add-quantity-table td {
+	border: 0px;
+}
+
+/*---------------------------------*/
+
+#add-quantity-table {
+	table-layout: fixed;
+	margin: auto;
+	border: 0;
+	border-collapse: collapse;
+	margin: 0px;
+}
+
+#add-quantity-table thead {
+	background: #f9f9f9;
+	display: table;
+	width: 100%;
+}
+
+#add-quantity-table tbody {
+	height: 300px;
+	overflow: auto;
+	overflow-x: hidden;
+	display: block;
+	width: 100%;
+}
+
+#add-quantity-table tfoot {
+	background: #f9f9f9;
+	display: table;
+	width: 100%;
+}
+
+#add-quantity-table thead tr,
+#add-quantity-table tbody tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
+}
+
+.eb_add_qty_tbl_sr_no,
+.eb_add_qty_tbl_prod_name,
+.eb_add_qty_tbl_price,
+.eb_add_qty_tbl_x,
+.eb_add_qty_tbl_qty,
+.eb_add_qty_tbl_equal,
+.eb_add_qty_tbl_total_price {
+	text-align: center;
+}
+
+/*******************************************************/
+
+/*
+* Add style for the new products table columns in the popup
+*/
+
+.wdm-tbl-sel-row {
+	background: #c4dbf9 !important;
+}
+/**
+* Dialog table style end
+*/
+
+/**
+* Jquery Dialog box style override start
+*/
+
+.wdm-enroll-stud-page-dialog .ui-dialog-content {
+	position: relative;
+	border: 0;
+	background: none;
+	overflow: auto;
+}
+
+.wdm-enroll-stud-page-dialog .ui-dialog-content::-webkit-scrollbar {
+	display: none;
+	width: 0px;
+	background: transparent; /* make scrollbar transparent */
+}
+
+.wdm-enroll-stud-page-csv-dialog .ui-dialog-content {
+	position: relative;
+	border: 0;
+	padding: 1em;
+	background: none;
+	overflow: auto;
+}
+
+#wdm_new_prod_qty {
+	width: 150px;
+	padding: 5px;
+}
+
+.wdm-enroll-stud-page-dialog .ui-dialog-titlebar {
+	background: white;
+	z-index: 9999;
+}
+.wdm-enroll-stud-page-dialog .ui-widget-header {
+	border: 0;
+	border-bottom: 1px solid #ededed;
+	padding: 12px 12px 10px 12px;
+	font-size: 20px;
+}
+
+.wdm-enroll-stud-page-dialog .ui-widget-header span {
+	padding-left: 25px;
+}
+
+.wdm-enroll-stud-page-dialog {
+	border: 0;
+	padding: 0px;
+	overflow: hidden;
+	border-radius: 5px;
+	position: fixed;
+	z-index: 4001;
+	-webkit-box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8);
+	box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.8);
+}
+
+.wdm-enroll-stud-page-dialog .ui-dialog-titlebar-close {
+	position: absolute;
+	right: 0px;
+	top: 25%;
+	width: 20px;
+	margin: -10px 0 0 0;
+	padding: 1px;
+	height: 20px;
+	background: white;
+	border: none;
+}
+
+.wdm-enroll-stud-page-dialog .ui-dialog-titlebar-close:hover {
+	background: white;
+	border: none;
+}
+
+#enroll-user-table thead tr th:first-child,
+#enroll-user-table tbody tr td:first-child {
+	padding: 10px 18px;
+}
+
+.wdm-enroll-stud-page-dialog .ui-dialog-buttonpane {
+	margin-top: 0px;
+}
+
+.wdm-view-courses-button .ui-dialog-buttonpane {
+	border-top: 1px solid #003f98;
+	margin-top: 0px;
+	text-align: center;
+}
+.wdm-view-courses-button .ui-dialog-buttonpane .ui-dialog-buttonset {
+	float: none;
+}
+
+.wdm-enroll-stud-page-dialog > .ui-button {
+	padding: 0.5em 1em;
+}
+/**
+* Jquery Dialog box style override start
+*/
+
+/*****************   ENROLL STUDENTS TAB CSS    ******************/
+.eb-enroll-student-tab-container .eb-enroll-student-tab-active {
+	background-color: #12539e1c;
+	border-bottom: 3px solid #12539e;
+	color: #12539e;
+	font-weight: 700;
+}
+
+.eb-enroll-student-tab {
+	cursor: pointer;
+	padding: 8px;
+	width: 50%;
+	text-align: center;
+	border: 1px solid #8080803d;
+}
+
+.eb-enroll-student-tab:hover {
+	background-color: #12539e24;
+}
+
+.eb-enroll-student-tab-container {
+	width: 100%;
+	margin-top: 20px;
+	display: flex;
+}
+
+.eb_hidden_tab_content {
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+	transition: opacity 650ms ease-in-out;
+}
+
+.eb_current_tab {
+	height: auto;
+	opacity: 1;
+}
+
+.eb-enroll-student-tab-content {
+	padding: 2%;
+	border: 1px solid #e1e1e1;
+}
+
+.eb-enroll-student-tab-container i {
+	padding-right: 5px;
+}
+
+.eb_tab_subsection {
+	padding: 1% 1% 3% 20px;
+}
+
+#eb_inpt_edit_cohort_name {
+	display: block;
+	width: 100%;
+	font-size: 1rem;
+	line-height: 1.57142857;
+	color: #526069;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid #e4eaec;
+	border-radius: 0.215rem;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+	border: 1px solid rgba(0, 0, 0, 0.32);
+}
+
+.eb_tab_subsection p button {
+	margin-left: 20px;
+	width: 25%;
+}
+
+.eb_tab_subsection p {
+	display: flex;
+}
+
+/***************** END  ENROLL STUDENTS TAB CSS    ******************/
+
+/************   ACCORDIAN CSS     ****************/
+
+#wdm-asso-course-accordian .ui-state-active,
+#wdm-asso-course-accordian .ui-widget-content .ui-state-active,
+#wdm-asso-course-accordian .ui-widget-header .ui-state-active,
+#wdm-asso-course-accordian a.ui-button:active,
+#wdm-asso-course-accordian .ui-button:active,
+#wdm-asso-course-accordian .ui-button.ui-state-active:hover,
+#wdm-asso-course-accordian .ui-accordion-header,
+#wdm-asso-course-accordian .ui-accordion-header:focus {
+	border: none;
+	color: #242424;
+	padding: 15px;
+	background: white;
+}
+
+#wdm-asso-course-accordian .ui-accordion .ui-accordion-content {
+	background: rgba(128, 128, 128, 0.11);
+}
+
+#wdm-asso-course-accordian .ui-accordion-content {
+	border: none;
+	border-bottom: 1px solid #9e9e9e40;
+}
+
+#wdm_group_details .ui-accordion-content {
+	border: 2px solid #24242436;
+}
+
+#wdm-asso-course-accordian .ui-accordion-header .ui-icon,
+.ui-widget-content .ui-icon {
+	background-image: url(images/ui-icons_444444_256x240.png);
+}
+
+#wdm_group_details .ui-icon {
+	background-image: url(images/ui-icons_444444_256x240.png);
+}
+
+.wdm_enroll_subheading {
+	font-weight: 700;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+#wdm_enroll_div {
+	padding: 1% 0px 3% 20px;
+}
+
+#enroll-user-table_filter input {
+	padding: inherit;
+}
+
+#wdm_avaliable_reg {
+	padding: 1% 1% 1% 20px;
+}
+
+#enroll-new-user-btn-div {
+	display: flex;
+	margin-bottom: 1%;
+}
+
+#enroll-new-user {
+	width: 49%;
+	margin-right: 1%;
+}
+
+#enroll-multiple-users {
+	width: 49%;
+	margin-left: 1%;
+}
+
+#wdm_eb_upload_csv {
+	padding-top: 1%;
+}
+
+#eb_enroll_students > div:first-child,
+#eb_group_info > div:first-child {
+	border-bottom: 1px solid #8080801c;
+}
+
+.eb_edit_cohort_name_section {
+	display: flex;
+	width: 100%;
+}
+
+.eb_edit_cohort_name_btn_sub_section {
+	width: 25%;
+	margin-left: 7%;
+}
+
+#eb_inpt_edit_cohort_name_btn {
+	width: 100%;
+}
+
+.eb_edit_cohort_name_inp_sub_section {
+	width: 50%;
+}
+
+.eb_edit_cohort_name_sub_section {
+	display: inline-flex;
+}
+
+.eb_edit_cohort_name_sub_section:first-child {
+	width: 15%;
+	margin: auto;
+}
+
+.eb_hide {
+	display: none;
+}
+
+#wdm_associated_courses_container h4 {
+	font-weight: 500;
+}
+
+.wdm-coho-asso-corses {
+	margin: 10px 20px;
+	overflow: auto;
+}
+
+.wdm_productwise_course {
+	padding-top: 5px;
+	padding-bottom: 10px;
+}
+
+.wdm_productwise_course ol {
+	list-style-type: lower-alpha;
+}
+
+.wdm_enrol-studnets_products {
+	font-weight: 600;
+}
+
+#wdm_group_details {
+	margin-top: 20px;
+	padding-top: 20px;
+	border-top: 1px solid #8080801f;
+}
+
+#wdm_group_details > h3 {
+	padding: 20px;
+	border: none;
+	background-color: #2424241f;
+	color: #3379b7;
+}
+
+#wdm_group_details > h3:hover {
+	background-color: #24242436;
+}
+
+#wdm_group_details .ui-state-active {
+	background-color: #24242436;
+}
+
+/******************    ACCORDIAN CSSS END     ********************/
+
+#enroll_user-pop-up {
+	padding: 10px 40px 20px 40px;
+}
+
+.wdm-diff-prod-qty {
+	margin-top: 10px;
+	padding: 10px;
+	margin-bottom: 10px;
+	background-color: rgba(251, 0, 0, 0.25);
+	border: 1px solid red;
+	color: #f32121;
+}
+.wdm-hide {
+	display: none;
+}
+.wdm-error-message-dialog > .ui-dialog-buttonpane,
+.wdm-error-message-dialog > .ui-dialog-titlebar {
+	background: #ca2121;
+	z-index: 9999;
+	color: white;
+}
+
+.wdm-error-message-dialog > .ui-widget-header {
+	border: 0;
+	border-bottom: 1px solid #225eb8;
+	color: white;
+}
+
+.wdm-error-message-dialog > .ui-dialog .ui-dialog-buttonpane {
+	border-radius: 0px;
+}
+.wdm-error-message-dialog > .ui-dialog-buttonpane {
+	border-top: 1px solid red;
+	margin-top: 0px;
+	text-align: center;
+}
+.wdm-error-message-dialog {
+	border: 1px solid red !important;
+}
+.ui-state-error {
+	text-align: center;
+	padding-left: 1em;
+	width: 100%;
+	display: table;
+}
+.ui-state-error,
+.ui-widget-content .ui-state-error,
+.ui-widget-header .ui-state-error {
+	background: white;
+}
+.ui-state-error p {
+	margin-top: 5%;
+	display: table-cell;
+	padding: 2em;
+}
+.fa-exclamation-triangle {
+	content: "\f071";
+	color: #cb2121;
+	font-size: 1.5em;
+	display: table-cell;
+}
+.wdm-dialog-cancel-button {
+	color: #242424 !important;
+	border-radius: 5px;
+	padding: 10px 18px;
+	background-color: white !important;
+	letter-spacing: 1px;
+}
+
+.wdm-dialog-cancel-button:hover {
+	color: #242424 !important;
+	background-color: #e5e4e4 !important;
+}
+.wdm-dialog-enroll-button,
+.wdm-dialog-checkout-button {
+	border-radius: 5px;
+	padding: 10px 18px;
+	color: white !important;
+	background-color: #4bb543 !important;
+	border-color: #4bb543 !important;
+	letter-spacing: 1px;
+}
+.wdm-dialog-enroll-button:hover,
+.wdm-dialog-checkout-button:hover {
+	background-color: #3a9733 !important;
+	border-color: #3a9733 !important;
+}
+
+.wdm-dialog-enroll-button span {
+	color: white;
+}
+
+.wdm-error-message-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+	float: none !important;
+}
+.wdm-error-message-dialog .ui-dialog-buttonpane {
+	padding: 0px;
+}
+
+.wdm-error-message-dialog .ui-dialog-buttonpane button {
+	padding: 0.5em 1em;
+}
+
+.enroll_user-row .wdm-enrol-form-input:focus,
+.enroll_user-row .wdm-enrol-form-input:active {
+	border-color: #05ccc0;
+}
+
+@media only screen and (max-width: 700px) {
+	.eb_edit_cohort_name_btn_sub_section {
+	width: 100%;
+	margin-left: unset;
+	}
+
+	.eb_edit_cohort_name_inp_sub_section {
+	width: 100%;
+	}
+
+	.eb_edit_cohort_name_section {
+	display: block;
+	}
+
+	.eb_edit_cohort_name_sub_section {
+	display: block;
+	padding-top: 1%;
+	padding-bottom: 1%;
+	}
+
+	.eb_edit_cohort_name_sub_section:first-child {
+	width: 100%;
+	margin: auto;
+	}
+
+	#eb_inpt_edit_cohort_name,
+	#eb_inpt_edit_cohort_name_btn {
+	width: 100%;
+	}
+
+	#wdm-course-button{
+		width: 100%;
+	}
+	
+	#edb_course_product_name {
+		max-width: 100%;
+	}
+
+	#wdm_eb_enroll_user li, #wdm_avaliable_reg, #wdm_enroll_div {
+		padding-left: 0 !important;
+	}
+}
+
+@media only screen and (max-width: 500px) {
+	#wdm_eb_enroll_user .course-select {
+	display: block;
+	}
+
+	.eb-enroll-student-tab-container {
+	display: block;
+	}
+
+	.enroll-button-grid,
+	.enroll-student-page-button {
+	width: 100%;
+	}
+
+	.eb-enroll-student-tab-container .eb-enroll-student-tab-active {
+	border-left: 4px solid #12539e;
+	border-bottom: 1px solid #8080803d;
+	}
+
+	.eb-enroll-student-tab {
+	width: 100%;
+	}
+}

@@ -1,0 +1,66 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+.wppu-awesome-loader-41 {
+  border: .05em currentcolor solid;
+  border-radius: .2em;
+  position: relative;
+  background: -webkit-linear-gradient(45deg, transparent 48%, currentcolor 50%, currentcolor 50%, transparent 52%, transparent), -webkit-linear-gradient(135deg, transparent 48%, currentcolor 50%, currentcolor 50%, transparent 52%, transparent);
+  background: linear-gradient(45deg, transparent 48%, currentcolor 50%, currentcolor 50%, transparent 52%, transparent), linear-gradient(-45deg, transparent 48%, currentcolor 50%, currentcolor 50%, transparent 52%, transparent);
+  background-size: .5em .5em;
+  background-position: 0% 0%;
+  -webkit-animation: wppu-awesome-loader-41 1s infinite linear;
+          animation: wppu-awesome-loader-41 1s infinite linear;
+}
+
+@-webkit-keyframes wppu-awesome-loader-41 {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -1em 0;
+  }
+}
+
+@keyframes wppu-awesome-loader-41 {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -1em 0;
+  }
+}

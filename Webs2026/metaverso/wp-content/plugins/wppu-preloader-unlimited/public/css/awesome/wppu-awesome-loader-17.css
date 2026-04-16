@@ -1,0 +1,91 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+.wppu-awesome-loader-17 {
+  position: relative;
+  background-color: currentcolor;
+  border-radius: 50%;
+}
+.wppu-awesome-loader-17:after, .wppu-awesome-loader-17:before {
+  content: "";
+  position: absolute;
+  width: .25em;
+  height: .25em;
+  border-radius: 50%;
+  opacity: .8;
+}
+.wppu-awesome-loader-17:after {
+  left: -.5em;
+  top: -.25em;
+  background-color: currentcolor;
+  -webkit-transform-origin: .75em 1em;
+          transform-origin: .75em 1em;
+  -webkit-animation: wppu-awesome-loader-17 1s linear infinite;
+          animation: wppu-awesome-loader-17 1s linear infinite;
+  opacity: .6;
+}
+.wppu-awesome-loader-17:before {
+  left: -1.25em;
+  top: -.75em;
+  background-color: currentcolor;
+  -webkit-transform-origin: 1.5em 1em;
+          transform-origin: 1.5em 1em;
+  -webkit-animation: wppu-awesome-loader-17 2s linear infinite;
+          animation: wppu-awesome-loader-17 2s linear infinite;
+}
+
+@-webkit-keyframes wppu-awesome-loader-17 {
+  0% {
+    -webkit-transform: rotateZ(0deg) translate3d(0, 0, 0);
+            transform: rotateZ(0deg) translate3d(0, 0, 0);
+  }
+  100% {
+    -webkit-transform: rotateZ(360deg) translate3d(0, 0, 0);
+            transform: rotateZ(360deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes wppu-awesome-loader-17 {
+  0% {
+    -webkit-transform: rotateZ(0deg) translate3d(0, 0, 0);
+            transform: rotateZ(0deg) translate3d(0, 0, 0);
+  }
+  100% {
+    -webkit-transform: rotateZ(360deg) translate3d(0, 0, 0);
+            transform: rotateZ(360deg) translate3d(0, 0, 0);
+  }
+}

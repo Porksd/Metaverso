@@ -1,0 +1,4799 @@
+# Copyright (C) 2022 VonStroheim
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: TeamBooking 3.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/team-booking\n"
+"POT-Creation-Date: 2023-05-25T15:49:07+00:00\n"
+"PO-Revision-Date: 2023-05-25 18:54+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.3.1\n"
+"X-Domain: team-booking\n"
+
+#. Plugin Name of the plugin
+msgid "TheBooking"
+msgstr "TheBooking"
+
+#. Description of the plugin
+msgid "A booking plugin for WordPress."
+msgstr "Un plugin de rezervări pentru WordPress."
+
+#. Author of the plugin
+msgid "VonStroheim"
+msgstr "VonStroheim"
+
+#. Author URI of the plugin
+msgid "https://stroheimdesign.com"
+msgstr "https://stroheimdesign.com"
+
+#: Functions.php:348 Modules/Notifications.php:695
+#: Modules/Notifications.php:701 Modules/Notifications.php:707
+#: src/backend/components/Plugin/AvailabilityCalendar.js:213
+#: src/backend/components/Plugin/DataTableReservations.js:270
+#: src/backend/components/Plugin/DataTableReservations.js:953
+#: src/backend/components/Plugin/DataTableReservations.js:1010
+#: src/backend/components/Plugin/DataTableReservations.js:1531
+#: src/backend/components/Plugin/ReservationSettingsSection.js:154
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1030
+msgid "Service"
+msgstr "Serviciu"
+
+#: Functions.php:352 src/backend/components/Plugin/DataTableReservations.js:265
+#: src/backend/components/Plugin/ReservationSettingsSection.js:632
+msgid "Date"
+msgstr "Data"
+
+#: Functions.php:356 src/backend/components/Plugin/DataTableReservations.js:958
+#: src/backend/components/Plugin/DataTableReservations.js:1022
+msgid "Created"
+msgstr "Creat"
+
+#: Functions.php:365
+msgid "Form field"
+msgstr "Câmp formular"
+
+#: Functions.php:372
+msgid "TheBooking reservations"
+msgstr "Rezervări TheBooking"
+
+#: Functions.php:748 Modules/Notifications.php:681
+#: Modules/Notifications.php:789 Settings/Customer/Email.php:20
+#: src/backend/components/Plugin/DataTableCustomers.js:642
+msgid "Email"
+msgstr "Email"
+
+#: Functions.php:757
+msgid "First name"
+msgstr "Prenume"
+
+#: Functions.php:766
+msgid "Last name"
+msgstr "Nume"
+
+#: Functions.php:773 Modules/Locations.php:178 Settings/Location/Address.php:19
+#: src/backend/components/Plugin/DataTableLocations.js:399
+msgid "Address"
+msgstr "Adresa"
+
+#: Functions.php:780 Modules/Notifications.php:687 plugin_options.php:616
+#: Settings/Customer/Phone.php:19
+#: src/backend/components/Plugin/DataTableCustomers.js:660
+msgid "Phone"
+msgstr "Telefon"
+
+#: Functions.php:787
+msgid "Url"
+msgstr "Url"
+
+#: Modules/Gcal2Ways.php:211
+msgid "Google"
+msgstr "Google"
+
+#: Modules/Gcal2Ways.php:250
+msgid "Google Meet link"
+msgstr "Link Google Meet"
+
+#: Modules/Gcal2Ways.php:252 Modules/Notifications.php:713
+#: Modules/Notifications.php:719 Modules/Notifications.php:725
+#: Modules/Notifications.php:731 Modules/Notifications.php:737
+#: Modules/Notifications.php:743 Modules/Notifications.php:749
+#: Modules/Notifications.php:755 Modules/Notifications.php:761
+#: Modules/Notifications.php:767 Modules/Notifications.php:773
+#: Modules/Notifications.php:779 Modules/Notifications.php:800
+#: Modules/Notifications.php:806 Modules/Notifications.php:812
+#: Modules/Notifications.php:818 Modules/Notifications.php:824
+#: Modules/Zoom.php:165 Modules/Zoom.php:172
+#: src/backend/components/Plugin/DataTableCoupons.js:105
+#: src/backend/components/Plugin/ReservationSettingsSection.js:153
+msgid "Reservation"
+msgstr "Rezervare"
+
+#: Modules/Gcal2Ways.php:435 Modules/Gcal2Ways.php:438
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:488
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:498
+#: src/backend/components/Plugin/ReservationSettingsSection.js:361
+msgid "Google Calendar"
+msgstr "Google Calendar"
+
+#: Modules/Gcal2Ways.php:439
+msgid ""
+"In order to use Google Calendar with the plugin, you have to activate and "
+"configure a Google Project."
+msgstr ""
+"Pentru a utiliza Google Calendar cu pluginul, trebuie să activați și să "
+"configurați un proiect Google."
+
+#: Modules/Gcal2Ways.php:547
+msgid ""
+"Your authorization was revoked upstream, please disconnect and reconnect!"
+msgstr ""
+"Autorizarea dvs. a fost revocată în amonte, vă rugăm să vă deconectați și să "
+"vă reconectați!"
+
+#: Modules/Gcal2Ways.php:550
+msgid ""
+"Something changed in your Google account (a password reset or similar), "
+"please disconnect and reconnect!"
+msgstr ""
+"S-a întâmplat ceva în contul dvs. Google (o resetare a parolei sau similar), "
+"vă rugăm să vă deconectați și să vă reconectați!"
+
+#: Modules/Gcal3Way/Routes/GetAuthUrl.php:32
+msgid "Google Calendar API is not configured."
+msgstr "API-ul Google Calendar nu este configurat."
+
+#: Modules/Gcal3Way/Routes/GetCalendars.php:49
+msgid ""
+"Insufficient permissions, please disconnect, then request the authorization "
+"again and ensure to select ALL the checkboxes when asked for permissions!"
+msgstr ""
+"Permisiuni insuficiente, vă rugăm să vă deconectați, apoi solicitați din nou "
+"autorizarea și asigurați-vă că selectați TOATE casetele de selectare atunci "
+"când vi se solicită permisiuni!"
+
+#: Modules/Gcal3Way/Routes/ManuallyCreateEvent.php:50
+msgid ""
+"Event not created. No destination calendar is found, or the reservation is "
+"not confirmed."
+msgstr ""
+
+#: Modules/Gcal3Way/Routes/ManuallyCreateEvent.php:60
+msgid "Event created."
+msgstr ""
+
+#: Modules/Gcal3Way/Routes/RevokeAuth.php:40
+msgid "Access was already revoked manually."
+msgstr "Accesul a fost deja revocat manual."
+
+#: Modules/Gcal3Way/Settings/GoogleAllowSlotCommands.php:20
+msgid ""
+"Allow service providers to use \"slot commands\" to override some service "
+"settings directly from Google Calendar events."
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleAllowSlotCommands.php:21
+msgid ""
+"If active, service providers are be able to override some general service "
+"settings for specific slots, such as the price, by using \"slot commands\" "
+"directly in Google Calendar."
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleAllowSlotCommands.php:22
+msgid "Administrators are always allowed."
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiApplicationName.php:19
+msgid "API App Name"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiApplicationName.php:20
+msgid ""
+"Google Cloud Platform console > OAuth Consent screen > Edit App (button) > "
+"App name"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiAutorizedOrigin.php:20
+msgid "Google API Authorized JS Origin"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiAutorizedOrigin.php:21
+msgid ""
+"Copy/Paste this link in the Authorized JS Origin field of the Google Project"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiClientId.php:19
+#: Plugin/PaymentGateways/PayPal_Gateway.php:733
+msgid "API Client ID"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiClientId.php:20
+msgid "Google Cloud Platform console > Credentials > Client ID"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiClientSecret.php:19
+#: Plugin/PaymentGateways/PayPal_Gateway.php:738
+msgid "API Client Secret"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiClientSecret.php:20
+msgid ""
+"Google Cloud Platform console > Credentials > Client ID > Edit oAuth Client "
+"(pencil icon) > Client Secret"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiRedirectURI.php:22
+msgid "Google API Redirect URI"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleApiRedirectURI.php:23
+msgid "Copy/Paste this link in the Redirect URI field of the Google Project"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleFetchDelay.php:20
+msgid "Google Calendar refresh delay"
+msgstr "Întârzierea de reîmprospătare a calendarului Google"
+
+#: Modules/Gcal3Way/Settings/GoogleFetchDelay.php:21
+msgid ""
+"If the value is greater than 0, the Google Calendar availability events will "
+"be cached for the specified time (in seconds)"
+msgstr ""
+
+#: Modules/Gcal3Way/Settings/GoogleFetchDelay.php:22
+msgid ""
+"If the Google Calendar availability is not changed too often, consider "
+"increasing this value to save Google API quota. However, note that events "
+"added to Google Calendar will only be detected by the plugin after this "
+"interval has passed."
+msgstr ""
+
+#: Modules/Locations.php:108 Routes/Customers/Save.php:99
+#: Routes/Promotions/Save.php:71 Routes/Providers/Save.php:40
+#: Routes/SaveSettingsRoute.php:58 Routes/Services/DataCustomSave.php:44
+#: Routes/Services/DataSave.php:40
+msgid "Settings have been saved!"
+msgstr "Setările salvate!"
+
+#: Modules/Locations.php:124
+msgid "Location added!"
+msgstr "Locația adăugată!"
+
+#: Modules/Locations.php:138
+msgid "Location removed!"
+msgstr "Locația a fost eliminată!"
+
+#: Modules/Locations.php:154
+msgid "Locations removed!"
+msgstr "Locațiile au fost eliminate!"
+
+#: Modules/Locations.php:177 Modules/Notifications.php:675
+#: Modules/Notifications.php:693 Modules/Notifications.php:783
+#: plugin_options.php:507 plugin_options.php:577 plugin_options.php:614
+#: plugin_options.php:651 Settings/Customer/Name.php:20
+#: Settings/Location/Name.php:19 Settings/Promotion/Name.php:19
+#: Settings/Service/Name.php:22
+#: src/backend/components/Plugin/DataTableApiTokens.js:168
+#: src/backend/components/Plugin/DataTableCustomers.js:624
+#: src/backend/components/Plugin/DataTableLocations.js:384
+#: src/backend/components/Plugin/DataTablePromotions.js:171
+#: src/backend/components/Plugin/DataTablePromotions.js:470
+#: src/backend/components/Plugin/DataTableServices.js:663
+#: src/backend/components/Plugin/WorkingHoursPanel.js:160
+#: src/backend/components/Plugin/WorkingHoursPanel.js:446
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:61
+msgid "Name"
+msgstr "Nume"
+
+#: Modules/Locations.php:179 plugin_options.php:510 plugin_options.php:617
+#: plugin_options.php:656
+#: src/backend/components/Plugin/AvailabilityCalendar.js:228
+#: src/backend/components/Plugin/DataTableCoupons.js:109
+#: src/backend/components/Plugin/DataTablePromotions.js:201
+#: src/backend/components/Plugin/DataTableReservations.js:295
+#: src/backend/components/Plugin/DataTableReservations.js:1598
+#: src/backend/components/Plugin/ReservationSettingsSection.js:590
+#: src/backend/components/Plugin/WorkingHoursPanel.js:198
+#: src/frontend/components/ViewReservations.js:176
+msgid "Actions"
+msgstr "Acțiuni"
+
+#: Modules/Locations.php:184 plugin_options.php:376 plugin_options.php:585
+#: plugin_options.php:622 plugin_options.php:664 plugin_options.php:802
+#: src/backend/components/Plugin/ReservationSettingsSection.js:688
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:117
+msgid "General"
+msgstr "General"
+
+#: Modules/Locations.php:198
+#: src/backend/components/Plugin/DataTableLocations.js:302
+#: src/backend/components/Plugin/DataTableLocations.js:308
+msgid "Locations"
+msgstr "Locații"
+
+#. translators: %s: name of the service
+#: Modules/Notifications.php:383
+msgid "Duplicate from %s"
+msgstr "Duplică de la %s"
+
+#: Modules/Notifications.php:408
+msgid "To the customer"
+msgstr "Către client"
+
+#: Modules/Notifications.php:418
+msgid "To the admin"
+msgstr "Către admin"
+
+#: Modules/Notifications.php:432
+msgid "Personal notifications"
+msgstr "Notificări personale"
+
+#: Modules/Notifications.php:597
+msgid "Selected"
+msgstr "Selectat"
+
+#: Modules/Notifications.php:598 Modules/Notifications.php:601
+#: Modules/Notifications.php:604
+msgid "Not selected"
+msgstr "Neselectat"
+
+#: Modules/Notifications.php:677 Modules/Notifications.php:683
+#: Modules/Notifications.php:689
+#: src/backend/components/Plugin/AddReservation.js:203
+#: src/backend/components/Plugin/DataTableReservations.js:275
+#: src/backend/components/Plugin/DataTableReservations.js:1554
+#: src/backend/components/Plugin/ReservationSettingsSection.js:173
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1235
+msgid "Customer"
+msgstr "Client"
+
+#: Modules/Notifications.php:699 Settings/Service/Description.php:22
+#: src/backend/components/Plugin/FormBuilder.js:961
+msgid "Description"
+msgstr "Descriere"
+
+#: Modules/Notifications.php:705 Settings/Service/ShortDescription.php:21
+#: src/backend/components/Plugin/DataTableServices.js:678
+msgid "Short description"
+msgstr "Descriere scurtă"
+
+#: Modules/Notifications.php:711
+msgid "Start time"
+msgstr "Ora de început"
+
+#: Modules/Notifications.php:717
+msgid "Start date"
+msgstr "Data de început"
+
+#: Modules/Notifications.php:723
+msgid "End time"
+msgstr "Ora de sfârșit"
+
+#: Modules/Notifications.php:729
+msgid "End date"
+msgstr "Data de sfârșit"
+
+#: Modules/Notifications.php:735
+msgid "Timezone"
+msgstr "Fus orar"
+
+#: Modules/Notifications.php:741
+msgid "Location (name)"
+msgstr "Locație (nume)"
+
+#: Modules/Notifications.php:747
+msgid "Location (address)"
+msgstr "Locație (adresă)"
+
+#: Modules/Notifications.php:753
+#: src/backend/components/Plugin/ReservationSettingsSection.js:225
+msgid "Duration"
+msgstr "Durată"
+
+#: Modules/Notifications.php:759 Settings/Service/Price.php:37
+#: src/backend/components/Plugin/DataTableReservations.js:964
+#: src/backend/components/Plugin/DataTableReservations.js:1020
+#: src/backend/components/Plugin/ReservationSettingsSection.js:234
+msgid "Price"
+msgstr "Pret"
+
+#: Modules/Notifications.php:765
+#: src/backend/components/Plugin/AddReservation.js:114
+#: src/backend/components/Plugin/ReservationSettingsSection.js:229
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1113
+#: src/frontend/components/ReservationForm.js:529
+msgid "Tickets"
+msgstr "Bucati"
+
+#: Modules/Notifications.php:771 Settings/Service/CancellationReason.php:21
+#: src/backend/components/Plugin/ReservationSettingsSection.js:251
+msgid "Cancellation reason"
+msgstr "Motivul anulării"
+
+#: Modules/Notifications.php:777 Settings/Service/Id.php:22
+#: src/backend/components/Plugin/DataTableReservations.js:260
+msgid "Id"
+msgstr "ID"
+
+#: Modules/Notifications.php:785 Modules/Notifications.php:791
+#: src/backend/components/Plugin/AvailabilityCalendar.js:218
+#: src/backend/components/Plugin/DataTableReservations.js:290
+#: src/backend/components/Plugin/DataTableReservations.js:957
+#: src/backend/components/Plugin/DataTableReservations.js:1021
+#: src/backend/components/Plugin/DataTableReservations.js:1576
+#: src/backend/components/Plugin/ReservationSettingsSection.js:192
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1211
+msgid "Provider"
+msgstr "Furnizor de servicii"
+
+#: Modules/Notifications.php:798
+msgid "Start time (old)"
+msgstr ""
+
+#: Modules/Notifications.php:804
+msgid "Start date (old)"
+msgstr ""
+
+#: Modules/Notifications.php:810
+msgid "End time (old)"
+msgstr ""
+
+#: Modules/Notifications.php:816
+msgid "End date (old)"
+msgstr ""
+
+#: Modules/Notifications.php:822
+msgid "Duration (old)"
+msgstr ""
+
+#: Modules/Notifications.php:839
+msgid "Form"
+msgstr "Formular"
+
+#: Modules/WorkingHours.php:537 Modules/WorkingHours.php:593
+#: Modules/WorkingHours.php:615 Modules/WorkingHours.php:651
+msgid "Service provider not found."
+msgstr ""
+
+#: Modules/WPML.php:62 Modules/WPML.php:91 Modules/WPML.php:110
+msgid "Translations"
+msgstr "Traduceri"
+
+#: Modules/WPML.php:240
+msgid "Update WPML translations"
+msgstr ""
+
+#: Modules/WPML.php:243
+msgid "Update"
+msgstr ""
+
+#: Modules/WPML.php:245
+msgid "Regenerate existing strings data for WPML"
+msgstr ""
+
+#: Modules/Zoom.php:163
+msgid "Zoom Join Meeting link"
+msgstr ""
+
+#: Modules/Zoom.php:170
+msgid "Zoom Start Meeting link"
+msgstr ""
+
+#. translators: %s: Name of a customer
+#: Modules/Zoom.php:389 Modules/Zoom/ZoomBusMiddleware.php:200
+msgid "Meeting with %s"
+msgstr ""
+
+#: Modules/Zoom.php:471 Modules/Zoom.php:475
+msgid "Zoom"
+msgstr ""
+
+#: Modules/Zoom.php:477
+msgid "Refer to the plugin documentation to know hot to get your API keys."
+msgstr ""
+
+#: Modules/Zoom/Settings/ZoomAccountId.php:18
+msgid "Zoom Account Id"
+msgstr ""
+
+#: Modules/Zoom/Settings/ZoomApiKey.php:18
+msgid "Zoom API key"
+msgstr ""
+
+#: Modules/Zoom/Settings/ZoomApiSecret.php:18
+msgid "Zoom API secret"
+msgstr ""
+
+#: Modules/Zoom/Settings/ZoomJWTApiKey.php:18
+msgid "Zoom JWT API key (deprecated)"
+msgstr ""
+
+#: Modules/Zoom/Settings/ZoomJWTApiSecret.php:18
+msgid "Zoom JWT API secret (deprecated)"
+msgstr ""
+
+#: Plugin/DateTimeTbk.php:65
+msgid "All day"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:30
+msgid "TheBooking widget"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:54
+msgid "Configuration"
+msgstr "Cofigurare"
+
+#: Plugin/Elementor_Widget.php:61
+msgid "Widget type"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:65
+msgid "Monthly calendar"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:66
+msgid "Upcoming events"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:67
+msgid "Unscheduled services"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:68
+msgid "Reservations list (logged users only)"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:74
+msgid "Displayed events"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:75
+msgid "The number of upcoming events that are displayed on the page"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:87 src/frontend/components/App.js:1265
+msgid "Show more"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:88
+msgid "Shows a button to load more events"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:98
+msgid "Maximum fetched events"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:99
+msgid ""
+"Limit the number of maximum events that can be loaded. 0 means no limit."
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:115
+msgid "Restrictions"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:122 Settings/Provider/RestrictServices.php:19
+msgid "Restrict services"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:134
+msgid "Restrict providers"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:146
+#: src/backend/components/Plugin/DataTableApiTokens.js:104
+#: src/backend/components/Plugin/DataTableApiTokens.js:176
+msgid "Read-only"
+msgstr ""
+
+#: Plugin/Elementor_Widget.php:156
+msgid "Logged-only"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:202
+#: Plugin/PaymentGateways/Stripe_Gateway.php:183
+msgid "No payment to refund."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:216
+msgid "PayPal API are not configured, refunds are not active."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:232
+msgid "PayPal API connection error."
+msgstr ""
+
+#. translators: %s: Reason for a refund failure
+#: Plugin/PaymentGateways/PayPal_Gateway.php:256
+msgid "PayPal refund failed. Reason: %s"
+msgstr ""
+
+#. translators: %s: Reason for a refund pending status
+#: Plugin/PaymentGateways/PayPal_Gateway.php:272
+msgid "PayPal refund pending. Reason: %s"
+msgstr ""
+
+#. translators: 1: reservation start time 2: reservation end time
+#: Plugin/PaymentGateways/PayPal_Gateway.php:358
+#: Plugin/PaymentGateways/Stripe_Gateway.php:442
+msgid "from %1$s to %2$s"
+msgstr ""
+
+#. translators: %s: Name of the website
+#: Plugin/PaymentGateways/PayPal_Gateway.php:394
+msgid "Return to %s"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:487
+#: Plugin/PaymentGateways/Stripe_Gateway.php:487
+msgid "Direct payment"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:497
+#: Plugin/PaymentGateways/PayPal_Gateway.php:700
+msgid "PayPal"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:666
+msgid ""
+"Done in a currency not held by your PayPal account at the moment of the "
+"transaction."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:702
+msgid "PayPal Settings"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:703
+msgid ""
+"Use of either Business or Premium PayPal account is recommended to avoid "
+"issues, as you are not supposed to make commercial transactions with a "
+"Personal PayPal account."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:708
+#: Plugin/PaymentGateways/Stripe_Gateway.php:770
+#: src/backend/components/Plugin/DataTableCustomers.js:321
+#: src/backend/components/Plugin/DataTableServices.js:419
+#: src/backend/components/Plugin/DataTableServices.js:432
+#: src/backend/components/Plugin/PromotionSettingsSection.js:208
+#: src/backend/components/Plugin/ServiceSettingsSection.js:141
+msgid "Active"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:709
+#: Plugin/PaymentGateways/Stripe_Gateway.php:771
+msgid "Use this payment gateway to accept online payments."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:712
+msgid "Account email"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:713
+msgid "Payments will be addressed to this email."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:714
+msgid ""
+"If you are using the Sandbox for testing, ensure to put here an email "
+"address generated in the Sandbox instead of your live account, or the "
+"payment notifications will fail."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:717
+msgid "Primary email (optional)"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:718
+msgid ""
+"Payments will be checked against this email. Use this setting if your PayPal "
+"account handles multiple email addresses and the payments are not supposed "
+"to go into the primary one."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:719
+msgid ""
+"Ensure that your primary PayPal email address is correct, otherwise payment "
+"notifications will fail."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:723
+#: Plugin/PaymentGateways/Stripe_Gateway.php:797
+msgid "Use sandbox"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:724
+#: Plugin/PaymentGateways/Stripe_Gateway.php:798
+msgid "Activate the sandbox to test payments."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:728
+#: Plugin/PaymentGateways/Stripe_Gateway.php:792
+#: Settings/Service/RedirectUrl.php:22
+msgid "Redirect URL"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:729
+#: Plugin/PaymentGateways/Stripe_Gateway.php:793
+msgid "After payment, the customer will be redirected to this URL."
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:734
+#: Plugin/PaymentGateways/PayPal_Gateway.php:739
+#: Plugin/PaymentGateways/PayPal_Gateway.php:744
+#: Plugin/PaymentGateways/PayPal_Gateway.php:749
+msgid "Required to enable refunds"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:743
+msgid "API Client ID (test)"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:748
+msgid "API Client Secret (test)"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:753
+msgid "Debug (IPN)"
+msgstr ""
+
+#: Plugin/PaymentGateways/PayPal_Gateway.php:754
+msgid ""
+"Activate this setting to dump IPN requests from PayPal in case of issues."
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:167
+msgid "Stripe gateway is not active."
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:199
+msgid "Stripe API error."
+msgstr ""
+
+#. translators: %s: Name of the service
+#: Plugin/PaymentGateways/Stripe_Gateway.php:436
+#: src/backend/components/Plugin/ReservationSettingsSection.js:943
+msgid "Reservation for %s"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:486
+msgid "Card"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:497
+#: Plugin/PaymentGateways/Stripe_Gateway.php:763
+msgid "Stripe"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:508
+msgid "Payment error."
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:765
+msgid "Stripe Settings"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:774
+msgid "Publishable Key"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:775
+#: Plugin/PaymentGateways/Stripe_Gateway.php:779
+#: Plugin/PaymentGateways/Stripe_Gateway.php:783
+#: Plugin/PaymentGateways/Stripe_Gateway.php:788
+msgid "https://dashboard.stripe.com/account/apikeys"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:778
+msgid "Secret Key"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:782
+msgid "Publishable Key (test)"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:784
+#: Plugin/PaymentGateways/Stripe_Gateway.php:789
+msgid "Used to test payments"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:787
+msgid "Secret Key (test)"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:802
+msgid "Send receipt to the customer"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:803
+msgid "The customer email provided in the reservation form will be used"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:807
+msgid "IDEAL support"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:808
+msgid "Activate this option if you want to use IDEAL"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:812
+msgid "Load Stripe.js library"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:813
+msgid ""
+"Deactivate this option only if another plugin is loading the same library"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:835
+msgid "Stripe webhook URL"
+msgstr ""
+
+#: Plugin/PaymentGateways/Stripe_Gateway.php:837
+msgid ""
+"This is the URL where Stripe notifies the payments. It must be equal to %s, "
+"otherwise go in your Stripe account dashboard and change the URL."
+msgstr ""
+
+#: plugin_options.php:195
+msgid "Booking tools"
+msgstr ""
+
+#: plugin_options.php:284
+msgid ""
+"Please navigate in the preview to a page where the booking calendar resides."
+msgstr ""
+
+#: plugin_options.php:289
+msgid "Style & Colors"
+msgstr ""
+
+#: plugin_options.php:294
+msgid "Maps"
+msgstr ""
+
+#: plugin_options.php:299
+msgid "Behaviour"
+msgstr ""
+
+#: plugin_options.php:318
+msgid "Dashboard"
+msgstr ""
+
+#: plugin_options.php:330
+#: src/backend/components/Plugin/WorkingHoursPanel.js:378
+#: src/backend/components/Plugin/WorkingHoursPanel.js:397
+msgid "Working hours"
+msgstr ""
+
+#: plugin_options.php:338
+msgid "Your slots"
+msgstr ""
+
+#: plugin_options.php:348
+msgid "All slots"
+msgstr ""
+
+#: plugin_options.php:358
+msgid "Availability"
+msgstr "Disponibilitate"
+
+#: plugin_options.php:374
+msgid "Core"
+msgstr ""
+
+#: plugin_options.php:389
+msgid "Redirects"
+msgstr ""
+
+#: plugin_options.php:397
+msgid "Roles"
+msgstr ""
+
+#: plugin_options.php:404 plugin_options.php:688
+msgid "Frontend"
+msgstr ""
+
+#: plugin_options.php:415
+msgid "Style"
+msgstr ""
+
+#: plugin_options.php:419
+msgid "Frontend can be styled through the customizer"
+msgstr ""
+
+#: plugin_options.php:420
+msgid ""
+"Inside the customizer preview window, navigate to a page where the booking "
+"calendar resides."
+msgstr ""
+
+#: plugin_options.php:423
+msgid "Customize"
+msgstr ""
+
+#: plugin_options.php:433
+msgid "Import/Export"
+msgstr ""
+
+#: plugin_options.php:436
+msgid "Export settings"
+msgstr ""
+
+#: plugin_options.php:437
+msgid ""
+"Export the plugin settings in a JSON file. It doesn't export data or user "
+"settings."
+msgstr ""
+
+#: plugin_options.php:439
+msgid ""
+"The exported file can't be imported on different versions of the plugin. "
+"This is meant to migrate settings from one environment to one another, not "
+"to pass settings through plugin versions which is not needed."
+msgstr ""
+
+#: plugin_options.php:442
+msgid "Import settings"
+msgstr ""
+
+#: plugin_options.php:444
+msgid ""
+"Import the plugin settings from a JSON file. It doesn't import data or user "
+"settings."
+msgstr ""
+
+#: plugin_options.php:447
+msgid "Import/Export data"
+msgstr ""
+
+#: plugin_options.php:460
+msgid ""
+"Data such as services, reservations, promotions and so on, requires an "
+"import/export of the following tables though a proper db migration plugin."
+msgstr ""
+
+#: plugin_options.php:464
+msgid "Migrate from version 2.x"
+msgstr ""
+
+#: plugin_options.php:465
+msgid "Migrates the data from old plugin version installed."
+msgstr ""
+
+#: plugin_options.php:468
+msgid "Migrate"
+msgstr ""
+
+#: plugin_options.php:471
+msgid "This will overwrite the current plugin data."
+msgstr ""
+
+#: plugin_options.php:473
+msgid "Clean version 2.x data"
+msgstr ""
+
+#: plugin_options.php:474
+msgid "Removes data of previous plugin versions."
+msgstr ""
+
+#: plugin_options.php:477
+msgid "Cleanup"
+msgstr ""
+
+#: plugin_options.php:479
+msgid ""
+"In case you migrated the data, please ensure that all is working as "
+"expected, before cleaning up 2.x data. This operation cannot be undone."
+msgstr ""
+
+#: plugin_options.php:486 plugin_options.php:813
+#: src/backend/components/Plugin/FormBuilder.js:604
+msgid "Advanced"
+msgstr ""
+
+#: plugin_options.php:497
+msgid "Payment Gateways"
+msgstr ""
+
+#: plugin_options.php:501
+#: src/backend/components/Plugin/ReservationSettingsSection.js:515
+msgid "API"
+msgstr ""
+
+#: plugin_options.php:504
+msgid "API tokens"
+msgstr ""
+
+#: plugin_options.php:505
+msgid ""
+"API tokens can be used by 3rd party applications to read/write the plugin "
+"data."
+msgstr ""
+
+#: plugin_options.php:508
+msgid "Token"
+msgstr ""
+
+#: plugin_options.php:509
+msgid "Usages"
+msgstr ""
+
+#: plugin_options.php:513
+msgid "API endpoint"
+msgstr ""
+
+#: plugin_options.php:517
+msgid "A note on API tokens"
+msgstr ""
+
+#: plugin_options.php:518
+msgid ""
+"Don't generate tokens if you don't know what you're doing. Read the "
+"documentation to explore how the API endpoint works."
+msgstr ""
+
+#: plugin_options.php:519
+msgid ""
+"Give tokens only to someone you trust, as they are able to read/write "
+"sensitive data."
+msgstr ""
+
+#: plugin_options.php:526 plugin_options.php:528
+msgid "Google Maps"
+msgstr ""
+
+#: plugin_options.php:529
+msgid ""
+"Google requires the activation of a Google Cloud billing account, in order "
+"to use Google Maps in your website."
+msgstr ""
+
+#: plugin_options.php:540 plugin_options.php:580 plugin_options.php:659
+#: src/backend/components/Plugin/CustomerSettingsSection.js:120
+#: src/backend/components/Plugin/DataTableCustomers.js:301
+#: src/backend/components/Plugin/DataTableLocations.js:217
+#: src/backend/components/Plugin/DataTableLocations.js:314
+#: src/backend/components/Plugin/DataTablePromotions.js:205
+#: src/backend/components/Plugin/DataTablePromotions.js:317
+#: src/backend/components/Plugin/DataTableProviders.js:92
+#: src/backend/components/Plugin/DataTableProviders.js:200
+#: src/backend/components/Plugin/DataTableReservations.js:299
+#: src/backend/components/Plugin/DataTableReservations.js:1606
+#: src/backend/components/Plugin/DataTableServices.js:354
+#: src/backend/components/Plugin/PromotionSettingsSection.js:201
+#: src/backend/components/Plugin/ServiceSettingsSection.js:136
+#: src/backend/components/Plugin/WorkingHoursPanel.js:193
+#: src/backend/components/Plugin/WorkingHoursPanel.js:318
+msgid "Settings"
+msgstr ""
+
+#: plugin_options.php:562
+#: src/backend/components/Plugin/AvailabilityCalendar.js:413
+#: src/backend/components/Plugin/AvailabilityCalendar.js:475
+#: src/backend/components/Plugin/DataTableCustomers.js:292
+#: src/backend/components/Plugin/DataTableCustomers.js:510
+#: src/backend/components/Plugin/DataTableReservations.js:1027
+#: src/backend/components/Plugin/DataTableReservations.js:1108
+#: src/backend/components/Plugin/DataTableReservations.js:1115
+#: src/backend/components/Plugin/ReservationSettingsSection.js:939
+#: src/frontend/components/ViewReservations.js:46
+msgid "Reservations"
+msgstr "Rezervări"
+
+#: plugin_options.php:578 plugin_options.php:615
+msgid "E-mail"
+msgstr ""
+
+#: plugin_options.php:579
+msgid "WP Roles"
+msgstr ""
+
+#: plugin_options.php:599
+#: src/backend/components/Plugin/DataTableProviders.js:187
+#: src/backend/components/Plugin/DataTableProviders.js:194
+msgid "Providers"
+msgstr ""
+
+#: plugin_options.php:635
+#: src/backend/components/Plugin/CustomerSettingsSection.js:114
+#: src/backend/components/Plugin/DataTableCustomers.js:426
+#: src/backend/components/Plugin/DataTableCustomers.js:460
+#: src/backend/components/Plugin/DataTableCustomers.js:504
+msgid "Customers"
+msgstr "Clienți"
+
+#: plugin_options.php:652
+#: src/backend/components/Plugin/AvailabilityCalendar.js:223
+#: src/backend/components/Plugin/DataTablePromotions.js:176
+#: src/backend/components/Plugin/DataTableReservations.js:280
+#: src/backend/components/Plugin/DataTableReservations.js:956
+#: src/backend/components/Plugin/DataTableReservations.js:1017
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1128
+msgid "Status"
+msgstr ""
+
+#: plugin_options.php:653
+#: src/backend/components/Plugin/DataTableServices.js:645
+msgid "Class"
+msgstr ""
+
+#: plugin_options.php:700
+msgid "Approval"
+msgstr ""
+
+#: plugin_options.php:708
+msgid "Cancellation"
+msgstr "Anulare"
+
+#: plugin_options.php:717
+#: src/backend/components/Plugin/ReservationSettingsSection.js:625
+#: src/backend/components/Plugin/ReservationSettingsSection.js:706
+msgid "Payments"
+msgstr ""
+
+#: plugin_options.php:725
+msgid "Access"
+msgstr ""
+
+#: plugin_options.php:733
+msgid "Redirect and conversions"
+msgstr ""
+
+#: plugin_options.php:748
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:132
+msgid "Personal Availability"
+msgstr ""
+
+#: plugin_options.php:759
+msgid "Behavior"
+msgstr ""
+
+#: plugin_options.php:768
+msgid "Overlapping"
+msgstr ""
+
+#: plugin_options.php:785
+#: src/backend/components/Plugin/DataTableServices.js:532
+#: src/backend/components/Plugin/DataTableServices.js:548
+#: src/backend/components/Plugin/FormBuilder.js:1102
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:157
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:126
+#: src/backend/components/Plugin/ServiceNotificationsSection.js:62
+#: src/backend/components/Plugin/ServiceSettingsSection.js:130
+#: src/backend/components/Plugin/WorkingHoursPanel.js:166
+#: src/frontend/components/App.js:1032
+msgid "Services"
+msgstr "Servicii"
+
+#: plugin_options.php:825
+msgid "Target services"
+msgstr ""
+
+#: plugin_options.php:837
+#: src/backend/components/Plugin/DataTablePromotions.js:406
+#: src/backend/components/Plugin/DataTablePromotions.js:417
+#: src/backend/components/Plugin/PromotionSettingsSection.js:195
+msgid "Promotions"
+msgstr ""
+
+#: Routes/Customers/Add.php:42 Routes/Customers/Save.php:53
+msgid "This email address is already registered for a WordPress user."
+msgstr ""
+
+#: Routes/Customers/Add.php:48 Routes/Customers/Save.php:58
+msgid "This email address is already registered for another customer."
+msgstr ""
+
+#: Routes/Customers/Add.php:74 Routes/Customers/Save.php:71
+msgid "This WordPress User does not exist."
+msgstr ""
+
+#: Routes/Customers/Remove.php:37
+msgid "There are reservations for this customer."
+msgstr ""
+
+#: Routes/Customers/Remove.php:44
+msgid "Customer removed"
+msgstr ""
+
+#: Routes/Customers/RemoveMulti.php:52
+msgid ""
+"Certain customers could not be removed due to existing reservations "
+"associated with them."
+msgstr ""
+
+#: Routes/Customers/Save.php:46
+msgid "Please provide a valid email address."
+msgstr "Introduceți o adresă de email validă"
+
+#: Routes/Customers/Save.php:65
+msgid "This WordPress User is already associated with another customer."
+msgstr ""
+
+#: Routes/Customers/Save.php:76
+msgid "Another customer is already registered with this email address."
+msgstr ""
+
+#: Routes/Forms/Add.php:44
+msgid "Form item added"
+msgstr ""
+
+#: Routes/Forms/Get.php:38
+msgid "Service form ID not found."
+msgstr ""
+
+#: Routes/Forms/GetFrontend.php:39
+#: src/backend/components/Plugin/AvailabilityCalendar.js:270
+#: src/backend/components/Plugin/AvailabilityCalendar.js:273
+#: src/backend/components/Plugin/DataTableReservations.js:411
+#: src/backend/components/Plugin/DataTableReservations.js:414
+#: src/backend/components/Plugin/DataTableReservations.js:438
+#: src/backend/components/Plugin/DataTableReservations.js:441
+#: src/backend/components/Plugin/DataTableReservations.js:1542
+#: src/backend/components/Plugin/DataTableReservations.js:1546
+#: src/backend/components/Plugin/ReservationSettingsSection.js:165
+#: src/backend/components/Plugin/ReservationSettingsSection.js:168
+msgid "Service not found"
+msgstr ""
+
+#: Routes/Forms/GetFrontend.php:45
+msgid "Booking form not found"
+msgstr ""
+
+#: Routes/Forms/Remove.php:37
+msgid "Form item removed"
+msgstr ""
+
+#: Routes/Forms/Save.php:99
+msgid "Form has been saved"
+msgstr ""
+
+#: Routes/PaymentGateways/Refund.php:39
+msgid "Refund issued."
+msgstr ""
+
+#: Routes/Promotions/CouponsVerify.php:53
+msgid "Service price not found"
+msgstr ""
+
+#: Routes/Reservations/ChangeFormEntries.php:62
+msgid "Reservation data saved"
+msgstr ""
+
+#: Routes/Reservations/Create.php:68
+msgid "No timeslots!"
+msgstr ""
+
+#: Routes/Reservations/Create.php:86
+msgid "File upload failed"
+msgstr ""
+
+#: Routes/Reservations/Create.php:96
+msgid "Trying to book a service not found."
+msgstr ""
+
+#: Routes/Reservations/Create.php:106
+msgid "Booking of multiple slots at once is not allowed."
+msgstr ""
+
+#: Routes/Reservations/Create.php:113
+msgid "This service can't be booked by the current user."
+msgstr ""
+
+#: Routes/Reservations/Create.php:123
+msgid "Unable to find booking form submission."
+msgstr ""
+
+#: Routes/Reservations/Create.php:130
+msgid "Unable to find booking form data."
+msgstr ""
+
+#: Routes/Reservations/Create.php:187
+msgid "Invalid customer email address."
+msgstr ""
+
+#: Routes/Reservations/Create.php:202
+msgid "No customer email address provided."
+msgstr ""
+
+#: Routes/Reservations/Create.php:218
+#: src/backend/components/Plugin/DataTableCustomers.js:453
+msgid "New customer"
+msgstr ""
+
+#: Routes/Reservations/Create.php:264
+msgid ""
+"You have already reached the maximum number of reservations for this service."
+msgstr ""
+
+#: Routes/Reservations/Create.php:300
+msgid "No available provider for this service."
+msgstr ""
+
+#: Routes/Reservations/Create.php:490
+msgid ""
+"Those time slots are not available anymore, apparently someone else was very "
+"fast :("
+msgstr ""
+
+#: Routes/Reservations/Create.php:491
+msgid "Trying to book more tickets than they're available."
+msgstr ""
+
+#: Routes/Reservations/Create.php:498
+msgid "Trying to book more tickets than you're allowed."
+msgstr ""
+
+#: Routes/Reservations/DeleteFile.php:50
+msgid "File has been deleted"
+msgstr ""
+
+#: Routes/Reservations/DeleteFormEntry.php:42
+msgid "Entry has been deleted"
+msgstr ""
+
+#: Routes/Reservations/GetPriceInfo.php:32 Routes/Reservations/GetSingle.php:39
+msgid "Reservation not found."
+msgstr ""
+
+#: Routes/Reservations/GetSingle.php:45
+msgid "Customer not found"
+msgstr ""
+
+#: Routes/Reservations/GetSingle.php:51
+msgid "Not authorized"
+msgstr ""
+
+#: Routes/Reservations/GetSingle.php:58
+msgid "Reservation expired"
+msgstr ""
+
+#: Routes/Reservations/GetUsersCurrent.php:36
+msgid "The current WordPress User is not linked to any customer."
+msgstr ""
+
+#: Routes/SaveSettingsRoute.php:97
+msgid "Defaults restored!"
+msgstr ""
+
+#: Routes/SaveSettingsRoute.php:137
+msgid "Settings imported, reloading page."
+msgstr ""
+
+#: Routes/SaveSettingsRoute.php:173
+msgid "Data removed!"
+msgstr ""
+
+#: Routes/SaveSettingsRoute.php:232
+msgid "Data migrated!"
+msgstr ""
+
+#. translators: %s: name of the service
+#: Routes/Services/CloneService.php:55
+msgid "Copy of %s"
+msgstr ""
+
+#: Routes/Services/DataCustomGet.php:39
+msgid "Service not found."
+msgstr ""
+
+#: Routes/Services/DataCustomSave.php:35
+msgid "Provider ID not found."
+msgstr ""
+
+#: Routes/Services/Remove.php:36
+msgid "There are reservations for this service."
+msgstr ""
+
+#: Routes/Services/RemoveMulti.php:52
+msgid ""
+"Some services were not removed because there were reservations in place for "
+"them."
+msgstr ""
+
+#: Settings/AllowCart.php:20
+msgid "Allow multiple slots selection"
+msgstr ""
+
+#: Settings/AllowCart.php:21
+msgid ""
+"If enabled, customers will be able to extend the reservation duration by "
+"selecting consecutive time slots."
+msgstr ""
+
+#: Settings/AllowCart.php:22
+msgid ""
+"Please refer to the documentation for more information on the implications."
+msgstr ""
+
+#: Settings/AllowedAdminWpRoles.php:60
+msgid "WP Roles allowed to manage the plugin"
+msgstr ""
+
+#: Settings/AllowedAdminWpRoles.php:61
+msgid "Select WP User roles that can manage the plugin and providers."
+msgstr ""
+
+#: Settings/AllowedAdminWpRoles.php:71
+#: Settings/AllowedServiceProviderWpRoles.php:46
+msgid "Administrators are always allowed"
+msgstr ""
+
+#: Settings/AllowedServiceProviderWpRoles.php:35
+msgid "WP Roles allowed to be Service Providers"
+msgstr ""
+
+#: Settings/AllowedServiceProviderWpRoles.php:36
+msgid "Select WP User roles that can provide services."
+msgstr ""
+
+#: Settings/AllowIcalDownload.php:19
+msgid "Allow customers to download iCal file after booking."
+msgstr ""
+
+#: Settings/CurrencyCode.php:20
+#: src/backend/components/Plugin/DataTableReservations.js:963
+#: src/backend/components/Plugin/DataTableReservations.js:1019
+#: src/frontend/components/App.js:528
+msgid "Currency"
+msgstr ""
+
+#: Settings/CurrencyFormat.php:23
+msgid "Currency format"
+msgstr ""
+
+#: Settings/CurrencyFormat.php:24
+msgid ""
+"The $ symbol here is taken as example, it does not necessarily reflect the "
+"actual currency."
+msgstr ""
+
+#: Settings/FetchingGranularity.php:20
+msgid "Fetch granularity"
+msgstr ""
+
+#: Settings/FetchingGranularity.php:24
+msgid "Number of months to query for events in a single API call."
+msgstr ""
+
+#: Settings/FetchingGranularity.php:25
+msgid ""
+"Default is 1. Try to raise it if you have sparse events and you want to "
+"speed up the loading times, or if you are hitting the limits of Google API "
+"usage quota too often."
+msgstr ""
+
+#: Settings/FrontendBookingManagerPage.php:38
+msgid "Reservation status page"
+msgstr ""
+
+#: Settings/FrontendBookingManagerPage.php:39
+msgid ""
+"Select the frontend page where customers can view and manage their "
+"reservations."
+msgstr ""
+
+#: Settings/FrontendBookingManagerPage.php:40
+msgid ""
+"To ensure functionality, the selected page must include the plugin widget in "
+"any section."
+msgstr ""
+
+#: Settings/FrontendBookingManagerPage.php:42
+msgid "No page selected"
+msgstr ""
+
+#: Settings/FrontendTimezone.php:19
+msgid "Frontend Timezone"
+msgstr ""
+
+#: Settings/FrontendTimezone.php:20
+msgid ""
+"Select your preferred timezone for displaying date and times in the "
+"frontend. By default, date and times are displayed in customer's local "
+"timezone."
+msgstr ""
+
+#: Settings/GoogleMapsApiKey.php:18
+msgid "Google Maps API key"
+msgstr ""
+
+#: Settings/GoogleMapsApiKey.php:19
+msgid ""
+"If you don't already have a Google Maps API key, please refer to the "
+"documentation for instructions on how to obtain one."
+msgstr ""
+
+#: Settings/LoadCalendarAtClosestSlot.php:20
+msgid "Load the calendar on the nearest date with available slots"
+msgstr ""
+
+#: Settings/LoadCalendarAtClosestSlot.php:21
+msgid ""
+"If enabled, the frontend calendar will load on the nearest date that has at "
+"least one available slot."
+msgstr ""
+
+#: Settings/LoadCalendarAtClosestSlot.php:22
+msgid "Enabling this option may result in slower page loading."
+msgstr ""
+
+#: Settings/LoadMapsAutocomplete.php:20
+msgid "Use Google Places for address autocomplete"
+msgstr ""
+
+#: Settings/LoadMapsAutocomplete.php:21
+msgid ""
+"Enable this setting if you want the Address field in the reservation form to "
+"be automatically completed using Google Places"
+msgstr ""
+
+#: Settings/LoadMapsAutocomplete.php:22
+msgid ""
+"Please note that this may have a significant impact on your Google Cloud "
+"usage billing."
+msgstr ""
+
+#: Settings/LoginUrl.php:20
+msgid "Login URL"
+msgstr ""
+
+#: Settings/LoginUrl.php:21
+msgid ""
+"When attempting to book a service for logged-in users only, customers will "
+"be prompted to log in at this page."
+msgstr ""
+
+#: Settings/LoginUrl.php:23
+msgid "Leave it empty to use the WordPress default behaviour."
+msgstr ""
+
+#: Settings/PaymentPendingTime.php:20
+msgid "Pending payment expiration time"
+msgstr ""
+
+#: Settings/PaymentPendingTime.php:21
+msgid ""
+"The customer must complete the online payment within this specified time "
+"frame."
+msgstr ""
+
+#. translators: %d: number of minutes
+#: Settings/PaymentPendingTime.php:27
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of hours
+#: Settings/PaymentPendingTime.php:34
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: Settings/PaymentPendingTime.php:38
+msgid ""
+"It is not recommended to set a very short time as there could be delays in "
+"the acknowledgment of the payment by your web server for various reasons."
+msgstr ""
+
+#: Settings/PrepopulateBookingForm.php:20
+msgid "Pre-populate booking form"
+msgstr ""
+
+#: Settings/PrepopulateBookingForm.php:21
+msgid ""
+"Controls if the booking form fields should be pre-populated with available "
+"data for logged-in customers."
+msgstr ""
+
+#: Settings/PrepopulateBookingForm.php:22
+msgid ""
+"Each form field should be instructed where to fetch data through a proper "
+"meta-key configuration."
+msgstr ""
+
+#: Settings/PriceDecimals.php:19
+msgid "Price decimals"
+msgstr ""
+
+#: Settings/PriceDecimals.php:20
+msgid ""
+"The decimal separator here is taken as example, it does not necessarily "
+"reflect the actual separator."
+msgstr ""
+
+#: Settings/PriceFormat.php:24
+msgid "Price format"
+msgstr ""
+
+#: Settings/PriceFormat.php:25
+msgid ""
+"The number of decimals here are taken as example, they does not necessarily "
+"reflect the actual number of decimals."
+msgstr ""
+
+#: Settings/Promotion/CouponMode.php:22
+msgid "Coupon configuration"
+msgstr "Configurare cupon"
+
+#: Settings/Promotion/CouponMode.php:23
+msgid ""
+"If set to \"fixed\", the coupon text will be the same as the promotion name. "
+"Alternatively, you can enter a list of single-use coupons, separated by "
+"commas. Please refer to the documentation for more information on coupon "
+"configuration."
+msgstr ""
+
+#: Settings/Promotion/CouponMode.php:24 Settings/Service/Location.php:29
+#: Settings/Service/Personal_FillingLogic.php:26
+#: Settings/Service/Personal_SlotDurationRule.php:27
+#: Settings/Service/SlotDurationRule.php:29
+#: src/backend/components/Plugin/DataTablePromotions.js:524
+msgid "Fixed"
+msgstr ""
+
+#: Settings/Promotion/CouponMode.php:25
+#: src/backend/components/Plugin/DataTableCustomers.js:464
+#: src/backend/components/Plugin/DataTableLocations.js:312
+#: src/backend/components/Plugin/DataTablePromotions.js:421
+#: src/backend/components/Plugin/DataTableProviders.js:198
+#: src/backend/components/Plugin/DataTableReservations.js:1112
+#: src/backend/components/Plugin/DataTableServices.js:552
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:502
+#: src/backend/components/Plugin/WorkingHoursPanel.js:401
+msgid "List"
+msgstr ""
+
+#: Settings/Promotion/DiscountType.php:21
+#: src/backend/components/Plugin/DataTablePromotions.js:514
+msgid "Discount type"
+msgstr ""
+
+#: Settings/Promotion/DiscountType.php:22
+#: src/backend/components/Plugin/DataTablePromotions.js:520
+msgid "Percentage (%)"
+msgstr ""
+
+#: Settings/Promotion/DiscountType.php:23
+msgid "Fixed amount"
+msgstr ""
+
+#: Settings/Promotion/MaximumUses.php:20
+msgid "Global discount usage limit"
+msgstr ""
+
+#: Settings/Promotion/MaximumUses.php:21
+msgid ""
+"Specify the maximum number of times the discount can be used globally across "
+"all reservations. Enter 0 for no limit."
+msgstr ""
+
+#: Settings/Promotion/Name.php:20
+msgid "Please enter the name of the promotion."
+msgstr ""
+
+#: Settings/Promotion/PromotionPeriod.php:18
+msgid "Promotion duration"
+msgstr ""
+
+#: Settings/Promotion/PromotionPeriod.php:19
+msgid "The promotion will be valid within the specified date range."
+msgstr ""
+
+#: Settings/Promotion/PromotionServices.php:23
+msgid "Services to target"
+msgstr "Serviciile destinate"
+
+#: Settings/Promotion/PromotionServices.php:24
+msgid "Select the services eligible for this promotion."
+msgstr ""
+
+#: Settings/Promotion/PromotionType.php:24
+msgid "Promotion type"
+msgstr ""
+
+#: Settings/Promotion/PromotionType.php:25
+#: src/backend/components/Plugin/DataTablePromotions.js:344
+#: src/backend/components/Plugin/DataTablePromotions.js:494
+msgid "Campaign"
+msgstr ""
+
+#: Settings/Promotion/PromotionType.php:26
+#: src/backend/components/Plugin/DataTableCoupons.js:96
+#: src/backend/components/Plugin/DataTablePromotions.js:348
+#: src/backend/components/Plugin/DataTablePromotions.js:499
+msgid "Coupon"
+msgstr ""
+
+#: Settings/Promotion/TimeslotMaxEnd.php:19
+msgid "Maximum end date for time slots"
+msgstr ""
+
+#: Settings/Promotion/TimeslotMaxEnd.php:20
+msgid "The promotion is valid for time slots that end on or before this date."
+msgstr ""
+
+#: Settings/Promotion/TimeslotMaxEndActive.php:19
+msgid "Time slot end date condition"
+msgstr ""
+
+#: Settings/Promotion/TimeslotMaxEndActive.php:20
+msgid ""
+"The promotion will be applied conditionally based on the time slot end date."
+msgstr ""
+
+#: Settings/Promotion/TimeslotMinStart.php:19
+msgid "Minimum start date for time slots"
+msgstr ""
+
+#: Settings/Promotion/TimeslotMinStart.php:20
+msgid "The promotion is valid for time slots that start on or after this date."
+msgstr ""
+
+#: Settings/Promotion/TimeslotMinStartActive.php:19
+msgid "Time slot start date condition"
+msgstr ""
+
+#: Settings/Promotion/TimeslotMinStartActive.php:20
+msgid ""
+"The promotion will be applied conditionally based on the time slot start "
+"date."
+msgstr ""
+
+#: Settings/Promotion/Value.php:19
+#: src/backend/components/Plugin/DataTablePromotions.js:530
+msgid "Discount value"
+msgstr ""
+
+#: Settings/Promotion/Value.php:20
+msgid "The discount will be applied to the base price of the service."
+msgstr ""
+
+#: Settings/Provider/AllowedServices.php:25
+msgid "Allowed services"
+msgstr ""
+
+#: Settings/Provider/AllowedServices.php:26
+msgid "Select the services to which this provider is restricted."
+msgstr ""
+
+#: Settings/Provider/RestrictServices.php:20
+msgid ""
+"If you want to assign this service provider to specific services, activate "
+"this setting."
+msgstr ""
+
+#: Settings/Provider/RestrictServices.php:21
+msgid ""
+"Please note that if this setting is active, new services will not be "
+"automatically assigned to this provider."
+msgstr ""
+
+#: Settings/RegistrationUrl.php:20
+msgid "Registration URL"
+msgstr ""
+
+#: Settings/RegistrationUrl.php:21
+msgid ""
+"When attempting to book a service for logged-in users only, customers will "
+"be prompted to register at this page."
+msgstr ""
+
+#: Settings/RegistrationUrl.php:23
+msgid "Leave it empty to use the WordPress default behavior"
+msgstr ""
+
+#: Settings/SenderEmail.php:19
+msgid "Sender email"
+msgstr ""
+
+#: Settings/SenderEmail.php:20
+msgid ""
+"Please provide the email address that will be used as the sender of "
+"notifications from the system. If left empty or invalid, the admin email "
+"address of the WordPress website will be used instead."
+msgstr ""
+
+#: Settings/SenderEmail.php:22
+msgid ""
+"Make sure that the email address you provide belongs to the domain of your "
+"mail server. Emails sent from unrecognized domains may be blocked by the "
+"recipient's email service."
+msgstr ""
+
+#: Settings/Service/Access.php:24
+msgid "Who can make a reservation"
+msgstr ""
+
+#: Settings/Service/Access.php:25
+msgid ""
+"If \"Logged user only\" is selected, a notice with a link to the "
+"registration page will be displayed. The default link can be changed in the "
+"\"Settings\" section."
+msgstr ""
+
+#: Settings/Service/Access.php:26
+msgid "Everyone"
+msgstr ""
+
+#: Settings/Service/Access.php:27
+msgid "Logged users only"
+msgstr ""
+
+#: Settings/Service/Access.php:28
+msgid "Nobody (read-only)"
+msgstr ""
+
+#: Settings/Service/AllowCancellation.php:20
+msgid "Allow customers to cancel a reservation"
+msgstr ""
+
+#: Settings/Service/AllowCancellation.php:21
+msgid ""
+"Customers will be able to cancel their reservations for this service either "
+"by using the cancellation link in the email (if provided) or by visiting the "
+"page where a reservation status widget is placed (in which case they must be "
+"logged in)."
+msgstr ""
+
+#: Settings/Service/Approval.php:24
+msgid "Approval requirement"
+msgstr ""
+
+#: Settings/Service/Approval.php:25
+msgid ""
+"If enabled, no actions such as sending confirmation emails or updating "
+"Google Calendar will be performed until the reservation is approved."
+msgstr ""
+
+#: Settings/Service/Approval.php:26
+msgid "Don't require approval"
+msgstr ""
+
+#: Settings/Service/Approval.php:27
+msgid "Require Admin approval"
+msgstr ""
+
+#: Settings/Service/Approval.php:28
+msgid "Require Provider approval"
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:26
+msgid "Service provider assignment rule"
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:27
+msgid ""
+"In case of multiple service providers, you can specify the assignment rule "
+"that the plugin should follow after each reservation."
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:28
+msgid "Equal"
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:29
+msgid ""
+"A new reservation will be assigned to the service provider with the fewest "
+"number of reservations already assigned to them, based on the reservations "
+"stored in the database."
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:31
+msgid "Direct"
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:32
+msgid "Always assign the reservation to a specific service provider."
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:34
+msgid "Random"
+msgstr ""
+
+#: Settings/Service/AssignmentRule.php:35
+msgid "A random provider will be selected for the assignment."
+msgstr ""
+
+#: Settings/Service/BlockAvailabilityAfterOneReservation.php:21
+msgid "Block after one reservation"
+msgstr ""
+
+#: Settings/Service/BlockAvailabilityAfterOneReservation.php:22
+msgid ""
+"Even if a single reservation does not reach the maximum number of available "
+"tickets for the time slot(s), activating this setting will prevent other "
+"reservations from being made for the same time slot(s)."
+msgstr ""
+
+#: Settings/Service/CancellationEmailToAdmin.php:26
+#: Settings/Service/CancellationEmailToCustomer.php:30
+msgid "Send cancellation email"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToAdmin.php:27
+msgid "An email notification is sent to the admin after a booking is cancelled"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToAdmin.php:29
+#: Settings/Service/ConfirmationEmailToAdmin.php:36
+msgid "Recipients administrators"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToAdmin.php:73
+#: Settings/Service/CancellationEmailToCustomer.php:82
+#: Settings/Service/Personal_CancellationEmailToProvider.php:63
+#: src/frontend/components/App.js:996
+msgid "Reservation cancelled"
+msgstr "Rezervare anulată"
+
+#: Settings/Service/CancellationEmailToAdmin.php:74
+msgid "A reservation was cancelled."
+msgstr "O rezervare a fost anulată"
+
+#: Settings/Service/CancellationEmailToCustomer.php:31
+msgid ""
+"An email notification is sent to the customer after a booking is cancelled"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:33
+#: Settings/Service/ConfirmationEmailToCustomer.php:32
+#: Settings/Service/ReminderEmailToCustomer.php:46
+msgid "Specify the email address that should appear as the sender."
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:34
+#: Settings/Service/ConfirmationEmailToCustomer.php:33
+#: Settings/Service/ReminderEmailToCustomer.php:47
+msgid "Administrator"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:35
+#: Settings/Service/ConfirmationEmailToCustomer.php:34
+#: Settings/Service/ReminderEmailToCustomer.php:48
+msgid ""
+"The email address is taken from Settings > General > Sender email. The "
+"sender name will be the site title as set in WordPress > General."
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:37
+#: Settings/Service/ConfirmationEmailToCustomer.php:36
+#: Settings/Service/ReminderEmailToCustomer.php:50
+msgid "Service Provider"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:38
+#: Settings/Service/ConfirmationEmailToCustomer.php:37
+#: Settings/Service/ReminderEmailToCustomer.php:51
+msgid ""
+"Email address and name as set in the WordPress user profile of the service "
+"provider"
+msgstr ""
+
+#: Settings/Service/CancellationEmailToCustomer.php:83
+msgid "Your reservation was cancelled."
+msgstr "Rezervarea a fost anulată"
+
+#: Settings/Service/CancellationReason.php:22
+msgid "Allow customers to provide a reason when canceling a reservation."
+msgstr ""
+
+#: Settings/Service/CancellationTimespan.php:21
+msgid "Cancellation timespan"
+msgstr ""
+
+#: Settings/Service/CancellationTimespan.php:22
+msgid ""
+"Customers are not able to cancel their reservations when the start date and "
+"time are within this specified timespan."
+msgstr ""
+
+#: Settings/Service/Color.php:56 src/backend/components/SettingItem.js:398
+msgid "Color"
+msgstr ""
+
+#: Settings/Service/Color.php:57
+msgid "Select the color for the service."
+msgstr "Selectați culoarea pentru serviciu"
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:28
+#: Settings/Service/ConfirmationEmailToCustomer.php:29
+msgid "Send confirmation email"
+msgstr ""
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:29
+msgid ""
+"An email notification will be sent to the admin after a booking is made."
+msgstr ""
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:31
+#: Settings/Service/Personal_ConfirmationEmailToProvider.php:28
+msgid "Include uploaded files as attachments"
+msgstr ""
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:32
+#: Settings/Service/Personal_ConfirmationEmailToProvider.php:29
+msgid ""
+"If the reservation form collects one or more file from the customer, you can "
+"enable or disable the inclusion of those files as email attachments."
+msgstr ""
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:83
+#: Settings/Service/Personal_ConfirmationEmailToProvider.php:72
+msgid "A new reservation"
+msgstr "Rezervare nouă"
+
+#: Settings/Service/ConfirmationEmailToAdmin.php:84
+#: Settings/Service/Personal_ConfirmationEmailToProvider.php:73
+msgid "You just got a new reservation!"
+msgstr "Aveți o rezervare nouă"
+
+#: Settings/Service/ConfirmationEmailToCustomer.php:30
+msgid ""
+"An email notification will be sent to the customer after a booking is made."
+msgstr ""
+
+#: Settings/Service/ConfirmationEmailToCustomer.php:81
+msgid "Your reservation is confirmed"
+msgstr "Rezervare confirmată"
+
+#: Settings/Service/ConfirmationEmailToCustomer.php:82
+msgid "Thanks for your reservation!"
+msgstr "Mulțumim pentru rezervare !"
+
+#: Settings/Service/CreateZoomMeeting.php:21
+msgid "Create a Zoom Meeting"
+msgstr ""
+
+#: Settings/Service/CreateZoomMeeting.php:22
+msgid "Automatically create a Zoom Meeting after a reservation is made."
+msgstr ""
+
+#: Settings/Service/Description.php:23
+msgid ""
+"It will be displayed at the top of the time slots list or reservation form "
+"for unscheduled services."
+msgstr ""
+
+#: Settings/Service/Description.php:25
+msgid ""
+"If you use HTML content, please consider the fact that it will observe the "
+"stylesheet of your theme and other plugins, so the result may differ from "
+"what you see in the editor."
+msgstr ""
+
+#: Settings/Service/DirectProvider.php:21
+msgid "Direct provider for assignment"
+msgstr ""
+
+#: Settings/Service/DiscardedAvailableSlots.php:24
+msgid "How to treat discarded available slots"
+msgstr ""
+
+#: Settings/Service/DiscardedAvailableSlots.php:25
+msgid ""
+"Choose how to handle available slots that are discarded due to overlapping "
+"settings."
+msgstr ""
+
+#: Settings/Service/DiscardedAvailableSlots.php:26
+#: Settings/Service/ShowSlotCustomers.php:28
+msgid "Don't show"
+msgstr ""
+
+#: Settings/Service/DiscardedAvailableSlots.php:29
+msgid "Show them as booked"
+msgstr ""
+
+#: Settings/Service/Location.php:25
+msgid "Location"
+msgstr ""
+
+#: Settings/Service/Location.php:26
+msgid ""
+"Choose how to set the location for this service. If a location is provided, "
+"it will be displayed in the frontend with directions and a map, unless "
+"specified otherwise."
+msgstr ""
+
+#: Settings/Service/Location.php:27
+msgid "No location"
+msgstr ""
+
+#: Settings/Service/Location.php:28
+msgid "Inherited from the booking form Address field"
+msgstr ""
+
+#: Settings/Service/LocationAssigned.php:21
+msgid "Assigned location"
+msgstr ""
+
+#: Settings/Service/LocationVisibility.php:21
+msgid "Location visibility"
+msgstr ""
+
+#: Settings/Service/LocationVisibility.php:22
+msgid ""
+"Choose whether the location should be visible in the frontend. If you choose "
+"to hide the location from the frontend, it will still be visible in the "
+"backend and can be used, for example, in email templates."
+msgstr ""
+
+#: Settings/Service/MaxUserReservations.php:23
+msgid "Max reservations per user"
+msgstr ""
+
+#: Settings/Service/MaxUserReservations.php:24
+msgid ""
+"The book button will display the number of reservations remaining for the "
+"current user. If the limit is reached, the user will not be able to proceed. "
+"Set 0 for no limit."
+msgstr ""
+
+#: Settings/Service/Name.php:23
+msgid "Choose the name of the service"
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:24
+msgid "How payment is required"
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:26
+msgid "Online"
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:27
+msgid ""
+"Customers are required to make an online payment. If no payment is made "
+"within the specified pending time, the reservation will be automatically "
+"cancelled."
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:29
+msgid "Local"
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:30
+msgid ""
+"The plugin will not handle the payment. You should manually set the "
+"reservation as \"Paid\" when the payment is done locally."
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:32
+msgid "Discretionary"
+msgstr ""
+
+#: Settings/Service/PaymentRequirement.php:33
+msgid "Customers can choose whether to pay online or pay later/locally."
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:24
+msgid "Buffer configuration"
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:25
+msgid "Select how the buffer between time slots should be calculated"
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:26
+msgid "Always computed between slots"
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:27
+msgid ""
+"The buffer is calculated between both free and booked slots within a "
+"container interval. This option is the default and ensures a consistent "
+"distribution of slots."
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:29
+msgid "Only computed around booked slots"
+msgstr ""
+
+#: Settings/Service/Personal_BufferRule.php:30
+msgid ""
+"The buffer is applied around booked slots. It can cause redistribution of "
+"free slots when a new reservation is made."
+msgstr ""
+
+#: Settings/Service/Personal_BufferTimespan.php:21
+msgid "Buffer between consecutive slots"
+msgstr ""
+
+#: Settings/Service/Personal_CancellationEmailToProvider.php:25
+msgid ""
+"Get notified when a customer cancels a reservation for this service that was "
+"booked from you"
+msgstr ""
+
+#: Settings/Service/Personal_CancellationEmailToProvider.php:64
+msgid "A reservation was cancelled"
+msgstr "O rezervare a fost anulată"
+
+#: Settings/Service/Personal_ConfirmationEmailToProvider.php:26
+msgid "Get notified when someone books this service from you"
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithOther.php:21
+msgid "Block availability if overlaps with reservations for other services"
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithOther.php:22
+msgid ""
+"Activate this option to automatically block all other overlapping available "
+"slots as soon as one of them is booked."
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithPersonal.php:21
+msgid "Block availability if overlaps with personal events"
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithPersonal.php:22
+msgid ""
+"Busy events in a personal Google Calendar will block the availability of "
+"this service. A personal Google Calendar which is different from the source "
+"one, must be set for this to work."
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithSame.php:21
+msgid "Block availability if overlaps with reservations for the same service"
+msgstr ""
+
+#: Settings/Service/Personal_DiscardOverlappingWithSame.php:22
+msgid ""
+"If you are using multiple availability sources for the same service, "
+"activating this option will ensure that overlapping availabilities are "
+"excluded as soon as a reservation is made. This option is only valid if the "
+"sources are not independent."
+msgstr ""
+
+#: Settings/Service/Personal_EventColorBooked.php:24
+msgid "Event color (booked slot)"
+msgstr ""
+
+#: Settings/Service/Personal_EventColorBooked.php:26
+msgid "Select a color for the Google Calendar reservation events."
+msgstr ""
+"Selectați o culoare pentru evenimentele de rezervare în Calendarul Google."
+
+#: Settings/Service/Personal_EventColorBooked.php:28
+msgid "Calendar default"
+msgstr ""
+
+#: Settings/Service/Personal_EventTitleBooked.php:24
+msgid "Event title (booked slot)"
+msgstr ""
+
+#: Settings/Service/Personal_EventTitleBooked.php:25
+msgid "Provide a title for the Google Calendar reservation events."
+msgstr ""
+"Furnizați un titlu pentru evenimentele de rezervare în Calendarul Google."
+
+#. translators: %s: name of the service
+#: Settings/Service/Personal_EventTitleBooked.php:37
+msgid "New reservation for %s"
+msgstr "Rezervare nouă pentru %s"
+
+#: Settings/Service/Personal_FillingLogic.php:24
+msgid "Slots filling"
+msgstr ""
+
+#: Settings/Service/Personal_FillingLogic.php:25
+msgid ""
+"Choose how the slots should be redistributed when a blocking event or a "
+"reservation of other services occurs."
+msgstr ""
+
+#: Settings/Service/Personal_FillingLogic.php:27
+msgid "Slots will always observe the original segmentation"
+msgstr ""
+
+#: Settings/Service/Personal_FillingLogic.php:29
+msgid "Adaptive"
+msgstr ""
+
+#: Settings/Service/Personal_FillingLogic.php:30
+msgid "Slots are adapted to maximize the available times"
+msgstr ""
+
+#: Settings/Service/Personal_GcalAddGuests.php:22
+msgid "Add customers as guests of the Google Calendar event"
+msgstr ""
+
+#: Settings/Service/Personal_GcalAddGuests.php:23
+msgid ""
+"If enabled, customers will receive Google notifications based on your Google "
+"Calendar settings. Additionally, a copy of the event will be created in "
+"their Google Calendars (if they have one), allowing them to view the event "
+"description. They will not have access to the guests list."
+msgstr ""
+
+#: Settings/Service/Personal_GcalAddGuests.php:24
+msgid ""
+"In accordance with personal data regulations, it may be necessary to provide "
+"customers with a comprehensive disclosure regarding the storage of their "
+"data. Additionally, you should ensure the ability to erase such data upon "
+"request. Before configuring this option to store customer personal data "
+"outside of this site, it is advisable to consult with the site administrator "
+"to ensure compliance with relevant regulations and guidelines."
+msgstr ""
+
+#: Settings/Service/Personal_GcalCreateEvent.php:22
+msgid "Add reservation on Google Calendar"
+msgstr ""
+
+#: Settings/Service/Personal_GcalCreateEvent.php:23
+msgid ""
+"If enabled, reservations will be automatically added as events to the "
+"designated Google Calendar."
+msgstr ""
+
+#: Settings/Service/Personal_GcalCreateEvent.php:24
+#: Settings/Service/Personal_GcalCreateMeet.php:24
+msgid ""
+"In order for this feature to work, you need to set a destination Google "
+"Calendar."
+msgstr ""
+
+#: Settings/Service/Personal_GcalCreateMeet.php:22
+msgid "Create a Google Meet link"
+msgstr ""
+
+#: Settings/Service/Personal_GcalCreateMeet.php:23
+msgid "A Google Meet link will be created after a reservation is made."
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:26
+msgid "Google Calendar event description content"
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:27
+msgid ""
+"Specify the content that should be included in the event description of the "
+"Google Calendar when a reservation is made."
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:28
+msgid "Empty content"
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:30
+msgid "Customer's name, tickets, email and phone when available"
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:32
+msgid "Custom content"
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionContent.php:35
+msgid ""
+"Privacy alert: Please note that the content of the Google Calendar event "
+"description may be visible to guests if customers are being added as guests."
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionCustomContent.php:22
+msgid "Google Calendar event description custom content"
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionCustomContent.php:23
+msgid "You can use dynamic placeholders."
+msgstr ""
+
+#: Settings/Service/Personal_GcalEventDescriptionCustomContent.php:25
+msgid "Do not use HTML content!"
+msgstr ""
+
+#: Settings/Service/Personal_GcalReminder.php:22
+msgid "Set a Google Calendar reminder for reserved slot"
+msgstr ""
+
+#: Settings/Service/Personal_GcalReminder.php:23
+msgid "No reminder"
+msgstr ""
+
+#: Settings/Service/Personal_GcalReminder.php:24
+msgid "10 minutes before"
+msgstr ""
+
+#: Settings/Service/Personal_GcalReminder.php:25
+msgid "30 minutes before"
+msgstr ""
+
+#: Settings/Service/Personal_GcalReminder.php:26
+msgid "1 hour before"
+msgstr ""
+
+#: Settings/Service/Personal_OverlappingWithSameDropTickets.php:21
+msgid "Drop tickets"
+msgstr ""
+
+#: Settings/Service/Personal_OverlappingWithSameDropTickets.php:22
+msgid ""
+"Instead of dropping the slot, reservations made for the same service but in "
+"a different availability plan will be treated as if they are on the same "
+"plan."
+msgstr ""
+
+#: Settings/Service/Personal_Participate.php:20
+msgid "Participate"
+msgstr ""
+
+#: Settings/Service/Personal_Participate.php:21
+msgid ""
+"Turn this off if you want to exclude your availability events from being "
+"counted for this service. This can be useful for temporary needs, such as "
+"vacations, as it allows you to maintain your availability schedule unchanged."
+msgstr ""
+
+#: Settings/Service/Personal_SlotDuration.php:21
+#: Settings/Service/Personal_SlotDurationRule.php:24
+#: Settings/Service/SlotDuration.php:21
+#: Settings/Service/SlotDurationRule.php:25
+msgid "Slot duration"
+msgstr ""
+
+#: Settings/Service/Personal_SlotDurationRule.php:25
+#: Settings/Service/SlotDurationRule.php:26
+msgid "How the duration of a timeslot is defined"
+msgstr ""
+
+#: Settings/Service/Personal_SlotDurationRule.php:26
+#: Settings/Service/SlotDurationRule.php:28
+msgid "Inherited from the entire available interval"
+msgstr ""
+
+#: Settings/Service/Personal_WhenToClose.php:23
+msgid "When reservations should be closed?"
+msgstr ""
+
+#: Settings/Service/Personal_WhenToClose.php:24
+msgid ""
+"The system will not allow reservations to be made if the event start or end "
+"time is closer than the specified timespan."
+msgstr ""
+
+#. translators: %d: number of minutes
+#: Settings/Service/Personal_WhenToClose.php:30
+msgid "%d minute before"
+msgid_plural "%d minutes before"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of hours
+#: Settings/Service/Personal_WhenToClose.php:37
+#: Settings/Service/Personal_WhenToOpen.php:30
+msgid "%d hour before"
+msgid_plural "%d hours before"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of days
+#: Settings/Service/Personal_WhenToClose.php:44
+#: Settings/Service/Personal_WhenToClose.php:52
+#: Settings/Service/Personal_WhenToOpen.php:37
+#: Settings/Service/Personal_WhenToOpen.php:45
+msgid "%d day before (until midnight)"
+msgid_plural "%d days before (until midnight)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: Settings/Service/Personal_WhenToCloseReference.php:25
+msgid "Reference time"
+msgstr ""
+
+#: Settings/Service/Personal_WhenToCloseReference.php:27
+msgid "Slot start time"
+msgstr "Ora de început"
+
+#: Settings/Service/Personal_WhenToCloseReference.php:28
+msgid "Slot end time"
+msgstr "Ora de sfârșit"
+
+#: Settings/Service/Personal_WhenToOpen.php:23
+msgid "When reservations should be opened?"
+msgstr ""
+
+#: Settings/Service/Personal_WhenToOpen.php:24
+msgid ""
+"When the start time of the time slot is within the specified timespan, the "
+"slot will be visible in the frontend."
+msgstr ""
+
+#: Settings/Service/Personal_WhenToOpen.php:26
+msgid "Always"
+msgstr ""
+
+#: Settings/Service/Picture.php:22
+msgid "Picture"
+msgstr ""
+
+#: Settings/Service/Picture.php:23
+msgid "Provide a picture for the service."
+msgstr ""
+
+#: Settings/Service/Price.php:38
+msgid ""
+"If zero, won't appear. To change the currency, navigate to the Settings "
+"section."
+msgstr ""
+
+#: Settings/Service/Redirect.php:21
+msgid "Redirect"
+msgstr ""
+
+#: Settings/Service/Redirect.php:22
+msgid ""
+"If active, the customer will be redirected to the specified URL after a "
+"successful reservation for this service. This is meant for tracking "
+"conversions."
+msgstr ""
+
+#: Settings/Service/Redirect.php:23
+msgid ""
+"About payments: when redirect is active, the immediate and later payment "
+"settings will work just fine, while discretion payment setting will not, so "
+"no payment option will be presented to the customer after the reservation in "
+"this case."
+msgstr ""
+
+#: Settings/Service/ReminderEmailToCustomer.php:33
+msgid "Send reminder email"
+msgstr ""
+
+#: Settings/Service/ReminderEmailToCustomer.php:34
+msgid ""
+"Reminders are sent using the WordPress Cron system, which relies on site "
+"visits to trigger the scheduled events. If your site has low traffic, there "
+"may be delays or the reminders may not be sent at all."
+msgstr ""
+
+#. translators: %d: number of days
+#: Settings/Service/ReminderEmailToCustomer.php:40
+msgid "%d day before"
+msgid_plural "%d days before"
+msgstr[0] ""
+msgstr[1] ""
+
+#: Settings/Service/ReminderEmailToCustomer.php:108
+msgid "Don't forget your reservation"
+msgstr ""
+
+#: Settings/Service/ReminderEmailToCustomer.php:109
+msgid "We are getting close!"
+msgstr ""
+
+#: Settings/Service/ShortDescription.php:22
+msgid "Short text to describe the service"
+msgstr ""
+
+#: Settings/Service/ShowBookedSlots.php:21
+msgid "Show booked slots"
+msgstr ""
+
+#: Settings/Service/ShowMap.php:21
+msgid "Show map"
+msgstr ""
+
+#: Settings/Service/ShowMap.php:22
+msgid ""
+"By default, a location map is displayed. However, you can change this "
+"setting to hide the map if it is not needed."
+msgstr ""
+
+#: Settings/Service/ShowProvider.php:20
+msgid "Show provider name"
+msgstr ""
+
+#: Settings/Service/ShowProviderUrl.php:21
+msgid "Show provider profile page link"
+msgstr ""
+
+#: Settings/Service/ShowProviderUrl.php:22
+msgid ""
+"When enabled, the provider name will be displayed as a hyperlink that leads "
+"to the provider's profile page. To set the profile page for each provider, "
+"navigate to WordPress > Users > Edit > Website."
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:26
+msgid "Show slot customers"
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:27
+msgid ""
+"Choose whether to display a list of the attendees or not, and which data it "
+"should include"
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:29
+msgid "Show names"
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:30
+msgid "Show email"
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:31
+msgid "Show names and email"
+msgstr ""
+
+#: Settings/Service/ShowSlotCustomers.php:32
+msgid "Please carefully consider any privacy-related implications"
+msgstr ""
+
+#: Settings/Service/ShowTimes.php:25
+msgid "Show start/end times"
+msgstr ""
+
+#: Settings/Service/ShowTimes.php:26
+msgid "Show start/end"
+msgstr ""
+
+#: Settings/Service/ShowTimes.php:27
+msgid "Hide"
+msgstr ""
+
+#: Settings/Service/ShowTimes.php:28
+msgid "Show start time only"
+msgstr ""
+
+#: Settings/Service/SlotDurationRule.php:27
+msgid "Let Service Providers decide"
+msgstr ""
+
+#: Settings/Service/TotalSlotTickets.php:22
+msgid "Time slot capacity"
+msgstr ""
+
+#: Settings/Service/TotalUserSlotTickets.php:23
+msgid "Max user tickets per slot"
+msgstr ""
+
+#: Settings/Service/TotalUserSlotTickets.php:24
+msgid ""
+"The maximum number of tickets that a customer is allowed to book for a "
+"single slot. 0 means up to the maximum available tickets."
+msgstr ""
+
+#: Settings/Service/UntilApproval.php:22
+msgid "Keep available until approval"
+msgstr ""
+
+#: Settings/Service/UntilApproval.php:23
+msgid ""
+"Activate this option if you want to keep the slot/tickets available for "
+"other reservations, until a reservation gets approved."
+msgstr ""
+
+#: Settings/Service/UntilApproval.php:24
+msgid "Activating this option could lead to overbooking"
+msgstr ""
+
+#: Settings/SettingAvailableSlotColor.php:28
+msgid "Available slot color"
+msgstr ""
+
+#: Settings/SettingBackgroundColor.php:29
+msgid "Background color"
+msgstr ""
+
+#: Settings/SettingBorderColor.php:29
+msgid "Border color"
+msgstr ""
+
+#: Settings/SettingBorderRadius.php:37
+msgid "Border radius"
+msgstr ""
+
+#: Settings/SettingBorderWidth.php:37
+msgid "Border size"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:17
+msgid "Total number of available slots"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:18
+msgid "Total number of available tickets"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:19
+msgid "Service name"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:20
+msgid "Service name + total number of available slots"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:21
+msgid "Service name + total number of available tickets"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:22
+msgid "Hide the dots"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:39
+msgid "Numbered dots meaning"
+msgstr ""
+
+#: Settings/SettingDotsLogic.php:44
+msgid "Select what the number inside the dots represents."
+msgstr ""
+
+#: Settings/SettingDotsThreshold.php:37
+msgid "Numbered dots threshold"
+msgstr ""
+
+#: Settings/SettingDotsThreshold.php:42
+msgid ""
+"Numbers inside the dots are not displayed when their value is below this "
+"threshold."
+msgstr ""
+
+#: Settings/SettingMapsStyle.php:43
+msgid "Default style"
+msgstr ""
+
+#: Settings/SettingMapsStyle.php:63
+msgid "Google Maps Style"
+msgstr ""
+
+#: Settings/SettingMapsStyle.php:68
+msgid ""
+"Do you want more styles or even create your own style? Just set this to "
+"\"Default style\", then install the SnazzyMaps WordPress plugin."
+msgstr ""
+
+#: Settings/SettingMapsZoom.php:37
+msgid "Map zoom level"
+msgstr ""
+
+#: Settings/SettingPrimaryColor.php:28
+msgid "Primary widget color"
+msgstr ""
+
+#: Settings/SettingSoldoutSlotColor.php:28
+msgid "Booked slot color"
+msgstr ""
+
+#: Settings/SkipGoogleMapsLib.php:19
+msgid "Skip Google Maps library loading"
+msgstr ""
+
+#: Settings/SkipGoogleMapsLib.php:20
+msgid ""
+"Enable this setting if you are experiencing issues with the Google Maps JS "
+"library being loaded by another plugin or theme."
+msgstr ""
+
+#: Settings/SortingProviders.php:19
+msgid "Providers sorting order"
+msgstr ""
+
+#: Settings/SortingProviders.php:20
+msgid ""
+"This determines the sorting order of service providers during the selection "
+"step."
+msgstr ""
+
+#: Settings/SortingServices.php:19
+msgid "Services sorting order"
+msgstr ""
+
+#: Settings/SortingServices.php:20
+msgid ""
+"This determines the sorting order of services during the selection step."
+msgstr ""
+
+#: Settings/UseCache.php:20
+msgid "Enable Caching"
+msgstr ""
+
+#: Settings/UseCache.php:21
+msgid ""
+"If enabled, the plugin will utilize the existing caching system to improve "
+"loading times."
+msgstr ""
+
+#: Settings/UseCache.php:22
+msgid ""
+"Disabling caching can significantly impact the overall speed of the plugin. "
+"Only disable caching if you are encountering problems with your current "
+"caching system."
+msgstr ""
+
+#: src/api.js:61
+msgid "WP API nonce expired, please refresh the page."
+msgstr ""
+
+#: src/api.js:63 src/backend/components/Plugin/DataTableLocations.js:374
+msgid "Generic error"
+msgstr ""
+
+#: src/backend/components/App.js:93
+msgid "All times are local"
+msgstr ""
+
+#: src/backend/components/Plugin/AddReservation.js:178
+#: src/backend/components/Plugin/DataTableCustomers.js:584
+#: src/backend/components/Plugin/DataTableLocations.js:380
+msgid "Add"
+msgstr ""
+
+#. translators: "Cancel" reservation
+#: src/backend/components/Plugin/AddReservation.js:185
+#: src/backend/components/Plugin/DataTableApiTokens.js:165
+#: src/backend/components/Plugin/DataTableCustomers.js:585
+#: src/backend/components/Plugin/DataTableLocations.js:381
+#: src/backend/components/Plugin/DataTablePromotions.js:467
+#: src/backend/components/Plugin/DataTableReservations.js:890
+#: src/backend/components/Plugin/DataTableReservations.js:1068
+#: src/backend/components/Plugin/DataTableReservations.js:1665
+#: src/backend/components/Plugin/DataTableServices.js:404
+#: src/backend/components/Plugin/DataTableServices.js:642
+#: src/backend/components/Plugin/NotificationSettingItem.js:138
+#: src/backend/components/Plugin/WorkingHoursPanel.js:443
+#: src/frontend/components/App.js:557
+#: src/frontend/components/ViewReservations.js:127
+msgid "Cancel"
+msgstr "Anulare"
+
+#: src/backend/components/Plugin/AddReservation.js:195
+msgid "This is an administrative panel"
+msgstr ""
+
+#: src/backend/components/Plugin/AddReservation.js:196
+msgid ""
+"Form conditionals and requirements will not be applied. All the fields are "
+"displayed, all the values are allowed."
+msgstr ""
+
+#: src/backend/components/Plugin/AddReservation.js:207
+msgid ""
+"Clear this field if you wish to create a new customer, based on the provided "
+"email address."
+msgstr ""
+
+#: src/backend/components/Plugin/AddReservation.js:266
+#: src/frontend/components/ReservationForm.js:175
+#: src/frontend/components/ReservationForm.js:183
+msgid "This is required"
+msgstr "Acest câmp e necesar"
+
+#: src/backend/components/Plugin/AddReservation.js:270
+#: src/frontend/components/ReservationForm.js:203
+msgid "Please insert a valid email address"
+msgstr "Introduceti o adresă validă de email"
+
+#: src/backend/components/Plugin/AvailabilityCalendar.js:208
+msgid "Time"
+msgstr ""
+
+#: src/backend/components/Plugin/AvailabilityCalendar.js:459
+msgid "Add reservation"
+msgstr ""
+
+#: src/backend/components/Plugin/AvailabilityCalendar.js:484
+#: src/backend/components/Plugin/DataTablePromotions.js:245
+#: src/backend/components/Plugin/DataTablePromotions.js:257
+msgid "%d out of %d"
+msgstr ""
+
+#: src/backend/components/Plugin/AvailabilityCalendar.js:487 src/globals.js:433
+msgid "Booked"
+msgstr "Rezervat"
+
+#: src/backend/components/Plugin/AvailabilityCalendar.js:489 src/globals.js:435
+msgid "Available"
+msgstr "Disponibil"
+
+#: src/backend/components/Plugin/CustomerSettingsSection.js:147
+#: src/backend/components/Plugin/DataTableCustomers.js:588
+msgid "Map the customer to a WordPress user"
+msgstr ""
+
+#: src/backend/components/Plugin/CustomerSettingsSection.js:153
+#: src/backend/components/Plugin/DataTableCustomers.js:604
+msgid "Do not map the customer"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:115
+#: src/backend/components/Plugin/DataTableCoupons.js:155
+#: src/backend/components/Plugin/DataTableCustomers.js:205
+#: src/backend/components/Plugin/DataTableCustomers.js:350
+#: src/backend/components/Plugin/DataTableLocations.js:150
+#: src/backend/components/Plugin/DataTableLocations.js:261
+#: src/backend/components/Plugin/DataTablePromotions.js:291
+#: src/backend/components/Plugin/DataTablePromotions.js:391
+#: src/backend/components/Plugin/DataTableProviders.js:112
+#: src/backend/components/Plugin/DataTableReservations.js:308
+#: src/backend/components/Plugin/DataTableReservations.js:844
+#: src/backend/components/Plugin/DataTableReservations.js:880
+#: src/backend/components/Plugin/DataTableReservations.js:903
+#: src/backend/components/Plugin/DataTableServices.js:287
+#: src/backend/components/Plugin/DataTableServices.js:479
+#: src/backend/components/Plugin/ReservationSettingsSection.js:276
+#: src/backend/components/Plugin/ReservationSettingsSection.js:401
+#: src/backend/components/Plugin/ReservationSettingsSection.js:593
+#: src/backend/components/Plugin/WorkingHoursPanel.js:357
+#: src/frontend/components/ViewReservations.js:209
+msgid "Are you sure?"
+msgstr "Sunteți sigur ?"
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:121
+#: src/backend/components/Plugin/DataTableCoupons.js:131
+#: src/backend/components/Plugin/DataTableCoupons.js:159
+#: src/backend/components/Plugin/DataTableCustomers.js:212
+#: src/backend/components/Plugin/DataTableCustomers.js:352
+#: src/backend/components/Plugin/DataTableLocations.js:157
+#: src/backend/components/Plugin/DataTableLocations.js:263
+#: src/backend/components/Plugin/DataTablePromotions.js:299
+#: src/backend/components/Plugin/DataTablePromotions.js:393
+#: src/backend/components/Plugin/DataTableProviders.js:119
+#: src/backend/components/Plugin/DataTableReservations.js:309
+#: src/backend/components/Plugin/DataTableReservations.js:905
+#: src/backend/components/Plugin/DataTableServices.js:295
+#: src/backend/components/Plugin/DataTableServices.js:481
+#: src/backend/components/Plugin/ReservationSettingsSection.js:280
+#: src/backend/components/Plugin/ReservationSettingsSection.js:405
+#: src/backend/components/Plugin/ReservationSettingsSection.js:609
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:142
+#: src/backend/components/Plugin/WorkingHoursPanel.js:362
+msgid "Yes"
+msgstr "Da"
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:122
+#: src/backend/components/Plugin/DataTableCoupons.js:133
+#: src/backend/components/Plugin/DataTableCoupons.js:160
+#: src/backend/components/Plugin/DataTableCustomers.js:213
+#: src/backend/components/Plugin/DataTableCustomers.js:353
+#: src/backend/components/Plugin/DataTableLocations.js:158
+#: src/backend/components/Plugin/DataTableLocations.js:264
+#: src/backend/components/Plugin/DataTablePromotions.js:300
+#: src/backend/components/Plugin/DataTablePromotions.js:394
+#: src/backend/components/Plugin/DataTableProviders.js:120
+#: src/backend/components/Plugin/DataTableReservations.js:310
+#: src/backend/components/Plugin/DataTableReservations.js:906
+#: src/backend/components/Plugin/DataTableServices.js:296
+#: src/backend/components/Plugin/DataTableServices.js:482
+#: src/backend/components/Plugin/ReservationSettingsSection.js:281
+#: src/backend/components/Plugin/ReservationSettingsSection.js:406
+#: src/backend/components/Plugin/ReservationSettingsSection.js:610
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:143
+#: src/backend/components/Plugin/WorkingHoursPanel.js:363
+msgid "No"
+msgstr "Nu"
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:124
+#: src/backend/components/Plugin/DataTableCoupons.js:162
+#: src/backend/components/Plugin/DataTableCustomers.js:203
+#: src/backend/components/Plugin/DataTableCustomers.js:357
+#: src/backend/components/Plugin/DataTableLocations.js:148
+#: src/backend/components/Plugin/DataTableLocations.js:268
+#: src/backend/components/Plugin/DataTablePromotions.js:303
+#: src/backend/components/Plugin/DataTablePromotions.js:396
+#: src/backend/components/Plugin/DataTableReservations.js:616
+#: src/backend/components/Plugin/DataTableReservations.js:908
+#: src/backend/components/Plugin/DataTableReservations.js:1406
+#: src/backend/components/Plugin/DataTableServices.js:285
+#: src/backend/components/Plugin/DataTableServices.js:486
+#: src/backend/components/Plugin/FormBuilder.js:206
+#: src/backend/components/Plugin/ReservationSettingsSection.js:283
+#: src/backend/components/Plugin/ReservationSettingsSection.js:408
+#: src/backend/components/Plugin/WorkingHoursPanel.js:355
+msgid "Delete"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:142
+msgid "New API token"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:163
+msgid "Create new API token"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:164
+#: src/backend/components/Plugin/DataTablePromotions.js:466
+#: src/backend/components/Plugin/DataTableServices.js:641
+#: src/backend/components/Plugin/WorkingHoursPanel.js:442
+msgid "Create"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:172
+msgid "Please input the token name"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableApiTokens.js:177
+msgid ""
+"If active, API requests made by this token are not allowed to perform write "
+"operations."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCoupons.js:42
+msgid "Add coupon"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCoupons.js:101
+msgid "Used"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCoupons.js:219
+msgid "Please input the coupon text without white spaces"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCoupons.js:224
+msgid "Coupon already present"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:84
+#: src/backend/components/Plugin/DataTableLocations.js:60
+msgid "Error"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:203
+msgid "There are reservations for this customer"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:263
+#: src/backend/components/Plugin/DataTableCustomers.js:390
+msgid "Registered"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:263
+#: src/backend/components/Plugin/DataTableCustomers.js:386
+msgid "Not registered"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:325
+#: src/backend/components/Plugin/DataTableServices.js:423
+#: src/backend/components/Plugin/DataTableServices.js:436
+#: src/backend/components/Plugin/PromotionSettingsSection.js:208
+#: src/backend/components/Plugin/ServiceSettingsSection.js:141
+msgid "Inactive"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:347
+#: src/backend/components/Plugin/DataTableLocations.js:259
+#: src/backend/components/Plugin/DataTablePromotions.js:389
+#: src/backend/components/Plugin/DataTableReservations.js:901
+#: src/backend/components/Plugin/DataTableServices.js:476
+msgid "Selected %d item"
+msgid_plural "Selected %d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:358
+#: src/backend/components/Plugin/DataTableLocations.js:269
+#: src/backend/components/Plugin/DataTableServices.js:487
+msgid "Delete %d item"
+msgid_plural "Delete %d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:394
+#: src/backend/components/Plugin/DataTableReservations.js:1090
+msgid "All"
+msgstr "Toate"
+
+#: src/backend/components/Plugin/DataTableCustomers.js:441
+msgid "Search..."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:498
+msgid "Reservations by %s"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:583
+msgid "Add a customer"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:608
+msgid "Create a new WordPress user"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:633
+#: src/backend/components/Plugin/DataTableLocations.js:390
+msgid "Please provide a name"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableCustomers.js:651
+msgid "Please provide a valid email address"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableLocations.js:148
+msgid "There are services with this location assigned"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableLocations.js:321
+msgid "New location"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableLocations.js:379
+msgid "Add a location"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableLocations.js:405
+msgid "Please provide a valid and well-formatted address"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:73
+msgid "More configuration options will be available upon creation."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:181
+msgid "Discount"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:186
+msgid "Uses"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:191
+#: src/backend/components/Plugin/DataTablePromotions.js:506
+msgid "Period"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:196
+#: src/backend/components/Plugin/DataTablePromotions.js:488
+msgid "Type"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:248
+#: src/backend/components/Plugin/DataTablePromotions.js:260
+msgid "This promotion can't be used anymore by customers."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:303
+msgid "There are reservations for this promotion"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:371
+msgid "Running"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:375
+msgid "Not running (paused)"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:381
+msgid "Not running"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:411
+msgid "New promotion"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:465
+msgid "Create a new Promotion"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:477
+msgid "Please input the promotion name without white spaces"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:482
+msgid "Name already present"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:496
+msgid ""
+"The promotion will run for the selected period, the discount is "
+"automatically applied to any eligible service."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:501
+msgid ""
+"The promotion will run for the selected period, the discount is applied to "
+"any eligible service only if a valid coupon is provided."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:510
+msgid "Please provide a date interval"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTablePromotions.js:535
+msgid "Please provide a discount value"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableProviders.js:122
+msgid "Revoke Google Authorization"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:285
+#: src/frontend/components/App.js:501
+msgid "Payment"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:326
+#: src/backend/components/Plugin/DataTableReservations.js:962
+#: src/backend/components/Plugin/DataTableReservations.js:1018
+#: src/backend/components/Plugin/TagReservationPayment.js:26
+msgid "Paid"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:330
+#: src/backend/components/Plugin/TagReservationPayment.js:37
+msgid "Not paid"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:335
+#: src/backend/components/Plugin/DataTableReservations.js:353
+msgid "Not due"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:461
+msgid "Search customer"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:586
+#: src/backend/components/Plugin/DataTableReservations.js:1608
+#: src/backend/components/Plugin/ReservationSettingsSection.js:945
+msgid "Details"
+msgstr "Detalii"
+
+#: src/backend/components/Plugin/DataTableReservations.js:634
+#: src/backend/components/Plugin/DataTableReservations.js:1428
+#: src/frontend/components/SlotPicker.js:256
+#: src/frontend/components/ViewReservations.js:226
+msgid "Confirm"
+msgstr "Confirm"
+
+#: src/backend/components/Plugin/DataTableReservations.js:654
+#: src/backend/components/Plugin/DataTableReservations.js:1450
+msgid "Approve"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:666
+#: src/backend/components/Plugin/DataTableReservations.js:1463
+msgid "Start meeting"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:676
+#: src/backend/components/Plugin/ReservationSettingsSection.js:314
+msgid "Zoom meeting"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:677
+#: src/backend/components/Plugin/ReservationSettingsSection.js:338
+msgid "Google Meet"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:708
+#: src/backend/components/Plugin/TagReservationStatus.js:25 src/globals.js:447
+msgid "Confirmed"
+msgstr "Confirmat"
+
+#: src/backend/components/Plugin/DataTableReservations.js:712
+#: src/backend/components/Plugin/TagReservationStatus.js:29 src/globals.js:450
+msgid "Cancelled"
+msgstr "Anulat"
+
+#: src/backend/components/Plugin/DataTableReservations.js:716
+#: src/backend/components/Plugin/TagReservationStatus.js:51 src/globals.js:453
+msgid "Pending"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:723
+#: src/backend/components/Plugin/DataTableReservations.js:1352
+#: src/backend/components/Plugin/TagReservationStatus.js:38
+msgid "Expired"
+msgstr "Expirat"
+
+#: src/backend/components/Plugin/DataTableReservations.js:847
+#: src/backend/components/Plugin/DataTableReservations.js:883
+msgid "Reason for the cancellation"
+msgstr "Motivul anulării"
+
+#: src/backend/components/Plugin/DataTableReservations.js:854
+msgid "Deny"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:952
+#: src/backend/components/Plugin/DataTableReservations.js:1009
+#: src/backend/components/Plugin/ReservationSettingsSection.js:241
+msgid "ID"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:954
+#: src/backend/components/Plugin/DataTableReservations.js:1015
+msgid "Customer Name"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:955
+#: src/backend/components/Plugin/DataTableReservations.js:1016
+msgid "Customer Email"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:970
+#: src/backend/components/Plugin/DataTableReservations.js:1011
+msgid "Service date start"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:971
+#: src/backend/components/Plugin/DataTableReservations.js:1012
+msgid "Service time start"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:972
+#: src/backend/components/Plugin/DataTableReservations.js:1013
+msgid "Service date end"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:973
+#: src/backend/components/Plugin/DataTableReservations.js:1014
+msgid "Service time end"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:980
+msgid "Form field: %s"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1045
+msgid "Reset reservation IDs"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1058
+msgid "PDF file is ready!"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1065
+msgid "Open PDF"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1078
+msgid "Today's"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1082
+msgid "Tomorrow's"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1086
+msgid "This week"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1097
+#: src/backend/components/Plugin/DataTableReservations.js:1341
+msgid "Past"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1130
+msgid "Search by ID"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1160
+msgid "Export selected (%d)"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1161
+msgid "Export all"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1173
+msgid "Empty the database"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1179
+msgid "Activate Table view"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1185
+msgid "Activate List view"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1191
+msgid "Activate Auto view"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1225
+msgid "Display columns"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1267
+msgid "Sort by"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1282
+msgid "Sorting order"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1287
+msgid "Descending"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1292
+msgid "Ascending"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1327
+msgid "Include reservations"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1664
+msgid "I know what I'm doing, proceed"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableReservations.js:1671
+msgid "This erases the reservations database"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:136
+msgid "Select what to copy in addition to the service general properties."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:141
+msgid "Copy form"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:149
+msgid "Copy providers settings"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:157
+msgid "Copy notifications"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:285
+msgid "There are reservations for this service"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:341
+#: src/backend/components/Plugin/ReservationSettingsSection.js:693
+#: src/backend/components/Plugin/ServiceNotificationsSection.js:68
+msgid "Notifications"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:365
+#: src/backend/components/Plugin/FormBuilder.js:1108
+msgid "Booking form"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:375
+msgid "Personal availability"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:403
+msgid "Duplicate service"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:406
+msgid "Duplicate"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:446
+#: src/backend/components/Plugin/DataTableServices.js:651 src/globals.js:140
+#: src/globals.js:151
+msgid "Appointment"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:450
+#: src/backend/components/Plugin/DataTableServices.js:656 src/globals.js:142
+#: src/globals.js:155
+msgid "Unscheduled"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:539
+msgid "New service"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:640
+msgid "Create a new Service"
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:653
+msgid "Suitable for timeslot-based reservations."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:658
+msgid ""
+"A service with no scheduling needs. Think about support tickets, estimate "
+"request, and so on."
+msgstr ""
+
+#: src/backend/components/Plugin/DataTableServices.js:669
+msgid "Please provide a name for the service"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:177
+msgid "This field is always active"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:180
+msgid "Other fields are dependent on this field"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:181
+msgid "Activate"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:197
+msgid "depends on %s"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:282
+msgid "New paragraph"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:286
+msgid "New text input"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:295
+msgid "New text area"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:303
+msgid "New options field"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:307
+#: src/backend/components/Plugin/FormBuilder.js:310
+#: src/backend/components/Plugin/FormBuilder.js:311
+msgid "Option 1"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:315
+#: src/backend/components/Plugin/FormBuilder.js:316
+msgid "Option 2"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:320
+#: src/backend/components/Plugin/FormBuilder.js:321
+msgid "Option 3"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:328
+msgid "New checkbox"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:336
+msgid "New file upload"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:344
+msgid "New number input"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:399
+#: src/backend/components/Plugin/FormBuilder.js:400
+msgid "New option"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:490
+msgid "Option label"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:504
+#: src/backend/components/Plugin/FormBuilder.js:1007
+msgid "Price increment"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:507
+msgid ""
+"If the customer select this option during the booking process, the service "
+"price will be increased of this amount"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:531
+msgid "Add option"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:539
+msgid "Validation"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:552
+msgid "Regex"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:554
+msgid "Need help with regex expressions?"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:565
+msgid "No validation"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:572
+msgctxt "Form field validation regex"
+msgid "Email"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:579
+msgid "Phone (international)"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:586
+msgid "Alphanumeric with space"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:593
+msgctxt "Form field validation regex"
+msgid "URL"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:611
+msgid "Hide from registered users"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:621
+msgid "Notification template placeholder"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:630
+msgid ""
+"This placeholder, when inserted in a notification template, will be replaced "
+"with the value of the field. It must be unique in the context of the service."
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:637
+msgid "Pre-fill user meta-key"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:642
+msgid "Select or write"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:645
+msgctxt "Form field label"
+msgid "Email"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:649
+msgctxt "Form field label"
+msgid "First name"
+msgstr "Prenume"
+
+#: src/backend/components/Plugin/FormBuilder.js:653
+msgctxt "Form field label"
+msgid "Last name"
+msgstr "Nume"
+
+#: src/backend/components/Plugin/FormBuilder.js:657
+msgctxt "Form field label"
+msgid "User URL"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:661
+msgid ""
+"The field will be pre-populated with the corresponding user meta when "
+"available (even if the field is hidden)"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:669
+msgid "Allowed file extensions"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:673
+msgid "Comma-separated, e.g. \"jpeg, png, tiff\""
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:681
+msgid "Max file size"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:702
+#: src/backend/components/Plugin/FormBuilder.js:706
+msgid "Visible"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:703
+#: src/backend/components/Plugin/FormBuilder.js:707
+msgid "Hidden"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:708
+#: src/backend/components/Plugin/FormBuilder.js:971
+msgid "Required"
+msgstr "Necesar"
+
+#: src/backend/components/Plugin/FormBuilder.js:709
+msgid "Not required"
+msgstr "Opțional"
+
+#: src/backend/components/Plugin/FormBuilder.js:718
+#: src/frontend/components/App.js:603 src/frontend/components/App.js:679
+msgid "Checked"
+msgstr "Bifat"
+
+#: src/backend/components/Plugin/FormBuilder.js:720
+msgid "Not checked"
+msgstr "Nebifat"
+
+#: src/backend/components/Plugin/FormBuilder.js:730
+msgid "Greater than"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:731
+msgid "Less than"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:732
+msgid "Equal to"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:750
+msgid "Conditional"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:759
+msgid "The field is"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:762
+#: src/backend/components/Plugin/FormBuilder.js:777
+msgid "No valid fields in this form"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:762
+msgid "Select a state"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:774
+msgid "Depending on"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:777
+msgid "Select a field"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:792
+msgid "Being"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:795
+msgid "Parent field options must be 2 or more"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:795
+msgid "Select a value"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:808
+msgid "This number"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:826
+msgid "Experimental feature"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:829
+msgid ""
+"Here you can apply a simple rule to control some states of this field based "
+"on values of other fields."
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:830
+msgid ""
+"A conditional rule can be provided only if the form contains at least one "
+"field of type number, options or checkbox (which is not this one)."
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:952
+msgid "Label"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:985
+msgid "Min"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:994
+msgid "Max"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1059
+msgid "Discard"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1062
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1342
+msgid "Save changes"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1118
+msgid "Input text"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1121
+msgid "Text area"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1124
+msgid "Checkbox"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1127
+msgid "Number"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1130
+msgid "Options"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1133
+msgid "File upload"
+msgstr ""
+
+#: src/backend/components/Plugin/FormBuilder.js:1136
+msgid "Paragraph"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:151
+msgid "Calendar"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:160
+msgid ""
+"Any event on this calendar which has the FREE/BUSY property set to BUSY, "
+"regardless of its title, will be considered as AVAILABLE time for the "
+"selected services. If more BUSY events overlap, their UNION will be "
+"considered."
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:171
+msgid "Destination"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:174
+msgid ""
+"If desired, select the calendar in which reservation events should be "
+"created for this source."
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:185
+msgid "Personal"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:188
+msgid ""
+"If desired, select a calendar whose busy events will block availability for "
+"this source."
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:199
+#: src/backend/components/Plugin/WorkingHoursPanel.js:180
+msgid "Independent"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:202
+msgid ""
+"If set as independent, the reservations for the same services derived from "
+"other calendars will not block the availability of this calendar."
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:289
+#: src/backend/components/Plugin/WorkingHoursPanel.js:267
+msgid "No services"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:340
+msgid "No destination"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:393
+msgid "No personal"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:472
+msgid "Connected as %s"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:474
+msgid "Disconnect"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:479
+msgid "Connect your Google Account"
+msgstr ""
+
+#: src/backend/components/Plugin/GoogleAvailabilityPanel.js:480
+msgid "Authorize"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:50
+msgid "Thanks for updating to the latest TeamBooking version!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:63
+msgid ""
+"This is the biggest update since the app was born, it brings new features "
+"and a complete re-style! It also brings some changes that you need to be "
+"aware of."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:68
+msgid "Show me"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:87
+msgid "Availability in Google Calendar is changed"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:109
+#: src/backend/components/Plugin/MigrationGuide.js:225
+msgid "Before"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:113
+msgid "Sync a Google Calendar."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:116
+msgid "Create events with title = to the name of the service."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:119
+msgid "Events are modified after booking."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:126
+#: src/backend/components/Plugin/MigrationGuide.js:243
+msgid "After"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:130
+msgid "Assign one or more services to one or more Google Calendars."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:133
+msgid ""
+"Any event in a calendar will be considered availability for calendar-"
+"assigned services, no matter the title."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:136
+msgid ""
+"You may (or may not) choose a destination Google Calendar where new events "
+"are created after booking."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:153
+#: src/backend/components/Plugin/MigrationGuide.js:269
+msgid "Benefits"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:157
+msgid ""
+"Availability calendars can be hidden from the main Google Calendar view to "
+"keep things clean"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:160
+msgid ""
+"Huge flexibility and reliability without messing around with event titles"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:163
+msgid "Shared calendars can be used as well"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:171
+msgid "How to adapt"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:174
+msgid ""
+"Go to the Availability tab of the plugin and assign the services to one or "
+"more of your Google Calendar, as you please."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:178
+msgid "Hint"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:180
+msgid ""
+"Create new Google Calendars for the availability, keep them separated from "
+"your personal Google Calendar."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:190
+#: src/backend/components/Plugin/MigrationGuide.js:287
+#: src/backend/components/Plugin/MigrationGuide.js:316
+#: src/backend/components/Plugin/MigrationGuide.js:358
+#: src/backend/components/Plugin/MigrationGuide.js:408
+#: src/frontend/components/App.js:713
+#: src/frontend/components/ReservationForm.js:549
+#: src/frontend/components/SlotPicker.js:249
+#: src/frontend/components/ViewReservations.js:218
+msgid "Back"
+msgstr "Inapoi"
+
+#: src/backend/components/Plugin/MigrationGuide.js:193
+#: src/backend/components/Plugin/MigrationGuide.js:290
+#: src/backend/components/Plugin/MigrationGuide.js:319
+msgid "What else?"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:202
+msgid "More intuitive step-by-step frontend workflow."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:230
+#: src/backend/components/Plugin/MigrationGuide.js:247
+msgid "Customer selects a day from the calendar."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:233
+msgid ""
+"A list of time slots are presented, one for each service-provider-time "
+"combination"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:236
+msgid "Customer picks the preferred one."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:250
+msgid ""
+"A step-by-step process is shown, to select the service, then the provider, "
+"then the time slot."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:253
+msgid ""
+"If configured to do so, the plugin allows the customer to select adjacent "
+"slots to extend the reservation time."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:273
+msgid "Cleaner process, no more crowded time slots."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:276
+msgid ""
+"Say goodbye to the cart feature, say hi to the more rationale adjacent slots "
+"selection!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:299
+msgid "Say Hi to form conditionals!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:312
+msgid ""
+"Reservation form fields can now be configured to observe some conditional "
+"logic!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:341
+msgid "No more strict Google Calendar requirement"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:354
+msgid ""
+"A weekly schedule based on working hours can be provided per-service, "
+"without the need to use Google Calendar!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:361
+msgid "Great! Take me to the dashboard!"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:383
+msgid "Settings and data migration"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:393
+msgid ""
+"Before going to the dashboard, please choose now if you want to migrate "
+"settings and data from the previous version, or if you want to start from "
+"scratch."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:398
+msgid "Migration can be done on a later time as well."
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:421
+msgid "Migrate settings and data"
+msgstr ""
+
+#: src/backend/components/Plugin/MigrationGuide.js:434
+msgid "Start fresh"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:137
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:549
+#: src/backend/components/SettingItem.js:379
+msgid "Save"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:141
+msgid "Subject"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:146
+msgid "Please provide the email subject"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:150
+msgid "Body"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:154
+msgid "You can use HTML"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:157
+msgid "Please provide the email content"
+msgstr ""
+
+#: src/backend/components/Plugin/NotificationSettingItem.js:197
+msgid "Edit email content"
+msgstr ""
+
+#: src/backend/components/Plugin/PromotionSettingsSection.js:167
+msgid "Coupons"
+msgstr ""
+
+#: src/backend/components/Plugin/PromotionSettingsSection.js:170
+msgid "List of single use coupon codes"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:113
+#: src/backend/components/Plugin/ReservationSettingsSection.js:271
+msgid "Download"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:116
+#: src/backend/components/Plugin/ReservationSettingsSection.js:299
+msgid "Not provided"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:211
+msgid "Date of service"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:214
+msgid "Times"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:244
+msgid "Submitted"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:254
+msgid "UID (internal)"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:313
+msgid "Virtual meetings"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:320
+msgid "Get data for Zoom meeting ID %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:326
+msgid "Start URL"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:330
+msgid "Join URL"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:332
+msgid "Password: %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:333
+msgid "Status: %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:341
+msgid "Join meeting"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:362
+msgid "Event"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:369
+msgid "Create Google Calendar event again"
+msgstr "Creează eveniment în Google Calendar din nou"
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:369
+msgid "Create Google Calendar event"
+msgstr "Creează eveniment în Google Calendar"
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:373
+msgid ""
+"The event will only be created if the calendar/plan that the reservation was "
+"made for has a destination calendar set for it"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:388
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1289
+msgid "Form submission details"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:426
+msgid "Applied discounts"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:429
+msgid ""
+"The discount values are based on the time of the reservation and any "
+"subsequent changes to a promotion will not be reflected here."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:506
+msgid "System"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:512
+msgid "User"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:524
+msgid "Confirmation email sent by %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:527
+#: src/backend/components/Plugin/ReservationSettingsSection.js:542
+#: src/backend/components/Plugin/ReservationSettingsSection.js:563
+msgid "send again"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:531
+msgid "Confirmation pending"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:539
+msgid "Reminder email sent by %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:548
+msgid "send now"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:551
+msgid "Reminder email pending"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:560
+msgid "Cancellation email sent by %s"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:583
+#: src/backend/components/Plugin/ReservationSettingsSection.js:613
+msgid "Refund"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:626
+msgid "Gateway"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:629
+msgid "Amount"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:670
+msgid "Gateway data"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:700
+msgid "Edit"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:715
+msgid "Files"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1004
+msgid "This reservation has expired."
+msgstr "Rezervarea a expirat."
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1005
+msgid ""
+"Editing an expired reservation could lead to overbooking as the spot may "
+"have been taken by other reservations."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1012
+msgid "I am aware of the potential risks"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1025
+msgid "You are editing the database directly"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1026
+msgid ""
+"Changes made here won't send notifications. Use the actions in the "
+"reservations table to trigger them."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1033
+msgid ""
+"The service will be modified even if there are no available slots for it."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1059
+msgid "Start date time"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1062
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1086
+msgid "The date will be modified even if there are no available slots for it."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1083
+msgid "End date time"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1162
+msgid "Payment status"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1192
+msgid "Base price"
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1261
+msgid "Reason for cancellation"
+msgstr "Motivul anulării"
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1280
+msgid "This is the latest service form available."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1283
+msgid ""
+"If you've made changes to the service form after this reservation was "
+"submitted, some information may be missing or different from what the "
+"customer originally viewed."
+msgstr ""
+
+#: src/backend/components/Plugin/ReservationSettingsSection.js:1351
+msgid "No payment yet"
+msgstr ""
+
+#: src/backend/components/Plugin/SelectGcal.js:63
+msgid "No calendar"
+msgstr ""
+
+#: src/backend/components/Plugin/SelectLocation.js:28
+msgid "No locations available."
+msgstr ""
+
+#: src/backend/components/Plugin/SelectLocation.js:32
+msgid "Go to Locations"
+msgstr ""
+
+#: src/backend/components/Plugin/SelectTimezone.js:27
+msgid "Customer's local timezone"
+msgstr ""
+
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:138
+msgid "Settings in this panel are relative to you only!"
+msgstr ""
+
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:140
+msgid "Are you sure? This will overwrite their current settings."
+msgstr ""
+
+#: src/backend/components/Plugin/ServiceCustomSettingsSection.js:145
+msgid "Apply to all providers"
+msgstr ""
+
+#: src/backend/components/Plugin/TagReservationStatus.js:42
+msgid ""
+"Customer was not able to pay within the allowed time. Expired reservations "
+"are going to be automatically deleted on a weekly basis, unless the status "
+"is manually changed or the reservation is set as paid."
+msgstr ""
+
+#: src/backend/components/Plugin/TagReservationStatus.js:55
+msgid "To do"
+msgstr ""
+
+#: src/backend/components/Plugin/TagReservationStatus.js:59
+msgid "Done"
+msgstr ""
+
+#: src/backend/components/Plugin/TagReservationStatus.js:63
+msgid "Draft"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:482
+msgid "Total time: %s"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:494
+msgid "Add interval"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:501
+msgid "Remove interval"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:524
+msgid "Showing from %s"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:535
+msgid "to %s"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:558
+msgid "Activity period"
+msgstr ""
+
+#: src/backend/components/Plugin/WeeklyPlannerPanel.js:575
+msgid "Excluded dates"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:169
+msgid "Services to which this availability source is applied."
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:183
+msgid ""
+"If set as independent, reservations for the same services derived from other "
+"sources will not block the availability of this one."
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:388
+msgid "New plan"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:406
+msgid ""
+"Create weekly availability plans. Those plans are in addition (or in "
+"alternative) to Google Calendar availability plans."
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:441
+msgid "Create a new Plan"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursPanel.js:452
+msgid "Please provide a name for the plan"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:67
+msgid "Weekly plan"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:76
+msgid "Google Calendar destination"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:82
+msgid "Google Calendar personal"
+msgstr ""
+
+#: src/backend/components/Plugin/WorkingHoursSettingsSection.js:124
+msgid "Google integration"
+msgstr ""
+
+#: src/backend/components/SettingItem.js:188
+msgid "Discard change"
+msgstr ""
+
+#: src/backend/components/SettingItem.js:196
+msgid "Save change"
+msgstr ""
+
+#: src/backend/components/SettingItem.js:362
+msgid "Edit content"
+msgstr ""
+
+#: src/backend/components/SettingItemImageSelector.js:34
+msgid "Select"
+msgstr ""
+
+#: src/backend/components/SettingItemImageSelector.js:40
+#: src/frontend/components/App.js:753
+msgid "Remove"
+msgstr ""
+
+#: src/backend/components/SettingItemInformative.js:51
+msgid "This file is from a different version."
+msgstr ""
+
+#: src/backend/components/SettingItemInformative.js:69
+msgid "Not a valid JSON file."
+msgstr ""
+
+#: src/backend/components/SettingItemInformative.js:83
+msgid "Import"
+msgstr ""
+
+#: src/backend/components/SettingItemInformative.js:107
+msgid "Export"
+msgstr ""
+
+#: src/frontend/components/App.js:76
+msgid "Time left"
+msgstr ""
+
+#: src/frontend/components/App.js:79
+msgid "Your reservation is expired."
+msgstr "Rezervarea a expirat"
+
+#: src/frontend/components/App.js:512 src/frontend/components/App.js:994
+msgid "Thank you for the reservation"
+msgstr "Mulțumim pentru rezervare"
+
+#: src/frontend/components/App.js:516
+msgid "To confirm the reservation, please select a payment method."
+msgstr ""
+
+#: src/frontend/components/App.js:517
+msgid "Please select a payment method."
+msgstr ""
+
+#: src/frontend/components/App.js:524
+msgid "Amount to pay"
+msgstr ""
+
+#: src/frontend/components/App.js:564
+msgid "Pay"
+msgstr ""
+
+#: src/frontend/components/App.js:628
+msgid "Summary"
+msgstr "Sumar rezervare"
+
+#: src/frontend/components/App.js:724
+#: src/frontend/components/ReservationForm.js:358
+msgid "Book now"
+msgstr "Rezervă acum"
+
+#: src/frontend/components/App.js:738
+msgid "Coupon?"
+msgstr ""
+
+#: src/frontend/components/App.js:759
+msgid "Apply"
+msgstr ""
+
+#: src/frontend/components/App.js:772
+msgid "Price details"
+msgstr ""
+
+#: src/frontend/components/App.js:781
+msgid "%s list price"
+msgstr ""
+
+#: src/frontend/components/App.js:787 src/frontend/components/App.js:812
+msgid "X %d ticket ="
+msgid_plural "X %d tickets ="
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/frontend/components/App.js:793 src/frontend/components/App.js:855
+msgid "Coupon %s "
+msgstr ""
+
+#: src/frontend/components/App.js:828
+msgid "Slot %d: %s discount"
+msgstr ""
+
+#: src/frontend/components/App.js:833 src/frontend/components/App.js:846
+msgid "%s discount"
+msgstr ""
+
+#: src/frontend/components/App.js:861
+msgid "Total"
+msgstr ""
+
+#: src/frontend/components/App.js:917
+msgid "Coupon applied!"
+msgstr ""
+
+#: src/frontend/components/App.js:925
+msgid "Invalid coupon!"
+msgstr ""
+
+#: src/frontend/components/App.js:965
+msgid "Go back"
+msgstr "Inapoi"
+
+#: src/frontend/components/App.js:974
+msgid "Reservations for %s number %s"
+msgstr ""
+
+#: src/frontend/components/App.js:990
+msgid "Add to calendar"
+msgstr "Adaugă la calendar"
+
+#: src/frontend/components/App.js:1006
+msgid "Reservation ID: %s"
+msgstr "Rezervare Nr: %s"
+
+#: src/frontend/components/App.js:1014
+msgid "Do you wish to pay online?"
+msgstr ""
+
+#: src/frontend/components/App.js:1042
+#: src/frontend/components/SlotPicker.js:321
+msgid "Select a service"
+msgstr "Selectează serviciul"
+
+#: src/frontend/components/App.js:1091
+#: src/frontend/components/SlotPicker.js:307
+msgid "Promo price!"
+msgstr ""
+
+#: src/frontend/components/App.js:1111
+#: src/frontend/components/SlotPicker.js:381 src/globals.js:392
+#: src/globals.js:403
+msgid "starts from"
+msgstr ""
+
+#: src/frontend/components/App.js:1144
+msgid "Upcoming"
+msgstr ""
+
+#: src/frontend/components/App.js:1245 src/globals.js:361
+msgid "Promo"
+msgstr ""
+
+#: src/frontend/components/GMap.js:128
+#: src/frontend/components/GMapAutocomplete.js:122
+msgid "Map cannot be loaded right now, sorry."
+msgstr ""
+
+#: src/frontend/components/GMap.js:128
+#: src/frontend/components/GMapAutocomplete.js:123
+msgid "Warning"
+msgstr ""
+
+#: src/frontend/components/GMapAutocomplete.js:92
+#: src/frontend/components/ReservationForm.js:244
+#: src/frontend/components/ReservationForm.js:253
+msgid "Please input"
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:210
+msgid "Validation failed"
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:283
+msgid "Select..."
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:323
+msgid "Upload"
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:335
+msgid "Max file size is %d MB, this file is %d MB"
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:358
+msgid "Next"
+msgstr "Inainte"
+
+#: src/frontend/components/ReservationForm.js:361
+msgid "%s left"
+msgstr ""
+
+#: src/frontend/components/ReservationForm.js:520
+msgid "Get directions"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:240
+msgid "%s or %s to book this service"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:241
+msgid "Login"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:242
+msgid "Register"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:309
+msgid "Promo available!"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:396
+msgid "Select a provider"
+msgstr ""
+
+#: src/frontend/components/SlotPicker.js:445
+msgid "Select one or more adjacent timeslots"
+msgstr "Selectează intervalul orar"
+
+#: src/frontend/components/SlotPicker.js:446
+msgid "Select a timeslot"
+msgstr "Selectează ora"
+
+#. translators: %s: Name of the timezone
+#: src/frontend/components/SlotPicker.js:452
+msgid "Local times in %s"
+msgstr "Ora locală %s"
+
+#: src/frontend/components/SlotPicker.js:518
+#: src/frontend/components/SlotPicker.js:594
+msgid "This timeslot is not adjacent to the others!"
+msgstr ""
+
+#: src/frontend/components/ViewReservations.js:104
+msgid "Pay %s"
+msgstr ""
+
+#: src/frontend/components/ViewReservations.js:111
+msgid "Join Zoom meeting"
+msgstr ""
+
+#: src/frontend/components/ViewReservations.js:118
+msgid "Join Google Meet"
+msgstr ""
+
+#: src/frontend/components/ViewReservations.js:197
+msgid "Please tell us the reason"
+msgstr "Te rugăm sa ne scrii motivul anulării"
+
+#: src/globals.js:239
+msgid "Whoops"
+msgstr ""
+
+#: src/globals.js:241
+msgid "Success"
+msgstr ""
+
+#: src/globals.js:363
+msgid "Starts from %s"
+msgstr ""
+
+#: src/globals.js:441
+msgid "%d available"
+msgstr ""
+
+#: src/globals.js:443
+msgid "Sold out"
+msgstr ""
+
+#: UI/Blocks/block.json
+msgctxt "block title"
+msgid "TheBooking widget"
+msgstr "Widgetul TheBooking"
+
+#: UI/Blocks/block.json
+msgctxt "block description"
+msgid "Displays the booking widget"
+msgstr "Afișează widgetul de rezervare"
+
+#: UI/Blocks/block.json
+msgctxt "block keyword"
+msgid "tbk-booking"
+msgstr "tbk-booking"
+
+#: UI/Blocks/block.json
+msgctxt "block keyword"
+msgid "thebooking"
+msgstr "thebooking"
+
+#: UI/Blocks/block.json
+msgctxt "block keyword"
+msgid "teambooking"
+msgstr "teambooking"
+
+#: UI/Blocks/block.json
+msgctxt "block keyword"
+msgid "calendar"
+msgstr "calendar"
+
+#: UI/Blocks/block.json
+msgctxt "block keyword"
+msgid "reservations"
+msgstr "rezervări"

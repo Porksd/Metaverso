@@ -1,0 +1,43 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 23 Sep, 2017, 1:01:19 PM
+    Author     : sudam
+*/
+
+.ebsso-hide{
+    display: none;
+}
+.ebsso-setting-filed-lbl{
+    font-weight: bold;
+}
+
+
+.eb_sso_update_notice_message {
+  display: flex;
+  padding: 10px;
+  border-left: 5px solid #2e9aa6;
+  background: #ffeb3b14;
+  border-left: 5px solid #ffc107;
+  border-bottom: 1px solid #ffc107;
+  border-top: 1px solid #ffc107;
+  border-right: 1px solid #ffc107;
+}
+
+.eb_sso_update_notice_message_cont {
+  display: flex;
+  width: 98%;
+}
+
+.eb_sso_update_notice_content {
+  margin: auto 2px;
+  font-size: 16px;
+  width: 92%;
+}
+.ebsso-hide{
+  display: none;
+}
+

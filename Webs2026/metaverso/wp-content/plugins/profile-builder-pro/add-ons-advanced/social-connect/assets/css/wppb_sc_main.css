@@ -1,0 +1,83 @@
+#wppb_social_connect_settings {
+    padding-top: 0 !important;
+}
+
+#wppb_social_connect_settings .sortable-handle {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url('../images/sorting-icon-dots.png') no-repeat center center;
+    vertical-align: middle;
+    margin-right: 7px;
+    cursor: move;
+}
+
+#wppb_social_connect_settings .row-buttons-order .wck-checkboxes > div {
+    margin-bottom: 5px;
+}
+
+#wppb_social_connect_settings .row-buttons-order input[type='checkbox'] {
+    display: none;
+}
+
+#wppb_social_connect_settings .row-buttons-re-order {
+    display: none;
+}
+
+/* hide right metabox Save button */
+#wppb_social_connect_info {
+    display: none;
+}
+
+/* Thickbox back-end style */
+.profile-builder_page_wppb-social-connect #TB_window {
+    width: 90% !important;
+    height: 85% !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    top: 5% !important;
+    left: 5% !important;
+}
+
+.profile-builder_page_wppb-social-connect #TB_window iframe {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#wppb-social-connect-id .inside,
+#wppb_social_connect_settings .mb-list-entry-fields {
+    margin: 0;
+}
+
+#wppb-social-connect-info-id .inside {
+    margin-top: 20px;
+}
+
+#wppb_social_connect_settings .mb-list-entry-fields li .cozmoslabs-subsection-title {
+    padding-top: 35px !important;
+}
+
+#wppb_social_connect_settings .mb-list-entry-fields li:not(:first-of-type) .cozmoslabs-subsection-title {
+    margin-top: 35px !important;
+    border-top: 1px solid #cccccc;
+}
+
+body.profile-builder_page_wppb-social-connect .wck-post-body {
+    clear: left;
+    float: left;
+    margin-right: -2000px;
+    width: 100%;
+}
+
+body.profile-builder_page_wppb-social-connect .metabox-holder .column-1,
+body.profile-builder_page_wppb-social-connect .metabox-holder .column-3 {
+    clear: both;
+    margin-right: 300px;
+}
+
+body.profile-builder_page_wppb-social-connect .metabox-holder .column-2 {
+    float: right;
+    width: 280px;
+    clear: right;
+    position: relative;
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edwiser-bridge-pro/single-product",
+  "version": "0.1.0",
+  "title": "Single Product",
+  "category": "edwiser",
+  "icon": "products",
+  "description": "A structured layout to showcase course details effectively.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "productId": {
+      "type": "number",
+      "source": "meta",
+      "meta": "productId"
+    },
+    "showCategory": {
+      "type": "boolean",
+      "default": true
+    },
+    "showRatings": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCreated": {
+      "type": "boolean",
+      "default": true
+    },
+    "showCourseAccess": {
+      "type": "boolean",
+      "default": true
+    },
+    "showEnrolled": {
+      "type": "boolean",
+      "default": true
+    },
+    "showAssociatedCourses": {
+      "type": "boolean",
+      "default": true
+    },
+    "showRelatedCourses": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "edwiser-bridge-pro",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta de Implementación — InnovaPreven / MetaversOtec</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --brand: #06b6d4;
+            --brand-dark: #0891b2;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-alt: #162032;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --purple: #a855f7;
+            --orange: #f97316;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* COVER PAGE */
+        .cover {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -20%; right: -15%;
+            width: 50%; height: 50%;
+            background: radial-gradient(circle, rgba(6,182,212,0.15), transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+        }
+        .cover::after {
+            content: '';
+            position: absolute;
+            bottom: -25%; left: -10%;
+            width: 60%; height: 60%;
+            background: radial-gradient(circle, rgba(168,85,247,0.1), transparent 70%);
+            border-radius: 50%;
+            filter: blur(100px);
+        }
+        .cover-content { position: relative; z-index: 1; }
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--brand);
+            border: 1px solid rgba(6,182,212,0.3);
+            background: rgba(6,182,212,0.08);
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            margin-bottom: 2rem;
+        }
+        .cover h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+        }
+        .cover h1 span { color: var(--brand); display: block; }
+        .cover .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            font-weight: 400;
+        }
+        .cover-meta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .cover-meta strong { color: var(--text); font-weight: 600; }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 6rem;
+        }
+
+        /* SECTION HEADERS */
+        .section-header {
+            margin: 5rem 0 2.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-header .section-number {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--brand);
+            margin-bottom: 0.5rem;
+        }
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .section-header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* SUBSECTION */
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1rem;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        h3 .dot {
+            width: 8px; height: 8px;
+            background: var(--brand);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* CONTEXT TABLE */
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .context-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .context-card .label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .context-card .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .context-card .detail {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+        .context-card.highlight {
+            border-color: rgba(6,182,212,0.3);
+            background: rgba(6,182,212,0.05);
+        }
+
+        /* FEATURE BLOCKS */
+        .feature-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .feature-block h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .feature-block .desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+        }
+
+        /* TABLES */
+        .styled-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.88rem;
+            margin: 1rem 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .styled-table thead {
+            background: var(--bg-card-alt);
+        }
+        .styled-table th {
+            text-align: left;
+            padding: 0.9rem 1.2rem;
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .styled-table td {
+            padding: 0.85rem 1.2rem;
+            border-bottom: 1px solid rgba(51,65,85,0.5);
+            vertical-align: top;
+        }
+        .styled-table tr:last-child td { border-bottom: none; }
+        .styled-table tbody tr:hover { background: rgba(6,182,212,0.03); }
+        .styled-table code {
+            background: rgba(6,182,212,0.1);
+            color: var(--brand);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        /* STATUS BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .badge-green { background: rgba(34,197,94,0.12); color: var(--green); }
+        .badge-yellow { background: rgba(234,179,8,0.12); color: var(--yellow); }
+        .badge-red { background: rgba(239,68,68,0.12); color: var(--red); }
+        .badge-purple { background: rgba(168,85,247,0.12); color: var(--purple); }
+        .badge-blue { background: rgba(6,182,212,0.12); color: var(--brand); }
+
+        /* ARCHITECTURE DIAGRAM */
+        .arch-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.9;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--text-muted);
+        }
+        .arch-block .hl { color: var(--brand); font-weight: 600; }
+        .arch-block .new { color: var(--green); font-weight: 600; }
+        .arch-block .exists { color: var(--text-muted); }
+        .arch-block .comment { color: #64748b; font-style: italic; }
+
+        /* PHASE TIMELINE */
+        .timeline {
+            position: relative;
+            margin: 2.5rem 0;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--brand), var(--purple));
+            border-radius: 1px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 0.35rem;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--brand);
+            background: var(--bg-dark);
+        }
+        .timeline-item.active::before {
+            background: var(--brand);
+            box-shadow: 0 0 12px rgba(6,182,212,0.4);
+        }
+        .timeline-phase {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--brand);
+            margin-bottom: 0.3rem;
+        }
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        .timeline-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        /* IMPROVEMENTS GRID */
+        .improve-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .improve-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.3rem;
+        }
+        .improve-card .improve-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        .improve-card h5 {
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+        .improve-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* STEPS LIST */
+        .steps-list {
+            counter-reset: steps;
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        .steps-list li {
+            counter-increment: steps;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(51,65,85,0.4);
+        }
+        .steps-list li:last-child { border-bottom: none; }
+        .steps-list li::before {
+            content: counter(steps);
+            min-width: 2rem; height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6,182,212,0.12);
+            color: var(--brand);
+            font-weight: 800;
+            font-size: 0.82rem;
+            border-radius: 0.5rem;
+            flex-shrink: 0;
+        }
+        .steps-list li strong { color: var(--text); display: block; font-weight: 600; }
+        .steps-list li span { color: var(--text-muted); font-size: 0.88rem; }
+
+        /* PROTOCOL GRID */
+        .protocol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+        .protocol-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem 1.2rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .protocol-pill .icon {
+            width: 28px; height: 28px;
+            border-radius: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        /* SSO OPTIONS */
+        .option-cards {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .option-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        .option-card.recommended {
+            border-color: rgba(34,197,94,0.4);
+            background: rgba(34,197,94,0.04);
+        }
+        .option-letter {
+            width: 36px; height: 36px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            background: rgba(6,182,212,0.12);
+            color: var(--brand);
+        }
+        .option-card.recommended .option-letter {
+            background: rgba(34,197,94,0.15);
+            color: var(--green);
+        }
+        .option-title { font-weight: 600; font-size: 0.92rem; }
+        .option-desc { font-size: 0.82rem; color: var(--text-muted); }
+
+        /* FOOTER */
+        .doc-footer {
+            margin-top: 6rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body { background: #fff; color: #1a1a1a; }
+            .cover { min-height: auto; page-break-after: always; padding: 3rem 2rem; }
+            .cover::before, .cover::after { display: none; }
+            .cover h1 span { color: #0891b2; }
+            .section-header { page-break-before: auto; }
+            .feature-block, .context-card, .arch-block, .improve-card, .option-card {
+                background: #f8fafc; border-color: #e2e8f0;
+            }
+            .styled-table thead { background: #f1f5f9; }
+            .styled-table td, .styled-table th { border-color: #e2e8f0; }
+            .timeline::before { background: #0891b2; }
+        }
+
+        @page { margin: 1.5cm; }
+    </style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+    <div class="cover-content">
+        <div class="cover-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Propuesta Técnica
+        </div>
+        <h1>Módulo de Consultoría<span>& Sitio Web 2.0</span></h1>
+        <p class="subtitle">Plataforma integral de gestión documental, cumplimiento de protocolos MINSAL e integración con MetaversOtec para clientes de consultoría InnovaPreven.</p>
+        <div class="cover-meta">
+            <div><strong>Preparado para:</strong> InnovaPreven / MetaversOtec</div>
+            <div><strong>Fecha:</strong> 9 de Abril, 2026</div>
+            <div><strong>Versión:</strong> 1.0</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MAIN ============ -->
+<div class="container">
+
+    <!-- CONTEXTO ACTUAL -->
+    <div class="section-header">
+        <div class="section-number">Contexto</div>
+        <h2>Estado Actual del Ecosistema</h2>
+        <p>Análisis técnico de los componentes existentes sobre los que se construirá la implementación.</p>
+    </div>
+
+    <div class="context-grid">
+        <div class="context-card">
+            <div class="label">Sitio Web Corporativo</div>
+            <div class="value">metaversotec.cl</div>
+            <div class="detail">WordPress + Astra + Elementor + WooCommerce. Contenido estático y comercial. 48+ plugins instalados.</div>
+        </div>
+        <div class="context-card highlight">
+            <div class="label">Aplicación LMS</div>
+            <div class="value">Next.js 16 + Supabase</div>
+            <div class="detail">Gestión de empresas, cursos SCORM, matrículas, certificados, quizzes, surveys. Docker en puerto 3001.</div>
+        </div>
+        <div class="context-card">
+            <div class="label">Base de Datos</div>
+            <div class="value">PostgreSQL (Supabase)</div>
+            <div class="detail">20+ tablas con Row-Level Security. Auth integrada, Storage con buckets por empresa.</div>
+        </div>
+        <div class="context-card">
+            <div class="label">Integraciones WP</div>
+            <div class="value">Edwiser Bridge + Bit Form Pro</div>
+            <div class="detail">Moodle (actualmente en uso, será reemplazado — ver <a href="#bloque3" style="color:var(--brand);text-decoration:underline;">Bloque 3</a>), Transbank WebPay, Zoho Flow, Profile Builder Pro.</div>
+        </div>
+    </div>
+
+    <!-- ==================== BLOQUE 1 ==================== -->
+    <div class="section-header">
+        <div class="section-number">Bloque 1</div>
+        <h2>Módulo de Consultoría Virtual</h2>
+        <p>Aplicativo para clientes de consultoría con gestor documental, informes automatizados, dashboard MINSAL e integración de cursos.</p>
+    </div>
+
+    <!-- 1.1 Gestor Documental -->
+    <h3><span class="dot"></span> 1.1 — Gestor Documental de Trabajadores</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Repositorio por empresa con carpeta individual por trabajador y checklist de documentos obligatorios.</p>
+
+    <div class="feature-block">
+        <h4>Nuevas Tablas de Base de Datos</h4>
+        <div class="desc">Se crean las estructuras necesarias sobre Supabase (PostgreSQL) con RLS por empresa.</div>
+        <table class="styled-table">
+            <thead><tr><th>Tabla</th><th>Campos Principales</th><th>Relación</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><code>workers</code></td>
+                    <td>id, company_id, rut, full_name, position, created_at</td>
+                    <td>FK → companies_list</td>
+                </tr>
+                <tr>
+                    <td><code>worker_documents</code></td>
+                    <td>id, company_id, worker_id, document_type (enum), file_url, status, uploaded_at, reviewed_by</td>
+                    <td>FK → workers</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="feature-block">
+        <h4>Checklist de Documentación por Trabajador</h4>
+        <div class="desc">Cada trabajador tiene una carpeta digital con los siguientes 14 tipos de documentos rastreables:</div>
+        <div class="protocol-grid">
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">📄</span> RUT</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">📷</span> Credencial / Foto</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(168,85,247,0.12);color:var(--purple);">📋</span> Funciones del Cargo</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(168,85,247,0.12);color:var(--purple);">📝</span> Contrato y Anexos</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(249,115,22,0.12);color:var(--orange);">🏥</span> Afiliación Previsional</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(249,115,22,0.12);color:var(--orange);">💰</span> Cotizaciones Pagadas</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--green);">🔒</span> Aut. Datos Personales</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--green);">🩺</span> Examen Preocupacional</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(239,68,68,0.12);color:var(--red);">❤️</span> Aptitud Médica</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(239,68,68,0.12);color:var(--red);">🧪</span> Ex. Alcohol y Drogas</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(234,179,8,0.12);color:var(--yellow);">🎓</span> Inducciones</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(234,179,8,0.12);color:var(--yellow);">📜</span> Cert. Capacitación</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">🦺</span> Entrega de EPP</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">📘</span> Entrega de RIOHS</div>
+        </div>
+    </div>
+
+    <div class="feature-block">
+        <h4>Componentes de UI</h4>
+        <div class="desc">Nuevas páginas y componentes en la aplicación Next.js:</div>
+        <table class="styled-table">
+            <thead><tr><th>Componente / Ruta</th><th>Función</th></tr></thead>
+            <tbody>
+                <tr><td><code>/admin/empresa/consultoria/</code></td><td>Hub principal — lista de trabajadores por empresa</td></tr>
+                <tr><td><code>WorkerFolderView.tsx</code></td><td>Vista de carpeta individual con grid de documentos</td></tr>
+                <tr><td><code>WorkerDocumentChecklist.tsx</code></td><td>Checklist visual (✅/⬜) con estado de cada documento</td></tr>
+                <tr><td><code>DocumentUploader.tsx</code></td><td>Drag & drop para carga de archivos (extiende ContentUploader existente)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 1.2 Informes Automatizados -->
+    <h3><span class="dot"></span> 1.2 — Generador de Informes Automatizados</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Exportación de reportes en PDF/Excel con formato corporativo basados en datos del sistema.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th>Elemento</th><th>Detalle</th></tr></thead>
+            <tbody>
+                <tr><td><strong>API Route</strong></td><td><code>/api/reports/generate</code> — Recibe company_id y report_type, genera PDF (jsPDF, ya en dependencias) o Excel (xlsx)</td></tr>
+                <tr><td><strong>Plantillas</strong></td><td>Header corporativo, tablas de cumplimiento, gráficos resumen, logos por empresa</td></tr>
+                <tr><td><strong>Tipos de Reporte</strong></td><td>Cumplimiento documental · Estado protocolos MINSAL · Progreso capacitaciones · Dotación activa</td></tr>
+                <tr><td><strong>Reutilizable</strong></td><td>Se extiende el sistema jsPDF existente usado para certificados</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 1.3 Dashboard MINSAL -->
+    <h3><span class="dot"></span> 1.3 — Dashboard de Protocolos MINSAL</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Panel de control visual para seguimiento de los 8 protocolos MINSAL aplicables.</p>
+
+    <div class="feature-block">
+        <h4>Los 8 Protocolos</h4>
+        <div class="desc">Cada protocolo tiene un estado de cumplimiento rastreable con evidencias y fechas de vencimiento.</div>
+        <div class="protocol-grid">
+            <div class="protocol-pill"><span class="icon" style="background:rgba(239,68,68,0.12);color:var(--red);">⚖️</span> Ley Karin</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(234,179,8,0.12);color:var(--yellow);">☀️</span> Radiaciones UV</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(168,85,247,0.12);color:var(--purple);">🦴</span> TMERT</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">🧠</span> Factores Psicosociales</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(249,115,22,0.12);color:var(--orange);">🔊</span> PREXOR (Ruido)</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--green);">🫁</span> PLANESI (Sílice)</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(234,179,8,0.12);color:var(--yellow);">🧴</span> Plaguicidas</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(168,85,247,0.12);color:var(--purple);">🏔️</span> Hipobaria</div>
+        </div>
+    </div>
+
+    <div class="feature-block">
+        <h4>Nuevas Tablas</h4>
+        <table class="styled-table">
+            <thead><tr><th>Tabla</th><th>Campos</th><th>Función</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><code>minsal_protocol_status</code></td>
+                    <td>id, company_id, protocol_type (enum 8), status, due_date, evidence_url, notes</td>
+                    <td>Estado global de cumplimiento por empresa</td>
+                </tr>
+                <tr>
+                    <td><code>minsal_protocol_items</code></td>
+                    <td>id, protocol_status_id, item_name, completed, evidence_url</td>
+                    <td>Checklist granular por sub-items de cada protocolo</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="feature-block">
+        <h4>Página & Componente</h4>
+        <div class="desc">Ruta <code>/admin/empresa/consultoria/protocolos</code></div>
+        <p>Dashboard visual con cards por protocolo, barras de progreso y sistema de alertas por vencimiento con indicadores visuales:</p>
+        <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <span class="badge badge-green">● Cumplido</span>
+            <span class="badge badge-yellow">● En Progreso</span>
+            <span class="badge badge-red">● Vencido</span>
+            <span class="badge badge-purple">● No Iniciado</span>
+        </div>
+    </div>
+
+    <!-- 1.4 Vista de Cursos -->
+    <h3><span class="dot"></span> 1.4 — Vista de Cursos y Progreso</h3>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">Los cursos, matrículas y progreso ya existen en la misma base de datos Supabase. La "integración" es simplemente una nueva vista dentro del portal de consultoría que muestra los datos que ya están disponibles, filtrados por empresa.</p>
+
+    <div class="feature-block">
+        <h4>¿Qué implica técnicamente?</h4>
+        <div class="desc">No se conectan dos sistemas separados. Es una consulta a tablas existentes con una interfaz dedicada.</div>
+        <table class="styled-table">
+            <thead><tr><th>Componente</th><th>Detalle</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Datos existentes</strong></td><td>Tablas <code>courses</code>, <code>enrollments</code>, <code>modules</code> y <code>students</code> ya contienen cursos, progreso y notas por empresa</td></tr>
+                <tr><td><strong>Nueva vista</strong></td><td>Página <code>/admin/empresa/consultoria/cursos</code> que consulta esos datos filtrados por <code>company_id</code></td></tr>
+                <tr><td><strong>Resultado</strong></td><td>El cliente de consultoría ve en un solo portal: documentos + protocolos MINSAL + cursos y avance de sus trabajadores</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 1.5 Puente Web → Plataforma -->
+    <h3><span class="dot"></span> 1.5 — Acceso desde metaversotec.cl al Portal</h3>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">El cliente naturalmente visitará primero metaversotec.cl. Se necesita un camino claro y profesional desde el sitio web WordPress hacia la plataforma de cursos y consultoría.</p>
+
+    <div class="feature-block">
+        <h4>Solución: Subdominio dedicado + acceso integrado en la navegación</h4>
+        <div class="desc">El portal vivirá bajo un subdominio propio (ej. <code>portal.metaversotec.cl</code>) y será accesible desde múltiples puntos del sitio WordPress.</div>
+        <table class="styled-table">
+            <thead><tr><th>Punto de acceso</th><th>Ubicación</th><th>Experiencia del usuario</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Botón fijo en menú principal</strong></td>
+                    <td>Header de metaversotec.cl (todas las páginas)</td>
+                    <td>Botón destacado "Acceso Clientes" siempre visible → abre <code>portal.metaversotec.cl</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Sección dedicada en Home</strong></td>
+                    <td>Nuevo bloque en la página principal</td>
+                    <td>Banner con título "¿Ya eres cliente?" → CTA directo al portal con descripción breve de funcionalidades</td>
+                </tr>
+                <tr>
+                    <td><strong>Página intermedia en WP</strong></td>
+                    <td><code>metaversotec.cl/web/portal-cliente/</code></td>
+                    <td>Página con Elementor explicando qué puede hacer el cliente en el portal (documentos, protocolos, cursos) → botón de acceso</td>
+                </tr>
+                <tr>
+                    <td><strong>Footer permanente</strong></td>
+                    <td>Pie de todas las páginas</td>
+                    <td>Link "Portal Clientes" junto a Contacto y Preguntas Frecuentes</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="option-cards">
+        <div class="option-card recommended">
+            <div class="option-letter">→</div>
+            <div>
+                <div class="option-title">Flujo del cliente <span class="badge badge-green">Simple y directo</span></div>
+                <div class="option-desc">
+                    metaversotec.cl → clic en "Acceso Clientes" → portal.metaversotec.cl → login con credenciales de empresa → ve todo: documentos, protocolos, cursos, reportes — sin salir del dominio MetaversOtec.
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== BLOQUE 2 ==================== -->
+    <div class="section-header">
+        <div class="section-number">Bloque 2</div>
+        <h2>Sitio Web Corporativo 2.0</h2>
+        <p>Transformar el sitio WordPress de estático a herramienta de preventa técnica con interactividad y generación de leads.</p>
+    </div>
+
+    <!-- 2.1 Calculadora -->
+    <h3><span class="dot"></span> 2.1 — Calculadora de Carga de Combustible</h3>
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th>Aspecto</th><th>Detalle</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Implementación</strong></td><td>Widget React embebido en WordPress o página dedicada en Next.js con enlace desde WP</td></tr>
+                <tr><td><strong>Alternativa</strong></td><td>Elementor widget custom usando Bit Form Pro (ya con licencia) + JavaScript para cálculo</td></tr>
+                <tr><td><strong>Algoritmo</strong></td><td>Basado en normativa vigente: usuario ingresa variables (materiales, superficies) → cálculo preliminar</td></tr>
+                <tr><td><strong>Lead Capture</strong></td><td>Resultado requiere email para informe completo → genera lead automático en el CRM</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2.2 Cotizador -->
+    <h3><span class="dot"></span> 2.2 — Cotizador Dinámico</h3>
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th>Aspecto</th><th>Detalle</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Flujo</strong></td><td>Wizard multi-step: Industria → Tamaño empresa → Necesidad → Recomendación de servicios</td></tr>
+                <tr><td><strong>Opción WP</strong></td><td>Bit Form Pro con lógica condicional (ya tienen licencia)</td></tr>
+                <tr><td><strong>Opción Next.js</strong></td><td>Ruta <code>/cotizador</code> con componente QuoteWizard.tsx — reutilizando patrón quiz/survey existente</td></tr>
+                <tr><td><strong>Output</strong></td><td>Cotización preliminar + CTA a contacto comercial</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2.3 Portal Reportabilidad -->
+    <h3><span class="dot"></span> 2.3 — Portal de Reportabilidad</h3>
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th>Aspecto</th><th>Detalle</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Acceso</strong></td><td>Login ligero (RUT + código) para clientes externos</td></tr>
+                <tr><td><strong>Vista</strong></td><td>Estado de asesorías vigentes, próximas visitas, documentos pendientes</td></tr>
+                <tr><td><strong>Implementación</strong></td><td>Extensión del módulo de consultoría, con rol "cliente-externo" de solo lectura</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== ARQUITECTURA ==================== -->
+    <div class="section-header">
+        <div class="section-number">Arquitectura</div>
+        <h2>Estructura de Rutas Propuesta</h2>
+        <p>Mapa de navegación del sistema integrado, señalando lo nuevo vs. lo existente.</p>
+    </div>
+
+    <div class="arch-block"><span class="exists">metaversotec.cl (WordPress)</span>
+├── Sitio corporativo (contenido, blog, cursos info)
+├── <span class="new">Calculadora de Carga (widget embebido)</span>          <span class="comment">← NUEVO</span>
+├── <span class="new">Cotizador Dinámico (wizard embebido)</span>             <span class="comment">← NUEVO</span>
+└── Botón "Acceso Portal Cliente" → redirige a Next.js
+
+<span class="hl">Next.js App</span> (app.metaversotec.cl)
+├── <span class="exists">/empresa</span>                              <span class="comment">← Landing actual</span>
+├── <span class="exists">/admin/empresa</span>                        <span class="comment">← Dashboard ejecutivo</span>
+├── <span class="new">/admin/empresa/consultoria</span>             <span class="comment">← NUEVO: Hub consultoría</span>
+│   ├── <span class="new">/trabajadores</span>                       <span class="comment">← Gestor documental</span>
+│   ├── <span class="new">/protocolos</span>                         <span class="comment">← Dashboard MINSAL</span>
+│   ├── <span class="new">/informes</span>                           <span class="comment">← Generador reportes</span>
+│   └── <span class="new">/cursos</span>                             <span class="comment">← Integración MetaversOtec</span>
+├── <span class="new">/portal</span>                                 <span class="comment">← NUEVO: Portal trabajador</span>
+│   ├── <span class="new">/campus</span>                             <span class="comment">← Cursos asignados</span>
+│   ├── <span class="new">/biblioteca</span>                         <span class="comment">← Docs técnicos</span>
+│   ├── <span class="new">/mi-info</span>                            <span class="comment">← Actualizar datos</span>
+│   └── <span class="new">/seguridad</span>                          <span class="comment">← Reportar incidentes</span>
+└── <span class="new">/reportabilidad</span>                         <span class="comment">← NUEVO: Acceso externo</span></div>
+
+
+    <!-- ==================== FASES ==================== -->
+    <div class="section-header">
+        <div class="section-number">Proyección</div>
+        <h2>Fases de Implementación</h2>
+        <p>Roadmap escalonado por entregables funcionales.</p>
+    </div>
+
+    <div class="timeline">
+        <div class="timeline-item active">
+            <div class="timeline-phase">Fase 1 — MVP Consultoría</div>
+            <div class="timeline-title">Autenticación SSO + Gestor Documental + Dashboard MINSAL Básico</div>
+            <div class="timeline-desc">Sistema de login por empresa, carga y validación de documentos con checklist, panel inicial de protocolos MINSAL con estados por empresa. <strong>Primer entregable funcional.</strong></div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-phase">Fase 2 — Reportes e Integración</div>
+            <div class="timeline-title">Informes PDF/Excel + Integración de Cursos + Portal Trabajador</div>
+            <div class="timeline-desc">Generador de reportes con formato corporativo, vista de cursos MetaversOtec integrada, portal del trabajador con campus, biblioteca y actualización de datos.</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-phase">Fase 3 — Web 2.0</div>
+            <div class="timeline-title">Calculadora de Carga + Cotizador Dinámico + Portal Reportabilidad</div>
+            <div class="timeline-desc">Herramientas interactivas en el sitio WordPress para generación de leads y preventa técnica. Portal de acceso externo para clientes.</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-phase">Fase 4 — Maduración</div>
+            <div class="timeline-title">Notificaciones + PWA + Validación IA</div>
+            <div class="timeline-desc">Automatización avanzada, aplicación móvil e inteligencia artificial para validación documental.</div>
+        </div>
+    </div>
+
+
+    <!-- ==================== MEJORAS FUTURAS ==================== -->
+    <div class="section-header">
+        <div class="section-number">Evolución</div>
+        <h2>Alternativas de Mejora Futuras</h2>
+        <p>Capacidades adicionales que aportan valor progresivo al ecosistema.</p>
+    </div>
+
+    <div class="improve-grid">
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>🔔 Notificaciones Automáticas</h5>
+                <span class="badge badge-green">Valor Alto</span>
+            </div>
+            <p>Email y WhatsApp cuando vence un protocolo o falta un documento. Alertas proactivas.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>🤖 IA para Validación Documental</h5>
+                <span class="badge badge-green">Valor Alto</span>
+            </div>
+            <p>OCR para verificar que el documento cargado corresponde al tipo declarado. Reducción de errores humanos.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>📱 App Móvil PWA</h5>
+                <span class="badge badge-green">Valor Alto</span>
+            </div>
+            <p>Trabajador sube fotos de EPP o firma desde el celular. Next.js ya es PWA-ready.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>🎓 Reemplazo de Moodle</h5>
+                <span class="badge badge-blue">En Planificación</span>
+            </div>
+            <p>Moodle será reemplazado por la plataforma LMS propia. Ver <a href="#bloque3" style="color:var(--brand);text-decoration:underline;">Bloque 3 — Plataforma de Cursos Fase 2</a> en este documento.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>🔗 API Pública para ERPs</h5>
+                <span class="badge badge-green">Valor Alto</span>
+            </div>
+            <p>Clientes grandes conectan SAP/Oracle al portal. Interoperabilidad corporativa.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>🏆 Gamificación de Cumplimiento</h5>
+                <span class="badge badge-yellow">Valor Medio</span>
+            </div>
+            <p>Ranking de empresas y trabajadores con mejor adherencia a protocolos.</p>
+        </div>
+        <div class="improve-card">
+            <div class="improve-header">
+                <h5>📊 BI con Metabase</h5>
+                <span class="badge badge-yellow">Valor Medio</span>
+            </div>
+            <p>Conectar Supabase con Metabase para dashboards de analytics avanzado.</p>
+        </div>
+    </div>
+
+
+    <!-- ==================== PASOS INMEDIATOS ==================== -->
+    <div class="section-header">
+        <div class="section-number">Plan de Acción</div>
+        <h2>Pasos Inmediatos para Iniciar</h2>
+        <p>Secuencia de trabajo recomendada para iniciar la Fase 1.</p>
+    </div>
+
+    <ol class="steps-list">
+        <li>
+            <div><strong>Crear migraciones de base de datos</strong>
+            <span>Tablas <code>workers</code>, <code>worker_documents</code>, <code>minsal_protocol_status</code>, <code>minsal_protocol_items</code> con RLS por empresa.</span></div>
+        </li>
+        <li>
+            <div><strong>Crear estructura de rutas</strong>
+            <span>Nuevas páginas en <code>/admin/empresa/consultoria/*</code> y <code>/portal/*</code> dentro del proyecto Next.js.</span></div>
+        </li>
+        <li>
+            <div><strong>Implementar portal dual Admin/Trabajador</strong>
+            <span>Basándose en el mockup del cliente, adaptado al stack actual (Next.js + Tailwind + Supabase).</span></div>
+        </li>
+        <li>
+            <div><strong>Configurar Storage buckets en Supabase</strong>
+            <span>Bucket <code>worker-docs</code> con políticas RLS por company_id para aislamiento de datos.</span></div>
+        </li>
+        <li>
+            <div><strong>Extender sistema de roles</strong>
+            <span>Agregar roles <code>consultor</code>, <code>cliente-externo</code> y <code>trabajador</code> al sistema de autenticación.</span></div>
+        </li>
+        <li>
+            <div><strong>Implementar Dashboard MINSAL</strong>
+            <span>Panel con los 8 protocolos, indicadores de estado y sistema de alertas por vencimiento.</span></div>
+        </li>
+        <li>
+            <div><strong>Conectar generación de reportes</strong>
+            <span>Extender jsPDF existente para informes corporativos automatizados en PDF y Excel.</span></div>
+        </li>
+    </ol>
+
+    <!-- ==================== BLOQUE 3 ==================== -->
+    <div class="section-header" id="bloque3">
+        <div class="section-number">Bloque 3 — Desarrollo Adicional</div>
+        <h2>Plataforma de Cursos — Fase 2</h2>
+        <p>Evolución del LMS actual para reemplazar Moodle completamente. Se construye sobre la base existente en Next.js + Supabase (cursos, módulos, matrículas, evaluaciones, certificados) agregando las funcionalidades requeridas.</p>
+    </div>
+
+    <div class="feature-block" style="border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.04);">
+        <h4>⚡ Nota Estratégica: Reemplazo de Moodle</h4>
+        <div class="desc">Actualmente MetaversOtec utiliza Moodle (integrado vía Edwiser Bridge en WordPress) como LMS. Esta fase reemplaza Moodle por completo con la plataforma propia en Next.js, consolidando todo el ecosistema bajo una sola tecnología. Esto elimina la dependencia de Moodle, reduce costos de hosting y mantención, y permite control total sobre la experiencia del usuario.</div>
+    </div>
+
+    <!-- Grupo A: Contenido y Estructura de Cursos -->
+    <h3><span class="dot"></span> A — Contenido y Estructura de Cursos</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Mejoras en cómo se crean, estructuran y presentan los cursos.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th><th>Estado Base</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>1</strong></td>
+                    <td><strong>Descripción enriquecida de cursos</strong></td>
+                    <td>Página de presentación por curso con imagen, descripción, objetivos, duración y requisitos. Se extiende la tabla <code>courses</code> con campos adicionales. Editor visual con TipTap (ya en el proyecto).</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>5</strong></td>
+                    <td><strong>Secciones mixtas dentro de módulos</strong></td>
+                    <td>Cada módulo puede contener sub-secciones con tipos: video, texto, actividad, evaluación. Nueva tabla <code>module_sections</code> con <code>type</code>, <code>order</code>, <code>content_url</code>. El alumno avanza secuencialmente dentro del módulo.</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>9</strong></td>
+                    <td><strong>Duplicar cursos entre clientes</strong></td>
+                    <td>Función de clonación que copia estructura completa del curso (módulos, secciones, evaluaciones, bancos de preguntas) y lo asigna a otra empresa. API <code>/api/courses/duplicate</code>.</td>
+                    <td><span class="badge badge-red">Nuevo</span></td>
+                </tr>
+                <tr>
+                    <td><strong>20</strong></td>
+                    <td><strong>Biblioteca de recursos por curso</strong></td>
+                    <td>Espacio independiente de archivos (PDFs, manuales, normas) adjunto a cada curso. Bucket de storage por curso. Alimenta al chatbot IA (ver punto 19).</td>
+                    <td><span class="badge badge-red">Nuevo</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo B: Progreso y Control de Avance -->
+    <h3><span class="dot"></span> B — Progreso y Control de Avance</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Control granular del avance del alumno y restricciones de navegación.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th><th>Estado Base</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td><strong>Restricción de avance secuencial</strong></td>
+                    <td>El alumno no puede avanzar al módulo siguiente sin completar el anterior (o una actividad específica). Validación en el componente CoursePlayer + campo <code>prerequisite_module_id</code> en tabla <code>modules</code>.</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td><strong>Porcentaje de avance por módulo</strong></td>
+                    <td>Barra de progreso visual por módulo y global. Se calcula sobre secciones completadas vs. totales. Campo <code>progress_pct</code> en <code>enrollments</code> (ya existe <code>current_module_index</code>).</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>11</strong></td>
+                    <td><strong>Retomar curso donde quedó (stand-by)</strong></td>
+                    <td>Guardar punto exacto de avance (módulo + sección + posición de video). Al reingresar, el alumno retoma donde dejó. Se extienden campos de <code>enrollments</code> con <code>last_section_id</code> y <code>last_position</code>.</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>10</strong></td>
+                    <td><strong>Modo offline</strong></td>
+                    <td>Descarga de contenido para uso sin conexión vía Service Worker (PWA). Al reconectarse, sincroniza progreso con Supabase. Requiere lógica de caché y reconciliación.</td>
+                    <td><span class="badge badge-red">Nuevo</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo C: Evaluaciones -->
+    <h3><span class="dot"></span> C — Evaluaciones y Bancos de Preguntas</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Sistema robusto de evaluaciones con aleatorización y control de intentos.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th><th>Estado Base</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>4</strong></td>
+                    <td><strong>Bancos de preguntas para evaluaciones random</strong></td>
+                    <td>Nueva tabla <code>question_banks</code> vinculada a cursos. Cada evaluación selecciona N preguntas aleatorias del banco. El QuizEngine existente se extiende con selector random. Cada alumno recibe un set diferente.</td>
+                    <td><span class="badge badge-yellow">Parcial</span></td>
+                </tr>
+                <tr>
+                    <td><strong>6</strong></td>
+                    <td><strong>Límite de intentos por evaluación</strong></td>
+                    <td>Campo <code>max_attempts</code> en tabla de evaluaciones (configurable: 1, 2, 3…). Contador de intentos realizados por alumno. Al agotar intentos, se bloquea la evaluación mostrando la mejor nota obtenida.</td>
+                    <td><span class="badge badge-red">Nuevo</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo D: Certificados -->
+    <h3><span class="dot"></span> D — Certificados Personalizados</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Certificado de aprobación completamente configurable por curso y empresa.</p>
+
+    <div class="feature-block">
+        <h4>Requerimiento #7 — Configuración del certificado</h4>
+        <div class="desc">Se extiende el componente <code>CertificateCanvas.tsx</code> existente y la API <code>/api/certificate</code>.</div>
+        <div class="protocol-grid">
+            <div class="protocol-pill"><span class="icon" style="background:rgba(168,85,247,0.12);color:var(--purple);">🎨</span> Fondo con línea gráfica</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">📱</span> Código QR de validación</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(34,197,94,0.12);color:var(--green);">🔢</span> Código del curso</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(249,115,22,0.12);color:var(--orange);">⏱️</span> Horas pedagógicas</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(234,179,8,0.12);color:var(--yellow);">📅</span> Fecha de realización</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(239,68,68,0.12);color:var(--red);">⏰</span> Fecha de expiración</div>
+            <div class="protocol-pill"><span class="icon" style="background:rgba(6,182,212,0.12);color:var(--brand);">✏️</span> Textos adicionales</div>
+        </div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:1rem;"><strong>Base existente:</strong> jsPDF + CertificateCanvas.tsx ya generan certificados. Se amplía con plantillas configurables por empresa, QR con URL de verificación pública, y campos dinámicos.</p>
+    </div>
+
+    <!-- Grupo E: Reportería -->
+    <h3><span class="dot"></span> E — Reportería y Descargas</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Panel de reportes descargables para el administrador en múltiples formatos.</p>
+
+    <div class="feature-block">
+        <h4>Requerimiento #8 — Reportería descargable (Excel, CSV, PDF)</h4>
+        <table class="styled-table">
+            <thead><tr><th>Reporte</th><th>Datos</th><th>Formato</th></tr></thead>
+            <tbody>
+                <tr><td><strong>a.</strong> Alumnos matriculados/inscritos</td><td>Nombre, RUT, empresa, fecha inscripción, estado</td><td>Excel · CSV · PDF</td></tr>
+                <tr><td><strong>b.</strong> Avance por curso</td><td>Porcentaje de progreso por alumno y módulo</td><td>Excel · CSV · PDF</td></tr>
+                <tr><td><strong>c.</strong> Alumnos aprobados</td><td>Quiénes completaron y aprobaron, nota final</td><td>Excel · CSV · PDF</td></tr>
+                <tr><td><strong>d.</strong> Resultados evaluaciones</td><td>Notas por intento, preguntas falladas, promedios</td><td>Excel · CSV · PDF</td></tr>
+                <tr><td><strong>e.</strong> Encuestas de satisfacción</td><td>Respuestas agregadas, promedios, comentarios</td><td>Excel · CSV · PDF</td></tr>
+                <tr><td><strong>f.</strong> Certificados</td><td>Descarga masiva de certificados de participantes</td><td>PDF (ZIP masivo)</td></tr>
+            </tbody>
+        </table>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:1rem;"><strong>Requerimiento #21:</strong> Los reportes PDF para el administrador-cliente incluirán no solo datos y gráficos, sino también un <strong>análisis interpretativo generado por IA</strong> (resúmenes, tendencias, recomendaciones) sobre los datos recolectados (fechas, género, actividades, etc.).</p>
+    </div>
+
+    <!-- Grupo F: Comercio y Acceso -->
+    <h3><span class="dot"></span> F — Comercio, Acceso y Calendario</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Flujos de compra, control de acceso temporal y gestión de activación por empresa.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>12</strong></td>
+                    <td><strong>Enlace web → plataforma (carrito de compras)</strong></td>
+                    <td>El usuario compra un curso en metaversotec.cl (WooCommerce + Transbank, ya instalados). Webhook post-compra crea la matrícula en Supabase automáticamente. Correo de agradecimiento + enlace de acceso al curso.</td>
+                </tr>
+                <tr>
+                    <td><strong>13</strong></td>
+                    <td><strong>Desactivación automática por calendario</strong></td>
+                    <td>Cursos de empresa tienen fecha de vencimiento. Al cumplirse, se desactivan automáticamente (cron job o Supabase Edge Function). Se reactivan manualmente al acreditarse el pago.</td>
+                </tr>
+                <tr>
+                    <td><strong>18</strong></td>
+                    <td><strong>Acceso limitado para personas naturales</strong></td>
+                    <td>Al comprar un curso individualmente, el acceso expira en N días (configurable, ej. 90). Campo <code>access_expires_at</code> en <code>enrollments</code>. Aviso 7 días antes del vencimiento.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo G: Comunicaciones Automáticas -->
+    <h3><span class="dot"></span> G — Notificaciones y Correos Automáticos</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Sistema de comunicación automatizada con alumnos y administradores.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>14</strong></td>
+                    <td><strong>Correo al admin cuando alumno termina curso</strong></td>
+                    <td>Trigger al completar enrollment: envía email al administrador de la empresa con datos del alumno + certificado adjunto en PDF.</td>
+                </tr>
+                <tr>
+                    <td><strong>15</strong></td>
+                    <td><strong>Recordatorio automático a alumnos inactivos</strong></td>
+                    <td>Cron job configurable (frecuencia definida por el admin). Detecta alumnos que no avanzan en X días y envía correo de recordatorio. Cola de emails con Supabase Edge Functions o servicio externo (Resend, SendGrid).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo H: Aula del Alumno -->
+    <h3><span class="dot"></span> H — Aula Personal del Alumno</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Espacio propio donde el alumno ve su recorrido formativo completo.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>16</strong></td>
+                    <td><strong>Aula personal con historial</strong></td>
+                    <td>Dashboard del alumno con: cursos activos, cursos completados, certificados descargables, progreso en curso. Ruta <code>/portal/mi-aula</code>.</td>
+                </tr>
+                <tr>
+                    <td><strong>17</strong></td>
+                    <td><strong>Portal administrador empresa-cliente</strong></td>
+                    <td>Vista ejecutiva donde el admin de la empresa ve toda la data concentrada: alumnos, progreso, certificados, reportes. Se integra con el módulo de consultoría (Bloque 1).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo I: Inteligencia Artificial -->
+    <h3><span class="dot"></span> I — Inteligencia Artificial Integrada</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Chatbots y asistentes IA dentro de la plataforma para soporte, tutoría y análisis.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>19</strong></td>
+                    <td><strong>Chatbot IA de consulta por contenido</strong></td>
+                    <td>Chat integrado en el aula que responde preguntas basándose en el contenido del curso. Se alimenta del texto de los módulos y la biblioteca (punto 20). RAG (Retrieval-Augmented Generation) con embeddings del contenido en Supabase + API de OpenAI o similar.</td>
+                </tr>
+                <tr>
+                    <td><strong>24</strong></td>
+                    <td><strong>Profesor-tutor IA</strong></td>
+                    <td>Extensión del chatbot: al responder una pregunta, indica también <strong>en qué archivo o sección del curso</strong> se encuentra la respuesta. Referencia directa al material fuente.</td>
+                </tr>
+                <tr>
+                    <td><strong>21</strong></td>
+                    <td><strong>Informes con análisis IA</strong></td>
+                    <td>Los reportes PDF generan un bloque de análisis interpretativo con IA: tendencias, brechas, recomendaciones. Va más allá de datos y gráficos — entrega conclusiones accionables.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grupo J: Soporte -->
+    <h3><span class="dot"></span> J — Chat de Soporte en Aula</h3>
+    <p style="color:var(--text-muted);margin-bottom:1rem;">Sistema de asistencia programada con escalamiento a soporte humano.</p>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th style="width:40px">#</th><th>Requerimiento</th><th>Detalle Técnico</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>22</strong></td>
+                    <td><strong>Chat de soporte con escalamiento</strong></td>
+                    <td>Primer nivel: banco de respuestas programadas (FAQ). Si no tiene respuesta, escala a soporte humano por el mismo canal. Al finalizar la conversación, se envía un correo resumen al alumno con todo lo hablado.</td>
+                </tr>
+                <tr>
+                    <td><strong>23</strong></td>
+                    <td><strong>Evaluación post-chat</strong></td>
+                    <td>Al cerrar un chat, aparece evaluación de 4 puntos: Malo · Medio · Bueno · Excelente. Los resultados generan un reporte interno de calidad de soporte para el equipo.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Resumen visual de los 24 puntos -->
+    <h3><span class="dot"></span> Resumen: Estado Base de los 24 Requerimientos</h3>
+
+    <div class="feature-block">
+        <table class="styled-table">
+            <thead><tr><th>Categoría</th><th>Funcionalidad base existente</th><th>Nuevo desarrollo</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>Contenido & Estructura</strong></td>
+                    <td>Cursos, módulos, TipTap editor, CoursePlayer</td>
+                    <td>Descripciones enriquecidas, secciones mixtas, duplicación, biblioteca</td>
+                </tr>
+                <tr>
+                    <td><strong>Progreso & Avance</strong></td>
+                    <td>current_module_index, enrollments</td>
+                    <td>Restricción secuencial, porcentaje visual, stand-by, modo offline</td>
+                </tr>
+                <tr>
+                    <td><strong>Evaluaciones</strong></td>
+                    <td>QuizEngine, QuizBuilder</td>
+                    <td>Bancos de preguntas, aleatorización, límite de intentos</td>
+                </tr>
+                <tr>
+                    <td><strong>Certificados</strong></td>
+                    <td>CertificateCanvas, jsPDF, API /api/certificate</td>
+                    <td>QR, plantillas configurables, campos dinámicos, expiración</td>
+                </tr>
+                <tr>
+                    <td><strong>Reportería</strong></td>
+                    <td>—</td>
+                    <td>6 tipos de reporte, 3 formatos, análisis IA</td>
+                </tr>
+                <tr>
+                    <td><strong>Comercio & Acceso</strong></td>
+                    <td>WooCommerce + Transbank en WP</td>
+                    <td>Webhook de compra, vencimiento automático, acceso temporal</td>
+                </tr>
+                <tr>
+                    <td><strong>Comunicaciones</strong></td>
+                    <td>—</td>
+                    <td>Correos automáticos (admin + alumno), recordatorios programables</td>
+                </tr>
+                <tr>
+                    <td><strong>Aula & Portal</strong></td>
+                    <td>Vista alumno básica, portal empresa</td>
+                    <td>Aula personal con historial, portal admin concentrado</td>
+                </tr>
+                <tr>
+                    <td><strong>IA</strong></td>
+                    <td>—</td>
+                    <td>Chatbot de contenido, tutor IA, análisis de reportes</td>
+                </tr>
+                <tr>
+                    <td><strong>Soporte</strong></td>
+                    <td>—</td>
+                    <td>Chat con FAQ + escalamiento humano + evaluación</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="doc-footer">
+        <p><strong>Propuesta Técnica — InnovaPreven / MetaversOtec</strong></p>
+        <p>Documento generado el 9 de Abril de 2026 · Versión 1.0</p>
+        <p style="margin-top:0.5rem;font-size:0.75rem;color:#475569;">Para imprimir como PDF: Ctrl+P → "Guardar como PDF"</p>
+    </div>
+
+</div>
+
+</body>
+</html>

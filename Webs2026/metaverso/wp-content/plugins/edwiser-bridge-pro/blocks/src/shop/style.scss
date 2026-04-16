@@ -1,0 +1,960 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+.wp-block-edwiser-bridge-pro-shop {
+  // CSS reset
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+    margin: 0 !important;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  background: none !important;
+  width: 100%;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  font-size: 1rem;
+  line-height: 1.5rem;
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px !important;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .eb-shop__success {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: fixed;
+    z-index: 99;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0041c9;
+    color: #fff;
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: -2%;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+
+    button {
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      margin: 0 !important;
+      padding: 2px;
+      border-radius: 4px;
+      flex-shrink: 0;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &.slide-in {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    &.slide-out {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-50%) translateY(-150%);
+    }
+  }
+
+  .eb-shop--wrapper {
+    width: 100%;
+
+    .eb-shop__header-wrapper {
+      width: 100%;
+      background: url('../../../images/shop-bg-pattern.png');
+      background-size: cover !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+      padding: 3.125em 1.5em;
+
+      .eb-shop__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75em;
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto !important;
+      }
+
+      .eb-shop__breadcrumb {
+        font-weight: 400;
+        font-size: 0.875rem;
+
+        .eb-shop__breadcrumb-link {
+          text-decoration: none;
+          color: #fa9941;
+        }
+
+        .eb-shop__breadcrumb-current {
+          font-weight: 700;
+          color: #a6c8c9;
+        }
+      }
+
+      .eb-shop__header-title {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #fff;
+      }
+    }
+
+    .eb-shop__body-wrapper {
+      background: #f7f9fd;
+      width: 100%;
+      padding: 2.5em 1.5em;
+
+      .eb-shop__body {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto !important;
+
+        .eb-shop__body-header {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 1em;
+          margin-bottom: 1.5em !important;
+
+          .eb-shop__courses-count {
+            font-weight: 400;
+            font-size: 0.875rem;
+            line-height: 1.375rem;
+            color: #273e3f;
+          }
+
+          .eb-shop__courses-filters {
+            display: flex;
+            align-items: center;
+            gap: 1.125em;
+            margin-left: auto !important;
+
+            .eb-shop__view-toggle {
+              display: none;
+
+              .btn__view-toggle {
+                cursor: pointer;
+                border: 0;
+                padding: 0;
+                background: none;
+                color: #385b5c;
+                box-shadow: none !important;
+
+                &.active {
+                  color: #0041c9;
+                }
+
+                &:focus {
+                  outline: none;
+                  border: none;
+                }
+              }
+            }
+          }
+        }
+
+        .eb-shop__body-main {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2.5em;
+        }
+      }
+    }
+
+    .eb-shop__courses {
+      width: 100%;
+      display: grid;
+      gap: 1.5em;
+
+      .eb-shop__course-card {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid #ecf3f3;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+          cursor: pointer;
+          box-shadow: 8px 16px 30px 0px #5d969829;
+
+          .eb-shop__course-info {
+            .eb-shop__course-title {
+              color: #008b91;
+            }
+          }
+        }
+
+        .eb-shop__course-image {
+          width: 100%;
+          height: 200px;
+          position: relative;
+
+          & img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .eb-shop__enrolled-badge,
+          .eb-shop__sale-badge {
+            position: absolute;
+            z-index: 9;
+            top: 20px;
+            width: fit-content;
+            font-weight: 600;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            text-align: center;
+            padding: 4px 6px;
+            border-radius: 2px;
+          }
+
+          .eb-shop__enrolled-badge {
+            background: #ffad1d;
+            color: #0b1212;
+            left: 20px;
+          }
+
+          .eb-shop__sale-badge {
+            width: 50px;
+            background: #0041c9;
+            color: #fff;
+            right: 20px;
+          }
+        }
+
+        .eb-shop__course-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 1.25em;
+          position: relative;
+
+          & > * + * {
+            margin-top: 14px !important;
+          }
+
+          .eb-shop__course-category {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            transform: translateY(-50%);
+            max-width: 270px;
+            width: fit-content;
+            font-weight: 600;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #385b5c;
+            background: #ecf3f3;
+            padding: 4px 6px;
+            border-radius: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .eb-shop__course-title {
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #162324;
+            transition: color 0.3s ease-in-out;
+            margin-top: 6px !important;
+          }
+
+          .eb-shop__course-desc {
+            font-weight: 400;
+            font-size: 0.875rem;
+            line-height: 1.375rem;
+            color: #385b5c;
+            overflow: hidden;
+            margin-top: 14px !important;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+          }
+
+          .eb-shop__course-ratings-enrollments {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5em;
+
+            .eb-shop__course-ratings,
+            .eb-shop__course-enrollments {
+              display: flex;
+              align-items: center;
+              gap: 0.25em;
+              font-weight: 600;
+              font-size: 0.875rem;
+              line-height: 1.5;
+              color: #385b5c;
+
+              & svg {
+                width: 16px;
+                height: 16px;
+              }
+            }
+
+            .eb-shop__course-enrollments {
+              margin-left: auto;
+            }
+
+            .eb-shop__course-ratings svg {
+              color: #f98012;
+            }
+
+            .eb-shop__course-enrollments svg {
+              color: #008b91;
+            }
+          }
+        }
+
+        .eb-shop__course-price-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 0.5em;
+          margin-top: 20px !important;
+
+          .eb-shop__course-price {
+            .regular-price,
+            del,
+            & > .amount {
+              font-weight: 700;
+              font-size: 1rem;
+              color: #0b1212;
+            }
+
+            .sale-price,
+            ins {
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 0.875rem;
+              color: #0041c9;
+            }
+
+            &.sale {
+              .regular-price {
+                text-decoration: line-through;
+              }
+            }
+
+            &.variable {
+              display: flex;
+              align-items: center;
+              gap: 2px;
+              font-weight: 700;
+
+              // .amount {
+              //   font-size: 0.75rem;
+              // }
+            }
+
+            // &.variable.sale {
+            //   color: #0041c9;
+
+            //   .amount {
+            //     // font-weight: 600;
+            //     // color: #0041c9;
+            //   }
+            // }
+
+            &.subscription,
+            &.variable-subscription {
+              // del,
+              // ins,
+              // & > .amount {
+              //   font-size: 0.75rem;
+              // }
+
+              .subscription-details,
+              .from {
+                font-weight: 700;
+                font-size: 0.75rem;
+                color: #0b1212;
+                line-height: 16px;
+              }
+            }
+
+            &.subscription.sale,
+            &.variable-subscription.sale {
+              // del,
+              // ins,
+              // & > .amount {
+              //   font-size: 0.75rem;
+              // }
+
+              .subscription-details {
+                font-weight: 700;
+                font-size: 0.75rem;
+                color: #0041c9;
+                line-height: 16px;
+              }
+            }
+          }
+
+          .eb-shop__course-actions {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5em;
+
+            .btn__add-to-cart {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              font-weight: 600;
+              font-size: 0.75rem;
+              line-height: 1.25;
+              color: #643307;
+              cursor: pointer;
+              border: 0 !important;
+              background-color: transparent;
+              flex-shrink: 0;
+              position: relative;
+              padding: 6px;
+              border-radius: 3px;
+              transition: background 0.1s ease-in-out;
+              box-shadow: none !important;
+
+              & svg {
+                width: 20px;
+                height: 20px;
+                color: #c7660e;
+              }
+
+              .add-to-cart-success {
+                position: absolute;
+                top: 1px;
+                left: 14px;
+                width: 16px;
+                height: 16px;
+              }
+
+              &:hover {
+                border-color: transparent;
+                background: #fee6d0;
+              }
+
+              &:focus {
+                outline: none;
+              }
+            }
+
+            .btn__buy,
+            .btn__view {
+              padding: 8px 14px;
+              border: 1px solid #fdcca0;
+              border-radius: 3px;
+              text-align: center;
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 0.75rem;
+              line-height: 1.25;
+              color: #643307;
+              transition: background 0.1s ease-in-out;
+              box-shadow: none !important;
+
+              &:hover {
+                border-color: transparent;
+                background: #fee6d0;
+              }
+            }
+          }
+        }
+      }
+
+      &.grid {
+        grid-template-columns: repeat(1, 1fr);
+      }
+
+      &.list {
+        grid-template-columns: repeat(1, 1fr);
+
+        .eb-shop__course-card {
+          padding: 1.5em;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5em;
+
+          .eb-shop__course-image {
+            height: 240px;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+
+          .eb-shop__course-info {
+            grid-column: 2 / 4;
+            padding: 0;
+
+            .eb-shop__course-ratings-enrollments,
+            .eb-shop__course-price-actions {
+              justify-content: flex-start;
+            }
+
+            .eb-shop__course-category {
+              max-width: 100%;
+              position: static;
+              transform: translateY(0);
+            }
+
+            .eb-shop__course-desc {
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              line-clamp: 3;
+              -webkit-line-clamp: 3;
+            }
+          }
+
+          .eb-shop__info-footer {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.75em;
+          }
+
+          .eb-shop__course-price-actions {
+            margin-top: 0px !important;
+            gap: 0.5rem;
+
+            .eb-shop__course-price {
+              display: flex;
+              align-items: center;
+              gap: 0.5em;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .eb-shop--wrapper {
+      .eb-shop__header-wrapper {
+        .eb-shop__header {
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .eb-shop__body-wrapper {
+        .eb-shop__body {
+          .eb-shop__body-header {
+            flex-direction: row;
+            align-items: center;
+            padding-bottom: 1.5em;
+            border-bottom: 1px solid #d9e7e8;
+
+            .eb-shop__courses-filters {
+              .eb-shop__view-toggle {
+                display: flex;
+                align-items: center;
+                gap: 0.75em;
+              }
+            }
+          }
+        }
+
+        .eb-shop__courses {
+          &.grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      }
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .eb-shop--wrapper {
+      .eb-shop__header-wrapper {
+        padding: 5em 1.5em 6.25em;
+
+        .eb-shop__header {
+          align-items: start;
+        }
+      }
+
+      .eb-shop__body-wrapper {
+        .eb-shop__courses {
+          &.grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+
+          &.list {
+            .eb-shop__course-card {
+              .eb-shop__course-image {
+                height: 160px;
+              }
+
+              .eb-shop__course-info {
+                .eb-shop__course-ratings-enrollments,
+                .eb-shop__course-price-actions {
+                  justify-content: space-between;
+                }
+
+                .eb-shop__course-desc {
+                  display: -webkit-box;
+                  -webkit-box-orient: vertical;
+                  line-clamp: 2;
+                  -webkit-line-clamp: 2;
+                }
+              }
+
+              .eb-shop__info-footer {
+                flex-direction: row;
+                align-items: center;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Mantine Select
+  .mantine-Select-root {
+    position: relative;
+    width: 180px;
+  }
+
+  .mantine-Select-section {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: #385b5c;
+  }
+
+  .mantine-Select-section[data-position='left'] {
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .mantine-Select-section[data-position='right'] {
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .mantine-Select-input {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #a6c8c9 !important;
+    border-radius: 4px;
+    background: #fff;
+    color: #385b5c;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    padding-inline: 12px 34px;
+
+    &:focus {
+      outline: 1px solid #008b91;
+    }
+  }
+
+  .mantine-Select-input::placeholder {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #385b5c;
+  }
+
+  .mantine-Select-dropdown {
+    --mantine-scale: 1;
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #d9e7e8;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+  }
+
+  .mantine-ScrollArea-root {
+    --scrollarea-scrollbar-size: calc(0.75rem * var(--mantine-scale));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mantine-ScrollArea-viewport {
+    padding-inline-end: 0.25rem;
+    padding-inline-start: unset;
+    scrollbar-width: none;
+    overscroll-behavior: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mantine-Select-option {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 0.875rem;
+    color: #385b5c;
+    word-break: break-word;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    padding: 0.375rem 0.625rem;
+
+    &[aria-selected='true'] {
+      font-weight: 700;
+      color: #162324;
+
+      svg {
+        opacity: 0.4;
+        width: 0.8em;
+        min-width: 0.8em;
+        height: 0.8em;
+      }
+    }
+
+    &:hover {
+      background-color: #ecf3f3;
+    }
+  }
+
+  .mantine-ScrollArea-scrollbar {
+    user-select: none;
+    touch-action: none;
+    box-sizing: border-box;
+    transition:
+      background-color 150ms ease,
+      opacity 150ms ease;
+    padding: calc(0.25rem / 5);
+    display: flex;
+    background-color: transparent;
+    flex-direction: row;
+
+    &:where([data-orientation='horizontal']) {
+      height: 0.25rem;
+      flex-direction: column;
+      bottom: 0;
+      inset-inline-start: 0;
+      inset-inline-end: 0px;
+    }
+
+    &:where([data-orientation='vertical']) {
+      width: 0.25rem;
+      top: 0;
+      bottom: 0px;
+      inset-inline-end: 0;
+    }
+
+    &:where([data-hidden], [data-state='hidden']) {
+      display: none;
+    }
+  }
+
+  .mantine-ScrollArea-thumb {
+    background-color: rgba(0, 0, 0, 0.4);
+    flex: 1;
+    border-radius: 0.25rem;
+    position: relative;
+    transition: background-color 150ms ease;
+    overflow: hidden;
+    opacity: var(--thumb-opacity);
+  }
+
+  // Mantine Pagination
+  .mantine-Group-root {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: var(--group-wrap, wrap);
+    justify-content: var(--group-justify, flex-start);
+    align-items: var(--group-align, center);
+    gap: 0.5rem;
+  }
+
+  .mantine-Pagination-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+    cursor: pointer !important;
+    height: 2rem;
+    min-width: 2rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1;
+    border-radius: 0.25rem;
+    border-color: #d6eaeb !important;
+    color: #273e3f;
+    background-color: transparent;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    appearance: none;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:disabled {
+      cursor: not-allowed !important;
+      opacity: 0.4 !important;
+    }
+
+    & svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+    &[data-active='true'] {
+      background: #fff !important;
+      color: #0041c9;
+      font-weight: 700;
+      box-shadow: 0px 4px 4px 0px #0000001a;
+    }
+  }
+
+  .mantine-Pagination-dots {
+    color: #283b3c;
+    height: 2rem;
+    min-width: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    & svg {
+      width: 18px !important;
+      height: 18px !important;
+      color: inherit;
+    }
+  }
+
+  // Mantine Skeleton
+  .mantine-Skeleton-root {
+    --mantine-scale: 1;
+    height: var(--skeleton-height, auto);
+    width: var(--skeleton-width, 100%);
+    border-radius: 4px;
+    position: relative;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+
+    &:where([data-animate])::after {
+      animation: skeleton-fade 1500ms linear infinite;
+    }
+
+    &:where([data-visible]) {
+      overflow: hidden;
+
+      &::before {
+        position: absolute;
+        content: '';
+        inset: 0;
+        z-index: 10;
+        background-color: #fff !important;
+      }
+
+      &::after {
+        position: absolute;
+        content: '';
+        inset: 0;
+        z-index: 11;
+        background-color: #dee2e6 !important;
+      }
+    }
+  }
+
+  @keyframes skeleton-fade {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+}

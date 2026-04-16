@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "edwiser-bridge-pro/cart",
+  "version": "0.1.0",
+  "title": "Edwiser Cart",
+  "category": "edwiser",
+  "icon": "cart",
+  "description": "A simplified cart page for a smoother checkout and enrollment process.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "textdomain": "edwiser-bridge-pro",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js"
+}

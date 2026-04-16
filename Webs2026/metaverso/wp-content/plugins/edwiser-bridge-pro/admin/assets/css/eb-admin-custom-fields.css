@@ -1,0 +1,58 @@
+/**
+ * Admin Custom Fields Styles
+ * Styles for custom fields displayed in WordPress admin user profile pages
+ */
+
+.eb-custom-fields-section {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	margin: 20px 0;
+	padding: 20px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	width: fit-content;
+}
+
+.eb-custom-fields-section h2 {
+	margin-top: 0;
+	color: #23282d;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
+	font-size: 1.3em;
+}
+
+.eb-custom-fields-section h2 .dashicons {
+	color: #0073aa;
+}
+
+.eb-custom-fields-section .description {
+	color: #666;
+	font-style: italic;
+	margin-top: 5px;
+	font-size: 13px;
+}
+
+.eb-custom-fields-section .form-table th {
+	width: 200px;
+	padding: 15px 10px 15px 0;
+	font-weight: 600;
+}
+
+.eb-custom-fields-section .form-table td {
+	padding: 15px 10px;
+}
+
+.eb-custom-fields-section input[readonly],
+.eb-custom-fields-section textarea[readonly],
+.eb-custom-fields-section select[disabled] {
+	background-color: #f9f9f9;
+	color: #666;
+	cursor: not-allowed;
+	border-color: #ddd;
+}
+
+.eb-custom-fields-section input[readonly]:focus,
+.eb-custom-fields-section textarea[readonly]:focus {
+	box-shadow: none;
+	border-color: #ddd;
+}

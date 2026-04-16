@@ -1,0 +1,86 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+
+.wppu-awesome-loader-14 {
+  border-radius: 50%;
+  box-shadow: 0 1em 0 -.2em currentcolor;
+  position: relative;
+  -webkit-animation: wppu-awesome-loader-14 0.8s ease-in-out alternate infinite;
+          animation: wppu-awesome-loader-14 0.8s ease-in-out alternate infinite;
+  -webkit-animation-delay: 0.32s;
+          animation-delay: 0.32s;
+  top: -1em;
+}
+.wppu-awesome-loader-14:after, .wppu-awesome-loader-14:before {
+  content: '';
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  box-shadow: inherit;
+  -webkit-animation: inherit;
+          animation: inherit;
+}
+.wppu-awesome-loader-14:before {
+  left: -1em;
+  -webkit-animation-delay: 0.48s;
+          animation-delay: 0.48s;
+}
+.wppu-awesome-loader-14:after {
+  right: -1em;
+  -webkit-animation-delay: 0.16s;
+          animation-delay: 0.16s;
+}
+
+@-webkit-keyframes wppu-awesome-loader-14 {
+  0% {
+    box-shadow: 0 2em 0 -.2em currentcolor;
+  }
+  100% {
+    box-shadow: 0 1em 0 -.2em currentcolor;
+  }
+}
+
+@keyframes wppu-awesome-loader-14 {
+  0% {
+    box-shadow: 0 2em 0 -.2em currentcolor;
+  }
+  100% {
+    box-shadow: 0 1em 0 -.2em currentcolor;
+  }
+}

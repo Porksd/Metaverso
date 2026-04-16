@@ -1,0 +1,92 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+
+.wppu-awesome-loader-31 {
+  box-shadow: 0 0 2em currentcolor;
+  background-color: currentcolor;
+  position: relative;
+  border-radius: 50%;
+  -webkit-transform: rotateX(-60deg) perspective(1000px);
+          transform: rotateX(-60deg) perspective(1000px);
+}
+.wppu-awesome-loader-31:before, .wppu-awesome-loader-31:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  -webkit-animation: 1s wppu-awesome-loader-31 ease-out infinite;
+          animation: 1s wppu-awesome-loader-31 ease-out infinite;
+}
+.wppu-awesome-loader-31:after {
+  -webkit-animation-delay: .4s;
+          animation-delay: .4s;
+}
+
+@-webkit-keyframes wppu-awesome-loader-31 {
+  0% {
+    opacity: 1;
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+    box-shadow: 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor;
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: rotate(180deg);
+            transform: rotate(180deg);
+    box-shadow: -1em -1em 0 -.35em currentcolor, 0 -1.5em 0 -.35em currentcolor, 1em -1em 0 -.35em currentcolor, -1.5em 0 0 -.35em currentcolor, 1.5em -0 0 -.35em currentcolor, -1em 1em 0 -.35em currentcolor, 0 1.5em 0 -.35em currentcolor, 1em 1em 0 -.35em currentcolor;
+  }
+}
+
+@keyframes wppu-awesome-loader-31 {
+  0% {
+    opacity: 1;
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+    box-shadow: 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor, 0 0 0 -.5em currentcolor;
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: rotate(180deg);
+            transform: rotate(180deg);
+    box-shadow: -1em -1em 0 -.35em currentcolor, 0 -1.5em 0 -.35em currentcolor, 1em -1em 0 -.35em currentcolor, -1.5em 0 0 -.35em currentcolor, 1.5em -0 0 -.35em currentcolor, -1em 1em 0 -.35em currentcolor, 0 1.5em 0 -.35em currentcolor, 1em 1em 0 -.35em currentcolor;
+  }
+}

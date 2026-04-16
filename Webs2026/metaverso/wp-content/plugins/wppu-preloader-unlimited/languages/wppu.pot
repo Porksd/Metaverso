@@ -1,0 +1,854 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Project-Id-Version: WordPress Preloader Unlimited\n"
+"POT-Creation-Date: 2018-09-03 11:23+0600\n"
+"PO-Revision-Date: 2018-09-03 11:23+0600\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: wppu.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: admin/settings_admin_options.php:107
+msgid "Active Image Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:111 admin/settings_admin_options.php:115
+msgid "Active Css Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:119
+msgid "Active Awesome CSS3 Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:123
+msgid "Active Trendy Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:127
+msgid "Active Special Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:131
+msgid "Active 3d Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:135
+msgid "Active Pace Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:139
+msgid "Active Your Custom Preloader"
+msgstr ""
+
+#: admin/settings_admin_options.php:201
+msgid "fadeOut"
+msgstr ""
+
+#: admin/settings_admin_options.php:205
+msgid "slideUp"
+msgstr ""
+
+#: admin/settings_admin_options.php:209
+msgid "slideDown"
+msgstr ""
+
+#: admin/settings_admin_options.php:213
+msgid "slideLeft"
+msgstr ""
+
+#: admin/settings_admin_options.php:217
+msgid "slideRight"
+msgstr ""
+
+#: admin/settings_admin_options.php:221
+msgid "blind"
+msgstr ""
+
+#: admin/settings_admin_options.php:225 admin/settings_admin_options.php:370
+msgid "bounce"
+msgstr ""
+
+#: admin/settings_admin_options.php:229
+msgid "clip"
+msgstr ""
+
+#: admin/settings_admin_options.php:233
+msgid "drop"
+msgstr ""
+
+#: admin/settings_admin_options.php:237
+msgid "fold"
+msgstr ""
+
+#: admin/settings_admin_options.php:241
+msgid "highlight"
+msgstr ""
+
+#: admin/settings_admin_options.php:245
+msgid "pulsate"
+msgstr ""
+
+#: admin/settings_admin_options.php:249
+msgid "scale"
+msgstr ""
+
+#: admin/settings_admin_options.php:253
+msgid "shake"
+msgstr ""
+
+#: admin/settings_admin_options.php:264
+msgid "Minimal"
+msgstr ""
+
+#: admin/settings_admin_options.php:268
+msgid "Flash"
+msgstr ""
+
+#: admin/settings_admin_options.php:272
+msgid "Barber Shop"
+msgstr ""
+
+#: admin/settings_admin_options.php:276
+msgid "Fill Left"
+msgstr ""
+
+#: admin/settings_admin_options.php:280
+msgid "Big Counter"
+msgstr ""
+
+#: admin/settings_admin_options.php:284
+msgid "Corner Indicator"
+msgstr ""
+
+#: admin/settings_admin_options.php:288
+msgid "Bounce"
+msgstr ""
+
+#: admin/settings_admin_options.php:292
+msgid "Loading Bar"
+msgstr ""
+
+#: admin/settings_admin_options.php:296
+msgid "Center Circle"
+msgstr ""
+
+#: admin/settings_admin_options.php:300
+msgid "Center Atom"
+msgstr ""
+
+#: admin/settings_admin_options.php:304
+msgid "Center Radar"
+msgstr ""
+
+#: admin/settings_admin_options.php:308
+msgid "Center Simple"
+msgstr ""
+
+#: admin/settings_admin_options.php:319
+msgid "Auto"
+msgstr ""
+
+#: admin/settings_admin_options.php:323
+msgid "Custom"
+msgstr ""
+
+#: admin/settings_admin_options.php:335
+msgid "Text"
+msgstr ""
+
+#: admin/settings_admin_options.php:339
+msgid "Image"
+msgstr ""
+
+#: admin/settings_admin_options.php:350
+msgid "None"
+msgstr ""
+
+#: admin/settings_admin_options.php:354
+msgid "Top"
+msgstr ""
+
+#: admin/settings_admin_options.php:358
+msgid "Bottom"
+msgstr ""
+
+#: admin/settings_admin_options.php:374
+msgid "rotateplane"
+msgstr ""
+
+#: admin/settings_admin_options.php:378
+msgid "stretch"
+msgstr ""
+
+#: admin/settings_admin_options.php:382
+msgid "orbit"
+msgstr ""
+
+#: admin/settings_admin_options.php:386
+msgid "roundBounce"
+msgstr ""
+
+#: admin/settings_admin_options.php:390
+msgid "win8"
+msgstr ""
+
+#: admin/settings_admin_options.php:394
+msgid "win8 linear"
+msgstr ""
+
+#: admin/settings_admin_options.php:398
+msgid "ios"
+msgstr ""
+
+#: admin/settings_admin_options.php:402
+msgid "facebook"
+msgstr ""
+
+#: admin/settings_admin_options.php:406
+msgid "rotation"
+msgstr ""
+
+#: admin/settings_admin_options.php:410
+msgid "timer"
+msgstr ""
+
+#: admin/settings_admin_options.php:414
+msgid "pulse"
+msgstr ""
+
+#: admin/settings_admin_options.php:418
+msgid "progressBar"
+msgstr ""
+
+#: admin/settings_admin_options.php:422
+msgid "bouncePulse"
+msgstr ""
+
+#: admin/settings_admin_options.php:434
+msgid "Flip 3D"
+msgstr ""
+
+#: admin/settings_admin_options.php:438
+msgid "FlipDown 3D"
+msgstr ""
+
+#: admin/settings_admin_options.php:442
+msgid "slowFlip 2D"
+msgstr ""
+
+#: admin/settings_admin_options.php:446
+msgid "slowFlip 3D"
+msgstr ""
+
+#: admin/settings_admin_options.php:450
+msgid "FlipHoz 3D"
+msgstr ""
+
+#: admin/settings_admin_options.php:454
+msgid "Fade 2D"
+msgstr ""
+
+#: admin/settings_admin_options.php:458
+msgid "slideDown 2D"
+msgstr ""
+
+#: admin/settings_admin_options.php:462
+msgid "slideUp 2D"
+msgstr ""
+
+#: admin/settings_admin_options.php:466
+msgid "slideBoth 2D"
+msgstr ""
+
+#: admin/settings_admin_options.php:498
+msgid "Options saved"
+msgstr ""
+
+#: admin/settings_admin_options.php:549 admin/settings_admin_options.php:563
+msgid "General Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:550
+msgid "Image Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:551
+msgid "Fill Animation"
+msgstr ""
+
+#: admin/settings_admin_options.php:551 admin/settings_admin_options.php:552
+#: admin/settings_admin_options.php:553
+msgid "New"
+msgstr ""
+
+#: admin/settings_admin_options.php:552
+msgid "Trendy"
+msgstr ""
+
+#: admin/settings_admin_options.php:553
+msgid "3D Letter"
+msgstr ""
+
+#: admin/settings_admin_options.php:554
+msgid "CSS Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:555
+msgid "Awesome CSS3"
+msgstr ""
+
+#: admin/settings_admin_options.php:556
+msgid "Special Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:557
+msgid "Pace Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:558
+msgid "Your Own Custom"
+msgstr ""
+
+#: admin/settings_admin_options.php:558
+msgid "Extra CSS"
+msgstr ""
+
+#: admin/settings_admin_options.php:564 admin/settings_admin_options.php:755
+#: admin/settings_admin_options.php:1058 admin/settings_admin_options.php:1458
+#: admin/settings_admin_options.php:2555 admin/settings_admin_options.php:2663
+#: admin/settings_admin_options.php:2771 admin/settings_admin_options.php:2865
+#: admin/settings_admin_options.php:2940 admin/settings_admin_options.php:3072
+#: admin/settings_admin_options.php:3330 admin/settings_admin_options.php:3349
+msgid "Save Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:567
+msgid "Set Preloader Where you want"
+msgstr ""
+
+#: admin/settings_admin_options.php:571
+msgid ""
+"Following settings will applies to control which pages you want to preloader "
+"show or not . If you don't set anything then it will show all the places. "
+"Every checkbox use to hide your preloader certaine places. If you check then "
+"preloader will be hide that checked place."
+msgstr ""
+
+#: admin/settings_admin_options.php:576
+msgid ""
+"Select and Disable Preloader - Please select/Checked where you want to hide "
+"preloader."
+msgstr ""
+
+#: admin/settings_admin_options.php:585
+msgid "Disable Home Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:591
+msgid "Home/Front Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:597
+msgid "Disable Specific Pages"
+msgstr ""
+
+#: admin/settings_admin_options.php:601
+msgid "Disable All"
+msgstr ""
+
+#: admin/settings_admin_options.php:613
+msgid "Disable Specific Post Type ( Single post )"
+msgstr ""
+
+#: admin/settings_admin_options.php:617
+msgid "Select All"
+msgstr ""
+
+#: admin/settings_admin_options.php:631
+msgid "Disable Archive Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:637
+msgid "All kind of Archive Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:643
+msgid "Disable 404 Error Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:649
+msgid "404 Error Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:654
+msgid "Disable Search Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:660
+msgid "Search Result Page"
+msgstr ""
+
+#: admin/settings_admin_options.php:666
+msgid "Disable on Mobile Or Tablet"
+msgstr ""
+
+#: admin/settings_admin_options.php:672
+msgid "Disable Preloader on Mobile"
+msgstr ""
+
+#: admin/settings_admin_options.php:678
+msgid "Disable Preloader on Tablet"
+msgstr ""
+
+#: admin/settings_admin_options.php:691
+msgid "Animation Settings ( Exclude = Pace options )"
+msgstr ""
+
+#: admin/settings_admin_options.php:694
+msgid "Select Preloader Hide Animation"
+msgstr ""
+
+#: admin/settings_admin_options.php:697
+msgid "select animation when preloader ready to hide"
+msgstr ""
+
+#: admin/settings_admin_options.php:720
+msgid "Preloader Hide Timing"
+msgstr ""
+
+#: admin/settings_admin_options.php:723
+msgid "Preloader Hide Dealy Timing"
+msgstr ""
+
+#: admin/settings_admin_options.php:730
+msgid ">Delay hide"
+msgstr ""
+
+#: admin/settings_admin_options.php:737
+msgid "Preloader Hiding Time"
+msgstr ""
+
+#: admin/settings_admin_options.php:744
+msgid ">Hide Time"
+msgstr ""
+
+#: admin/settings_admin_options.php:754
+msgid "Image Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:759
+msgid "Set image option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:784
+msgid "Select Image Collection"
+msgstr ""
+
+#: admin/settings_admin_options.php:787
+msgid "Click on the image you want to"
+msgstr ""
+
+#: admin/settings_admin_options.php:791
+msgid "Modern Package"
+msgstr ""
+
+#: admin/settings_admin_options.php:792
+msgid "Another Modern Package"
+msgstr ""
+
+#: admin/settings_admin_options.php:793
+msgid "Regular Package"
+msgstr ""
+
+#: admin/settings_admin_options.php:949
+msgid "Set Background Size Selector"
+msgstr ""
+
+#: admin/settings_admin_options.php:952
+msgid "Set Background Image Size"
+msgstr ""
+
+#: admin/settings_admin_options.php:955
+msgid ""
+"If you dont use custom size option then it will set default style background "
+"image size auto"
+msgstr ""
+
+#: admin/settings_admin_options.php:977
+msgid "Select Background Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:980
+msgid "Choose background according to image color"
+msgstr ""
+
+#: admin/settings_admin_options.php:984
+msgid "Remove Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:992 admin/settings_admin_options.php:1354
+#: admin/settings_admin_options.php:2443 admin/settings_admin_options.php:2622
+#: admin/settings_admin_options.php:2734 admin/settings_admin_options.php:3045
+#: admin/settings_admin_options.php:3205
+msgid "Live Preview"
+msgstr ""
+
+#: admin/settings_admin_options.php:1009 admin/settings_admin_options.php:2468
+#: admin/settings_admin_options.php:2629
+msgid "Open Draggble Preview"
+msgstr ""
+
+#: admin/settings_admin_options.php:1032 admin/settings_admin_options.php:3165
+msgid "Use your custom image"
+msgstr ""
+
+#: admin/settings_admin_options.php:1035 admin/settings_admin_options.php:3168
+msgid "Upload Custom Image"
+msgstr ""
+
+#: admin/settings_admin_options.php:1038 admin/settings_admin_options.php:3171
+msgid "plz upload a gif image only"
+msgstr ""
+
+#: admin/settings_admin_options.php:1042 admin/settings_admin_options.php:3175
+msgid "Upload"
+msgstr ""
+
+#: admin/settings_admin_options.php:1057
+msgid "Trendy Options"
+msgstr ""
+
+#: admin/settings_admin_options.php:1062
+msgid "Set Trendy option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:1117 admin/settings_admin_options.php:1126
+#: admin/settings_admin_options.php:1136 admin/settings_admin_options.php:1146
+#: admin/settings_admin_options.php:1158 admin/settings_admin_options.php:1195
+#: admin/settings_admin_options.php:1212 admin/settings_admin_options.php:1235
+#: admin/settings_admin_options.php:1245 admin/settings_admin_options.php:1264
+#: admin/settings_admin_options.php:1280 admin/settings_admin_options.php:1297
+#: admin/settings_admin_options.php:1313 admin/settings_admin_options.php:1339
+#: admin/settings_admin_options.php:1390
+msgid "Loading"
+msgstr ""
+
+#: admin/settings_admin_options.php:1407
+msgid "Customize trendy css preloader"
+msgstr ""
+
+#: admin/settings_admin_options.php:1412 admin/settings_admin_options.php:2502
+msgid "Type your loading text"
+msgstr ""
+
+#: admin/settings_admin_options.php:1422
+msgid "Trendy CSS Preloader Background"
+msgstr ""
+
+#: admin/settings_admin_options.php:1430
+msgid "Trendy CSS Text Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:1438 admin/settings_admin_options.php:2536
+#: admin/settings_admin_options.php:2718 admin/settings_admin_options.php:3004
+#: admin/settings_admin_options.php:3148
+msgid "Text Size"
+msgstr ""
+
+#: admin/settings_admin_options.php:1457
+msgid "Awesome CSS3 Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:1462
+msgid "Set Awesome CSS3 option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2497
+msgid "Customize awesome css preloader"
+msgstr ""
+
+#: admin/settings_admin_options.php:2512
+msgid "Awesome CSS Preloader Body Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2520
+msgid "Awesome CSS Preloader Background"
+msgstr ""
+
+#: admin/settings_admin_options.php:2528
+msgid "Awesome CSS Text Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2554
+msgid "CSS Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:2559
+msgid "Set css option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2585
+msgid "Select Element"
+msgstr ""
+
+#: admin/settings_admin_options.php:2588 admin/settings_admin_options.php:3021
+#: admin/settings_admin_options.php:3242
+msgid "select effect and see in live preview"
+msgstr ""
+
+#: admin/settings_admin_options.php:2611
+msgid "Change Preloader Text"
+msgstr ""
+
+#: admin/settings_admin_options.php:2614
+msgid ""
+"Type your name or what ever you want as a preloader but plz care full about "
+"your length"
+msgstr ""
+
+#: admin/settings_admin_options.php:2641
+msgid "Set Preloader Color and Background Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2644
+msgid "Preloader Main Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2652
+msgid "Preloader Background Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2662
+msgid "Special Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:2667
+msgid "Set Special option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2692 admin/settings_admin_options.php:2970
+#: admin/settings_admin_options.php:3130
+msgid "Type your text"
+msgstr ""
+
+#: admin/settings_admin_options.php:2702 admin/settings_admin_options.php:2980
+#: admin/settings_admin_options.php:3140
+msgid "Text Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2710 admin/settings_admin_options.php:2988
+msgid "Text Animation Banckground"
+msgstr ""
+
+#: admin/settings_admin_options.php:2762
+msgid "Click to Large view"
+msgstr ""
+
+#: admin/settings_admin_options.php:2763 admin/settings_admin_options.php:3230
+msgid "Run Again"
+msgstr ""
+
+#: admin/settings_admin_options.php:2770
+msgid "Pace Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:2775
+msgid "Set Pace option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2802
+#, php-format
+msgid ""
+"First Select your desire pace jQuery progressBar effect, color & background-"
+"color then live preview on your site <a href=\"%1$s\" target=\"_blank\">View "
+"Preview</a> For details visit <a href=\"%2$s\" target=\"_blank\">pace "
+"official page</a>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2813
+msgid "Set Pace Effect"
+msgstr ""
+
+#: admin/settings_admin_options.php:2816
+msgid "Select Your Effects"
+msgstr ""
+
+#: admin/settings_admin_options.php:2819
+msgid "select your pace effect"
+msgstr ""
+
+#: admin/settings_admin_options.php:2841
+msgid "Set Pace Color And Background"
+msgstr ""
+
+#: admin/settings_admin_options.php:2844
+msgid "Choose Your Pace Main Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2847
+msgid ""
+"choose pace preloader main color. change and go to your website and see what "
+"happen"
+msgstr ""
+
+#: admin/settings_admin_options.php:2853
+msgid "Choose pace preloader background color"
+msgstr ""
+
+#: admin/settings_admin_options.php:2856
+msgid ""
+"choose pace preloader background color. change and go to your website and "
+"see what happen"
+msgstr ""
+
+#: admin/settings_admin_options.php:2864
+msgid "Your Custom Preloader Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:2869
+msgid "Set Custom Preloader option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2896
+msgid ""
+"Following settings will applies to control to make your own preloader with "
+"html, css and javascript"
+msgstr ""
+
+#: admin/settings_admin_options.php:2902
+msgid "Custom Preloader HTML"
+msgstr ""
+
+#: admin/settings_admin_options.php:2905
+msgid "Input your custom preloader markup/html"
+msgstr ""
+
+#: admin/settings_admin_options.php:2914
+msgid "Custom Preloader Style"
+msgstr ""
+
+#: admin/settings_admin_options.php:2917 admin/settings_admin_options.php:3336
+msgid "Input your custom preloader style/css. no need use <style></style>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2926
+msgid "Custom Preloader Script"
+msgstr ""
+
+#: admin/settings_admin_options.php:2929
+msgid ""
+"Your custom preloader script for custom preloader hide/animate effect. Leave "
+"blank to use default settings (General Settings)"
+msgstr ""
+
+#: admin/settings_admin_options.php:2939
+msgid "3D Letters Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:2944
+msgid "Set 3D option as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:2996
+msgid "Conainer Banckground"
+msgstr ""
+
+#: admin/settings_admin_options.php:3018
+msgid "Select Style"
+msgstr ""
+
+#: admin/settings_admin_options.php:3071
+msgid "Fill Options Settings"
+msgstr ""
+
+#: admin/settings_admin_options.php:3076
+msgid "Fill as preloader ==>"
+msgstr ""
+
+#: admin/settings_admin_options.php:3100
+msgid "Select fill loader type"
+msgstr ""
+
+#: admin/settings_admin_options.php:3116
+msgid "Loader Main Background Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:3127
+msgid "Fill Text Loader"
+msgstr ""
+
+#: admin/settings_admin_options.php:3187
+msgid "Thumb Size"
+msgstr ""
+
+#: admin/settings_admin_options.php:3236
+msgid "Progess bar and Counder controll"
+msgstr ""
+
+#: admin/settings_admin_options.php:3239
+msgid "Select Progess bar position"
+msgstr ""
+
+#: admin/settings_admin_options.php:3264
+msgid "Progess bar background color"
+msgstr ""
+
+#: admin/settings_admin_options.php:3272
+msgid "Progesbar height"
+msgstr ""
+
+#: admin/settings_admin_options.php:3287
+msgid "Counter Enable/Disable"
+msgstr ""
+
+#: admin/settings_admin_options.php:3300
+msgid "Counter Text Color"
+msgstr ""
+
+#: admin/settings_admin_options.php:3309
+msgid "Counter Font Size"
+msgstr ""
+
+#: admin/settings_admin_options.php:3329
+msgid "Apply Extra CSS to WPPU"
+msgstr ""
+
+#: admin/settings_admin_options.php:3333
+msgid "Add/Paste Extra CSS"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "WordPress Preloader Unlimited"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://www.wppreloader.com/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"This plugin will enable custom preloader in your wordpress site. You can "
+"change color & other setting from <a href=\"admin.php?page=wppu_options"
+"\">WPPU</a>"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "pixiefy"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://pixiefy.com"
+msgstr ""

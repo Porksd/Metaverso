@@ -1,0 +1,224 @@
+<?php
+
+/**
+ * The plugin bootstrap file
+ *
+ * @link    https://edwiser.org
+ * @since   1.0.0
+ * @package Edwiser Bridge
+ *
+ * @WordPress-plugin
+ * Plugin Name:       Edwiser Bridge - WordPress Moodle LMS Integration
+ * Plugin URI:        https://edwiser.org/bridge-wordpress-moodle-integration/
+ * Description:       Edwiser Bridge integrates WordPress with the Moodle LMS. The plugin provides an easy option to import Moodle courses to WordPress and sell them using PayPal. The plugin also allows automatic registration of WordPress users on the Moodle website along with single login credentials for both the systems.
+ * Version:           4.3.0
+ * Author:            WisdmLabs
+ * Author URI:        https://edwiser.org
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       edwiser-bridge
+ * Domain Path:       /languages
+ */
+
+namespace app\wisdmlabs\edwiserBridge;
+
+// If this file is called directly, abort.
+if (! defined('WPINC')) {
+	die;
+}
+
+// plugin data global variable.
+global $eb_plugin_data;
+$eb_plugin_data = array(
+	'name'           => 'Edwiser Bridge - WordPress Moodle LMS Integration',
+	'slug'           => 'edwiser-bridge',
+	'version'        => '4.3.0',
+	'mdl_plugin_url' => 'https://edwiser.org/plugins/edwiserbridge.zip',
+);
+
+/**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-eb-activator.php.
+ */
+
+/**
+ * Activate.
+ *
+ * @param text $net_wide net_wide.
+ */
+function activate_edwiser_bridge($net_wide)
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-eb-activator.php';
+	Eb_Activator::activate($net_wide);
+}
+
+register_activation_hook(__FILE__, '\app\wisdmlabs\edwiserBridge\activate_edwiser_bridge');
+
+/**
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/class-eb-deactivator.php.
+ */
+function deactivate_edwiser_bridge()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-eb-deactivator.php';
+	Eb_Deactivator::deactivate();
+}
+
+register_deactivation_hook(__FILE__, '\app\wisdmlabs\edwiserBridge\deactivate_edwiser_bridge');
+
+/*
+ * Applied to the list of links to display on the plugins page (beside the activate/deactivate links).
+ *
+ * A nes link is added that takes user to plugin settings.
+ */
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), '\app\wisdmlabs\edwiserBridge\wdm_add_settings_action_link');
+
+/**
+ * Action link.
+ *
+ * @param text $links links.
+ */
+function wdm_add_settings_action_link($links)
+{
+	// add pro link.
+	$plugin_links = array(
+		'<a href="' . admin_url('/admin.php?page=eb-settings') . '">' . esc_html__('Settings', 'edwiser-bridge') . '</a>',
+	);
+	$license      = get_option('edd_edwiser_bridge_pro_license_status');
+	if ('valid' !== $license) {
+		$plugin_links[] = '<a href="https://bit.ly/2NAJ7OW" target="_blank">' . esc_html__('Upgrade to Pro', 'edwiser-bridge') . '</a>';
+	}
+
+	return array_merge($links, $plugin_links);
+}
+
+/*
+ * Show row meta on the plugin screen, custom docs link added.
+ */
+add_filter('plugin_row_meta', '\app\wisdmlabs\edwiserBridge\wdm_plugin_row_meta', 10, 2);
+
+/**
+ * Row meta.
+ *
+ * @param text $links links.
+ * @param text $file file.
+ */
+function wdm_plugin_row_meta($links, $file)
+{
+	if (plugin_basename(__FILE__) === $file) {
+		$row_meta = array(
+			'docs' => '<a href="https://edwiser.org/bridge/documentation/" target="_blank"
+						title="' . esc_attr(esc_html__('Edwiser Bridge Documentation', 'edwiser-bridge')) . '">' .
+				esc_html__('Documentation', 'edwiser-bridge') .
+				'</a>',
+		);
+
+		return array_merge($links, $row_meta);
+	}
+
+	return (array) $links;
+}
+
+/**
+ * The core plugin class that is used to define internationalization,
+ * admin-specific hooks, and public-facing site hooks.
+ */
+require_once plugin_dir_path(__FILE__) . 'includes/class-eb.php';
+
+/*
+ * Executes on the plugin update.
+ */
+add_action('admin_init', '\app\wisdmlabs\edwiserBridge\process_upgrade');
+
+/**
+ * Upgrade.
+ */
+function process_upgrade()
+{
+	global $eb_plugin_data;
+	$current_version = get_option('eb_current_version');
+	if (false === $current_version || $current_version !== $eb_plugin_data['version']) {
+		require_once plugin_dir_path(__FILE__) . 'includes/class-eb-activator.php';
+		Eb_Activator::activate(false);
+		update_option('eb_current_version', $eb_plugin_data['version']);
+		update_option('eb_mdl_plugin_update_notice_dismissed', false);
+
+		if (version_compare($current_version, '4.3.0', '<')) {
+			update_option('eb_show_update_modal_4_3_0', 'yes');
+		}
+
+		// rename files.
+		require_once WP_PLUGIN_DIR . '/edwiser-bridge/includes/class-eb-i18n.php';
+		$plugin_i18n = new Eb_I18n();
+		$plugin_i18n->rename_langauge_files();
+	}
+}
+
+/**
+ * Begins execution of the plugin.
+ *
+ * Since everything within the plugin is registered via hooks,
+ * then kicking off the plugin from this point in the file does
+ * not affect the page life cycle.
+ *
+ * @since    1.0.0
+ */
+function run_edwiser_bridge()
+{
+	edwiser_bridge_instance()->run();
+}
+
+run_edwiser_bridge(); // start plugin execution.
+
+require_once plugin_dir_path(__FILE__) . 'includes/api/class-eb-external-api-endpoint.php';
+
+// if ( ! function_exists( 'eb_fs' ) ) {
+//     // Create a helper function for easy SDK access.
+//     function eb_fs() {
+//         global $eb_fs;
+
+//         if ( ! isset( $eb_fs ) ) {
+//             // Include Freemius SDK.
+//             require_once dirname(__FILE__) . '/freemius/start.php';
+
+//             $eb_fs = fs_dynamic_init( array(
+//                 'id'                  => '16802',
+//                 'slug'                => 'edwiser-bridge',
+//                 'type'                => 'plugin',
+//                 'public_key'          => 'pk_81f44e942733db4d4ccf381ca4858',
+//                 'is_premium'          => false,
+//                 'has_addons'          => false,
+//                 'has_paid_plans'      => false,
+//                 'menu'                => array(
+//                     'slug'           => 'edit.php?post_type=eb_course',
+//                     'account'        => false,
+//                     'support'        => false,
+//                     'contact'        => false,
+//                 ),
+//             ) );
+//         }
+
+//         return $eb_fs;
+//     }
+
+//     // Init Freemius.
+//     eb_fs();
+//     // Signal that SDK was initiated.
+//     do_action( 'eb_fs_loaded' );
+// }
+//Include the below code in the main plugin file to ensure that the Modular Analytics System is loaded when the plugin is activated.
+
+// Include the Modular Analytics System class
+require_once plugin_dir_path(__FILE__) . 'includes/analytics/class-modular-analytics.php';
+
+// Initialize the analytics system when the plugin is loaded
+add_action('plugins_loaded', function () {
+	Modular_Analytics_System::get_instance();
+	add_action('wp_ajax_modular_analytics_deactivation_feedback', [Modular_Analytics_System::get_instance(), 'handle_deactivation_feedback_ajax']);
+	add_action('wp_ajax_modular_analytics_dismiss_feedback', [Modular_Analytics_System::get_instance(), 'handle_dismiss_feedback']);
+});
+
+/**
+ * The classes responsible for Gutenberg blocks.
+ */
+require_once plugin_dir_path(__FILE__) . 'includes/class-eb-blocks.php';

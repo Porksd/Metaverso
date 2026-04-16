@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'mypreview/woo-additional-terms',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '20590b2c293f30d5dbe75ef878cd2639e8e944cd',
+        'type' => 'wordpress-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'mahdiyazdani/wc-install-notice' => array(
+            'pretty_version' => '1.0.0',
+            'version' => '1.0.0.0',
+            'reference' => '6a921025c28e42fcfda7c7d467bd513a1cab7b85',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../mahdiyazdani/wc-install-notice',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'mahdiyazdani/wp-footer-rate' => array(
+            'pretty_version' => '1.0.1',
+            'version' => '1.0.1.0',
+            'reference' => 'a2d20e031e4f7bb3f262235a6ded2e775e21edfe',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../mahdiyazdani/wp-footer-rate',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'mypreview/woo-additional-terms' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '20590b2c293f30d5dbe75ef878cd2639e8e944cd',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

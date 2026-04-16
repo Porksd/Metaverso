@@ -1,0 +1,92 @@
+.wppb-msf-hr {
+    border-top: 1px dashed #848484;
+}
+
+#wppb-msf-side .inside {
+    padding: 24px 12px;
+}
+
+#wppb-msf-side .inside div.wppb-msf-tabs-title-container {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#wppb-msf-side .inside div.wppb-msf-tabs-title-container .cozmoslabs-description {
+    order: 2;
+    margin-top: 10px !important;
+}
+
+#wppb-msf-side .inside div.wppb-msf-tabs-title-container .cozmoslabs-form-field-wrapper {
+    order: 1;
+}
+
+#wppb-msf-side .inside div.wppb-msf-tabs-title-container .cozmoslabs-form-field-wrapper .cozmoslabs-form-field-label {
+    flex-basis: 110px;
+}
+
+#wppb-msf-side .inside div.wppb-msf-tabs-title-container .cozmoslabs-description {
+    padding-left: 120px;
+}
+
+#wppb-msf-side .inside #major-publishing-actions {
+    margin-top: 35px;
+    background: #FFFFFF;
+    border: none;
+}
+
+#wppb-msf-side p.wppb-msf-post-publish-error {
+    color: #e76054;
+}
+
+#wppb-msf-side #wppb-msf-options p.description {
+    text-align: justify;
+}
+
+.wppb-msf-tabs-title {
+    margin: 5px 0;
+    width: 85%;
+}
+
+p.wppb-msf-tabs-title-heading {
+    margin-bottom: 5px;
+}
+
+.wppb-msf-edit-tabs-title {
+    margin-bottom: 10px;
+}
+
+span.wppb-msf-break {
+    border-style: solid;
+    border-width: 30px 0 0 30px;
+    border-color: transparent transparent transparent #1D35B4;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+    display: block;
+    cursor: pointer;
+}
+
+span.wppb-msf-break:hover {
+    border-color: transparent transparent transparent #3858E9;
+}
+
+span.wppb-msf-break b {
+    color: white;
+    font-size: 16px;
+    bottom: -3px;
+    left: -26px;
+    position: inherit;
+    font-weight: normal;
+}
+
+span.wppb-msf-break b.wppb-msf-remove-sign {
+    left: -25px;
+    font-size: 25px;
+}
+
+.wck-msf {
+    display: none;
+}

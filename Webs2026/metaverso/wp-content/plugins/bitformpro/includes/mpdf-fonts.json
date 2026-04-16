@@ -1,0 +1,267 @@
+{
+  "AboriginalSans": {
+    "variants": [
+      "AboriginalSansREGULAR.ttf"
+    ],
+    "fontFamily": "aboriginalaans"
+  },
+  "Abyssinica SIL": {
+    "variants": [
+      "Abyssinica_SIL.ttf"
+    ],
+    "fontFamily": "Abyssinica SIL"
+  },
+  "Aegean": {
+    "variants": [
+      "Aegean.otf"
+    ],
+    "fontFamily": "aegean"
+  },
+  "Aegyptus": {
+    "variants": [
+      "Aegyptus.otf"
+    ],
+    "fontFamily": "aegyptus"
+  },
+  "Akkadian": {
+    "variants": [
+      "Akkadian.otf"
+    ],
+    "fontFamily": "akkadian"
+  },
+  "Dai Banna SIL Book": {
+    "variants": [
+      "DBSILBR.ttf"
+    ],
+    "fontFamily": "dbsilbr"
+  },
+  "DejaVuSans": {
+    "variants": [
+      "DejaVuSans-Bold.ttf",
+      "DejaVuSans-BoldOblique.ttf",
+      "DejaVuSans-Oblique.ttf",
+      "DejaVuSans.ttf"
+    ],
+    "fontFamily": "dejavusans"
+  },
+  "DejaVuSansCondensed": {
+    "variants": [
+      "DejaVuSansCondensed.ttf",
+      "DejaVuSansCondensed-Bold.ttf",
+      "DejaVuSansCondensed-BoldOblique.ttf",
+      "DejaVuSansCondensed-Oblique.ttf"
+    ],
+    "fontFamily": "dejavusanscondensed"
+  },
+  "DejaVuSansMono": {
+    "variants": [
+      "DejaVuSansMono.ttf",
+      "DejaVuSansMono-Bold.ttf",
+      "DejaVuSansMono-BoldOblique.ttf",
+      "DejaVuSansMono-Oblique.ttf"
+    ],
+    "fontFamily": "dejavusansmono"
+  },
+  "DejaVuSerif": {
+    "variants": [
+      "DejaVuSerif.ttf",
+      "DejaVuSerif-Italic.ttf",
+      "DejaVuSerif-BoldItalic.ttf",
+      "DejaVuSerif-Bold.ttf"
+    ],
+    "fontFamily": "dejavuserif"
+  },
+  "DejaVuSerifCondensed": {
+    "variants": [
+      "DejaVuSerifCondensed.ttf",
+      "DejaVuSerifCondensed-Italic.ttf",
+      "DejaVuSerifCondensed-BoldItalic.ttf",
+      "DejaVuSerifCondensed-Bold.ttf"
+    ],
+    "fontFamily": "dejavuserifcondensed"
+  },
+  "Dhyana": {
+    "variants": [
+      "Dhyana-Regular.ttf",
+      "Dhyana-Bold.ttf"
+    ],
+    "fontFamily": "dhyana"
+  },
+  "FreeMono": {
+    "variants": [
+      "FreeMono.ttf",
+      "FreeMonoBold.ttf",
+      "FreeMonoBoldOblique.ttf",
+      "FreeMonoOblique.ttf"
+    ],
+    "fontFamily": "freemono"
+  },
+  "FreeSans": {
+    "variants": [
+      "FreeSans.ttf",
+      "FreeSansBold.ttf",
+      "FreeSansBoldOblique.ttf",
+      "FreeSansOblique.ttf"
+    ],
+    "fontFamily": "freesans"
+  },
+  "FreeSerif": {
+    "variants": [
+      "FreeSerif.ttf",
+      "FreeSerifBold.ttf",
+      "FreeSerifBoldItalic.ttf",
+      "FreeSerifItalic.ttf"
+    ],
+    "fontFamily": "freeserif"
+  },
+  "Garuda": {
+    "variants": [
+      "Garuda.ttf",
+      "Garuda-Oblique.ttf",
+      "Garuda-Bold.ttf",
+      "Garuda-BoldOblique.ttf"
+    ],
+    "fontFamily": "garuda"
+  },
+  "Jomolhari": {
+    "variants": [
+      "Jomolhari.ttf"
+    ],
+    "fontFamily": "jomolhari"
+  },
+  "KhmerOS": {
+    "variants": [
+      "KhmerOS.ttf"
+    ],
+    "fontFamily": "khmeros"
+  },
+  "Lateef": {
+    "variants": [
+      "LateefRegOT.ttf"
+    ],
+    "fontFamily": "lateef"
+  },
+  "Lohit Kannada": {
+    "variants": [
+      "Lohit-Kannada.ttf"
+    ],
+    "fontFamily": "lohit-kannada"
+  },
+  "Padauk book": {
+    "variants": [
+      "Padauk-book.ttf"
+    ],
+    "fontFamily": "padaukbook"
+  },
+  "Pothana2000": {
+    "variants": [
+      "Pothana2000.ttf"
+    ],
+    "fontFamily": "pothana2000"
+  },
+  "Quivira": {
+    "variants": [
+      "Quivira.otf"
+    ],
+    "fontFamily": "quivira"
+  },
+  "Sun ExtA": {
+    "variants": [
+      "Sun-ExtA.ttf"
+    ],
+    "fontFamily": "sun-exta"
+  },
+  "Sun ExtB": {
+    "variants": [
+      "Sun-ExtB.ttf"
+    ],
+    "fontFamily": "sun-extb"
+  },
+  "SundaneseUnicode": {
+    "variants": [
+      "SundaneseUnicode-1.0.5.ttf"
+    ],
+    "fontFamily": "sundaneseunicode"
+  },
+  "SyrCOMEdessa": {
+    "variants": [
+      "SyrCOMEdessa.otf"
+    ],
+    "fontFamily": "syromedessa"
+  },
+  "TaameyDavidCLM": {
+    "variants": [
+      "TaameyDavidCLM-Medium.ttf"
+    ],
+    "fontFamily": "taameydavidclm"
+  },
+  "TaiHeritagePro": {
+    "variants": [
+      "TaiHeritagePro.ttf"
+    ],
+    "fontFamily": "taiheritagepro"
+  },
+  "Tharlon": {
+    "variants": [
+      "Tharlon-Regular.ttf"
+    ],
+    "fontFamily": "tharlon"
+  },
+  "UnBatang_0613": {
+    "variants": [
+      "UnBatang_0613.ttf"
+    ],
+    "fontFamily": "unbatang_0613"
+  },
+  "Uthman": {
+    "variants": [
+      "Uthman.otf"
+    ],
+    "fontFamily": "uthman"
+  },
+  "XB Riyaz": {
+    "variants": [
+      "XB Riyaz.ttf",
+      "XB RiyazBd.ttf",
+      "XB RiyazBdIt.ttf",
+      "XB RiyazIt.ttf"
+    ],
+    "fontFamily": "xb riyaz"
+  },
+  "ZawgyiOne": {
+    "variants": [
+      "ZawgyiOne.ttf"
+    ],
+    "fontFamily": "zawgyione"
+  },
+  "Ayar": {
+    "variants": [
+      "ayar.ttf"
+    ],
+    "fontFamily": "ayar"
+  },
+  "damase_v.2": {
+    "variants": [
+      "damase_v.2.ttf"
+    ],
+    "fontFamily": "damase"
+  },
+  "kaputaunicode": {
+    "variants": [
+      "kaputaunicode.ttf"
+    ],
+    "fontFamily": "kaputaunicode"
+  },
+  "lannaalif-v1-03": {
+    "variants": [
+      "lannaalif-v1-03.ttf"
+    ],
+    "fontFamily": "lannaalif-v1-03"
+  },
+  "ocrb10": {
+    "variants": [
+      "ocrb10.ttf"
+    ],
+    "fontFamily": "ocrb10"
+  }
+}

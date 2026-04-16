@@ -1,0 +1,38 @@
+/* Backend styling for field properties */
+#container_wppb_manage_fields .wck-content pre {
+    width: 26%;
+}
+
+#container_wppb_manage_fields .wck-content pre.wppb-mb-head-required {
+/*#container_wppb_manage_fields .wck-content li.row-required pre {*/
+    width: 14%;
+    text-align: left;
+    margin-right: 1%;
+}
+
+#container_wppb_manage_fields .wck-content li.row-required pre {
+    width: 8%;
+    text-align: left;
+    margin-right: 1%;
+}
+
+#container_wppb_manage_fields .wck-content pre.wppb-mb-head-visibility {
+    width: 6%;
+}
+
+#container_wppb_manage_fields .wppb-manage-fields-dashicon {
+    display: block;
+    float: left;
+    width: auto;
+    font-size: 17px;
+    cursor: pointer;
+}
+
+@media screen and ( max-width: 1125px ) {
+    #container_wppb_manage_fields .wppb-manage-fields-dashicon {
+        display: inline;
+        float: none;
+        width: auto;
+        vertical-align: middle;
+    }
+}

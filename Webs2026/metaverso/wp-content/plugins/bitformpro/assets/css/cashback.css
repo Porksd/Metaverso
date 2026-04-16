@@ -1,0 +1,84 @@
+.cashback-wrapper .cashback-btn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0px 15px;
+  height: 40px;
+  background-color: rgb(78, 255, 191);
+  font-size: 15px;
+  font-weight: 700;
+  margin-right: 10px;
+}
+
+.cashback-wrapper .cashback-btn:hover {
+  background-color: #90ffd7;
+}
+
+.cashback-wrapper .title-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Outfit', sans-serif;
+  background-image: url(../img/cashback.jpg);
+  background-repeat: no-repeat;
+  background-position: left;
+  color: #fff;
+  padding: 35px;
+}
+
+.cashback-wrapper .title {
+  margin: 0;
+  font-size: 35px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cashback-wrapper .details-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: justify;
+  padding: 15px;
+}
+
+.cashback-wrapper .details {
+  margin: 0;
+}
+
+.cashback-wrapper .footer-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 20px;
+}
+
+.cashback-wrapper .footer-btn {
+  border: none;
+  border-radius: 5px;
+  display: inline-block;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 2px 10px;
+  position: relative;
+  font-size: 1rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.cashback-wrapper .footer-btn:focus {
+  color: #fff;
+}
+
+.cashback-wrapper .footer-btn:hover {
+  background-color: #3582c4;
+  color: #fff;
+}
+
+.cashback-wrapper .btcd-modal-content {
+  padding: 0px !important;
+}

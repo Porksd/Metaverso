@@ -1,0 +1,109 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+.wppu-awesome-loader-36 {
+  position: relative;
+}
+.wppu-awesome-loader-36:before, .wppu-awesome-loader-36:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.wppu-awesome-loader-36:before {
+  width: 1em;
+  height: 1em;
+  border: .1em solid currentcolor;
+  border-radius: 50%;
+  -webkit-animation: wppu-awesome-loader-36-1 1.15s infinite -0.3s;
+          animation: wppu-awesome-loader-36-1 1.15s infinite -0.3s;
+}
+.wppu-awesome-loader-36:after {
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  width: 0;
+  height: 0;
+  border: .1em solid currentcolor;
+  border-radius: 50%;
+  -webkit-transform: translate(-0.2em);
+          transform: translate(-0.2em);
+  -webkit-animation: wppu-awesome-loader-36-2 4.6s infinite steps(1);
+          animation: wppu-awesome-loader-36-2 4.6s infinite steps(1);
+}
+
+@-webkit-keyframes wppu-awesome-loader-36-1 {
+  to {
+    -webkit-transform: rotateX(180deg);
+            transform: rotateX(180deg);
+  }
+}
+
+@keyframes wppu-awesome-loader-36-1 {
+  to {
+    -webkit-transform: rotateX(180deg);
+            transform: rotateX(180deg);
+  }
+}
+@-webkit-keyframes wppu-awesome-loader-36-2 {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    box-shadow: .2em 0 0 currentcolor;
+  }
+  75% {
+    box-shadow: .2em 0 0 currentcolor, .4em 0 0 currentcolor;
+  }
+}
+@keyframes wppu-awesome-loader-36-2 {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    box-shadow: .2em 0 0 currentcolor;
+  }
+  75% {
+    box-shadow: .2em 0 0 currentcolor, .4em 0 0 currentcolor;
+  }
+}

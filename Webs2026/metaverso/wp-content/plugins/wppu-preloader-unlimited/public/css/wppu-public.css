@@ -1,0 +1,124 @@
+.wppu_preloader__default_element {
+	background-color: #FFF;
+	background-image: url("../images/Preloader_1.gif");
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 128px auto;
+	bottom: 0;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 999999;
+}
+.wppu-preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #009999;
+  z-index: 999999;
+  overflow: hidden;
+}
+
+.wppu-logo-loader h2 {
+    display: inline-block;
+    font-size: 8em;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 0.9em;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+.wppu-logo-loader h2 span {
+  display: inline-block;
+  float: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  overflow: hidden;
+}
+.wppu-logo-loader .wppu_special {
+    color: rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+}
+.wppu_special span {
+    position: relative;
+}
+.wppu_special span p {
+    margin:0 ;
+    overflow: hidden;
+    width: 100%;
+    font-size: inherit;
+}
+.wppu_special span .t-p {
+    position: relative;
+}
+.wppu_special span .h-p {
+    position: absolute;
+    top: 0;
+    width: 0;
+    z-index: 2;
+    color: #FFFFFF;
+}
+
+.wppu-preloader-loaded .wppu_special span .h-p {
+    transition: width 0.5s ease 0s;
+    -webkit-transition: width 0.5s ease 0s;
+    -moz-transition: width 0.5s ease 0s;
+    -o-transition: width 0.5s ease 0s;
+    -ms-transition: width 0.5s ease 0s;
+    width: 90% !important;
+}
+.preview_spcial_container {
+height: 200px;
+left: 25%;
+margin-left: 0;
+position: absolute;
+top: -30px;
+width: 450px;
+}
+div.wppu_frameT {
+  display: table;
+  height: 100%;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+div.wppu_frameTC {
+  display: table-cell;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+div.wppu_special_preloader {
+  font-size: 50%;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+}
+
+#pace_wow {
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 999998;
+}
+.pace,
+.pace .pace-progress,
+.pace .pace-activity,
+.pace .pace-progress-inner {
+z-index: 999999 !important;
+}
+.awesome-item-loader-container .item-generate > * {
+    color: inherit;
+}

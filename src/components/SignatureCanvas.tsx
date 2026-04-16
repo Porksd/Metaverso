@@ -11,6 +11,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
     const [isDrawing, setIsDrawing] = useState(false);
     const [hasSignature, setHasSignature] = useState(false);
     const [consentAccepted, setConsentAccepted] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -63,6 +64,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
         ctx.lineTo(x, y);
         ctx.stroke();
         setHasSignature(true);
+        setIsSaved(false);
     };
 
     const stopDrawing = (e?: React.PointerEvent<HTMLCanvasElement>) => {
@@ -83,6 +85,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             setHasSignature(false);
+            setIsSaved(false);
         }
     };
 
@@ -103,6 +106,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
             console.log("[SignatureCanvas] Data length:", dataUrl.length, "chars");
             console.log("[SignatureCanvas] Consent accepted: YES");
             onSave(dataUrl);
+            setIsSaved(true);
         }
     };
 
@@ -153,6 +157,12 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
                     <Save className="w-4 h-4" /> Guardar Firma
                 </button>
             </div>
+
+            {isSaved && (
+                <div className="w-full max-w-xl text-center rounded-lg border border-brand/30 bg-brand/10 px-4 py-2">
+                    <p className="text-brand text-xs md:text-sm font-bold uppercase tracking-wide">Firma guardada correctamente</p>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,0 +1,75 @@
+.wppb-cf-rule-action {
+	width: 20px;
+	height: 20px;
+	border-radius: 2px;
+	border: 1px solid #757575;
+	color: #939393;
+	font-size: 20px;
+	text-align: center;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding-bottom: 1px;
+}
+
+.wppb-cf-add:hover {
+	border-color: #3858E9;
+	color: #3858E9;
+}
+
+.wppb-cf-remove:hover {
+	border-color: #e76054;
+	color: #e76054;
+}
+
+.wppb-cf-wrapper[data-rules-count="1"] .wppb-cf-rule-action.wppb-cf-remove {
+	display: none;
+}
+
+.cozmoslabs-form-field-wrapper.row-conditional-logic {
+	align-items: flex-start;
+}
+
+.wppb-cf-wrapper {
+	flex-basis: calc( 100% - 230px );
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 10px;
+}
+
+.wppb-cf-wrapper .wppb-cf-select-action_type,
+.wppb-cf-wrapper .wppb-cf-select-logic_type {
+	flex-basis: 150px;
+}
+
+.wppb-cf-wrapper .wppb-cf-rule {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	flex-basis: 100%;
+	flex-wrap: wrap;
+	gap: 10px;
+
+	position: relative;
+}
+
+.wppb-cf-wrapper .wppb-cf-rule .wppb-cf-rule-field,
+.wppb-cf-wrapper .wppb-cf-rule .wppb-cf-rule-value {
+	flex-basis: 220px !important;
+}
+
+.wppb-cf-wrapper .wppb-cf-rule select[data-property="operator"] {
+	flex-basis: 75px;
+}
+
+#container_wppb_manage_fields .added_fields_list li.row-conditional-logic-enabled {
+	display: list-item !important;
+}
+
+#container_wppb_manage_fields .added_fields_list li.row-conditional-logic-enabled pre {
+	display: none;
+}

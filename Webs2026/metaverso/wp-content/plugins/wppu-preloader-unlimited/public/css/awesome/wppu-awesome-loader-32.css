@@ -1,0 +1,87 @@
+#awesome_preloader_body {
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+.awesome_prelader_item {
+  display: table;
+  height: 100%;
+  width: 100%;
+}
+.awesome_prelader_table {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+.awesome_prelader_table_cell {
+  display: inline-block;
+}
+.awesome_title_txt {
+  line-height: 1;
+  margin-top: 15px;
+}
+
+[class*="wppu-awesome-loader-"] {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  color: inherit;
+  vertical-align: middle;
+  pointer-events: none;
+  font-size: 80px;
+  margin-bottom: 45px;
+  color: #FFF;
+}
+
+.wppu-awesome-loader-32 {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 0 1em 0 currentcolor, inset 0 0 1em 0 currentcolor;
+  -webkit-animation: 1s wppu-awesome-loader-32 linear infinite;
+          animation: 1s wppu-awesome-loader-32 linear infinite;
+}
+.wppu-awesome-loader-32:before, .wppu-awesome-loader-32:after {
+  content: '';
+  display: block;
+  width: inherit;
+  height: inherit;
+  position: absolute;
+  border-radius: 50%;
+}
+.wppu-awesome-loader-32:before {
+  border-top: .2em solid currentcolor;
+  border-right: .2em solid transparent;
+  top: .28em;
+  right: calc(50% - .22em);
+}
+.wppu-awesome-loader-32:after {
+  border-bottom: .2em solid currentcolor;
+  border-left: .2em solid transparent;
+  bottom: .28em;
+  left: calc(50% - .22em);
+}
+
+@-webkit-keyframes wppu-awesome-loader-32 {
+  0% {
+    -webkit-transform: rotateX(-60deg) rotateZ(0deg);
+            transform: rotateX(-60deg) rotateZ(0deg);
+  }
+  100% {
+    -webkit-transform: rotateX(-60deg) rotateZ(360deg);
+            transform: rotateX(-60deg) rotateZ(360deg);
+  }
+}
+
+@keyframes wppu-awesome-loader-32 {
+  0% {
+    -webkit-transform: rotateX(-60deg) rotateZ(0deg);
+            transform: rotateX(-60deg) rotateZ(0deg);
+  }
+  100% {
+    -webkit-transform: rotateX(-60deg) rotateZ(360deg);
+            transform: rotateX(-60deg) rotateZ(360deg);
+  }
+}

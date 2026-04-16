@@ -1,0 +1,109 @@
+# Translation of Plugins - Import Users from CSV - Stable (latest release) in Spanish (Spain)
+# This file is distributed under the same license as the Plugins - Import Users from CSV - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2024-02-23 22:50:03+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: es\n"
+"Project-Id-Version: Plugins - Import Users from CSV - Stable (latest release)\n"
+
+#. Author URI of the plugin
+#: import-users-from-csv.php
+msgid "https://www.wpallimport.com/"
+msgstr "https://www.wpallimport.com/"
+
+#. Author of the plugin
+#: import-users-from-csv.php
+msgid "WP All Import"
+msgstr "WP All Import"
+
+#: import-users-from-csv.php:141
+msgid ", please <a href='%s' target='_blank'>check the error log</a>"
+msgstr ", por favor <a href='%s' target='_blank'>comprueba el registro de errores</a>"
+
+#. Description of the plugin
+#: import-users-from-csv.php
+msgid "Import Users data and metadata from a csv file."
+msgstr "Importa datos de usuario y metadatos desde un fichero csv."
+
+#. Plugin URI of the plugin
+#: import-users-from-csv.php
+msgid "https://wordpress.org/plugins/import-users-from-csv/"
+msgstr "https://es.wordpress.org/extend/plugins/import-users-from-csv/"
+
+#. Plugin Name of the plugin
+#: import-users-from-csv.php import-users-from-csv.php:124
+msgid "Import Users from CSV"
+msgstr "Import Users from CSV"
+
+#: import-users-from-csv.php:488
+msgid "[Line %1$s] %2$s"
+msgstr "[Línea %1$s] %2$s"
+
+#: import-users-from-csv.php:483
+msgid "BEGIN %s"
+msgstr "EMPIEZA %s"
+
+#: import-users-from-csv.php:226
+msgid "Import"
+msgstr "Importar"
+
+#: import-users-from-csv.php:218
+msgid "Update user when a username or email exists"
+msgstr "Actualizar usuario cuando ya existe el nombre de usuario o el correo electrónico"
+
+#: import-users-from-csv.php:211 import-users-from-csv.php:214
+msgid "Users update"
+msgstr "Actualización de usuarios"
+
+#: import-users-from-csv.php:205
+msgid "Send to new users"
+msgstr "Enviar a nuevos usuarios"
+
+#: import-users-from-csv.php:196 import-users-from-csv.php:201
+msgid "Notification"
+msgstr "Aviso"
+
+#: import-users-from-csv.php:188
+msgid "You may want to see <a href=\"%s\">the example of the CSV file</a>."
+msgstr "Puede que quieras ver <a href=\"%s\">el archivo CSV de ejemplo</a>."
+
+#: import-users-from-csv.php:181
+msgid "CSV file"
+msgstr "Archivo CSV"
+
+#: import-users-from-csv.php:162
+msgid "Users import was successful."
+msgstr "La importación de usuarios fue correcta."
+
+#: import-users-from-csv.php:158
+msgid "Some users were successfully imported but some were not%s."
+msgstr "Algunos usuarios se importaron correctamente pero otros no %s."
+
+#: import-users-from-csv.php:154
+msgid "No user was successfully imported%s."
+msgstr "No se importó correctamente ningún usuario%s."
+
+#: import-users-from-csv.php:150
+msgid "Cannot extract data from uploaded file or no file was uploaded."
+msgstr "No se pueden extraer datos del archivo subido o no se subió ningún archivo."
+
+#: import-users-from-csv.php:146
+msgid "Error during file upload."
+msgstr "Error en la subida del archivo."
+
+#: import-users-from-csv.php:131
+msgid "Notice: please make the directory %s writable so that you can see the error log."
+msgstr "Advertencia: por favor, haz que el directorio %s tenga permisos de escritura para que puedas ver el registro de errores."
+
+#: import-users-from-csv.php:118
+msgid "You do not have sufficient permissions to access this page."
+msgstr "No tiene los suficientes permisos para acceder esta página."
+
+#: import-users-from-csv.php:67
+msgid "Import From CSV"
+msgstr "Importar desde CSV"

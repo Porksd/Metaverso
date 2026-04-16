@@ -1,0 +1,38 @@
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 237,7 MB/512 MB - 4dm1nmv > Start upgrade from 8.9.1
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,5 MB/512 MB - 4dm1nmv > Backing up options of 8.9.1
+06-10-2025 17:17:27 - INFO  - 8.9.9 - 238,7 MB/512 MB - 4dm1nmv > End

@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	>
+
+<channel>
+	<title></title>
+	<atom:link href="https://metaversotec.cl/web/feed/" rel="self" type="application/rss+xml" />
+	<link>https://metaversotec.cl/web</link>
+	<description>Metaverso Otec</description>
+	<lastBuildDate>Wed, 23 Jul 2025 21:09:07 +0000</lastBuildDate>
+	<language>es</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.9.4</generator>
+
+<image>
+	<url>https://metaversotec.cl/web/wp-content/uploads/2025/09/cropped-metaversotec-logo-2025-iso-32x32.png</url>
+	<title></title>
+	<link>https://metaversotec.cl/web</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>Alianza CTEC</title>
+		<link>https://metaversotec.cl/web/2025/07/23/alianza-ctec/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Wed, 23 Jul 2025 21:04:43 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=7041</guid>
+
+					<description><![CDATA[Estamos emocionados de anunciar nuestra alianza estratégica con CTEC, el Centro Tecnológico para la Innovación en la Construcción. Este acuerdo marca un hito en nuestra visión de transformar la industria mediante la colaboración y el desarrollo de soluciones innovadoras.]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="7041" class="elementor elementor-7041" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Alianza CTEC</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">¡Unimos fuerzas con CTEC para impulsar la innovación en la construcción!</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p class="first:mt-1.5">Estamos emocionados de anunciar nuestra alianza estratégica con <strong class="">CTEC,</strong> el Centro Tecnológico para la Innovación en la Construcción. Este acuerdo marca un hito en nuestra visión de transformar la industria mediante la colaboración y el desarrollo de soluciones innovadoras.</p><p class="first:mt-1.5"><strong class="">CTEC</strong> es reconocido por su liderazgo en la transformación digital y tecnológica del sector construcción, promoviendo prácticas más eficientes, sostenibles y competitivas. A través de su <strong class="">Parque de Innovación</strong>, han creado un espacio único para probar y madurar tecnologías avanzadas que están redefiniendo los estándares de la industria.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p><span style="font-weight: 400;">Esta alianza no solo potenciará nuestras capacidades, sino que también abrirá nuevas oportunidades para desarrollar proyectos que impacten positivamente en el sector, fomentando la innovación abierta y el uso eficiente de los recursos.</span><b></b></p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>Estamos convencidos de que esta colaboración será clave para enfrentar los desafíos del futuro y construir un sector más resiliente y sostenible.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img fetchpriority="high" decoding="async" width="900" height="700" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-7043 lazyload" alt="" sizes="(max-width: 900px) 100vw, 900px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/07/img_5264_Parque_CTEC_13012022-900x700-1.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/07/img_5264_Parque_CTEC_13012022-900x700-1.jpg 900w, https://metaversotec.cl/web/wp-content/uploads/2025/07/img_5264_Parque_CTEC_13012022-900x700-1-300x233.jpg 300w, https://metaversotec.cl/web/wp-content/uploads/2025/07/img_5264_Parque_CTEC_13012022-900x700-1-768x597.jpg 768w, https://metaversotec.cl/web/wp-content/uploads/2025/07/img_5264_Parque_CTEC_13012022-900x700-1-600x467.jpg 600w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Importancia de un Onboarding efectivo</title>
+		<link>https://metaversotec.cl/web/2025/06/09/importancia-de-un-onboarding-efectivo/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Mon, 09 Jun 2025 13:36:15 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=6698</guid>
+
+					<description><![CDATA[Un onboarding automatizado no solo mejora la experiencia de la persona trabajadora, sino que también fortalece la cultura organizacional y aumenta la productividad. Invertir en un proceso consistente y eficiente es clave para el éxito organizacional a largo plazo.]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="6698" class="elementor elementor-6698" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Importancia de un Onboarding efectivo</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">La Importancia de un Onboarding Efectivo y Consistente</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []">El onboarding es clave para integrar a los nuevos colaboradores, ayudándolos a entender su rol, la cultura de la empresa y a ser productivos rápidamente. Sin embargo, cuando este proceso depende de diferentes personas, puede volverse inconsistente, con información incompleta o desigual, lo que afecta la experiencia de la persona trabajadora y la eficiencia organizacional.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<h4>Problemas de un onboarding inconsistente</h4><ul class="list-disc"><li class="ml-4"><strong class="">Falta de uniformidad:</strong> Cada capacitador puede omitir o variar información.</li><li class="ml-4"><strong class="">Errores humanos:</strong> Pasos importantes pueden olvidarse.</li><li class="ml-4"><strong class="">Desigualdad:</strong> Los empleados perciben diferencias en la calidad del proceso.</li></ul><h4>Automatización: la solución para un onboarding transversal</h4><p class="first:mt-1.5">Automatizar el onboarding garantiza que todos los trabajadores reciban la misma información de manera estructurada y eficiente. Sus beneficios incluyen:</p><ul class="list-disc"><li class="ml-4"><strong class="">Estandarización:</strong> Un proceso uniforme para todos.</li><li class="ml-4"><strong class="">Reducción de errores:</strong> Se eliminan olvidos y omisiones.</li><li class="ml-4"><strong class="">Acceso centralizado:</strong> Materiales disponibles en cualquier momento.</li><li class="ml-4"><strong class="">Seguimiento:</strong> Monitoreo del progreso de cada empleado.</li><li class="ml-4"><strong class="">Escalabilidad:</strong> Adaptable al crecimiento de la empresa.</li></ul><h4>Elementos clave de un onboarding automatizado</h4><ul class="list-disc"><li class="ml-4">Bienvenida estructurada y alineada con la cultura.</li><li class="ml-4">Capacitación inicial con módulos claros.</li><li class="ml-4">Mentores o puntos de contacto para resolver dudas.</li><li class="ml-4">Evaluaciones para medir el progreso y ajustar el proceso.</li></ul>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>Un onboarding automatizado no solo mejora la experiencia de la persona trabajadora, sino que también fortalece la cultura organizacional y aumenta la productividad. Invertir en un proceso consistente y eficiente es clave para el éxito organizacional a largo plazo.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img decoding="async" width="1024" height="1024" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-6700 lazyload" alt="" sizes="(max-width: 1024px) 100vw, 1024px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/06/download.png" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/06/download.png 1024w, https://metaversotec.cl/web/wp-content/uploads/2025/06/download-300x300.png 300w, https://metaversotec.cl/web/wp-content/uploads/2025/06/download-150x150.png 150w, https://metaversotec.cl/web/wp-content/uploads/2025/06/download-768x768.png 768w, https://metaversotec.cl/web/wp-content/uploads/2025/06/download-600x600.png 600w, https://metaversotec.cl/web/wp-content/uploads/2025/06/download-100x100.png 100w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Impresora 3D &#8211; CTEC</title>
+		<link>https://metaversotec.cl/web/2025/05/23/impresora-3d-ctec/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Fri, 23 May 2025 20:31:47 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=6658</guid>
+
+					<description><![CDATA[La innovación no se cuenta, se vive. Y eso fue precisamente lo que hicimos en ConstruyeLazos 2025, el evento organizado por CTEC que reunió a actores clave de la industria de la construcción, la tecnología y la formación de capital humano.]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="6658" class="elementor elementor-6658" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Impresora 3D &#8211; CTEC</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Simulación de RV en Enfermería:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []"><strong>Innovación Sostenible</strong></p><p>En marzo 2025, junto a CTEC, grabamos en Realidad Inmersiva (RV) 360° un brazo robótico que funciona como impresora 3D de concreto. Este proyecto combina tecnología avanzada con sostenibilidad para transformar la construcción. La construcción está evolucionando, y este proyecto colaborativo busca transformar la manera en que se diseña y fabrica elementos constructivos. A través de la impresión 3D, se está implementando un nuevo sistema que optimiza el uso de materiales, reduce residuos y disminuye los costos y tiempos de producción, con un fuerte enfoque en la economía circular.</p><p>La grabación en RV 360° no solo permite documentar este innovador proceso, sino también ofrecer una experiencia inmersiva que muestra cómo la tecnología y la sostenibilidad se unen para revolucionar la industria de la construcción. Este enfoque pionero destaca el potencial de la impresión 3D en concreto para redefinir los estándares constructivos, promoviendo prácticas más eficientes y respetuosas con el medio ambiente.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p><span style="font-weight: 400;"> </span><b>Construcción Circular</b></p><p><span style="font-weight: 400;">Este proyecto se enmarca dentro de las Tecnologías de Adaptación al Cambio Climático (TACC) del programa Construye Zero, una iniciativa que busca soluciones innovadoras para reducir el impacto ambiental en la construcción. En él participan Melón, Acciona y CTEC como empresas ancla, junto con una serie de colaboradores que impulsan su desarrollo.</span></p><p><b>Eficiencia Local</b></p><p><span style="font-weight: 400;">Uno de los principales objetivos es disminuir las emisiones de CO₂ de los métodos tradicionales mediante la incorporación de insumos locales, lo que permite mejorar la eficiencia de los procesos y reducir el impacto ambiental asociado al uso de maquinaria y transporte.</span></p><p><b>Hormigón Eficiente</b></p><p><span style="font-weight: 400;">Además, se busca gestionar de manera eficiente los residuos generados en la producción de elementos estructurales de hormigón, minimizando desperdicios y optimizando los materiales. A través de la impresión 3D, es posible reducir los espesores de los elementos, lo que significa menor consumo de material y menores emisiones.</span></p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p><b>Revolución Constructiva</b></p><p><span style="font-weight: 400;">Este proyecto no solo busca innovar en la forma de construir, sino también generar un impacto real en la industria. Desde la validación del método constructivo, de la «tinta» de impresión con materias primas locales, hasta la reducción de la huella de carbono, cada paso está pensado para hacer más sostenible el futuro de la construcción.</span></p><p> </p><p><strong>Agradecemos a CTEC</strong>, <strong>Melón, Acciona</strong> y todos los colaboradores por impulsar esta revolución constructiva. ¡Juntos construimos un futuro más sostenible!</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img decoding="async" width="577" height="1024" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-6667 lazyload" alt="" sizes="(max-width: 577px) 100vw, 577px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-577x1024.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-577x1024.jpg 577w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-169x300.jpg 169w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-768x1364.jpg 768w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-865x1536.jpg 865w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023-600x1065.jpg 600w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250313-WA0023.jpg 901w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>¡Presentes en Expomin 2025!</title>
+		<link>https://metaversotec.cl/web/2025/05/12/presentes-en-expomin-2025/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Mon, 12 May 2025 20:30:49 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=6329</guid>
+
+					<description><![CDATA[En Metaversotec, tuvimos el honor de participar en Expomin 2025, el evento más importante de la industria minera en Latinoamérica. Durante esta gran feria, nuestro equipo tuvo la oportunidad de presentar nuestras soluciones tecnológicas innovadoras y compartir con empresas, profesionales y expertos del sector.]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="6329" class="elementor elementor-6329" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">¡Presentes en Expomin 2025!</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Metaversotec en Expomin 2025: Innovación y tecnología para el futuro de la minería:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>En Metaversotec, tuvimos el honor de participar en <strong class="">Expomin 2025</strong>, el evento más importante de la industria minera en Latinoamérica. Durante esta gran feria, nuestro equipo tuvo la oportunidad de presentar nuestras soluciones tecnológicas innovadoras y compartir con empresas, profesionales y expertos del sector.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p class="first:mt-1.5">Queremos expresar nuestro más sincero agradecimiento a todos los que visitaron nuestro stand. Fue un verdadero placer conversar sobre cómo la tecnología está transformando el futuro de la minería y explorar juntos nuevas formas de colaboración para enfrentar los desafíos del sector.</p><p class="first:mt-1.5">El último día del evento, <strong class="">Expomin abrió sus puertas al público general</strong>, permitiendo que familias, estudiantes y niños pudieran disfrutar de esta experiencia única. Nos encantó recibir a tantas personas interesadas en la minería y la tecnología, y ver cómo los más pequeños participaron con entusiasmo en las actividades diseñadas especialmente para ellos. Fue una jornada llena de aprendizaje, curiosidad y diversión.</p><p class="first:mt-1.5"><strong class="">Expomin 2025</strong> nos permitió conectar con personas interesadas en nuestras propuestas y reafirmar nuestro compromiso con un futuro más tecnológico, eficiente y sostenible. Nos llena de orgullo haber sido parte de esta experiencia y de haber recibido tanto interés en nuestras soluciones.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p class="first:mt-1.5">En Metaversotec, seguimos trabajando con pasión para construir un futuro donde la tecnología sea el motor de una minería más innovadora y responsable.</p><p class="first:mt-1.5"><strong class="">¿Quieres saber más sobre nuestras soluciones o cómo podemos colaborar?</strong><br />Te invitamos a explorar nuestra página web y a contactarnos para descubrir cómo podemos ayudarte a enfrentar los desafíos del sector minero.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="575" height="1024" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-6335 lazyload" alt="" sizes="(max-width: 575px) 100vw, 575px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-575x1024.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-575x1024.jpg 575w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-169x300.jpg 169w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-768x1367.jpg 768w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-863x1536.jpg 863w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053-600x1068.jpg 600w, https://metaversotec.cl/web/wp-content/uploads/2025/05/IMG-20250428-WA0053.jpg 899w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Expusimos en ConstruyeLazos</title>
+		<link>https://metaversotec.cl/web/2025/04/08/expusimos-en-construyelazos/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Tue, 08 Apr 2025 20:27:26 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=5827</guid>
+
+					<description><![CDATA[La innovación no se cuenta, se vive. Y eso fue precisamente lo que hicimos en ConstruyeLazos 2025, el evento organizado por CTEC que reunió a actores clave de la industria de la construcción, la tecnología y la formación de capital humano.]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="5827" class="elementor elementor-5827" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Expusimos en ConstruyeLazos</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Simulación de RV en Enfermería:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []">La innovación no se cuenta, se vive. Y eso fue precisamente lo que hicimos en ConstruyeLazos 2025, el evento organizado por CTEC que reunió a actores clave de la industria de la construcción, la tecnología y la formación de capital humano.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>Desde nuestro stand, abrimos una ventana al futuro de la capacitación laboral. Decenas de visitantes exploraron nuestras experiencias inmersivas con lentes de realidad virtual, interactuaron con simuladores de emergencias y conocieron de cerca cómo la inteligencia artificial, la gamificación y los entornos 360° están redefiniendo la forma de aprender y entrenar en contextos laborales reales.</p><p>Uno de los grandes protagonistas fue nuestro demo exclusivo de simulación de impresora 3D, que permitió a los asistentes experimentar una capacitación técnica en un entorno totalmente seguro y controlado. La recepción fue increíble: asombro, curiosidad y entusiasmo marcaron cada interacción.</p><p>Más allá de la tecnología, ConstruyeLazos fue una oportunidad para tejer redes, escuchar desafíos reales y conectar con empresas, instituciones y profesionales que, como nosotros, creen en el poder de innovar para transformar.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>Nos volvemos con la convicción de que vamos por buen camino y con el compromiso renovado de seguir desarrollando herramientas que potencien el aprendizaje, la productividad y la seguridad en el trabajo.</p><p><strong>Gracias a CTEC por este espacio y a cada persona que se acercó a conocernos, conversar y experimentar.</strong><br /><strong>Seguimos construyendo juntos el futuro de la capacitación.</strong></p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="720" height="973" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-5834 lazyload" alt="" sizes="(max-width: 720px) 100vw, 720px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/04/IMG-20250328-WA0032.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/04/IMG-20250328-WA0032.jpg 720w, https://metaversotec.cl/web/wp-content/uploads/2025/04/IMG-20250328-WA0032-222x300.jpg 222w, https://metaversotec.cl/web/wp-content/uploads/2025/04/IMG-20250328-WA0032-600x811.jpg 600w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Simulación de RV en Enfermería</title>
+		<link>https://metaversotec.cl/web/2025/03/11/simulacion-de-rv-en-enfermeria/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Tue, 11 Mar 2025 19:30:22 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=5322</guid>
+
+					<description><![CDATA[BLOG Simulación de RV en Enfermería: El desafío que presentan: Los profesores de Enfermería se enfrentan constantemente al desafío de [&#8230;]]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="5322" class="elementor elementor-5322" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Simulación de RV en Enfermería</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Simulación de RV en Enfermería:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []"><strong data-renderer-mark="true">El desafío que presentan:</strong> Los profesores de Enfermería se enfrentan constantemente al desafío de métodos accesiblese innovadores de enseñanza y aprendizaje que hacen la transición de los estudiantes através de cada etapa de su viaje educativo.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []"><strong data-renderer-mark="true">Cómo puede solucionarse?:</strong> la tecnología de la RV tiene el potencial de cambiar la forma en que se imparte la educación, ya que opera bajo la premisa de que se puede crear un mundo virtual, realista, que permite a los estudiantes y profesionales no solo visualizar el contenido, sino también interactuar con él de forma segura y sin amenazas. De este modo y en comparación con los enfoques tradicionales de enseñanza y aprendizaje, el uso de la tecnología de la RV sirve como un medio inmersivo para la transferencia del aprendizaje teórico y clínico en la formación de enfermeras.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-renderer-start-pos="861">Incorporar la RV en los estudios de Enfermería ayuda a los estudiantes a adquirir habilidades psicomotoras, toma de decisiones, razonamiento clínico, resolución de problemas y promover la equidad entre los estudiantes, especialmente cuando la exposición a ciertas experiencias clínicas es limitada. En este sentido, los profesores deben considerar el valor de usar la RV en diversos planos de estudios de Enfermería como una herramienta de enseñanza y aprendizaje ayudando a abordar las posibles amenazas a la actualización.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="1024" height="576" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-5324 lazyload" alt="" sizes="(max-width: 1024px) 100vw, 1024px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-1024x576.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-1024x576.jpg 1024w, https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-300x169.jpg 300w, https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-768x432.jpg 768w, https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-1536x864.jpg 1536w, https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-2048x1152.jpg 2048w, https://metaversotec.cl/web/wp-content/uploads/2025/03/professional-physician-wearing-virtual-reality-glasses-using-medical-inovation-in-hospital-surgeon-working-with-equipment-device-future-medicine-healthcare-professional-vision-simulator-video-600x338.jpg 600w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Ley Karin y la Importancia de la Capacitación</title>
+		<link>https://metaversotec.cl/web/2025/03/11/ley-karin-y-la-importancia-de-la-capacitacion/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Tue, 11 Mar 2025 15:53:54 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=5301</guid>
+
+					<description><![CDATA[BLOG Ley Karin y la Importancia de la Capacitación: La Ley Karin refuerza la seguridad en los lugares de trabajo [&#8230;]]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="5301" class="elementor elementor-5301" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Ley Karin y la Importancia de la Capacitación</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Ley Karin y la Importancia de la Capacitación:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []">La <strong data-prosemirror-content-type="mark" data-prosemirror-mark-name="strong">Ley Karin</strong> refuerza la seguridad en los lugares de trabajo en Chile, estableciendo exigencias más estrictas para prevenir accidentes laborales. Sin embargo, más allá del cumplimiento normativo, la clave para reducir los riesgos es la <strong data-prosemirror-content-type="mark" data-prosemirror-mark-name="strong">capacitación efectiva</strong>, permitiendo que trabajadores y empleadores conozcan y apliquen correctamente los protocolos de seguridad.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []">Para que la formación sea realmente útil, debe ser <strong data-prosemirror-content-type="mark" data-prosemirror-mark-name="strong">gamificada, flexible y con analítica avanzada</strong>. La gamificación aumenta el compromiso y la retención del conocimiento, la flexibilidad permite que cada persona aprenda a su ritmo y la analítica avanzada facilita el seguimiento del progreso y la identificación de áreas de mejora. Estas metodologías no solo garantizan el cumplimiento de la ley, sino que fortalecen una cultura de prevención en las organizaciones.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-prosemirror-content-type="node" data-prosemirror-node-name="paragraph" data-prosemirror-node-block="true" data-pm-slice="1 1 []">Invertir en una capacitación moderna y adaptada a las necesidades actuales es fundamental para evitar accidentes y proteger la vida de los trabajadores. La seguridad no debe verse solo como una obligación, sino como un compromiso real con el bienestar laboral y el desarrollo sostenible de las empresas.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="1024" height="576" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-5304 lazyload" alt="" sizes="(max-width: 1024px) 100vw, 1024px" data-src="https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1-1024x576.png" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1-1024x576.png 1024w, https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1-300x169.png 300w, https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1-768x432.png 768w, https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1-600x338.png 600w, https://metaversotec.cl/web/wp-content/uploads/2025/03/12-NOTA-WEB-LEY-KARIN-1536x864-1.png 1536w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Importancia del Análisis de Datos</title>
+		<link>https://metaversotec.cl/web/2024/11/19/importancia-del-analisis-de-datos/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Tue, 19 Nov 2024 12:26:01 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=3881</guid>
+
+					<description><![CDATA[BLOG Recabación de datos con RV para la toma de decisiones: La digitalización está transformando la forma en que las [&#8230;]]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="3881" class="elementor elementor-3881" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Importancia del Análisis de Datos</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Recabación de datos con RV para la toma de decisiones:</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-pm-slice="1 1 []">La digitalización está transformando la forma en que las empresas gestionan su información, permitiendo la recopilación y análisis de grandes volúmenes de datos. Esto se traduce en decisiones más informadas y estrategias más efectivas para el crecimiento. Según Nataly Cornejo, de HRX Talent, el análisis de datos permite identificar patrones y tendencias que impactan en el rendimiento empresarial. Actualmente, el 60% de las empresas utilizan herramientas de análisis para innovar.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-pm-slice="1 1 []">El análisis de datos ayuda a las pymes a prever la demanda, optimizar inventarios y mejorar la satisfacción del cliente, permitiendo que las decisiones se basen en hechos concretos en lugar de intuiciones. A pesar de que las startups pueden enfrentar limitaciones debido a la falta de datos, este análisis sigue siendo útil para evaluar qué estrategias funcionan.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p data-pm-slice="1 1 []">Los beneficios del análisis incluyen la identificación de nuevas oportunidades de mercado, la optimización de procesos y la creación de dashboards para monitorear el desempeño, establecer brechas y proyectar en base a los datos históricos obtenidos. Aunque las pymes pueden encontrar desafíos para acceder a tecnologías de análisis, existen opciones accesibles que nivelan el terreno con grandes empresas. En definitiva, adoptar un enfoque «data driven» puede ser clave para el éxito en el competitivo panorama actual.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-12f9995 elementor-widget elementor-widget-image" data-id="12f9995" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="710" height="399" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-3883 lazyload" alt="" sizes="(max-width: 710px) 100vw, 710px" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/11/Sin-titulo-2.png" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2024/11/Sin-titulo-2.png 710w, https://metaversotec.cl/web/wp-content/uploads/2024/11/Sin-titulo-2-600x337.png 600w, https://metaversotec.cl/web/wp-content/uploads/2024/11/Sin-titulo-2-300x169.png 300w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Cómo mejorar las habilidades con RV</title>
+		<link>https://metaversotec.cl/web/2024/07/31/como-mejorar-las-habilidades-criticas-de-los-empleados-para-el-negocio-con-vr-y-video-de-360/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Wed, 31 Jul 2024 21:26:18 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=2768</guid>
+
+					<description><![CDATA[BLOG Desafíos para la mano de obra moderna La conversación tocó los desafíos únicos de la fuerza laboral que mantienen [&#8230;]]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="2768" class="elementor elementor-2768" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Cómo mejorar las habilidades con RV</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-54290ac elementor-widget elementor-widget-heading" data-id="54290ac" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Desafíos para la mano de obra moderna</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>La conversación tocó los desafíos únicos de la fuerza laboral que mantienen a los líderes de recursos humanos despiertos por la noche:</p>
+<ul>
+<li><strong>Rotación rápido</strong>: Con la transición de los empleados más rápido que antes, las empresas están presionadas para encontrar métodos de entrenamiento eficientes.</li>
+<li><strong>Medición de eficacia:</strong> El efecto de la formación sigue siendo un reto.</li>
+<li><strong>La fuga de cerebros:</strong> Los profesionales jubilados dejan un vacío de conocimiento al alejarse con un tesoro de percepciones.</li>
+</ul>								</div>
+				</div>
+				<div class="elementor-element elementor-element-657e76d elementor-widget elementor-widget-heading" data-id="657e76d" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">El amplio potencial de vídeo de 360o en VR</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-61e8126 elementor-widget elementor-widget-text-editor" data-id="61e8126" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>La aplicabilidad de RV con vídeo de 360° no se limita a una sola industria o caso de uso. Su potencial es vasto y transformador, ilustrado por los siguientes ejemplos.</p>
+<p><strong>Atención médica:</strong> Capacitar a los médicos para el caos en las salas de emergencia o preparar a las enfermeras para lidiar con una familia que va en contra de la voluntad de un paciente.<br /><strong>Bomberos:</strong> Experimenta estar dentro de un edificio en llamas sin el peligro real.<br /><strong>Corporativa:</strong> Gestione pesadillas de relaciones públicas, navegue en batallas en la sala de juntas o equipe a los empleados para manejar negociaciones complejas y cambios organizacionales.<br /><strong>Industria 4.0:</strong> Preparar a los trabajadores para una planta de fábrica donde las máquinas se comunican entre sí, optimizando los procesos en tiempo real.</p>								</div>
+				</div>
+				<div class="elementor-element elementor-element-9824c41 elementor-widget elementor-widget-heading" data-id="9824c41" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Entonces...</h2>				</div>
+				</div>
+				<div class="elementor-element elementor-element-a695155 elementor-widget elementor-widget-text-editor" data-id="a695155" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									<p>La realidad virtual basada en video de 360° está revolucionando la forma en que abordamos la capacitación. Al ofrecer experiencias que reflejan situaciones de la vida real, garantiza que las personas de todos los sectores no solo estén capacitadas, sino que también estén preparadas cognitivamente para enfrentar los desafíos. En una era de rápida rotación de personal y fuga de cerebros, es una inversión en el futuro que garantiza la continuidad del conocimiento y la excelencia operativa.</p>								</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-1cae32c elementor-widget elementor-widget-image" data-id="1cae32c" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="1024" height="538" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2772 lazyload" alt="" sizes="(max-width: 1024px) 100vw, 1024px" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1-1024x538.jpeg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1-1024x538.jpeg 1024w, https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1-600x315.jpeg 600w, https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1-300x158.jpeg 300w, https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1-768x403.jpeg 768w, https://metaversotec.cl/web/wp-content/uploads/2024/07/6567a4a6d70d2773e6606ed1_64f74d61fbaa85d3fd682e72_how-to-improve-business-critical-employee-skills-with-vr-and-360-video-header-1.jpeg 1200w">															</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>Plataformas virtuales</title>
+		<link>https://metaversotec.cl/web/2024/07/03/plataformas-virtuales/</link>
+		
+		<dc:creator><![CDATA[Loreen Frey]]></dc:creator>
+		<pubDate>Wed, 03 Jul 2024 09:17:59 +0000</pubDate>
+				<category><![CDATA[Sin categoría]]></category>
+		<guid isPermaLink="false">https://metaversotec.cl/web/?p=2412</guid>
+
+					<description><![CDATA[BLOG Las plataformas de enseñanza virtual ofrecen flexibilidad y acceso a recursos didácticos variados, permitiendo a los estudiantes aprender en [&#8230;]]]></description>
+										<content:encoded><![CDATA[		<div data-elementor-type="wp-post" data-elementor-id="2412" class="elementor elementor-2412" data-elementor-post-type="post">
+				<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-66c517b e-flex e-con-boxed e-con e-parent" data-id="66c517b" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-29919eb e-con-full e-flex e-con e-child" data-id="29919eb" data-element_type="container">
+				<div class="elementor-element elementor-element-4ec87a0 elementor-widget elementor-widget-heading" data-id="4ec87a0" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h1 class="elementor-heading-title elementor-size-default">BLOG</h1>				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-423a899 e-flex e-con-boxed e-con e-parent" data-id="423a899" data-element_type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b59ebc6 e-con-full e-flex e-con e-child" data-id="b59ebc6" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-166e9bc e-con-full e-flex e-con e-child" data-id="166e9bc" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-2708f50 e-con-full e-flex e-con e-child" data-id="2708f50" data-element_type="container">
+				<div class="elementor-element elementor-element-07d7a26 elementor-widget elementor-widget-heading" data-id="07d7a26" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+					<h2 class="elementor-heading-title elementor-size-default">Plataformas virtuales</h2>				</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-ef564d7 e-flex e-con-boxed e-con e-parent" data-id="ef564d7" data-element_type="container">
+					<div class="e-con-inner">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-6391be4 e-con-full e-flex e-con e-child" data-id="6391be4" data-element_type="container">
+				<div class="elementor-element elementor-element-1cae32c elementor-widget elementor-widget-image" data-id="1cae32c" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="600" height="600" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2378 lazyload" alt="" sizes="(max-width: 600px) 100vw, 600px" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/blog02.jpg" data-srcset="https://metaversotec.cl/web/wp-content/uploads/2024/07/blog02.jpg 600w, https://metaversotec.cl/web/wp-content/uploads/2024/07/blog02-300x300.jpg 300w, https://metaversotec.cl/web/wp-content/uploads/2024/07/blog02-100x100.jpg 100w, https://metaversotec.cl/web/wp-content/uploads/2024/07/blog02-150x150.jpg 150w">															</div>
+				</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-b106186 e-con-full e-flex e-con e-child" data-id="b106186" data-element_type="container">
+				<div class="elementor-element elementor-element-5d8c232a elementor-widget elementor-widget-text-editor" data-id="5d8c232a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+									
+<p>Las plataformas de enseñanza virtual ofrecen flexibilidad y acceso a recursos didácticos variados, permitiendo a los estudiantes aprender en cualquier momento y lugar. Los profesores también pueden crear y compartir contenido educativo, monitorear el progreso de los estudiantes y fomentar la colaboración. En resumen, estas plataformas han democratizado la educación al permitir el acceso a la información y al aprendizaje a un mayor número de personas.</p>
+								</div>
+				</div>
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-96502c3 e-con-full e-flex e-con e-child" data-id="96502c3" data-element_type="container">
+		<div data-particle_enable="false" data-particle-mobile-disabled="false" class="elementor-element elementor-element-d39304b e-grid e-con-full e-con e-child" data-id="d39304b" data-element_type="container">
+				<div class="elementor-element elementor-element-919f466 elementor-widget elementor-widget-image" data-id="919f466" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="230" height="196" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2416 lazyload" alt="" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/imgcurso_idioma01.jpg">															</div>
+				</div>
+				<div class="elementor-element elementor-element-e88b644 elementor-widget elementor-widget-image" data-id="e88b644" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="230" height="196" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2417 lazyload" alt="" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/imgcurso_idioma02.jpg">															</div>
+				</div>
+				<div class="elementor-element elementor-element-17295e7 elementor-widget elementor-widget-image" data-id="17295e7" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="230" height="196" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2418 lazyload" alt="" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/imgcurso_idioma03.jpg">															</div>
+				</div>
+				<div class="elementor-element elementor-element-50833bb elementor-widget elementor-widget-image" data-id="50833bb" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+															<img loading="lazy" decoding="async" width="230" height="196" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="attachment-large size-large wp-image-2415 lazyload" alt="" data-src="https://metaversotec.cl/web/wp-content/uploads/2024/07/imgcurso_idioma04.jpg">															</div>
+				</div>
+				</div>
+				</div>
+				</div>
+					</div>
+				</div>
+				</div>
+		]]></content:encoded>
+					
+		
+		
+			</item>
+	</channel>
+</rss>

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "tbk/widget",
+  "title": "TheBooking widget",
+  "description": "Displays the booking widget",
+  "keywords": [
+    "tbk-booking",
+    "thebooking",
+    "teambooking",
+    "calendar",
+    "reservations"
+  ],
+  "category": "tbk-bookings",
+  "textdomain": "team-booking",
+  "version": "1.0.0",
+  "supports": {
+    "html": false,
+    "reusable": false
+  },
+  "editorScript": "file:./block.js"
+}

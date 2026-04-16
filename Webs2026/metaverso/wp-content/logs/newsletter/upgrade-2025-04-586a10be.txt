@@ -1,0 +1,38 @@
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,0 MB/512 MB - [cron] > Start upgrade from 8.4.7
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_emails`] => Created table `wp_newsletter_emails`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_sent`] => Created table `wp_newsletter_sent`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter`] => Created table `wp_newsletter`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_user_logs`] => Created table `wp_newsletter_user_logs`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_user_meta`] => Created table `wp_newsletter_user_meta`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_stats`] => Created table `wp_newsletter_stats`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Array
+(
+    [`wp_newsletter_logs`] => Created table `wp_newsletter_logs`
+)
+
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > Backing up options of 8.4.7
+14-04-2025 09:42:54 - INFO  - 8.7.7 - 209,7 MB/512 MB - [cron] > End

@@ -1,0 +1,5 @@
+01-14-2025 @ 05:27:46 -: Request end with error - message: No se ha facilitado una URL válida. 
+ 01-20-2025 @ 10:08:49 -: Request end with error - message: cURL error 28: Resolving timed out after 5002 milliseconds 
+ 01-20-2025 @ 10:08:52 -: Request end with error - message: cURL error 6: Could not resolve host: aula.metaversotec.cl 
+ 01-20-2025 @ 10:08:53 -: Request end with error - message: cURL error 6: Could not resolve host: aula.metaversotec.cl 
+ 

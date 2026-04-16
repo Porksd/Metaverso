@@ -356,14 +356,9 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             // Si intentamos completar pero falto la encuesta, guardamos como in_progress + scores temporales
             const finalStatus = (status === 'completed' && hasPendingSurvey) ? 'in_progress' : status;
 
-            const previousBestScore = typeof enrollment.best_score === 'number' ? enrollment.best_score : null;
-            const bestScoreToPersist = previousBestScore !== null
-                ? Math.max(previousBestScore, totalScore)
-                : totalScore;
-
             const updatePayload: any = { 
                 status: finalStatus, 
-                best_score: bestScoreToPersist,
+                best_score: totalScore,
                 quiz_score: quizScore,
                 scorm_score: scormScore,
                 completed_at: finalStatus === 'completed' ? new Date().toISOString() : enrollment.completed_at
@@ -392,14 +387,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 .from('enrollments')
                 .update(updatePayload)
                 .eq('id', enrollment.id);
-            console.log("CoursePlayer: Enrollment status updated with scores:", {
-                status: finalStatus,
-                totalScore,
-                bestScoreToPersist,
-                quizScore,
-                scormScore,
-                hasPendingSurvey
-            });
+            console.log("CoursePlayer: Enrollment status updated with scores:", { status: finalStatus, totalScore, quizScore, scormScore, hasPendingSurvey });
         } catch (err) {
             console.error("Error updating enrollment status:", err);
         }
@@ -544,14 +532,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             if (item.type === 'survey') {
                 const isMandatory = item.content?.is_mandatory;
                 if (!isMandatory) return false;
-                if (currentModule.type === 'evaluation' && !evaluationPassed) return false;
-                if (currentModule.type === 'evaluation' && !isPostEvaluationItemUnlocked(item)) return false;
-                return !itemsCompleted.has(item.id);
-            }
-
-            if (item.type === 'signature') {
-                if (currentModule.type === 'evaluation' && !evaluationPassed) return false;
-                if (currentModule.type === 'evaluation' && !isPostEvaluationItemUnlocked(item)) return false;
                 return !itemsCompleted.has(item.id);
             }
 
@@ -655,22 +635,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     }
 
     const isEvaluation = currentModule.type === 'evaluation';
-    const postEvaluationItems = isEvaluation
-        ? (currentModule.items || [])
-            .filter((item: ModuleItem) => item.type === 'survey' || item.type === 'signature')
-            .sort((a: ModuleItem, b: ModuleItem) => (a.order_index ?? 0) - (b.order_index ?? 0))
-        : [];
-    const postEvaluationItemIds = postEvaluationItems.map((item: ModuleItem) => item.id);
-    const isPostEvaluationItemUnlocked = (item: ModuleItem) => {
-        if (!isEvaluation || (item.type !== 'survey' && item.type !== 'signature')) return true;
-        if (!evaluationPassed) return false;
-
-        const currentIdx = postEvaluationItemIds.indexOf(item.id);
-        if (currentIdx <= 0) return true;
-
-        const previousItemIds = postEvaluationItemIds.slice(0, currentIdx);
-        return previousItemIds.every((prevId: string) => itemsCompleted.has(prevId));
-    };
+    const surveyEnabled = approved || evaluationPassed;
 
     // Helper to detect light backgrounds (very basic check)
     const isLightBg = currentModule.settings?.bg_color && 
@@ -682,7 +647,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
                 {/* Visual Stage / Diapositiva */}
                 <div 
-                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-40 md:pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
+                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
                     style={{ backgroundColor: currentModule.settings?.bg_color || '#0a0a0a' }}
                 >
                     <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 w-full">
@@ -846,45 +811,33 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     )}
 
                                     {/* Survey */}
-                                    {item.type === 'survey' && (
+                                    {item.type === 'survey' && surveyEnabled && (
                                         <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden mt-6">
-                                            {!evaluationPassed ? (
-                                                <div className="mx-6 my-6 p-4 bg-white/5 border border-white/10 rounded-xl">
-                                                    <p className="text-white/60 text-xs md:text-sm font-bold text-center">Debes aprobar la evaluación para desbloquear esta encuesta.</p>
+                                            {evaluationPassed && !surveyDone && (
+                                                <div className="mx-6 mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                                                    <p className="text-yellow-500 text-xs md:text-sm font-bold text-center">{t.survey_pending_after_exam}</p>
                                                 </div>
-                                            ) : !isPostEvaluationItemUnlocked(item) ? (
-                                                <div className="mx-6 my-6 p-4 bg-white/5 border border-white/10 rounded-xl">
-                                                    <p className="text-white/60 text-xs md:text-sm font-bold text-center">Completa el paso anterior para continuar.</p>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {evaluationPassed && !surveyDone && (
-                                                        <div className="mx-6 mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                                                            <p className="text-yellow-500 text-xs md:text-sm font-bold text-center">{t.survey_pending_after_exam}</p>
-                                                        </div>
-                                                    )}
-                                                    <SurveyEngine 
-                                                        surveyId={item.content?.survey_id} 
-                                                        studentId={studentId}
-                                                        enrollmentId={enrollment?.id}
-                                                        onComplete={() => {
-                                                            handleItemCompletion(item.id);
-                                                            setSurveyDone(true);
-                                                            // Forzar guardado inmediato si ya estaba aprobado
-                                                            // IMPORTANTE: pasar surveyJustCompleted=true para que no vuelva a detectar encuesta pendiente
-                                                            if (approved || evaluationPassed) {
-                                                                let qw = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
-                                                                let sw = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
-                                                                const hasScorm = currentModule?.items?.some((it: any) => it.type === 'scorm');
-                                                                if (!hasScorm && sw > 0) { qw = 1; sw = 0; }
-                                                                const total = ((quizScore || 0) * qw) + (scormScore * sw);
-                                                                updateEnrollmentStatus('completed', Math.round(total), true);
-                                                            }
-                                                        }}
-                                                        language={language as any}
-                                                    />
-                                                </>
                                             )}
+                                            <SurveyEngine 
+                                                surveyId={item.content?.survey_id} 
+                                                studentId={studentId}
+                                                enrollmentId={enrollment?.id}
+                                                onComplete={() => {
+                                                    handleItemCompletion(item.id);
+                                                    setSurveyDone(true);
+                                                    // Forzar guardado inmediato si ya estaba aprobado
+                                                    // IMPORTANTE: pasar surveyJustCompleted=true para que no vuelva a detectar encuesta pendiente
+                                                    if (approved || evaluationPassed) {
+                                                        let qw = (currentModule?.settings?.quiz_percentage ?? enrollment?.courses?.config?.weight_quiz ?? 80) / 100;
+                                                        let sw = (currentModule?.settings?.scorm_percentage ?? enrollment?.courses?.config?.weight_scorm ?? 20) / 100;
+                                                        const hasScorm = currentModule?.items?.some((it: any) => it.type === 'scorm');
+                                                        if (!hasScorm && sw > 0) { qw = 1; sw = 0; }
+                                                        const total = ((quizScore || 0) * qw) + (scormScore * sw);
+                                                        updateEnrollmentStatus('completed', Math.round(total), true);
+                                                    }
+                                                }}
+                                                language={language as any}
+                                            />
                                         </div>
                                     )}
 
@@ -893,16 +846,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                                             <h3 className="text-xl font-bold mb-2">{t.signature_title}</h3>
                                             <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>{t.signature_desc}</p>
-
-                                            {!evaluationPassed ? (
-                                                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-                                                    <p className="text-white/60 font-bold">Debes aprobar la evaluación para desbloquear la firma.</p>
-                                                </div>
-                                            ) : !isPostEvaluationItemUnlocked(item) ? (
-                                                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
-                                                    <p className="text-white/60 font-bold">Completa el paso anterior para continuar.</p>
-                                                </div>
-                                            ) : itemsCompleted.has(item.id) ? (
+                                            
+                                            {itemsCompleted.has(item.id) ? (
                                                 <div className="bg-brand/10 p-6 rounded-xl border border-brand/20 flex flex-col items-center gap-3">
                                                     <CheckCircle2 className="w-12 h-12 text-brand" />
                                                     <p className="text-brand font-bold">{t.signature_success}</p>
@@ -955,7 +900,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             </div>
 
             {/* Footer de Navegación Profesional */}
-            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl sticky bottom-0">
+            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl relative">
                 {/* Slim Progress Bar on top of footer */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
                     <motion.div
@@ -966,17 +911,17 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     />
                 </div>
 
-                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 sm:py-5 px-3 sm:px-4 md:px-8">
+                <div className="max-w-4xl mx-auto flex items-center justify-between py-5 px-4 md:px-8">
                     {/* Info Módulo */}
-                    <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-6 w-full sm:w-auto">
+                    <div className="flex items-center gap-6">
                         <div className="flex flex-col">
                             <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.current_module}</span>
-                            <span className="text-sm font-bold text-white/90 truncate max-w-[170px] sm:max-w-[220px]">
+                            <span className="text-sm font-bold text-white/90 truncate max-w-[200px]">
                                 {activeModuleIndex + 1}. {currentModule?.title}
                             </span>
                         </div>
-                        <div className="h-8 w-px bg-white/10 hidden md:block"></div>
-                        <div className="flex flex-col hidden md:flex">
+                        <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
+                        <div className="flex flex-col hidden sm:flex">
                             <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.progress}</span>
                             <span className="text-sm font-mono text-brand font-bold">
                                 {activeModuleIndex + 1}/{modules.length}
@@ -985,11 +930,11 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     </div>
 
                     {/* Botones de Navegación */}
-                    <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={handlePrevious}
                             disabled={activeModuleIndex === 0}
-                            className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
                         >
                             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             <span>{t.previous}</span>
@@ -1003,7 +948,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 cursor: (mode !== 'preview' && !moduleCompleted) ? 'not-allowed' : 'pointer',
                                 backgroundColor: (mode !== 'preview' && !moduleCompleted) ? '#333' : '#31D22D'
                             }}
-                            className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
+                            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
                         >
                             <span>{activeModuleIndex === modules.length - 1 ? t.finish : t.next}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

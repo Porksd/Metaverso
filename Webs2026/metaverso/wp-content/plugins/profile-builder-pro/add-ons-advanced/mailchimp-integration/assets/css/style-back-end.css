@@ -1,0 +1,43 @@
+.wppb-mci-list-settings {
+    display: none;
+    background: #fff;
+}
+
+body.profile-builder_page_profile-builder-mailchimp .cozmoslabs-form-subsection-wrapper {
+    margin-bottom: 20px;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #wppb-mci-list-table {
+    margin-bottom: 30px;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #wppb-mci-list-table tfoot {
+    display: none;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #the-list .wppb-mci-list-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #the-list .wppb-mci-list-name p {
+    font-size: 15px;
+    line-height: 25px;
+    color: #1E1E1E;
+    margin: 0 !important;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #the-list .cozmoslabs-form-subsection-wrapper {
+    border: none;
+    margin-top: 0;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #the-list .cozmoslabs-form-subsection-wrapper:not(:last-of-type) {
+    border-bottom: 1px solid #CCCCCC;
+}
+
+body.profile-builder_page_profile-builder-mailchimp #the-list .button-secondary {
+    display: inline-flex !important;
+    margin: 20px;
+}

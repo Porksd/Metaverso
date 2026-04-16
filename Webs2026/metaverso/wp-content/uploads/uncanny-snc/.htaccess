@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /web/
+RewriteRule ^index\.php$ - [L]
+RewriteRule ^(?:|(?:\/|\\))([0-9]{1,})((?:.*(?:\/|\\))|.*\.(?:(?:html|htm)(?:|.*)))$ /web/index.php?tincanny_content_id=$1&tincanny_file_path=$2 [QSA,L,NE]
+</IfModule>

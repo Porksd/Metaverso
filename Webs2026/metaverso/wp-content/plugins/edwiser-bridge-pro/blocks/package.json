@@ -1,0 +1,21 @@
+{
+  "name": "edwiser-bridge-pro-blocks",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@wordpress/api-fetch": "^7.20.0",
+    "@wordpress/scripts": "^30.13.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.17.2",
+    "@wordpress/server-side-render": "^5.23.0"
+  }
+}
