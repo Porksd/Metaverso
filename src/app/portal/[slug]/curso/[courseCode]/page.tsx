@@ -584,56 +584,6 @@ export default function CourseAuthPage() {
                                         </div>
                                     </div>
 
-                                    {/* Empresa autocomplete */}
-                                    {isFieldVisible('company_collab') && (
-                                    <div className="space-y-1 relative empresa-autocomplete">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}</label>
-                                        <div className="relative">
-                                            <input 
-                                                type="text" 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm pr-10"
-                                                placeholder={t.empresaPh}
-                                                value={empresaInput} 
-                                                onChange={e => {
-                                                    setEmpresaInput(e.target.value);
-                                                    setEmpresaDropdownOpen(true);
-                                                }}
-                                                onFocus={() => setEmpresaDropdownOpen(true)}
-                                            />
-                                            <Search className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                        </div>
-                                        {empresaDropdownOpen && empresaInput.length > 0 && (
-                                            <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl max-h-48 overflow-y-auto shadow-xl">
-                                                {companiesList
-                                                    .filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase()))
-                                                    .map(c => (
-                                                        <button
-                                                            key={c.id}
-                                                            type="button"
-                                                            className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-colors first:rounded-t-xl last:rounded-b-xl"
-                                                            onClick={() => {
-                                                                setEmpresaInput(c.name_es);
-                                                                setEmpresaDropdownOpen(false);
-                                                            }}
-                                                        >
-                                                            <Building2 className="w-3.5 h-3.5 inline mr-2 text-white/40" />{c.name_es}
-                                                        </button>
-                                                    ))}
-                                                {companiesList.filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase())).length === 0 && (
-                                                    <button
-                                                        type="button"
-                                                        className="w-full text-left px-4 py-2.5 text-sm text-brand hover:bg-brand/10 transition-colors rounded-xl"
-                                                        onClick={() => setEmpresaDropdownOpen(false)}
-                                                    >
-                                                        <span className="text-white/40">+</span> {lang === 'ht' ? 'Ajoute' : 'Agregar'}: <span className="font-bold">{empresaInput}</span>
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                    )}
-                                    
-                                    {/* ID Type + Cargo row */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <div className="flex justify-between items-center mb-1">
@@ -678,76 +628,7 @@ export default function CourseAuthPage() {
                                                 />
                                             )}
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}</label>
-                                            {isFieldVisible('job_position') ? (
-                                                <div className="relative">
-                                                    <select 
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
-                                                        style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
-                                                        value={regData.role_id} 
-                                                        onChange={e => {
-                                                            const roleId = e.target.value;
-                                                            const role = companyRoles.find(r => r.id === roleId);
-                                                            setRegData({...regData, role_id: roleId, position: role?.name || ''});
-                                                            const desc = lang === 'ht' 
-                                                                ? (role?.description_ht || role?.description) 
-                                                                : role?.description;
-                                                            setSelectedRoleDesc(desc || null);
-                                                            setHasReadJobInfo(false); // Reset acceptance when role changes
-                                                            if (desc) {
-                                                                setShowJobInfoModal(true); // Open modal automatically when role has description
-                                                            }
-                                                        }}
-                                                    >
-                                                        <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
-                                                        {companyRoles.map(role => (
-                                                            <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
-                                                                {lang === 'ht' ? (role.name_ht || role.name) : role.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                                </div>
-                                            ) : (
-                                                <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
-                                                    {lang === 'ht' ? 'Otomatik asiyen' : 'Asignado Automáticamente'}
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
-
-                                    {/* Tooltip trigger button instead of full width tooltip */}
-                                    {selectedRoleDesc && (
-                                        <button 
-                                            type="button"
-                                            onClick={() => setShowJobInfoModal(true)}
-                                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
-                                                hasReadJobInfo 
-                                                    ? 'bg-brand/10 border-brand/30 text-brand' 
-                                                    : 'bg-orange-500/10 border-orange-500/30 text-orange-400 animate-pulse'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <Info className="w-4 h-4" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">
-                                                    {lang === 'ht' ? 'Enfòmasyon sou Risk' : 'Información de Riesgos'}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold">
-                                                    {hasReadJobInfo 
-                                                        ? (lang === 'ht' ? 'AKSEPTE' : 'ACEPTADO') 
-                                                        : (lang === 'ht' ? 'LI KOUNYE A' : 'LEER AHORA')}
-                                                </span>
-                                                {hasReadJobInfo ? (
-                                                    <CheckCircle2 className="w-4 h-4" />
-                                                ) : (
-                                                    <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
-                                                )}
-                                            </div>
-                                        </button>
-                                    )}
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
@@ -808,6 +689,126 @@ export default function CourseAuthPage() {
                                             )}
                                         </div>
                                     </div>
+
+                                    {/* Empresa autocomplete */}
+                                    {isFieldVisible('company_collab') && (
+                                    <div className="space-y-1 relative empresa-autocomplete">
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="text" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm pr-10"
+                                                placeholder={t.empresaPh}
+                                                value={empresaInput} 
+                                                onChange={e => {
+                                                    setEmpresaInput(e.target.value);
+                                                    setEmpresaDropdownOpen(true);
+                                                }}
+                                                onFocus={() => setEmpresaDropdownOpen(true)}
+                                            />
+                                            <Search className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                        </div>
+                                        {empresaDropdownOpen && empresaInput.length > 0 && (
+                                            <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl max-h-48 overflow-y-auto shadow-xl">
+                                                {companiesList
+                                                    .filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase()))
+                                                    .map(c => (
+                                                        <button
+                                                            key={c.id}
+                                                            type="button"
+                                                            className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-colors first:rounded-t-xl last:rounded-b-xl"
+                                                            onClick={() => {
+                                                                setEmpresaInput(c.name_es);
+                                                                setEmpresaDropdownOpen(false);
+                                                            }}
+                                                        >
+                                                            <Building2 className="w-3.5 h-3.5 inline mr-2 text-white/40" />{c.name_es}
+                                                        </button>
+                                                    ))}
+                                                {companiesList.filter(c => c.name_es?.toLowerCase().includes(empresaInput.toLowerCase())).length === 0 && (
+                                                    <button
+                                                        type="button"
+                                                        className="w-full text-left px-4 py-2.5 text-sm text-brand hover:bg-brand/10 transition-colors rounded-xl"
+                                                        onClick={() => setEmpresaDropdownOpen(false)}
+                                                    >
+                                                        <span className="text-white/40">+</span> {lang === 'ht' ? 'Ajoute' : 'Agregar'}: <span className="font-bold">{empresaInput}</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}</label>
+                                            {isFieldVisible('job_position') ? (
+                                                <div className="relative">
+                                                    <select 
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm appearance-none pr-10" 
+                                                        style={{ color: regData.role_id ? '#FFFFFF' : '#9CA3AF' }}
+                                                        value={regData.role_id} 
+                                                        onChange={e => {
+                                                            const roleId = e.target.value;
+                                                            const role = companyRoles.find(r => r.id === roleId);
+                                                            setRegData({...regData, role_id: roleId, position: role?.name || ''});
+                                                            const desc = lang === 'ht' 
+                                                                ? (role?.description_ht || role?.description) 
+                                                                : role?.description;
+                                                            setSelectedRoleDesc(desc || null);
+                                                            setHasReadJobInfo(false);
+                                                            if (desc) {
+                                                                setShowJobInfoModal(true);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="" style={{ background: '#1a1a1a', color: '#9CA3AF' }}>{t.select}</option>
+                                                        {companyRoles.map(role => (
+                                                            <option key={role.id} value={role.id} style={{ background: '#1a1a1a', color: '#FFFFFF' }}>
+                                                                {lang === 'ht' ? (role.name_ht || role.name) : role.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="w-4 h-4 text-white/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                                </div>
+                                            ) : (
+                                                <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">
+                                                    {lang === 'ht' ? 'Otomatik asiyen' : 'Asignado Automáticamente'}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {selectedRoleDesc && (
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowJobInfoModal(true)}
+                                            className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                                hasReadJobInfo 
+                                                    ? 'bg-brand/10 border-brand/30 text-brand' 
+                                                    : 'bg-orange-500/10 border-orange-500/30 text-orange-400 animate-pulse'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                                    {lang === 'ht' ? 'Enfòmasyon sou Risk' : 'Información de Riesgos'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold">
+                                                    {hasReadJobInfo 
+                                                        ? (lang === 'ht' ? 'AKSEPTE' : 'ACEPTADO') 
+                                                        : (lang === 'ht' ? 'LI KOUNYE A' : 'LEER AHORA')}
+                                                </span>
+                                                {hasReadJobInfo ? (
+                                                    <CheckCircle2 className="w-4 h-4" />
+                                                ) : (
+                                                    <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                                                )}
+                                            </div>
+                                        </button>
+                                    )}
 
                                     <button onClick={() => {
                                         const hasId = idType === 'rut' ? regData.rut : regData.passport;
