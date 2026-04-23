@@ -401,7 +401,7 @@ export default function CoursesPage() {
                                 onClick={confirmExitCourse}
                                 className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white hover:text-brand transition-all border border-white/10 flex items-center gap-2 group"
                             >
-                                <span className="text-xs font-bold uppercase tracking-widest opacity-100 [@media(max-height:430px)]:opacity-100 [@media(max-height:430px)]:group-hover:opacity-100 transition-opacity">{t.exit_course}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest lg:hidden">{t.exit_course}</span>
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
