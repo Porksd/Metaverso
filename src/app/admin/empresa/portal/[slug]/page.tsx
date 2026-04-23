@@ -48,7 +48,6 @@ export default function EmpresaPortalLogin() {
             .not('slug', 'is', null);
 
         if (fallbackError) throw fallbackError;
-
         const fallbackCompanies = (fallbackData ?? []) as unknown as CompanyInfo[];
         return fallbackCompanies.find((company) => company.slug?.toString().trim().toLowerCase() === slug) ?? null;
     };
