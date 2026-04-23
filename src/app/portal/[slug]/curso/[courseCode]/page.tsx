@@ -553,39 +553,6 @@ export default function CourseAuthPage() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
-                                            <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
-                                                value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
-                                            {course?.use_generic_password ? (
-                                                <div className="relative">
-                                                    <input 
-                                                        type="password"
-                                                        readOnly
-                                                        value={regData.password}
-                                                        className="w-full bg-white/5 border border-brand/20 rounded-xl px-4 py-3 text-white/40 text-sm cursor-not-allowed"
-                                                    />
-                                                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand/40" />
-                                                </div>
-                                            ) : (
-                                            <input 
-                                                type="password" 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
-                                                required 
-                                                minLength={6}
-                                                title={t.passMin}
-                                                pattern=".{6,}"
-                                                onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
-                                                onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
-                                                value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="space-y-1">
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
                                                     {idType === 'rut' ? t.rut : t.passport}
@@ -626,6 +593,39 @@ export default function CourseAuthPage() {
                                                     value={regData.passport} 
                                                     onChange={e => setRegData({...regData, passport: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')})} 
                                                 />
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
+                                            <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
+                                                value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
+                                            {course?.use_generic_password ? (
+                                                <div className="relative">
+                                                    <input 
+                                                        type="password"
+                                                        readOnly
+                                                        value={regData.password}
+                                                        className="w-full bg-white/5 border border-brand/20 rounded-xl px-4 py-3 text-white/40 text-sm cursor-not-allowed"
+                                                    />
+                                                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand/40" />
+                                                </div>
+                                            ) : (
+                                            <input 
+                                                type="password" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" 
+                                                required 
+                                                minLength={6}
+                                                title={t.passMin}
+                                                pattern=".{6,}"
+                                                onInvalid={(e) => (e.target as HTMLInputElement).setCustomValidity(t.passMin)}
+                                                onInput={(e) => (e.target as HTMLInputElement).setCustomValidity('')}
+                                                value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})} />
                                             )}
                                         </div>
                                     </div>
