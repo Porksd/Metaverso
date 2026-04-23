@@ -71,7 +71,7 @@ export default function CourseAuthPage() {
     const [regStep, setRegStep] = useState(1);
     const [regData, setRegData] = useState({
         first_name: '', last_name: '', email: '', password: '', 
-        rut: '', passport: '', gender: '', age: '', position: '', role_id: '', language: 'es'
+        rut: '', passport: '', gender: '', age: '18', position: '', role_id: '', language: 'es'
     });
     const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
 
@@ -776,40 +776,30 @@ export default function CourseAuthPage() {
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}</label>
                                             {isFieldVisible('age') ? (
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        type="button"
-                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg"
-                                                        onClick={() => {
-                                                            const parsed = parseInt(regData.age || '18', 10);
-                                                            const current = Number.isNaN(parsed) ? 18 : parsed;
-                                                            const next = Math.max(18, current - 1);
-                                                            setRegData({ ...regData, age: String(next) });
-                                                        }}
-                                                        aria-label="Disminuir edad"
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <input
-                                                        type="text"
-                                                        readOnly
-                                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm text-center"
-                                                        value={regData.age || '18'}
-                                                        aria-label="Edad"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg"
-                                                        onClick={() => {
-                                                            const parsed = parseInt(regData.age || '18', 10);
-                                                            const current = Number.isNaN(parsed) ? 18 : parsed;
-                                                            const next = Math.min(100, current + 1);
-                                                            setRegData({ ...regData, age: String(next) });
-                                                        }}
-                                                        aria-label="Aumentar edad"
-                                                    >
-                                                        +
-                                                    </button>
+                                                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                                                    <span className="flex-1 px-4 py-3 text-white text-sm text-center" aria-label="Edad">
+                                                        {regData.age}
+                                                    </span>
+                                                    <div className="flex border-l border-white/10">
+                                                        <button
+                                                            type="button"
+                                                            className="w-10 h-10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg transition-colors"
+                                                            onClick={() => {
+                                                                const current = parseInt(regData.age, 10);
+                                                                setRegData({ ...regData, age: String(Math.max(18, current - 1)) });
+                                                            }}
+                                                            aria-label="Disminuir edad"
+                                                        >−</button>
+                                                        <button
+                                                            type="button"
+                                                            className="w-10 h-10 text-white/70 hover:text-white hover:bg-white/10 font-black text-lg transition-colors border-l border-white/10"
+                                                            onClick={() => {
+                                                                const current = parseInt(regData.age, 10);
+                                                                setRegData({ ...regData, age: String(Math.min(100, current + 1)) });
+                                                            }}
+                                                            aria-label="Aumentar edad"
+                                                        >+</button>
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="bg-white/5 border border-dashed border-white/10 rounded-xl px-4 py-3 text-sm text-white/20 italic">

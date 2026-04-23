@@ -296,13 +296,12 @@ export default function MetaversoAdmin() {
     const saveCompanyCourses = async () => {
         if (!selectedCompanyId) return alert('Selecciona primero una empresa');
 
-        // Validación de cupos proyectada
+        // Los cupos de empresa corresponden a alumnos únicos, no a matrículas por curso.
         const company = companies.find(c => c.id === selectedCompanyId);
         const studentCount = participants.filter(p => (p.companies?.id === selectedCompanyId || p.client_id === selectedCompanyId)).length;
-        const estimatedEnrollments = selectedCourseIds.length * studentCount;
 
-        if (company && estimatedEnrollments > company.total_quotas) {
-            alert(`Error: Se proyectan ${estimatedEnrollments} matrículas (${selectedCourseIds.length} cursos x ${studentCount} alumnos), pero la empresa solo dispone de ${company.total_quotas} cupos totales.`);
+        if (company && studentCount > company.total_quotas) {
+            alert(`Error: La empresa tiene ${studentCount} alumnos y solo dispone de ${company.total_quotas} cupos totales.`);
             return;
         }
 

@@ -647,34 +647,34 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
                 {/* Visual Stage / Diapositiva */}
                 <div 
-                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-32 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
+                    className={`max-w-5xl mx-auto min-h-full shadow-2xl transition-all duration-500 border-x border-white/5 pb-20 md:pb-32 [@media(max-height:430px)]:pb-16 ${isLightBg ? 'text-slate-900' : 'text-white'}`}
                     style={{ backgroundColor: currentModule.settings?.bg_color || '#0a0a0a' }}
                 >
-                    <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 w-full">
+                    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-8 py-4 md:py-10 [@media(max-height:430px)]:py-3 w-full">
 
                         {/* Header */}
-                        <header className={`mb-8 pb-4 border-b ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
-                            <div className="flex justify-between items-center gap-4">
-                                <div>
+                        <header className={`mb-5 md:mb-8 pb-3 md:pb-4 border-b ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
+                            <div className="flex max-[430px]:flex-col max-[430px]:items-start justify-between items-center gap-3 md:gap-4">
+                                <div className="min-w-0">
                                     <span className="text-brand text-xs font-bold">{t.slide} {activeModuleIndex + 1} {t.of} {modules.length}</span>
-                                    <h1 className={`text-2xl md:text-3xl font-black mt-1 ${isLightBg ? 'text-slate-900' : 'text-white'}`}>
+                                    <h1 className={`text-lg sm:text-2xl md:text-3xl [@media(max-height:430px)]:text-lg font-black mt-1 leading-tight ${isLightBg ? 'text-slate-900' : 'text-white'}`}>
                                         {(language === 'ht' && currentModule.title_ht) ? currentModule.title_ht : currentModule.title}
                                     </h1>
                                 </div>
                                 
                                 {/* Biblioteca */}
                                 {currentModule.settings?.extras?.length > 0 && (
-                                    <div className="relative">
+                                    <div className="relative max-[430px]:w-full shrink-0">
                                         <button
                                             onClick={() => setExtrasOpen((prev) => !prev)}
-                                            className={`px-4 py-2 rounded-xl border transition-all flex items-center gap-2 text-sm font-bold ${isLightBg ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-brand/10 border-brand/20 text-white hover:bg-brand/20'}`}
+                                            className={`px-3 md:px-4 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-bold max-[430px]:w-full ${isLightBg ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-brand/10 border-brand/20 text-white hover:bg-brand/20'}`}
                                         >
                                             <Library className="w-4 h-4" />
                                             <span>{t.material} ({currentModule.settings.extras.length})</span>
                                         </button>
                                         
                                         <div
-                                            className={`absolute right-0 top-full mt-2 w-72 bg-[#111] border border-white/10 rounded-xl shadow-2xl transition-all z-50 p-3 text-white ${extrasOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                                            className={`absolute right-0 top-full mt-2 w-72 max-[430px]:left-0 max-[430px]:right-auto max-[430px]:w-full bg-[#111] border border-white/10 rounded-xl shadow-2xl transition-all z-50 p-3 text-white ${extrasOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                                         >
                                             {currentModule.settings.extras.map((extra: any, idx: number) => (
                                                 <a 
@@ -696,7 +696,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         </header>
 
                         {/* CONTENIDO DEL MÓDULO */}
-                        <div className="space-y-12">
+                        <div className="space-y-6 md:space-y-12 [@media(max-height:430px)]:space-y-5">
                             {currentModule.items && currentModule.items.map((item: ModuleItem) => (
                                 <div key={item.id}>
                                     {/* Título/Header */}
@@ -715,7 +715,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Texto */}
                                     {item.type === 'text' && !item.content?.isHeader && (
-                                        <div className={`prose max-w-none p-6 rounded-xl border ${isLightBg ? 'prose-slate bg-black/5 border-black/10' : 'prose-invert bg-white/5 border-white/10'}`}>
+                                        <div className={`prose max-w-none p-4 sm:p-6 rounded-xl border ${isLightBg ? 'prose-slate bg-black/5 border-black/10' : 'prose-invert bg-white/5 border-white/10'}`}>
                                             <div dangerouslySetInnerHTML={{ __html: (language === 'ht' && (item.content?.html_ht || item.content?.text_ht)) ? (item.content?.html_ht || item.content?.text_ht) : (item.content?.html || item.content?.text || '') }} />
                                         </div>
                                     )}
@@ -729,7 +729,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Video */}
                                     {item.type === 'video' && (
-                                        <div className={`rounded-xl overflow-hidden bg-black border ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
+                                        <div className={`rounded-lg sm:rounded-xl overflow-hidden bg-black border ${isLightBg ? 'border-black/10' : 'border-white/10'}`}>
                                             <VideoPlayer
                                                 ref={(el) => { if (el) videoRefs.current.set(item.id, el); }}
                                                 src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url}
@@ -740,7 +740,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Audio */}
                                     {item.type === 'audio' && (
-                                        <div className={`p-6 rounded-xl flex items-center gap-4 border ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                        <div className={`p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 border ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                                             <div className="p-3 bg-brand rounded-lg">
                                                 <Volume2 className="w-6 h-6 text-black" />
                                             </div>
@@ -757,7 +757,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     {/* PDF */}
                                     {item.type === 'pdf' && (
                                         <div className="space-y-4">
-                                            <iframe src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url} className={`w-full h-[600px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
+                                            <iframe src={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url} className={`w-full h-[58svh] min-h-[320px] max-h-[720px] [@media(max-height:430px)]:h-[calc(100svh-11rem)] [@media(max-height:430px)]:min-h-[180px] rounded-xl border ${isLightBg ? 'border-black/10' : 'border-white/10'}`} />
                                             <a href={(language === 'ht' && item.content?.url_ht) ? item.content?.url_ht : item.content?.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-brand/10 hover:bg-brand/20 rounded-lg text-sm font-bold transition-all">
                                                 <FileIcon className="w-4 h-4" />
                                                 {t.open_pdf}
@@ -767,15 +767,17 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Genially */}
                                     {item.type === 'genially' && (
-                                        <div className="h-[600px] rounded-xl overflow-hidden border border-white/10">
+                                        <div className="rounded-lg sm:rounded-xl overflow-hidden border border-white/10 bg-black">
+                                            <div className="w-full h-[52svh] min-h-[260px] max-h-[620px] max-[430px]:h-[46svh] max-[430px]:min-h-[220px] [@media(max-height:430px)]:h-[calc(100svh-12rem)] [@media(max-height:430px)]:min-h-[190px] md:h-[600px]">
                                             <GeniallyEmbed src={item.content?.url} onInteract={() => handleItemCompletion(item.id)} />
+                                            </div>
                                         </div>
                                     )}
 
                                     {/* SCORM - Ocultar Reiniciar si ya se aprobó el quiz */}
                                     {item.type === 'scorm' && !evaluationPassed && (
-                                        <div className={`p-6 rounded-xl border flex items-center justify-between ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
-                                            <div className="flex items-center gap-4">
+                                        <div className={`p-4 sm:p-6 rounded-xl border flex max-[430px]:flex-col max-[430px]:items-start items-center justify-between gap-4 ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                            <div className="flex items-center gap-4 min-w-0">
                                                 <div className="w-12 h-12 bg-brand/20 rounded-lg flex items-center justify-center">
                                                     <Lock className="w-6 h-6 text-brand" />
                                                 </div>
@@ -786,7 +788,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                             </div>
                                             <button
                                                 onClick={() => setScormModalItem(item)}
-                                                className="px-6 py-3 bg-brand text-black font-bold rounded-lg hover:scale-105 transition-all shadow-lg"
+                                                className="px-5 sm:px-6 py-3 bg-brand text-black font-bold rounded-lg hover:scale-105 transition-all shadow-lg max-[430px]:w-full"
                                             >
                                                 {itemsCompleted.has(item.id) ? t.restart : t.start}
                                             </button>
@@ -843,7 +845,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
                                     {/* Firma - Solo mostrar si se ha añadido explícitamente */}
                                     {item.type === 'signature' && (
-                                        <div className={`p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
+                                        <div className={`p-4 sm:p-8 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10' : 'bg-white/5 border-white/10'}`}>
                                             <h3 className="text-xl font-bold mb-2">{t.signature_title}</h3>
                                             <p className={`text-sm mb-6 ${isLightBg ? 'text-slate-500' : 'text-white/40'}`}>{t.signature_desc}</p>
                                             
@@ -869,19 +871,19 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             <motion.div 
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="mt-12 bg-brand/5 p-12 rounded-3xl border border-brand/20 text-center shadow-2xl shadow-brand/10"
+                                className="mt-10 md:mt-12 bg-brand/5 p-5 sm:p-8 md:p-12 rounded-3xl border border-brand/20 text-center shadow-2xl shadow-brand/10"
                             >
                                 <div className="w-20 h-20 bg-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(49,210,45,0.4)]">
                                     <CheckCircle2 className="w-10 h-10 text-black" />
                                 </div>
-                                <h3 className="text-3xl font-black text-brand mb-2">{t.course_approved}</h3>
-                                <p className="text-white/60 text-lg mt-4 font-medium">{t.course_approved_desc}</p>
+                                <h3 className="text-2xl md:text-3xl font-black text-brand mb-2">{t.course_approved}</h3>
+                                <p className="text-sm md:text-lg text-white/60 mt-4 font-medium">{t.course_approved_desc}</p>
                                 <p className="text-white/40 text-sm mt-2">{t.diploma_desc}</p>
                                 
                                 {moduleCompleted ? (
                                     <button
                                         onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
-                                        className="mt-8 px-10 py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-lg"
+                                        className="mt-8 w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-base sm:text-lg"
                                     >
                                         <Download className="w-6 h-6" /> {t.download_cert}
                                     </button>
@@ -911,12 +913,12 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     />
                 </div>
 
-                <div className="max-w-4xl mx-auto flex items-center justify-between py-5 px-4 md:px-8">
+                <div className="max-w-4xl mx-auto flex items-center justify-between py-3 md:py-5 [@media(max-height:430px)]:py-2 px-3 sm:px-4 md:px-8 gap-2 sm:gap-3">
                     {/* Info Módulo */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 sm:gap-6 min-w-0">
                         <div className="flex flex-col">
                             <span className="text-[10px] text-white/40 uppercase tracking-widest mb-1 font-bold">{t.current_module}</span>
-                            <span className="text-sm font-bold text-white/90 truncate max-w-[200px]">
+                            <span className="text-[11px] sm:text-sm font-bold text-white/90 truncate max-w-[110px] max-[430px]:max-w-[92px] sm:max-w-[200px] [@media(max-height:430px)]:max-w-[160px]">
                                 {activeModuleIndex + 1}. {currentModule?.title}
                             </span>
                         </div>
@@ -930,14 +932,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     </div>
 
                     {/* Botones de Navegación */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                         <button
                             onClick={handlePrevious}
                             disabled={activeModuleIndex === 0}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold border border-white/10 group"
+                            className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-[11px] sm:text-sm font-bold border border-white/10 group"
                         >
                             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                            <span>{t.previous}</span>
+                            <span className="max-[430px]:hidden sm:inline">{t.previous}</span>
                         </button>
 
                         <button
@@ -948,7 +950,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 cursor: (mode !== 'preview' && !moduleCompleted) ? 'not-allowed' : 'pointer',
                                 backgroundColor: (mode !== 'preview' && !moduleCompleted) ? '#333' : '#31D22D'
                             }}
-                            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
+                            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-black hover:bg-brand/90 transition-all active:scale-95 text-[11px] sm:text-sm font-black shadow-[0_0_20px_rgba(49,210,45,0.3)] group"
                         >
                             <span>{activeModuleIndex === modules.length - 1 ? t.finish : t.next}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

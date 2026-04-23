@@ -22,7 +22,21 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
     const [youtubeId, setYoutubeId] = useState('');
     const [completed, setCompleted] = useState(false);
     const [showCenterControl, setShowCenterControl] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const completedRef = useRef(false);
+
+    useEffect(() => {
+        const media = window.matchMedia('(max-width: 768px)');
+        const update = () => setIsMobile(media.matches);
+        update();
+        media.addEventListener('change', update);
+        return () => media.removeEventListener('change', update);
+    }, []);
+
+    useEffect(() => {
+        completedRef.current = false;
+        setCompleted(false);
+    }, [src]);
     
     // Expose control methods via ref
     useImperativeHandle(ref, () => ({
@@ -86,6 +100,31 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
         console.error('Error loading video:', src);
     };
 
+    const handleVideoEnded = () => {
+        console.log('[VideoPlayer] Video terminado (evento onEnded)');
+
+        const doc = document as any;
+        const videoEl = videoRef.current as any;
+
+        if (doc?.fullscreenElement && doc.exitFullscreen) {
+            doc.exitFullscreen().catch(() => {});
+        }
+
+        if (videoEl?.webkitDisplayingFullscreen && videoEl.webkitExitFullscreen) {
+            try {
+                videoEl.webkitExitFullscreen();
+            } catch {
+                // iOS Safari puede bloquear esta llamada en algunos estados.
+            }
+        }
+
+        if (!completedRef.current && onEnded) {
+            completedRef.current = true;
+            setCompleted(true);
+            onEnded();
+        }
+    };
+
     // YouTube embed
     if (isYouTube) {
         return (
@@ -143,16 +182,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
             <video
                 ref={videoRef}
                 className="w-full h-full object-contain"
+                playsInline
                 onPlay={() => setPlaying(true)}
                 onPause={() => setPlaying(false)}
-                onEnded={() => {
-                    console.log('[VideoPlayer] Video terminado (evento onEnded)');
-                    if (!completedRef.current && onEnded) {
-                        completedRef.current = true;
-                        setCompleted(true);
-                        onEnded();
-                    }
-                }}
+                onEnded={handleVideoEnded}
                 onTimeUpdate={handleTimeUpdate}
                 onClick={togglePlay}
                 onError={handleError}
@@ -191,9 +224,11 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({ src, onEnded
                         {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                     </button>
 
-                    <button type="button" onClick={() => videoRef.current?.requestFullscreen()} className="text-white hover:text-brand transition-colors">
-                        <Maximize className="w-5 h-5" />
-                    </button>
+                    {!isMobile && (
+                        <button type="button" onClick={() => videoRef.current?.requestFullscreen()} className="text-white hover:text-brand transition-colors">
+                            <Maximize className="w-5 h-5" />
+                        </button>
+                    )}
                 </div>
             </div>
 

@@ -30,6 +30,8 @@ const translations: any = {
         available: "Disponible",
         start: "Comenzar",
         certificate: "Certificado",
+        exit_course: "Salir",
+        exit_course_confirm: "Estas seguro de que deseas salir del curso?",
         access_desc: "Accede a tus cursos asignados y mantén tu certificación al día.",
         collab: "Colaborador",
         logout: "Cerrar Sesión",
@@ -48,6 +50,8 @@ const translations: any = {
         available: "Disponib",
         start: "Kòmanse",
         certificate: "Sètifika",
+        exit_course: "Soti",
+        exit_course_confirm: "Eske ou sèten ou vle soti nan kou a?",
         access_desc: "Aksede kou ou asiyen yo epi kenbe sètifikasyon ou a jou.",
         collab: "Kolaboratè",
         logout: "Dekonekte",
@@ -66,6 +70,15 @@ export default function CoursesPage() {
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga
 
     const t = translations[user?.language || 'es'];
+
+    const confirmExitCourse = useCallback(() => {
+        if (window.confirm(t.exit_course_confirm)) {
+            setActiveCourse(null);
+            if (user?.id && user?.client_id) {
+                fetchEnrollments(user.id, user.client_id);
+            }
+        }
+    }, [t.exit_course_confirm, user?.id, user?.client_id]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -385,10 +398,10 @@ export default function CoursesPage() {
                                 </div>
                             </div>
                             <button 
-                                onClick={() => setActiveCourse(null)} 
+                                onClick={confirmExitCourse}
                                 className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white hover:text-brand transition-all border border-white/10 flex items-center gap-2 group"
                             >
-                                <span className="text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Cerrar</span>
+                                <span className="text-xs font-bold uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">{t.exit_course}</span>
                                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
                             </button>
                         </div>
@@ -433,10 +446,7 @@ export default function CoursesPage() {
                                                         enrollment={activeCourse}
                                                         courseConfig={activeCourse.course}
                                                         language={user.language || 'es'}
-                                                        onClose={() => {
-                                                            setActiveCourse(null);
-                                                            fetchEnrollments(user.id, user.client_id);
-                                                        }}
+                                                        onClose={confirmExitCourse}
                                                         onComplete={(scormScore) => {
                                                             console.log("SCORM completed with score:", scormScore);
                                                             // Marcar SCORM como completado y refrescar
@@ -470,10 +480,7 @@ export default function CoursesPage() {
                                             enrollment={activeCourse}
                                             courseConfig={activeCourse.course}
                                             language={user.language || 'es'}
-                                            onClose={() => {
-                                                setActiveCourse(null);
-                                                fetchEnrollments(user.id, user.client_id);
-                                            }}
+                                            onClose={confirmExitCourse}
                                             onComplete={(scormScore) => {
                                                 console.log("SCORM completed with score:", scormScore);
                                             }}
