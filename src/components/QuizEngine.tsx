@@ -71,8 +71,7 @@ const translations: any = {
         incorrect: "Incorrecta",
         eval_intro_title: "Evaluación Final del Curso",
         eval_intro_subtitle: "¡Es el momento de demostrar lo que aprendiste!",
-        eval_intro_body: "Lee cada pregunta con calma antes de responder. Una vez que selecciones tu respuesta y avances, no podrás volver atrás. Recuerda que cuentas con hasta 3 intentos para alcanzar el puntaje mínimo de aprobación. ¡Confía en ti — has trabajado duro para llegar hasta aquí!",
-        eval_intro_tip: "Tip: Respira profundo, concéntrate y da lo mejor de ti.",
+        eval_intro_body: "Lee cada pregunta con calma antes de responder. Una vez que selecciones tu respuesta y avances, no podrás volver atrás. Recuerda que cuentas con hasta 3 intentos para alcanzar el puntaje mínimo de aprobación. ¡Confía en tus conocimientos!",
         eval_intro_start: "Comenzar Evaluación →"
     },
     ht: {
@@ -105,8 +104,7 @@ const translations: any = {
         incorrect: "Pa kòrèk",
         eval_intro_title: "Evalyasyon Final Kou a",
         eval_intro_subtitle: "Li lè pou montre sa ou te aprann!",
-        eval_intro_body: "Li chak kesyon dousman anvan ou reponn. Yon fwa ou chwazi repons ou epi ou avanse, ou pa ka retounen. Sonje ou gen jiska 3 eseye pou rive nan nòt minimòm pou pase. Fè konfyans nan ou menm — ou te travay di pou rive isit la!",
-        eval_intro_tip: "Konsèy: Pran yon gwo souf, konsantre ou epi bay pi bon ou.",
+        eval_intro_body: "Li chak kesyon dousman anvan ou reponn. Yon fwa ou chwazi repons ou epi ou avanse, ou pa ka retounen. Sonje ou gen jiska 3 eseye pou rive nan nòt minimòm pou pase. Fè konfyans nan konesans ou!",
         eval_intro_start: "Kòmanse Evalyasyon →"
     }
 };
@@ -221,34 +219,41 @@ const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: s
 
     if (showEvalIntro) {
         return (
-            <div className="min-h-[420px] w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-6 gap-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, #0f1a2e 0%, #1a1040 50%, #0d1f1a 100%)' }}>
-                {/* Animated glow ring */}
-                <div className="relative flex items-center justify-center">
-                    <div className="absolute w-28 h-28 rounded-full bg-brand/20 blur-2xl animate-pulse" />
-                    <div className="w-24 h-24 rounded-full border-2 border-brand/40 bg-brand/10 flex items-center justify-center z-10">
-                        <GraduationCap className="w-12 h-12 text-brand" />
+            <div className="relative min-h-[420px] w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-6 gap-6 rounded-2xl overflow-hidden">
+                {/* Background image */}
+                <img src="/app_background.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none rounded-2xl" />
+                {/* Dark overlay to keep text readable */}
+                <div className="absolute inset-0 bg-black/60 rounded-2xl" />
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center gap-6 w-full">
+                    {/* Animated glow ring */}
+                    <div className="relative flex items-center justify-center">
+                        <div className="absolute w-28 h-28 rounded-full bg-brand/20 blur-2xl animate-pulse" />
+                        <div className="w-24 h-24 rounded-full border-2 border-brand/40 bg-brand/10 flex items-center justify-center z-10">
+                            <GraduationCap className="w-12 h-12 text-brand" />
+                        </div>
                     </div>
-                </div>
 
-                {/* Title */}
-                <div className="text-center space-y-1">
-                    <h2 className="text-2xl font-black text-white tracking-tight">{t.eval_intro_title}</h2>
-                    <p className="text-brand font-semibold text-sm">{t.eval_intro_subtitle}</p>
-                </div>
+                    {/* Title */}
+                    <div className="text-center space-y-1">
+                        <h2 className="text-2xl font-black text-white tracking-tight">{t.eval_intro_title}</h2>
+                        <p className="text-brand font-semibold text-sm">{t.eval_intro_subtitle}</p>
+                    </div>
 
-                {/* Info box */}
-                <div className="w-full rounded-xl border border-brand/20 bg-white/[0.04] p-5 space-y-3 text-sm text-white/80 leading-relaxed">
-                    <p>{t.eval_intro_body}</p>
-                    <p className="text-brand/70 italic text-xs border-t border-white/10 pt-3">{t.eval_intro_tip}</p>
-                </div>
+                    {/* Info box */}
+                    <div className="w-full rounded-xl border border-brand/20 bg-white/[0.06] backdrop-blur-sm p-5 text-sm text-white/85 leading-relaxed">
+                        <p>{t.eval_intro_body}</p>
+                    </div>
 
-                {/* CTA */}
-                <button
-                    onClick={() => setShowEvalIntro(false)}
-                    className="mt-2 px-8 py-3 rounded-xl bg-brand text-black font-black text-sm tracking-wide hover:bg-brand/90 active:scale-95 transition-all shadow-lg shadow-brand/20"
-                >
-                    {t.eval_intro_start}
-                </button>
+                    {/* CTA */}
+                    <button
+                        onClick={() => setShowEvalIntro(false)}
+                        className="mt-2 px-8 py-3 rounded-xl bg-brand text-black font-black text-sm tracking-wide hover:bg-brand/90 active:scale-95 transition-all shadow-lg shadow-brand/20"
+                    >
+                        {t.eval_intro_start}
+                    </button>
+                </div>
             </div>
         );
     }
