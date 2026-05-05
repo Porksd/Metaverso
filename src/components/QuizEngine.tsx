@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, ArrowRight, Home, Download, Lock, Check } from "lucide-react";
+import { CheckCircle2, AlertCircle, ArrowRight, Home, Download, Lock, Check, Lightbulb, GraduationCap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type QuestionType = 'single' | 'multiple' | 'truefalse';
@@ -68,7 +68,12 @@ const translations: any = {
         answer_label: "Respuesta",
         no_answer: "Sin respuesta",
         correct: "Correcta",
-        incorrect: "Incorrecta"
+        incorrect: "Incorrecta",
+        eval_intro_title: "Evaluación Final del Curso",
+        eval_intro_subtitle: "¡Es el momento de demostrar lo que aprendiste!",
+        eval_intro_body: "Lee cada pregunta con calma antes de responder. Una vez que selecciones tu respuesta y avances, no podrás volver atrás. Recuerda que cuentas con hasta 3 intentos para alcanzar el puntaje mínimo de aprobación. ¡Confía en ti — has trabajado duro para llegar hasta aquí!",
+        eval_intro_tip: "Tip: Respira profundo, concéntrate y da lo mejor de ti.",
+        eval_intro_start: "Comenzar Evaluación →"
     },
     ht: {
         error: "Erè: Kesyon pa jwenn",
@@ -97,7 +102,12 @@ const translations: any = {
         answer_label: "Repons",
         no_answer: "Pa gen repons",
         correct: "Kòrèk",
-        incorrect: "Pa kòrèk"
+        incorrect: "Pa kòrèk",
+        eval_intro_title: "Evalyasyon Final Kou a",
+        eval_intro_subtitle: "Li lè pou montre sa ou te aprann!",
+        eval_intro_body: "Li chak kesyon dousman anvan ou reponn. Yon fwa ou chwazi repons ou epi ou avanse, ou pa ka retounen. Sonje ou gen jiska 3 eseye pou rive nan nòt minimòm pou pase. Fè konfyans nan ou menm — ou te travay di pou rive isit la!",
+        eval_intro_tip: "Konsèy: Pran yon gwo souf, konsantre ou epi bay pi bon ou.",
+        eval_intro_start: "Kòmanse Evalyasyon →"
     }
 };
 
@@ -143,7 +153,8 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     const [score, setScore] = useState(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || currentEnrollment?.score || 0);
     const [correctCount, setCorrectCount] = useState(0);
     const [wasPassed, setWasPassed] = useState<boolean | null>(forceFinished ? true : null);
-    const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]);
+const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]); 
+    const [showEvalIntro, setShowEvalIntro] = useState(persistScore && !forceFinished && !(currentEnrollment?.status === 'completed'));
 
     const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
     const targetCourseId = courseId || config?.id;
@@ -207,6 +218,40 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         if (selectedIds.length === 0) return t.no_answer;
         return selectedIds.map((id) => getOptionText(question, id)).join(', ');
     };
+
+    if (showEvalIntro) {
+        return (
+            <div className="min-h-[420px] w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-6 gap-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, #0f1a2e 0%, #1a1040 50%, #0d1f1a 100%)' }}>
+                {/* Animated glow ring */}
+                <div className="relative flex items-center justify-center">
+                    <div className="absolute w-28 h-28 rounded-full bg-brand/20 blur-2xl animate-pulse" />
+                    <div className="w-24 h-24 rounded-full border-2 border-brand/40 bg-brand/10 flex items-center justify-center z-10">
+                        <GraduationCap className="w-12 h-12 text-brand" />
+                    </div>
+                </div>
+
+                {/* Title */}
+                <div className="text-center space-y-1">
+                    <h2 className="text-2xl font-black text-white tracking-tight">{t.eval_intro_title}</h2>
+                    <p className="text-brand font-semibold text-sm">{t.eval_intro_subtitle}</p>
+                </div>
+
+                {/* Info box */}
+                <div className="w-full rounded-xl border border-brand/20 bg-white/[0.04] p-5 space-y-3 text-sm text-white/80 leading-relaxed">
+                    <p>{t.eval_intro_body}</p>
+                    <p className="text-brand/70 italic text-xs border-t border-white/10 pt-3">{t.eval_intro_tip}</p>
+                </div>
+
+                {/* CTA */}
+                <button
+                    onClick={() => setShowEvalIntro(false)}
+                    className="mt-2 px-8 py-3 rounded-xl bg-brand text-black font-black text-sm tracking-wide hover:bg-brand/90 active:scale-95 transition-all shadow-lg shadow-brand/20"
+                >
+                    {t.eval_intro_start}
+                </button>
+            </div>
+        );
+    }
 
     if (!currentQuestion && !isFinished) return <div className="text-center text-white/40">{t.error}</div>;
 
@@ -283,13 +328,13 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         const finalScore = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
         const totalCorrect = perQuestion.filter(p => p.correct).length;
         
+        const passed2 = finalScore >= finalPassingScore;
+
         setScore(finalScore);
         setCorrectCount(totalCorrect);
         setQuestionSummaries(summaries);
+        setWasPassed(passed2);
         setIsFinished(true);
-        setWasPassed(passed);
-
-        const passed2 = finalScore >= finalPassingScore;
 
         // Persistir en Supabase
         // Solo persistir si tenemos un enrollment ID válido (los dummy IDs o preview-admin se saltan)
@@ -370,18 +415,21 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     if (isFinished) {
         // En un sistema ponderado, queremos mostrar cuánto aportó este quiz
         const contribution = Math.round((score / 100) * 80); // Asumiendo 80% de peso para el quiz
+        const resolvedPassed = typeof wasPassed === 'boolean'
+            ? wasPassed
+            : (questionSummaries.length > 0 ? questionSummaries.every((item) => item.correct) : correctCount === finalQuestions.length);
 
         const statusTitle = persistScore
             ? t.quiz_finished
-            : (wasPassed === false ? t.activity_pending : t.activity_done);
+            : (resolvedPassed ? t.activity_done : t.activity_pending);
 
         const statusDescription = persistScore
             ? t.answered_correctly(correctCount, finalQuestions.length)
-            : (wasPassed === false ? t.activity_pending_desc : t.activity_done_desc);
+            : (resolvedPassed ? t.activity_done_desc : t.activity_pending_desc);
 
         // Quiz en módulo de CONTENIDO (no evaluación)
         if (!persistScore) {
-            if (wasPassed === true) {
+            if (resolvedPassed) {
                 // Actividad completada correctamente — bloqueada, no se puede repetir
                 return (
                     <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
@@ -545,6 +593,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     }
 
     const hasAnswered = answers[currentQuestion.id] && (Array.isArray(answers[currentQuestion.id]) ? (answers[currentQuestion.id] as string[]).length > 0 : true);
+    const progressPercent = Math.round(((currentQuestionIdx + 1) / finalQuestions.length) * 100);
 
     return (
         <div className="max-w-2xl mx-auto w-full p-4 space-y-8">
@@ -556,10 +605,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                             <span className="text-[10px] bg-brand/20 text-brand px-2 py-0.5 rounded font-black uppercase">{t.multiple_selection}</span>
                         )}
                     </div>
-                    <span className="text-brand font-black tabular-nums">{Math.round(((currentQuestionIdx) / finalQuestions.length) * 100)}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand transition-all duration-500" style={{ width: `${((currentQuestionIdx + 1) / finalQuestions.length) * 100}%` }} />
+                    <div className="h-full bg-brand transition-all duration-500" style={{ width: `${progressPercent}%` }} />
                 </div>
             </div>
 
@@ -596,9 +644,11 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
                 {/* Feedback opcional por pregunta */}
                 {currentQuestion.feedback && (
-                    <div className="mt-2 p-3 bg-white/5 rounded-xl border border-white/10 flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 text-brand/60 shrink-0 mt-0.5" />
-                        <p className="text-xs text-white/50">{currentQuestion.feedback}</p>
+                    <div className="mt-2 p-4 bg-yellow-500/10 rounded-xl border border-yellow-400/40 flex items-start gap-3 shadow-[0_0_20px_rgba(250,204,21,0.08)]">
+                        <div className="w-8 h-8 rounded-full bg-yellow-400/15 border border-yellow-400/40 flex items-center justify-center shrink-0">
+                            <Lightbulb className="w-4 h-4 text-yellow-300" />
+                        </div>
+                        <p className="text-sm text-yellow-100 leading-relaxed font-medium">{currentQuestion.feedback}</p>
                     </div>
                 )}
             </motion.div>
