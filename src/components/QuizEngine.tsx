@@ -229,7 +229,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,210,45,0.12),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(135deg,rgba(0,0,0,0.78),rgba(2,8,6,0.55),rgba(3,13,18,0.72))]" />
 
-                <div className="absolute -right-24 top-1/2 hidden h-[260px] w-[260px] -translate-y-1/2 opacity-55 md:block">
+                <div className="absolute -right-24 top-1/2 hidden h-[260px] w-[260px] -translate-y-1/2 opacity-55 lg:block">
                     <div className="absolute inset-0 rounded-full border border-brand/12" />
                     <div className="absolute inset-8 rounded-full border border-cyan-400/8" />
                     <div className="absolute inset-16 rounded-full border border-white/8" />
