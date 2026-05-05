@@ -1268,8 +1268,8 @@ export default function DynamicCourseEditor() {
                                     </div>
                                     )}
                                     
-                                    {/* Peso SCORM - solo si existe item SCORM en el módulo */
-                                    {module.items?.some((i: any) => i.type === 'scorm') && (
+                                    {/* Peso SCORM - solo si existe item SCORM en el módulo */}
+                                    {hasScorm && (
                                     <div className="bg-black/40 p-4 rounded-xl border border-orange-500/20">
                                         <label className="text-[9px] font-black uppercase text-white/40 mb-2 block text-center">
                                             Peso SCORM
