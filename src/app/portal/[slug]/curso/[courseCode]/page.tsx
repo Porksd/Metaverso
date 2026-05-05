@@ -418,8 +418,9 @@ export default function CourseAuthPage() {
             <img src="/alumno_background.jpg" alt="" aria-hidden="true"
                 className="absolute inset-0 w-full h-full object-cover object-center z-0 pointer-events-none select-none" />
             {/* Left Panel: Context */}
-            <div className="w-full md:w-1/2 p-5 sm:p-8 md:p-10 flex flex-col relative z-10 overflow-hidden bg-[#0a0a0a]/90">
+            <div className="w-full md:w-1/2 p-5 sm:p-8 md:p-10 flex flex-col relative z-10 overflow-hidden bg-black/60 backdrop-blur-xl md:border-r md:border-white/10">
                 <div className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/45 to-brand/10" />
                     <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-brand/5 blur-[120px] rounded-full" />
                 </div>
                 
