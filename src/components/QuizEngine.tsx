@@ -558,15 +558,10 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
                     <div className="space-y-2 pt-1">
                         {finalQuestions.map((question, idx) => {
-                            const result = questionSummaries.find((item) => item.questionId === question.id);
                             const questionText = (language === 'ht' && question.text_ht) ? question.text_ht : question.text;
                             return (
                                 <div key={`summary-${question.id}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                                     <p className="text-sm font-bold text-white">{t.question} {idx + 1}: <span className="text-white/80">{questionText}</span></p>
-                                    <p className="text-xs text-white/60 mt-1">{t.answer_label}: {result?.selectedText || t.no_answer}</p>
-                                    <p className={`text-xs mt-1 font-bold ${result?.correct ? 'text-brand' : 'text-red-400'}`}>
-                                        {result?.correct ? t.correct : t.incorrect}
-                                    </p>
                                 </div>
                             );
                         })}
