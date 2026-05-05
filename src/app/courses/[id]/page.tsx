@@ -78,8 +78,15 @@ export default function StudentCoursePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="text-white text-center">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <img
+          src="/app_background.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative z-10 text-white text-center">
           <div className="animate-spin w-12 h-12 border-4 border-brand border-t-transparent rounded-full mx-auto mb-4"></div>
           <p>Cargando curso...</p>
         </div>
@@ -89,8 +96,15 @@ export default function StudentCoursePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="text-center">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <img
+          src="/app_background.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 text-center">
           <div className="glass p-8 rounded-3xl border border-red-500/20 max-w-md">
             <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
             <p className="text-white/60 mb-6">{error}</p>
@@ -112,11 +126,20 @@ export default function StudentCoursePage() {
   }
 
   return (
-    <CoursePlayer
-      courseId={courseId}
-      studentId={studentId}
-      onComplete={handleCourseComplete}
-      className="min-h-screen"
-    />
+    <div className="relative min-h-screen overflow-hidden">
+      <img
+        src="/app_background.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+      />
+      <div className="absolute inset-0 bg-black/60" />
+      <CoursePlayer
+        courseId={courseId}
+        studentId={studentId}
+        onComplete={handleCourseComplete}
+        className="relative z-10 min-h-screen bg-transparent"
+      />
+    </div>
   );
 }
