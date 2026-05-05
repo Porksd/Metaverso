@@ -55,7 +55,7 @@ const translations: any = {
         weight: "Ponderación (80%)",
         try_again: "Intentar Nuevamente",
         repeat_activity: "Repetir Actividad",
-        progress_saved: "* Tu progreso ha sido guardado. Completa el contenido SCORM para alcanzar el 90% requerido para aprobar.",
+        progress_saved: "* Tu progreso ha sido guardado.",
         question: "Pregunta",
         of: "de",
         multiple_selection: "Múltiple Selección",
@@ -88,7 +88,7 @@ const translations: any = {
         weight: "Pwa (80%)",
         try_again: "Eseye ankò",
         repeat_activity: "Repete aktivite",
-        progress_saved: "* Pwogrè ou sove. Ranpli kontni SCORM pou rive nan 90% obligatwa pou pase.",
+        progress_saved: "* Pwogrè ou sove.",
         question: "Kesyon",
         of: "nan",
         multiple_selection: "Plis pase yon chwa",
@@ -555,17 +555,6 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 <div className="glass p-5 border-white/10 rounded-2xl text-left space-y-3">
                     <h3 className="text-sm uppercase tracking-widest text-white/50 font-black">{t.summary_title}</h3>
                     <p className="text-sm text-white/80 font-bold">{t.quiz_status_line} <span className="text-brand">{t.finalized}</span></p>
-
-                    <div className="space-y-2 pt-1">
-                        {finalQuestions.map((question, idx) => {
-                            const questionText = (language === 'ht' && question.text_ht) ? question.text_ht : question.text;
-                            return (
-                                <div key={`summary-${question.id}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                                    <p className="text-sm font-bold text-white">{t.question} {idx + 1}: <span className="text-white/80">{questionText}</span></p>
-                                </div>
-                            );
-                        })}
-                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 w-full">
