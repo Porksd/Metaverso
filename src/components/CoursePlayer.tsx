@@ -654,30 +654,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 </div>
                                 
                             </div>
-
-                            {/* Biblioteca - Material de apoyo (siempre visible) */}
-                            {currentModule.settings?.extras?.length > 0 && (
-                                <div className={`mt-3 pt-3 border-t ${isLightBg ? 'border-black/10' : 'border-brand/20'}`}>
-                                    <div className="flex items-center flex-wrap gap-2">
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            <Library className="w-3.5 h-3.5 text-brand" />
-                                            <span className={`text-xs font-bold uppercase tracking-widest ${isLightBg ? 'text-slate-500' : 'text-brand'}`}>{t.material}</span>
-                                        </div>
-                                        {currentModule.settings.extras.map((extra: any, idx: number) => (
-                                            <a
-                                                key={idx}
-                                                href={extra.url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${isLightBg ? 'bg-white border-slate-200 text-slate-700 hover:border-brand/50 hover:text-brand' : 'bg-white/5 border-brand/30 text-white/90 hover:bg-brand/20 hover:border-brand/60'}`}
-                                            >
-                                                <FileIcon className="w-3 h-3 text-brand shrink-0" />
-                                                <span>{extra.name}</span>
-                                            </a>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </header>
 
                         {/* CONTENIDO DEL MÓDULO */}
@@ -897,6 +873,36 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                         transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     />
                 </div>
+
+                {/* Biblioteca - Material de apoyo (siempre visible sobre el footer) */}
+                {currentModule.settings?.extras?.length > 0 && (
+                    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-8 pt-3 [@media(max-height:430px)]:pt-2">
+                        <div className="flex items-center flex-wrap gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                <Library className="w-4 h-4 text-brand" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-brand">{t.material}</span>
+                            </div>
+                            {currentModule.settings.extras.map((extra: any, idx: number) => {
+                                const cleanName = extra.name
+                                    .replace(/^\d+_/, '')
+                                    .replace(/_/g, ' ')
+                                    .replace(/\.[^.]+$/, '');
+                                return (
+                                    <a
+                                        key={idx}
+                                        href={extra.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand/10 border border-brand/30 text-white/90 text-xs font-semibold hover:bg-brand/25 hover:border-brand/60 transition-all"
+                                    >
+                                        <FileIcon className="w-3.5 h-3.5 text-brand shrink-0" />
+                                        <span className="max-w-[160px] truncate">{cleanName}</span>
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <div className="max-w-4xl mx-auto flex items-center justify-between py-3 md:py-5 [@media(max-height:430px)]:py-2 px-3 sm:px-4 md:px-8 gap-2 sm:gap-3">
                     {/* Info Módulo */}
