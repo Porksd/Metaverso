@@ -15,6 +15,7 @@ interface Question {
     options: { id: string; text: string; text_ht?: string }[]; // Soporte para creole
     correctAnswer: string | string[];
     weight?: number; // optional weight for this question (default 1)
+    feedback?: string; // Retroalimentación opcional por pregunta
 }
 
 interface CourseConfig {
@@ -44,6 +45,10 @@ const translations: any = {
         error: "Error: Pregunta no encontrada",
         quiz_finished: "¡Quiz Finalizado!",
         activity_completed: "¡Actividad Completada!",
+        activity_done: "¡Actividad Realizada!",
+        activity_done_desc: "Has respondido todas las preguntas correctamente.",
+        activity_pending: "Actividad Pendiente",
+        activity_pending_desc: "Algunas respuestas son incorrectas. Inténtalo nuevamente hasta responder todo correctamente.",
         answered_correctly: (correct: number, total: number) => `Has respondido correctamente ${correct} de ${total} preguntas.`,
         activity_success: "Has completado satisfactoriamente los ejercicios de esta sección.",
         hits: "Aciertos",
@@ -55,12 +60,24 @@ const translations: any = {
         of: "de",
         multiple_selection: "Múltiple Selección",
         finish_eval: "Finalizar Evaluación",
-        next_question: "Siguiente Pregunta"
+        next_question: "Siguiente Pregunta",
+        confirm_answers: "Finalizar Actividad",
+        summary_title: "Resumen de actividad",
+        quiz_status_line: "Quiz:",
+        finalized: "Finalizado",
+        answer_label: "Respuesta",
+        no_answer: "Sin respuesta",
+        correct: "Correcta",
+        incorrect: "Incorrecta"
     },
     ht: {
         error: "Erè: Kesyon pa jwenn",
         quiz_finished: "Egzamen fini!",
         activity_completed: "Aktivite konplè!",
+        activity_done: "Aktivite Reyalize!",
+        activity_done_desc: "Ou reponn tout kesyon yo kòrèkteman.",
+        activity_pending: "Aktivite An Atant",
+        activity_pending_desc: "Gen kèk repons ki mal. Eseye ankò jiskaske ou reponn tout kòrèkteman.",
         answered_correctly: (correct: number, total: number) => `Ou reponn kòrèkteman ${correct} nan ${total} kesyon.`,
         activity_success: "Ou te konplete avèk siksè egzèsis yo nan seksyon sa a.",
         hits: "Siksè",
@@ -72,7 +89,15 @@ const translations: any = {
         of: "nan",
         multiple_selection: "Plis pase yon chwa",
         finish_eval: "Fini Evalyasyon",
-        next_question: "Kesyon Pwochen"
+        next_question: "Kesyon Pwochen",
+        confirm_answers: "Fini Aktivite",
+        summary_title: "Rezime aktivite",
+        quiz_status_line: "Egzamen:",
+        finalized: "Fini",
+        answer_label: "Repons",
+        no_answer: "Pa gen repons",
+        correct: "Kòrèk",
+        incorrect: "Pa kòrèk"
     }
 };
 
@@ -117,6 +142,8 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     const [isFinished, setIsFinished] = useState(currentEnrollment?.status === 'completed' || forceFinished);
     const [score, setScore] = useState(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || currentEnrollment?.score || 0);
     const [correctCount, setCorrectCount] = useState(0);
+    const [wasPassed, setWasPassed] = useState<boolean | null>(forceFinished ? true : null);
+    const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]);
 
     const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
     const targetCourseId = courseId || config?.id;
@@ -154,6 +181,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     useEffect(() => {
         if (!forceFinished) return;
         setIsFinished(true);
+        setWasPassed(true);
         setScore(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || 0);
     }, [forceFinished, currentEnrollment?.quiz_score, currentEnrollment?.last_exam_score, currentEnrollment?.best_score]);
 
@@ -162,6 +190,23 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
     const currentQuestion = finalQuestions[currentQuestionIdx];
     const questionType: QuestionType = resolveQuestionType(currentQuestion);
+
+    const getOptionText = (question: Question, optionId: string): string => {
+        const option = question.options.find((opt) => opt.id === optionId);
+        if (!option) return optionId;
+        return (language === 'ht' && option.text_ht) ? option.text_ht : option.text;
+    };
+
+    const getSelectedAnswerText = (question: Question, userAnswer: string | string[] | undefined): string => {
+        const selectedIds = Array.isArray(userAnswer)
+            ? userAnswer
+            : userAnswer
+                ? [userAnswer]
+                : [];
+
+        if (selectedIds.length === 0) return t.no_answer;
+        return selectedIds.map((id) => getOptionText(question, id)).join(', ');
+    };
 
     if (!currentQuestion && !isFinished) return <div className="text-center text-white/40">{t.error}</div>;
 
@@ -199,6 +244,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         let totalWeight = 0;
         let earnedWeight = 0;
         const perQuestion: Array<{ id: string; correct: boolean; weight: number }> = [];
+        const summaries: Array<{ questionId: string; selectedText: string; correct: boolean }> = [];
 
         finalQuestions.forEach((q: Question) => {
             const qWeight = 1;
@@ -227,6 +273,11 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
             if (correct) earnedWeight += qWeight;
             perQuestion.push({ id: q.id, correct, weight: qWeight });
+            summaries.push({
+                questionId: q.id,
+                selectedText: getSelectedAnswerText(q, userAnswer),
+                correct
+            });
         });
 
         const finalScore = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
@@ -234,9 +285,11 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         
         setScore(finalScore);
         setCorrectCount(totalCorrect);
+        setQuestionSummaries(summaries);
         setIsFinished(true);
+        setWasPassed(passed);
 
-        const passed = finalScore >= finalPassingScore;
+        const passed2 = finalScore >= finalPassingScore;
 
         // Persistir en Supabase
         // Solo persistir si tenemos un enrollment ID válido (los dummy IDs o preview-admin se saltan)
@@ -251,9 +304,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                     await supabase
                         .from('enrollments')
                         .update({
-                            status: passed ? 'completed' : 'in_progress',
+                            status: passed2 ? 'completed' : 'in_progress',
                             best_score: finalScore,
-                            completed_at: passed ? new Date().toISOString() : null
+                            completed_at: passed2 ? new Date().toISOString() : null
                         })
                         .eq('id', targetEnrollmentId);
                     console.log("QuizEngine: Enrollment updated directly (persistScore=true, no onComplete)");
@@ -294,7 +347,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         }
 
         if (onFinish) onFinish(finalScore);
-        if (onComplete) onComplete(finalScore, passed);
+        if (onComplete) onComplete(finalScore, passed2);
     };
 
     const isOptionSelected = (optionId: string) => {
@@ -318,59 +371,173 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         // En un sistema ponderado, queremos mostrar cuánto aportó este quiz
         const contribution = Math.round((score / 100) * 80); // Asumiendo 80% de peso para el quiz
 
+        const statusTitle = persistScore
+            ? t.quiz_finished
+            : (wasPassed === false ? t.activity_pending : t.activity_done);
+
+        const statusDescription = persistScore
+            ? t.answered_correctly(correctCount, finalQuestions.length)
+            : (wasPassed === false ? t.activity_pending_desc : t.activity_done_desc);
+
+        // Quiz en módulo de CONTENIDO (no evaluación)
+        if (!persistScore) {
+            if (wasPassed === true) {
+                // Actividad completada correctamente — bloqueada, no se puede repetir
+                return (
+                    <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
+                        <div className="flex flex-col items-center justify-center p-6 space-y-3 text-center">
+                            <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center border-2 border-brand/30">
+                                <CheckCircle2 className="w-12 h-12 text-brand" />
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-2xl font-bold">{statusTitle}</h2>
+                                <p className="text-white/60 text-sm">{statusDescription}</p>
+                            </div>
+                        </div>
+
+                        <div className="glass p-5 border-white/10 rounded-2xl text-left space-y-3">
+                            <h3 className="text-sm uppercase tracking-widest text-white/50 font-black">{t.summary_title}</h3>
+                            <p className="text-sm text-white/80 font-bold">{t.quiz_status_line} <span className="text-brand">{t.finalized}</span></p>
+
+                            <div className="space-y-2 pt-1">
+                                {finalQuestions.map((question, idx) => {
+                                    const result = questionSummaries.find((item) => item.questionId === question.id);
+                                    const questionText = (language === 'ht' && question.text_ht) ? question.text_ht : question.text;
+                                    return (
+                                        <div key={`summary-${question.id}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                                            <p className="text-sm font-bold text-white">{t.question} {idx + 1}: <span className="text-white/80">{questionText}</span></p>
+                                            <p className="text-xs text-white/60 mt-1">{t.answer_label}: {result?.selectedText || t.no_answer}</p>
+                                            <p className={`text-xs mt-1 font-bold ${result?.correct ? 'text-brand' : 'text-red-400'}`}>
+                                                {result?.correct ? t.correct : t.incorrect}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                );
+            } else {
+                // Actividad pendiente — se puede repetir
+                return (
+                    <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
+                        <div className="flex flex-col items-center justify-center p-6 space-y-3 text-center">
+                            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border-2 border-red-500/30">
+                                <AlertCircle className="w-12 h-12 text-red-400" />
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-2xl font-bold text-red-400">{statusTitle}</h2>
+                                <p className="text-white/60 text-sm">{statusDescription}</p>
+                            </div>
+                        </div>
+
+                        <div className="glass p-5 border-white/10 rounded-2xl text-left space-y-3">
+                            <h3 className="text-sm uppercase tracking-widest text-white/50 font-black">{t.summary_title}</h3>
+                            <p className="text-sm text-white/80 font-bold">{t.quiz_status_line} <span className="text-red-400">{t.activity_pending}</span></p>
+
+                            <div className="space-y-2 pt-1">
+                                {finalQuestions.map((question, idx) => {
+                                    const result = questionSummaries.find((item) => item.questionId === question.id);
+                                    const questionText = (language === 'ht' && question.text_ht) ? question.text_ht : question.text;
+                                    return (
+                                        <div key={`summary-${question.id}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                                            <p className="text-sm font-bold text-white">{t.question} {idx + 1}: <span className="text-white/80">{questionText}</span></p>
+                                            <p className="text-xs text-white/60 mt-1">{t.answer_label}: {result?.selectedText || t.no_answer}</p>
+                                            <p className={`text-xs mt-1 font-bold ${result?.correct ? 'text-brand' : 'text-red-400'}`}>
+                                                {result?.correct ? t.correct : t.incorrect}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setAnswers({});
+                                setQuestionSummaries([]);
+                                setCurrentQuestionIdx(0);
+                                setIsFinished(false);
+                                setWasPassed(null);
+                                if (quizDraftKey) localStorage.removeItem(quizDraftKey);
+                            }}
+                            className="w-full max-w-xs mx-auto py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase block"
+                        >
+                            {t.repeat_activity}
+                        </button>
+                    </div>
+                );
+            }
+        }
+
+        // Quiz de EVALUACIÓN — mostrar puntaje y opción de reintentar
         return (
-            <div className="flex flex-col items-center justify-center p-8 space-y-6 text-center">
-                <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-12 h-12 text-brand" />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-3xl font-bold">
-                        {persistScore ? t.quiz_finished : t.activity_completed}
-                    </h2>
-                    <p className="text-white/60">
-                        {persistScore 
-                            ? t.answered_correctly(correctCount, finalQuestions.length)
-                            : t.activity_success
-                        }
-                    </p>
+            <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
+                <div className="flex flex-col items-center justify-center p-6 space-y-3 text-center">
+                    <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-12 h-12 text-brand" />
+                    </div>
+                    <div className="space-y-1">
+                        <h2 className="text-3xl font-bold">{statusTitle}</h2>
+                        <p className="text-white/60">{statusDescription}</p>
+                    </div>
                 </div>
 
-                {persistScore && (
-                    <>
-                        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                            <div className="glass p-4 border-brand/20">
-                                <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.hits}</p>
-                                <p className="text-2xl font-black text-brand">{score}%</p>
-                            </div>
-                            <div className="glass p-4 border-brand/20">
-                                <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.weight}</p>
-                                <p className="text-2xl font-black text-brand">{contribution}%</p>
-                            </div>
-                        </div>
+                <div className="glass p-5 border-white/10 rounded-2xl text-left space-y-3">
+                    <h3 className="text-sm uppercase tracking-widest text-white/50 font-black">{t.summary_title}</h3>
+                    <p className="text-sm text-white/80 font-bold">{t.quiz_status_line} <span className="text-brand">{t.finalized}</span></p>
 
-                        <div className="w-full max-w-sm h-2 bg-white/5 rounded-full overflow-hidden">
-                            <div className="h-full bg-brand transition-all duration-1000" style={{ width: `${score}%` }} />
-                        </div>
+                    <div className="space-y-2 pt-1">
+                        {finalQuestions.map((question, idx) => {
+                            const result = questionSummaries.find((item) => item.questionId === question.id);
+                            const questionText = (language === 'ht' && question.text_ht) ? question.text_ht : question.text;
+                            return (
+                                <div key={`summary-${question.id}-${idx}`} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                                    <p className="text-sm font-bold text-white">{t.question} {idx + 1}: <span className="text-white/80">{questionText}</span></p>
+                                    <p className="text-xs text-white/60 mt-1">{t.answer_label}: {result?.selectedText || t.no_answer}</p>
+                                    <p className={`text-xs mt-1 font-bold ${result?.correct ? 'text-brand' : 'text-red-400'}`}>
+                                        {result?.correct ? t.correct : t.incorrect}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
 
-                        <p className="text-xs text-brand/60 font-medium italic">
-                            {t.progress_saved}
-                        </p>
-                    </>
-                )}
+                <div className="grid grid-cols-2 gap-4 w-full">
+                    <div className="glass p-4 border-brand/20">
+                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.hits}</p>
+                        <p className="text-2xl font-black text-brand">{score}%</p>
+                    </div>
+                    <div className="glass p-4 border-brand/20">
+                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{t.weight}</p>
+                        <p className="text-2xl font-black text-brand">{contribution}%</p>
+                    </div>
+                </div>
 
-                <div className="flex flex-col w-full max-w-sm gap-3">
+                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-brand transition-all duration-1000" style={{ width: `${score}%` }} />
+                </div>
+
+                <p className="text-xs text-brand/60 font-medium italic text-center">
+                    {t.progress_saved}
+                </p>
+
+                <div className="flex flex-col w-full gap-3">
                     <button
                         onClick={() => {
                             setAnswers({});
+                            setQuestionSummaries([]);
                             setCurrentQuestionIdx(0);
                             setIsFinished(false);
+                            setWasPassed(null);
                             if (quizDraftKey) {
                                 localStorage.removeItem(quizDraftKey);
                             }
                         }}
                         className="w-full py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase"
                     >
-                        {persistScore ? t.try_again : t.repeat_activity}
+                        {t.try_again}
                     </button>
                 </div>
             </div>
@@ -426,6 +593,14 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                         </button>
                     ))}
                 </div>
+
+                {/* Feedback opcional por pregunta */}
+                {currentQuestion.feedback && (
+                    <div className="mt-2 p-3 bg-white/5 rounded-xl border border-white/10 flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-brand/60 shrink-0 mt-0.5" />
+                        <p className="text-xs text-white/50">{currentQuestion.feedback}</p>
+                    </div>
+                )}
             </motion.div>
 
             <div className="pt-8">
@@ -434,7 +609,9 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                     disabled={!hasAnswered}
                     className="group w-full py-5 bg-brand disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-black font-black uppercase text-sm tracking-widest rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.98] transition-all shadow-xl shadow-brand/10 font-mono"
                 >
-                    {currentQuestionIdx === finalQuestions.length - 1 ? t.finish_eval : t.next_question}
+                    {currentQuestionIdx === finalQuestions.length - 1
+                        ? (persistScore ? t.finish_eval : t.confirm_answers)
+                        : t.next_question}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
