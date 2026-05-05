@@ -375,7 +375,7 @@ export default function CoursesPage() {
     if (!user) return null;
 
     return (
-        <div className="min-h-screen text-white flex flex-col relative overflow-hidden bg-[#060606] font-sans">
+        <div className="min-h-screen text-white flex flex-col relative overflow-hidden bg-transparent font-sans">
 
             {/* Background Premium */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -385,7 +385,7 @@ export default function CoursesPage() {
 
             <AnimatePresence>
                 {activeCourse && (
-                    <div className="fixed inset-0 z-[100] bg-[#060606] flex flex-col overflow-hidden">
+                    <div className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-md flex flex-col overflow-hidden">
                         {/* Header Superior Consolidado */}
                         <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-black/40 backdrop-blur-xl z-[110]">
                             <div className="flex items-center gap-4">
@@ -535,7 +535,7 @@ export default function CoursesPage() {
                 )}
             </AnimatePresence>
 
-            <header className="sticky top-0 z-50 w-full bg-[#0a0a0a]/80 backdrop-blur-2xl border-b border-white/10 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-2xl">
+            <header className="sticky top-0 z-50 w-full bg-black/65 backdrop-blur-2xl border-b border-white/10 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-2xl">
                 <div className="flex items-center gap-4">
                     <img src="/logo-metaverso.png" alt="Logo" className="h-8 w-auto hover:opacity-80 transition-opacity" />
                     <div className="h-6 w-px bg-white/10 mx-2 hidden md:block" />

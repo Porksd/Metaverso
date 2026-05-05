@@ -635,7 +635,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         ['#ffffff', '#fff', '#f4f4f4', '#f8f8f8', '#eeeeee', 'white'].includes(currentModule.settings.bg_color.toLowerCase());
 
     return (
-        <div className={`flex flex-col w-full text-white relative bg-[#060606] ${className}`}>
+        <div className={`flex flex-col w-full text-white relative bg-transparent ${className}`}>
             {/* Content area con scroll visible solo aquí */}
             <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
                 {/* Visual Stage / Diapositiva */}
@@ -895,7 +895,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             </div>
 
             {/* Footer de Navegación Profesional */}
-            <footer className="w-full bg-black/98 border-t border-white/10 z-[100] backdrop-blur-xl relative">
+            <footer className="w-full bg-black/80 border-t border-white/10 z-[100] backdrop-blur-2xl relative">
                 {/* Slim Progress Bar on top of footer */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
                     <motion.div
