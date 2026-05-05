@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, ArrowRight, Home, Download, Lock, Check, Lightbulb, GraduationCap } from "lucide-react";
+import { CheckCircle2, AlertCircle, ArrowRight, Home, Download, Lock, Check, Lightbulb } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type QuestionType = 'single' | 'multiple' | 'truefalse';
@@ -151,7 +151,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     const [score, setScore] = useState(currentEnrollment?.quiz_score || currentEnrollment?.last_exam_score || currentEnrollment?.best_score || currentEnrollment?.score || 0);
     const [correctCount, setCorrectCount] = useState(0);
     const [wasPassed, setWasPassed] = useState<boolean | null>(forceFinished ? true : null);
-const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]); 
+    const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]);
     const [showEvalIntro, setShowEvalIntro] = useState(persistScore && !forceFinished && !(currentEnrollment?.status === 'completed'));
 
     const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
@@ -219,40 +219,56 @@ const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: s
 
     if (showEvalIntro) {
         return (
-            <div className="relative min-h-[420px] w-full max-w-2xl mx-auto flex flex-col items-center justify-center p-6 gap-6 rounded-2xl overflow-hidden">
-                {/* Background image */}
-                <img src="/app_background.jpg" alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none rounded-2xl" />
-                {/* Dark overlay to keep text readable */}
-                <div className="absolute inset-0 bg-black/60 rounded-2xl" />
+            <div className="relative left-1/2 w-screen max-w-none -translate-x-1/2 overflow-hidden border-y border-white/5 bg-[#050a08]">
+                <div
+                    className="absolute inset-0 opacity-50"
+                    style={{
+                        backgroundImage: "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+                        backgroundSize: "48px 48px"
+                    }}
+                />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,210,45,0.12),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(135deg,rgba(0,0,0,0.78),rgba(2,8,6,0.55),rgba(3,13,18,0.72))]" />
 
-                {/* Content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 w-full">
-                    {/* Animated glow ring */}
-                    <div className="relative flex items-center justify-center">
-                        <div className="absolute w-28 h-28 rounded-full bg-brand/20 blur-2xl animate-pulse" />
-                        <div className="w-24 h-24 rounded-full border-2 border-brand/40 bg-brand/10 flex items-center justify-center z-10">
-                            <GraduationCap className="w-12 h-12 text-brand" />
+                <div className="absolute right-[8%] top-1/2 hidden h-[340px] w-[340px] -translate-y-1/2 lg:block">
+                    <div className="absolute inset-0 rounded-full border border-brand/15" />
+                    <div className="absolute inset-8 rounded-full border border-cyan-400/10" />
+                    <div className="absolute inset-16 rounded-full border border-white/10" />
+                    <div className="absolute left-6 right-6 top-1/2 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+                    <div className="absolute bottom-12 left-1/2 h-40 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent" />
+                    <div className="absolute right-10 top-10 h-24 w-24 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm" />
+                    <div className="absolute bottom-10 left-8 h-20 w-28 rounded-full border border-brand/15 bg-brand/[0.05]" />
+                    <div className="absolute right-24 top-[42%] h-3 w-3 rounded-full bg-brand shadow-[0_0_18px_rgba(49,210,45,0.65)]" />
+                </div>
+
+                <div className="relative mx-auto flex min-h-[68vh] max-w-6xl items-center px-6 py-14 sm:px-8 md:px-12">
+                    <div className="max-w-3xl space-y-6">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-brand">
+                            <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
+                            Evaluacion final
                         </div>
-                    </div>
 
-                    {/* Title */}
-                    <div className="text-center space-y-1">
-                        <h2 className="text-2xl font-black text-white tracking-tight">{t.eval_intro_title}</h2>
-                        <p className="text-brand font-semibold text-sm">{t.eval_intro_subtitle}</p>
-                    </div>
+                        <div className="space-y-3">
+                            <h2 className="text-4xl font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-brand via-emerald-300 to-cyan-400 sm:text-5xl md:text-6xl">
+                                {t.eval_intro_title}
+                            </h2>
+                            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/45 sm:text-base">
+                                {t.eval_intro_subtitle}
+                            </p>
+                        </div>
 
-                    {/* Info box */}
-                    <div className="w-full rounded-xl border border-brand/20 bg-white/[0.06] backdrop-blur-sm p-5 text-sm text-white/85 leading-relaxed">
-                        <p>{t.eval_intro_body}</p>
-                    </div>
+                        <div className="max-w-2xl rounded-[28px] border border-white/10 bg-black/30 p-6 backdrop-blur-md sm:p-7">
+                            <p className="text-sm leading-relaxed text-white/82 sm:text-[15px]">
+                                {t.eval_intro_body}
+                            </p>
+                        </div>
 
-                    {/* CTA */}
-                    <button
-                        onClick={() => setShowEvalIntro(false)}
-                        className="mt-2 px-8 py-3 rounded-xl bg-brand text-black font-black text-sm tracking-wide hover:bg-brand/90 active:scale-95 transition-all shadow-lg shadow-brand/20"
-                    >
-                        {t.eval_intro_start}
-                    </button>
+                        <button
+                            onClick={() => setShowEvalIntro(false)}
+                            className="mt-2 rounded-xl bg-brand px-8 py-3 text-sm font-black tracking-wide text-black shadow-lg shadow-brand/20 transition-all hover:bg-brand/90 active:scale-95"
+                        >
+                            {t.eval_intro_start}
+                        </button>
+                    </div>
                 </div>
             </div>
         );
