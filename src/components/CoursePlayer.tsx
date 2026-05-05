@@ -862,29 +862,18 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
               </div>
             </div>
 
-            {/* Footer de Navegación Profesional */}
-            <footer className="w-full bg-black/80 border-t border-white/10 z-[100] backdrop-blur-2xl relative">
-                {/* Slim Progress Bar on top of footer */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
-                    <motion.div
-                        className="h-full bg-brand shadow-[0_0_15px_rgba(49,210,45,0.4)]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${((activeModuleIndex + 1) / modules.length) * 100}%` }}
-                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                    />
-                </div>
-
-                {/* Biblioteca - Material de apoyo */}
-                {currentModule.settings?.extras?.length > 0 && (
-                    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-8 pt-3 [@media(max-height:430px)]:pt-2">
-                        <div className="rounded-t-2xl bg-[#150d1f] border border-fuchsia-500/40 border-b-0 px-4 py-3">
+            {/* Biblioteca - Material Complementario (fuera del footer) */}
+            {currentModule.settings?.extras?.length > 0 && (
+                <div className="w-full px-3 sm:px-4 md:px-8 pb-0">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="rounded-2xl bg-[#150d1f] border border-fuchsia-400/50 px-4 py-3">
                             <div className="flex items-center flex-wrap gap-2.5">
                                 {/* Ícono en círculo */}
                                 <div className="flex items-center gap-2 shrink-0">
-                                    <div className="w-8 h-8 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/50 flex items-center justify-center">
-                                        <Library className="w-4 h-4 text-fuchsia-400" />
+                                    <div className="w-8 h-8 rounded-full bg-fuchsia-400/20 border border-fuchsia-400/60 flex items-center justify-center">
+                                        <Library className="w-4 h-4 text-fuchsia-200" />
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-fuchsia-400">{t.material}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-fuchsia-200">Material complementario</span>
                                 </div>
                                 {/* Archivos */}
                                 {currentModule.settings.extras.map((extra: any, idx: number) => {
@@ -899,7 +888,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                             href={extra.url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-200 text-xs font-semibold hover:bg-fuchsia-500/20 hover:border-fuchsia-400/70 transition-all"
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-fuchsia-400/10 border border-fuchsia-400/30 text-fuchsia-200 text-xs font-semibold hover:bg-fuchsia-400/20 hover:border-fuchsia-400/70 transition-all"
                                         >
                                             <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shrink-0">{ext}</span>
                                             <span className="max-w-[180px] truncate">{cleanName}</span>
@@ -909,7 +898,20 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
+
+            {/* Footer de Navegación Profesional */}
+            <footer className="w-full bg-black/80 border-t border-white/10 z-[100] backdrop-blur-2xl relative">
+                {/* Slim Progress Bar on top of footer */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
+                    <motion.div
+                        className="h-full bg-brand shadow-[0_0_15px_rgba(49,210,45,0.4)]"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((activeModuleIndex + 1) / modules.length) * 100}%` }}
+                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                    />
+                </div>
 
                 <div className="max-w-4xl mx-auto flex items-center justify-between py-3 md:py-5 [@media(max-height:430px)]:py-2 px-3 sm:px-4 md:px-8 gap-2 sm:gap-3">
                     {/* Info Módulo */}
