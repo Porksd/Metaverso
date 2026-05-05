@@ -84,8 +84,15 @@ export default function StudentCoursesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="text-white text-center">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <img
+          src="/app_background.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="relative z-10 text-white text-center">
           <div className="animate-spin w-12 h-12 border-4 border-brand border-t-transparent rounded-full mx-auto mb-4"></div>
           <p>Cargando tus cursos...</p>
         </div>
@@ -94,9 +101,16 @@ export default function StudentCoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="relative min-h-screen text-white overflow-hidden">
+      <img
+        src="/app_background.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none"
+      />
+      <div className="absolute inset-0 bg-black/60" />
       {/* Header */}
-      <header className="glass border-b border-white/10 p-6">
+      <header className="relative z-10 glass border-b border-white/10 p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-black mb-2">Mis Cursos</h1>
           {studentData && (
@@ -108,7 +122,7 @@ export default function StudentCoursesPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="relative z-10 max-w-7xl mx-auto p-6">
         {enrollments.length === 0 ? (
           <div className="text-center py-20">
             <BookOpen className="w-16 h-16 text-white/20 mx-auto mb-4" />
