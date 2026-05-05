@@ -866,7 +866,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             {currentModule.settings?.extras?.length > 0 && (
                 <div className="w-full px-3 sm:px-4 md:px-8 pb-0">
                     <div className="max-w-4xl mx-auto">
-                        <div className="rounded-2xl bg-[#150d1f] border border-fuchsia-400/50 px-4 py-3">
+                        <div className="rounded-t-2xl bg-[#150d1f] border border-fuchsia-400/50 border-b-0 px-4 py-3">
                             <div className="flex items-center flex-wrap gap-2.5">
                                 {/* Ícono en círculo */}
                                 <div className="flex items-center gap-2 shrink-0">
