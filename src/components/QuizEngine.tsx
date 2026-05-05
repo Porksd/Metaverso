@@ -229,15 +229,15 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,210,45,0.12),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(135deg,rgba(0,0,0,0.78),rgba(2,8,6,0.55),rgba(3,13,18,0.72))]" />
 
-                <div className="absolute -right-14 top-1/2 hidden h-[260px] w-[260px] -translate-y-1/2 md:block">
-                    <div className="absolute inset-0 rounded-full border border-brand/15" />
-                    <div className="absolute inset-8 rounded-full border border-cyan-400/10" />
-                    <div className="absolute inset-16 rounded-full border border-white/10" />
-                    <div className="absolute left-6 right-6 top-1/2 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
-                    <div className="absolute bottom-12 left-1/2 h-40 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent" />
-                    <div className="absolute right-10 top-10 h-24 w-24 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm" />
-                    <div className="absolute bottom-10 left-8 h-20 w-28 rounded-full border border-brand/15 bg-brand/[0.05]" />
-                    <div className="absolute right-24 top-[42%] h-3 w-3 rounded-full bg-brand shadow-[0_0_18px_rgba(49,210,45,0.65)]" />
+                <div className="absolute -right-24 top-1/2 hidden h-[260px] w-[260px] -translate-y-1/2 opacity-55 md:block">
+                    <div className="absolute inset-0 rounded-full border border-brand/12" />
+                    <div className="absolute inset-8 rounded-full border border-cyan-400/8" />
+                    <div className="absolute inset-16 rounded-full border border-white/8" />
+                    <div className="absolute left-6 right-6 top-1/2 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" />
+                    <div className="absolute bottom-12 left-1/2 h-40 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-cyan-400/20 to-transparent" />
+                    <div className="absolute right-10 top-10 h-24 w-24 rounded-2xl border border-white/8 bg-white/[0.02] backdrop-blur-sm" />
+                    <div className="absolute bottom-10 left-8 h-20 w-28 rounded-full border border-brand/12 bg-brand/[0.04]" />
+                    <div className="absolute right-24 top-[42%] h-3 w-3 rounded-full bg-brand shadow-[0_0_14px_rgba(49,210,45,0.5)]" />
                 </div>
 
                 <div className="relative flex min-h-[480px] items-center px-6 py-12 sm:px-8 md:px-10">
