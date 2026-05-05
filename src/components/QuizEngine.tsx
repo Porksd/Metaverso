@@ -219,7 +219,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
 
     if (showEvalIntro) {
         return (
-            <div className="relative left-1/2 w-screen max-w-none -translate-x-1/2 overflow-hidden border-y border-white/5 bg-[#050a08]">
+            <div className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-[28px] border border-white/10 bg-[#050a08] shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
                 <div
                     className="absolute inset-0 opacity-50"
                     style={{
@@ -229,7 +229,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(49,210,45,0.12),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(135deg,rgba(0,0,0,0.78),rgba(2,8,6,0.55),rgba(3,13,18,0.72))]" />
 
-                <div className="absolute right-[8%] top-1/2 hidden h-[340px] w-[340px] -translate-y-1/2 lg:block">
+                <div className="absolute -right-14 top-1/2 hidden h-[260px] w-[260px] -translate-y-1/2 md:block">
                     <div className="absolute inset-0 rounded-full border border-brand/15" />
                     <div className="absolute inset-8 rounded-full border border-cyan-400/10" />
                     <div className="absolute inset-16 rounded-full border border-white/10" />
@@ -240,15 +240,15 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                     <div className="absolute right-24 top-[42%] h-3 w-3 rounded-full bg-brand shadow-[0_0_18px_rgba(49,210,45,0.65)]" />
                 </div>
 
-                <div className="relative mx-auto flex min-h-[68vh] max-w-6xl items-center px-6 py-14 sm:px-8 md:px-12">
-                    <div className="max-w-3xl space-y-6">
+                <div className="relative flex min-h-[480px] items-center px-6 py-12 sm:px-8 md:px-10">
+                    <div className="max-w-xl space-y-6">
                         <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-brand">
                             <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
                             Evaluacion final
                         </div>
 
                         <div className="space-y-3">
-                            <h2 className="text-4xl font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-brand via-emerald-300 to-cyan-400 sm:text-5xl md:text-6xl">
+                            <h2 className="text-4xl font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-brand via-emerald-300 to-cyan-400 sm:text-5xl">
                                 {t.eval_intro_title}
                             </h2>
                             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/45 sm:text-base">
