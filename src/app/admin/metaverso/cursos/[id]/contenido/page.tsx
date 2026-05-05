@@ -1212,7 +1212,10 @@ export default function DynamicCourseEditor() {
                                     </button>
                                 </div>
                                 
-                                <div className="grid grid-cols-4 gap-4">
+                                {(() => {
+                                    const hasScorm = module.items?.some((i: any) => i.type === 'scorm');
+                                    return (
+                                <div className={`grid gap-4 ${hasScorm ? 'grid-cols-4' : 'grid-cols-2'}`}>
                                     {/* Puntaje Mínimo */}
                                     <div className="bg-black/40 p-4 rounded-xl border border-purple-500/20">
                                         <label className="text-[9px] font-black uppercase text-white/40 mb-2 block text-center">
@@ -1237,7 +1240,8 @@ export default function DynamicCourseEditor() {
                                         <p className="text-[8px] text-white/30 mt-1 text-center">% para aprobar</p>
                                     </div>
                                     
-                                    {/* Peso Quiz */}
+                                    {/* Peso Quiz - solo si hay SCORM */}
+                                    {hasScorm && (
                                     <div className="bg-black/40 p-4 rounded-xl border border-blue-500/20">
                                         <label className="text-[9px] font-black uppercase text-white/40 mb-2 block text-center">
                                             Peso Quiz
@@ -1262,8 +1266,10 @@ export default function DynamicCourseEditor() {
                                         />
                                         <p className="text-[8px] text-white/30 mt-1 text-center">% del total</p>
                                     </div>
+                                    )}
                                     
-                                    {/* Peso SCORM */}
+                                    {/* Peso SCORM - solo si existe item SCORM en el módulo */
+                                    {module.items?.some((i: any) => i.type === 'scorm') && (
                                     <div className="bg-black/40 p-4 rounded-xl border border-orange-500/20">
                                         <label className="text-[9px] font-black uppercase text-white/40 mb-2 block text-center">
                                             Peso SCORM
@@ -1273,6 +1279,7 @@ export default function DynamicCourseEditor() {
                                         </div>
                                         <p className="text-[8px] text-white/30 mt-1 text-center">auto-calculado</p>
                                     </div>
+                                    )}
                                     
                                     {/* Requiere Firma */}
                                     <div className="bg-black/40 p-4 rounded-xl border border-green-500/20 flex flex-col items-center justify-center">
@@ -1299,17 +1306,31 @@ export default function DynamicCourseEditor() {
                                         </button>
                                     </div>
                                 </div>
+                                    );
+                                })()}
                                 
                                 {/* Fórmula visual */}
                                 <div className="mt-4 p-3 bg-black/40 rounded-lg border border-white/5">
                                     <p className="text-xs text-white/60 text-center font-mono">
-                                        <span className="text-blue-400 font-bold">Quiz ({module.settings?.quiz_percentage ?? 80}%)</span>
-                                        {' + '}
-                                        <span className="text-orange-400 font-bold">SCORM ({module.settings?.scorm_percentage ?? 20}%)</span>
-                                        {' ≥ '}
-                                        <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 60}%</span>
-                                        {' → '}
-                                        <span className="text-green-400 font-bold">Certificado ✓</span>
+                                        {module.items?.some((i: any) => i.type === 'scorm') ? (
+                                            <>
+                                                <span className="text-blue-400 font-bold">Quiz ({module.settings?.quiz_percentage ?? 80}%)</span>
+                                                {' + '}
+                                                <span className="text-orange-400 font-bold">SCORM ({module.settings?.scorm_percentage ?? 20}%)</span>
+                                                {' ≥ '}
+                                                <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 60}%</span>
+                                                {' → '}
+                                                <span className="text-green-400 font-bold">Certificado ✓</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-blue-400 font-bold">Quiz (100%)</span>
+                                                {' ≥ '}
+                                                <span className="text-purple-400 font-bold">{module.settings?.min_score ?? 60}%</span>
+                                                {' → '}
+                                                <span className="text-green-400 font-bold">Certificado ✓</span>
+                                            </>
+                                        )}
                                     </p>
                                 </div>
                             </div>

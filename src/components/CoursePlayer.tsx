@@ -509,15 +509,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             // Estos elementos NO bloquean el botón:
             if (['text', 'image', 'pdf', 'header'].includes(item.type)) return false;
 
-            // En módulos de contenido, los quiz son formativos por defecto.
-            // Solo bloquean si el módulo es de evaluación o si vienen marcados como obligatorios.
+            // Todos los quiz bloquean hasta que se complete y apruebe (handleItemCompletion solo se llama al pasar)
             if (item.type === 'quiz') {
-                const quizRequired = currentModule.type === 'evaluation' ||
-                    item.content?.is_mandatory === true ||
-                    item.content?.required === true ||
-                    item.content?.must_pass === true;
-
-                if (!quizRequired) return false;
                 return !itemsCompleted.has(item.id);
             }
             
