@@ -106,7 +106,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
     const [scormScore, setScormScore] = useState<number>(0);
     const [scormModalItem, setScormModalItem] = useState<ModuleItem | null>(null);
     const [enrollment, setEnrollment] = useState<any>(null);
-    const [extrasOpen, setExtrasOpen] = useState(false);
     const [surveyDone, setSurveyDone] = useState(false);
     const [evaluationPassed, setEvaluationPassed] = useState(false);
 
@@ -225,7 +224,6 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         // setItemsCompleted(new Set()); // NO LIMPIAR itemsCompleted para mantener el estado entre módulos
         setModuleCompleted(false);
         stopAllMedia();
-        setExtrasOpen(false);
     }, [activeModuleIndex]);
 
     const stopAllMedia = () => {
@@ -655,37 +653,31 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     </h1>
                                 </div>
                                 
-                                {/* Biblioteca */}
-                                {currentModule.settings?.extras?.length > 0 && (
-                                    <div className="relative max-[430px]:w-full shrink-0">
-                                        <button
-                                            onClick={() => setExtrasOpen((prev) => !prev)}
-                                            className={`px-3 md:px-4 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-bold max-[430px]:w-full ${isLightBg ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-brand/10 border-brand/20 text-white hover:bg-brand/20'}`}
-                                        >
-                                            <Library className="w-4 h-4" />
-                                            <span>{t.material} ({currentModule.settings.extras.length})</span>
-                                        </button>
-                                        
-                                        <div
-                                            className={`absolute right-0 top-full mt-2 w-72 max-[430px]:left-0 max-[430px]:right-auto max-[430px]:w-full bg-[#111] border border-white/10 rounded-xl shadow-2xl transition-all z-50 p-3 text-white ${extrasOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-                                        >
-                                            {currentModule.settings.extras.map((extra: any, idx: number) => (
-                                                <a 
-                                                    key={idx}
-                                                    href={extra.url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-all"
-                                                    onClick={() => setExtrasOpen(false)}
-                                                >
-                                                    <FileIcon className="w-5 h-5 text-brand" />
-                                                    <span className="text-sm flex-1 truncate">{extra.name}</span>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
+
+                            {/* Biblioteca - Material de apoyo (siempre visible) */}
+                            {currentModule.settings?.extras?.length > 0 && (
+                                <div className={`mt-3 pt-3 border-t ${isLightBg ? 'border-black/10' : 'border-brand/20'}`}>
+                                    <div className="flex items-center flex-wrap gap-2">
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <Library className="w-3.5 h-3.5 text-brand" />
+                                            <span className={`text-xs font-bold uppercase tracking-widest ${isLightBg ? 'text-slate-500' : 'text-brand'}`}>{t.material}</span>
+                                        </div>
+                                        {currentModule.settings.extras.map((extra: any, idx: number) => (
+                                            <a
+                                                key={idx}
+                                                href={extra.url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${isLightBg ? 'bg-white border-slate-200 text-slate-700 hover:border-brand/50 hover:text-brand' : 'bg-white/5 border-brand/30 text-white/90 hover:bg-brand/20 hover:border-brand/60'}`}
+                                            >
+                                                <FileIcon className="w-3 h-3 text-brand shrink-0" />
+                                                <span>{extra.name}</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </header>
 
                         {/* CONTENIDO DEL MÓDULO */}
