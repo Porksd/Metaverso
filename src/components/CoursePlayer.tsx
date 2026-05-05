@@ -874,32 +874,39 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     />
                 </div>
 
-                {/* Biblioteca - Material de apoyo (siempre visible sobre el footer) */}
+                {/* Biblioteca - Material de apoyo */}
                 {currentModule.settings?.extras?.length > 0 && (
                     <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-8 pt-3 [@media(max-height:430px)]:pt-2">
-                        <div className="flex items-center flex-wrap gap-2">
-                            <div className="flex items-center gap-1.5 shrink-0">
-                                <Library className="w-4 h-4 text-brand" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-brand">{t.material}</span>
+                        <div className="rounded-t-2xl bg-[#150d1f] border border-fuchsia-500/40 border-b-0 px-4 py-3">
+                            <div className="flex items-center flex-wrap gap-2.5">
+                                {/* Ícono en círculo */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/50 flex items-center justify-center">
+                                        <Library className="w-4 h-4 text-fuchsia-400" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-fuchsia-400">{t.material}</span>
+                                </div>
+                                {/* Archivos */}
+                                {currentModule.settings.extras.map((extra: any, idx: number) => {
+                                    const ext = (extra.url || extra.name || '').split('.').pop()?.toUpperCase().slice(0, 4) || 'FILE';
+                                    const cleanName = extra.name
+                                        .replace(/^\d+_/, '')
+                                        .replace(/_/g, ' ')
+                                        .replace(/\.[^.]+$/, '');
+                                    return (
+                                        <a
+                                            key={idx}
+                                            href={extra.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-200 text-xs font-semibold hover:bg-fuchsia-500/20 hover:border-fuchsia-400/70 transition-all"
+                                        >
+                                            <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shrink-0">{ext}</span>
+                                            <span className="max-w-[180px] truncate">{cleanName}</span>
+                                        </a>
+                                    );
+                                })}
                             </div>
-                            {currentModule.settings.extras.map((extra: any, idx: number) => {
-                                const cleanName = extra.name
-                                    .replace(/^\d+_/, '')
-                                    .replace(/_/g, ' ')
-                                    .replace(/\.[^.]+$/, '');
-                                return (
-                                    <a
-                                        key={idx}
-                                        href={extra.url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand/10 border border-brand/30 text-white/90 text-xs font-semibold hover:bg-brand/25 hover:border-brand/60 transition-all"
-                                    >
-                                        <FileIcon className="w-3.5 h-3.5 text-brand shrink-0" />
-                                        <span className="max-w-[160px] truncate">{cleanName}</span>
-                                    </a>
-                                );
-                            })}
                         </div>
                     </div>
                 )}
