@@ -567,7 +567,10 @@ export default function MetaversoAdmin() {
             <ShieldCheck className="w-20 h-20 text-red-500" />
             <h1 className="text-4xl font-black italic tracking-tighter uppercase">Acceso Denegado</h1>
             <p className="text-white/40 max-w-md uppercase text-xs font-bold leading-relaxed">Las credenciales no tienen autorización para el protocolo de acceso nivel 5.</p>
+            <div className="flex gap-3">
                 <button onClick={() => router.push("/admin")} className="bg-white text-black px-8 py-4 rounded-2xl font-black uppercase text-xs">Volver al Inicio</button>
+                <button onClick={async () => { await supabase.auth.signOut(); router.push("/admin/metaverso/login"); }} className="bg-red-500/20 border border-red-500/30 text-red-400 px-8 py-4 rounded-2xl font-black uppercase text-xs hover:bg-red-500/30 transition-all">Cerrar Sesión</button>
+            </div>
         </div>
     );
 

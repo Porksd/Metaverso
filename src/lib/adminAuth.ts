@@ -8,8 +8,8 @@ export const SUPER_ADMIN_EMAILS = [
   'apacheco@metaversotec.com'
 ];
 
-// Nota: admin@metaversotec.com ya no está en la lista hardcoded,
-// su rol 'administrador' se gestiona desde la tabla admin_profiles en la DB.
+// Fallback para el rol Administrador (puede eliminarse cursos, no puede exportar Excel)
+export const ADMINISTRADOR_EMAILS = ['admin@metaversotec.com'];
 
 type ResolveRoleResult = {
   role: AdminRole | null;
@@ -27,6 +27,10 @@ export async function resolveAdminRole(
   // Fast path for known superadmins to avoid unnecessary DB calls/policy failures.
   if (SUPER_ADMIN_EMAILS.includes(normalizedEmail)) {
     return { role: 'superadmin', source: 'fallback' };
+  }
+  // Fast path for known administradores
+  if (ADMINISTRADOR_EMAILS.includes(normalizedEmail)) {
+    return { role: 'administrador', source: 'fallback' };
   }
 
   const { data: profile, error } = await supabaseClient
