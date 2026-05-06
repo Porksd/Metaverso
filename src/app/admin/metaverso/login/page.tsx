@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, Lock, ArrowRight, User, ChevronLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,12 +9,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 function LoginForm() {
-    const [email, setEmail] = useState("apacheco@lobus.cl");
+    const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl') || "/admin/metaverso";
+
+    // Siempre cerrar sesión al llegar a la página de login para no quedar atrapado
+    useEffect(() => {
+        supabase.auth.signOut();
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
