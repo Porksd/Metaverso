@@ -759,17 +759,23 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     {/* Quiz */}
                                     {item.type === 'quiz' && (
                                         <div className={`${((approved || evaluationPassed) && isEvaluation) ? 'opacity-50 pointer-events-none' : ''}`}>
-                                            <QuizEngine
-                                                questions={item.content.questions || []}
-                                                passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 100}
-                                                courseId={courseId}
-                                                enrollmentId={enrollment?.id}
-                                                currentEnrollment={enrollment}
-                                                onComplete={(score, passed) => handleEvaluationItemScore(item.id, score, 'quiz', passed)}
-                                                persistScore={isEvaluation}
-                                                forceFinished={isEvaluation && evaluationPassed}
-                                                language={language}
-                                            />
+                                            {isEvaluation && !enrollment ? (
+                                                <div className={`p-6 rounded-2xl border text-center ${isLightBg ? 'bg-black/5 border-black/10 text-slate-500' : 'bg-white/5 border-white/10 text-white/50'}`}>
+                                                    Cargando estado de evaluacion...
+                                                </div>
+                                            ) : (
+                                                <QuizEngine
+                                                    questions={item.content.questions || []}
+                                                    passingScore={isEvaluation ? (currentModule.settings?.min_score || 60) : 100}
+                                                    courseId={courseId}
+                                                    enrollmentId={enrollment?.id}
+                                                    currentEnrollment={enrollment}
+                                                    onComplete={(score, passed) => handleEvaluationItemScore(item.id, score, 'quiz', passed)}
+                                                    persistScore={isEvaluation}
+                                                    forceFinished={isEvaluation && evaluationPassed}
+                                                    language={language}
+                                                />
+                                            )}
                                         </div>
                                     )}
 

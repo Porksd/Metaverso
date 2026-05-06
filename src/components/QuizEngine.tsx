@@ -153,10 +153,16 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
     const [wasPassed, setWasPassed] = useState<boolean | null>(forceFinished ? true : null);
     const [questionSummaries, setQuestionSummaries] = useState<Array<{ questionId: string; selectedText: string; correct: boolean }>>([]);
     const [showEvalIntro, setShowEvalIntro] = useState(persistScore && !forceFinished && !(currentEnrollment?.status === 'completed'));
+    const [attemptOverride, setAttemptOverride] = useState<number | null>(null);
 
     const targetEnrollmentId = enrollmentId || currentEnrollment?.id;
     const targetCourseId = courseId || config?.id;
     const quizDraftKey = targetEnrollmentId ? `quiz-draft:${targetEnrollmentId}` : (targetCourseId ? `quiz-draft:course:${targetCourseId}` : null);
+    const currentAttempt = attemptOverride ?? Number(currentEnrollment?.current_attempt || 0);
+    const maxAttempts = Number(currentEnrollment?.max_attempts || 3);
+    const attemptsLocked = persistScore && !forceFinished && (currentEnrollment?.status !== 'completed') && currentAttempt >= maxAttempts;
+    const attemptsExhausted = attemptsLocked && !isFinished;
+    const remainingAttempts = Math.max(maxAttempts - currentAttempt, 0);
 
     useEffect(() => {
         if (!quizDraftKey || isFinished || forceFinished) return;
@@ -217,6 +223,22 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         return selectedIds.map((id) => getOptionText(question, id)).join(', ');
     };
 
+    if (attemptsExhausted && !isFinished) {
+        return (
+            <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
+                <div className="flex flex-col items-center justify-center p-6 space-y-3 text-center">
+                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border-2 border-red-500/30">
+                        <Lock className="w-12 h-12 text-red-400" />
+                    </div>
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-bold text-red-400">Límite de intentos alcanzado</h2>
+                        <p className="text-white/60 text-sm">Ya utilizaste {currentAttempt} de {maxAttempts} intentos disponibles para esta evaluación.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (showEvalIntro) {
         return (
             <div className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-[28px] border border-white/10 bg-[#050a08] shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
@@ -260,14 +282,25 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                             <p className="text-sm leading-relaxed text-white/82 sm:text-[15px]">
                                 {t.eval_intro_body}
                             </p>
+                            {persistScore && (
+                                <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-white/45">
+                                    Intentos disponibles: {remainingAttempts}/{maxAttempts}
+                                </p>
+                            )}
                         </div>
 
-                        <button
-                            onClick={() => setShowEvalIntro(false)}
-                            className="mt-2 rounded-xl bg-brand px-8 py-3 text-sm font-black tracking-wide text-black shadow-lg shadow-brand/20 transition-all hover:bg-brand/90 active:scale-95"
-                        >
-                            {t.eval_intro_start}
-                        </button>
+                        {attemptsLocked ? (
+                            <div className="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 px-8 py-4 text-sm font-black tracking-wide text-red-300 text-center">
+                                Limite de intentos alcanzado
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setShowEvalIntro(false)}
+                                className="mt-2 rounded-xl bg-brand px-8 py-3 text-sm font-black tracking-wide text-black shadow-lg shadow-brand/20 transition-all hover:bg-brand/90 active:scale-95"
+                            >
+                                {t.eval_intro_start}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -357,12 +390,24 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
         setWasPassed(passed2);
         setIsFinished(true);
 
+        const nextAttempt = persistScore ? Math.max(currentAttempt + 1, 1) : currentAttempt;
+        if (persistScore) {
+            setAttemptOverride(nextAttempt);
+        }
+
         // Persistir en Supabase
         // Solo persistir si tenemos un enrollment ID válido (los dummy IDs o preview-admin se saltan)
         const isValidUUID = targetEnrollmentId && targetEnrollmentId.length > 20 && targetEnrollmentId !== 'preview-admin' && !targetEnrollmentId.includes('dummy');
 
         if (isValidUUID) {
             try {
+                if (persistScore) {
+                    await supabase
+                        .from('enrollments')
+                        .update({ current_attempt: nextAttempt })
+                        .eq('id', targetEnrollmentId);
+                }
+
                 // SOLO persistir estado directamente si NO hay un handler onComplete externo.
                 // Cuando onComplete existe (ej: CoursePlayer evaluación), el componente padre
                 // maneja la lógica de estado con verificación de encuestas pendientes.
@@ -372,6 +417,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                         .update({
                             status: passed2 ? 'completed' : 'in_progress',
                             best_score: finalScore,
+                            current_attempt: nextAttempt,
                             completed_at: passed2 ? new Date().toISOString() : null
                         })
                         .eq('id', targetEnrollmentId);
@@ -391,7 +437,7 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 await supabase.from('activity_logs').insert({
                     enrollment_id: targetEnrollmentId,
                     course_id: targetCourseId,
-                    attempt_number: 1, // Podríamos incrementarlo si tuviéramos seguimiento de intentos
+                    attempt_number: nextAttempt,
                     raw_data: {
                         answers,
                         finalScore,
@@ -577,21 +623,27 @@ export default function QuizEngine({ config, questions: propQuestions, passingSc
                 </p>
 
                 <div className="flex flex-col w-full gap-3">
-                    <button
-                        onClick={() => {
-                            setAnswers({});
-                            setQuestionSummaries([]);
-                            setCurrentQuestionIdx(0);
-                            setIsFinished(false);
-                            setWasPassed(null);
-                            if (quizDraftKey) {
-                                localStorage.removeItem(quizDraftKey);
-                            }
-                        }}
-                        className="w-full py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase"
-                    >
-                        {t.try_again}
-                    </button>
+                    {!resolvedPassed && attemptsLocked ? (
+                        <div className="w-full py-4 border border-red-500/20 bg-red-500/5 text-red-300 font-bold rounded-xl text-xs uppercase text-center">
+                            Límite de intentos alcanzado
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => {
+                                setAnswers({});
+                                setQuestionSummaries([]);
+                                setCurrentQuestionIdx(0);
+                                setIsFinished(false);
+                                setWasPassed(null);
+                                if (quizDraftKey) {
+                                    localStorage.removeItem(quizDraftKey);
+                                }
+                            }}
+                            className="w-full py-4 bg-white/5 text-white/60 font-bold rounded-xl hover:bg-white/10 transition-all text-xs uppercase"
+                        >
+                            {t.try_again}
+                        </button>
+                    )}
                 </div>
             </div>
         );
