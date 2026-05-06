@@ -44,7 +44,7 @@ export default function SurveyStats() {
     const [totalEnrollmentsCount, setTotalEnrollmentsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',

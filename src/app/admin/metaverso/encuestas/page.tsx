@@ -28,7 +28,7 @@ export default function SurveysAdmin() {
     const [surveys, setSurveys] = useState<Survey[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
     const [isResetting, setIsResetting] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<Survey | null>(null);

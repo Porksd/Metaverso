@@ -35,7 +35,7 @@ export default function JobPositionsAdmin() {
     const [companies, setCompanies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditing, setIsEditing] = useState<JobPosition | null>(null);
     const [showForm, setShowForm] = useState(false);
