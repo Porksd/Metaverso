@@ -473,7 +473,7 @@ export default function EmpresaAdmin() {
                 </header>
 
                 {role === 'manager' ? (
-                    <EnhancedManagerDashboard companyName={companyName} companyId={companyId || undefined} />
+                    <EnhancedManagerDashboard companyName={companyName} companyId={companyId || undefined} isMasterAdmin={!!masterRole} />
                 ) : (
                     <div className="space-y-6">
                         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">

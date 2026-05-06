@@ -97,7 +97,7 @@ interface ActivityLog {
     raw_data?: any;
 }
 
-export default function EnhancedManagerDashboard({ companyName, companyId }: { companyName: string, companyId?: string }) {
+export default function EnhancedManagerDashboard({ companyName, companyId, isMasterAdmin }: { companyName: string, companyId?: string, isMasterAdmin?: boolean }) {
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
     const [loading, setLoading] = useState(true);
@@ -950,6 +950,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId }: { c
                             </motion.div>
                         )}
 
+                        {isMasterAdmin && (
                         <button
                             onClick={exportData}
                             className="px-4 py-2 bg-brand/20 border border-brand/40 rounded-xl hover:bg-brand/30 transition-all flex items-center gap-2"
@@ -957,6 +958,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId }: { c
                             <Download className="w-4 h-4" />
                             Exportar Datos
                         </button>
+                        )}
                     </div>
                 ) : null}
             </div>
@@ -975,12 +977,14 @@ export default function EnhancedManagerDashboard({ companyName, companyId }: { c
                     >
                         <Filter className="w-4 h-4" /> Filtros
                     </button>
+                    {isMasterAdmin && (
                     <button
                         onClick={exportGlobalView}
                         className="px-3.5 py-1.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
                     >
                         <Download className="w-4 h-4" /> Exportar Excel (Filtros Activos)
                     </button>
+                    )}
                 </div>
 
                 {showGlobalFilters && (
