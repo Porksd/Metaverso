@@ -102,8 +102,8 @@ export default function CoursesAdmin() {
     };
 
     const handleDeleteCourse = async (course: any) => {
-        if (userRole !== 'superadmin') {
-            return alert("No tienes permisos para eliminar cursos. Contacta a un SuperAdmin.");
+        if (userRole !== 'superadmin' && userRole !== 'administrador') {
+            return alert("No tienes permisos para eliminar cursos.");
         }
         // 1. Verificar alumnos
         const { count: enrollmentCount, error: enrollError } = await supabase

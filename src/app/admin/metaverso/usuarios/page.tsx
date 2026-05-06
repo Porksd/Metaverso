@@ -14,7 +14,7 @@ import { resolveAdminRole } from "@/lib/adminAuth";
 interface AdminProfile {
     id: string;
     email: string;
-    role: 'superadmin' | 'editor';
+    role: 'superadmin' | 'administrador' | 'editor';
     permissions: any;
     created_at: string;
 }
@@ -78,14 +78,23 @@ export default function AdminUsersPage() {
         e.preventDefault();
         const formData = new FormData(e.currentTarget as HTMLFormElement);
         const email = (formData.get('email') as string).toLowerCase();
-        const role = formData.get('role') as 'superadmin' | 'editor';
+        const role = formData.get('role') as 'superadmin' | 'administrador' | 'editor';
 
         const adminData = { email, role };
 
+        let saveError;
         if (editingAdmin?.id) {
-            await supabase.from('admin_profiles').update(adminData).eq('id', editingAdmin.id);
+            const { error } = await supabase.from('admin_profiles').update(adminData).eq('id', editingAdmin.id);
+            saveError = error;
         } else {
-            await supabase.from('admin_profiles').insert([adminData]);
+            const { error } = await supabase.from('admin_profiles').insert([adminData]);
+            saveError = error;
+        }
+
+        if (saveError) {
+            console.error('Error guardando administrador:', saveError);
+            alert('Error al guardar: ' + saveError.message + '\n\nVerifica que tu cuenta tenga permisos de escritura en la base de datos (ejecuta la migración 033).');
+            return;
         }
 
         setShowForm(false);
@@ -205,9 +214,11 @@ export default function AdminUsersPage() {
                                             <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
                                                 admin.role === 'superadmin' 
                                                 ? 'bg-brand/10 text-brand border-brand/20' 
+                                                : admin.role === 'administrador'
+                                                ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
                                                 : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                             }`}>
-                                                {admin.role}
+                                                {admin.role === 'superadmin' ? 'Super Admin' : admin.role === 'administrador' ? 'Administrador' : 'Editor'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
@@ -266,8 +277,9 @@ export default function AdminUsersPage() {
                                             defaultValue={editingAdmin?.role || 'editor'} 
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand outline-none transition-all"
                                         >
-                                            <option value="superadmin" className="bg-[#0A0A0A]">SuperAdmin (Acceso Total)</option>
-                                            <option value="editor" className="bg-[#0A0A0A]">Editor (Gestión sin Eliminación)</option>
+                                            <option value="superadmin" className="bg-[#0A0A0A]">Super Admin — Acceso total</option>
+                                            <option value="administrador" className="bg-[#0A0A0A]">Administrador — Puede eliminar cursos, sin exportar Excel</option>
+                                            <option value="editor" className="bg-[#0A0A0A]">Editor — Sin eliminación, sin exportar Excel</option>
                                         </select>
                                     </div>
 

@@ -1,4 +1,4 @@
-export type AdminRole = 'superadmin' | 'editor';
+export type AdminRole = 'superadmin' | 'administrador' | 'editor';
 
 export const SUPER_ADMIN_EMAILS = [
   'apacheco@lobus.cl',
@@ -8,7 +8,8 @@ export const SUPER_ADMIN_EMAILS = [
   'apacheco@metaversotec.com'
 ];
 
-export const EDITOR_EMAILS = ['admin@metaversotec.com'];
+// Nota: admin@metaversotec.com ya no está en la lista hardcoded,
+// su rol 'administrador' se gestiona desde la tabla admin_profiles en la DB.
 
 type ResolveRoleResult = {
   role: AdminRole | null;
@@ -23,12 +24,9 @@ export async function resolveAdminRole(
   const normalizedEmail = (email || '').toLowerCase().trim();
   if (!normalizedEmail) return { role: null, source: null };
 
-  // Fast path for known admins to avoid unnecessary DB calls/policy failures.
+  // Fast path for known superadmins to avoid unnecessary DB calls/policy failures.
   if (SUPER_ADMIN_EMAILS.includes(normalizedEmail)) {
     return { role: 'superadmin', source: 'fallback' };
-  }
-  if (EDITOR_EMAILS.includes(normalizedEmail)) {
-    return { role: 'editor', source: 'fallback' };
   }
 
   const { data: profile, error } = await supabaseClient
@@ -42,8 +40,8 @@ export async function resolveAdminRole(
     return { role: null, source: null };
   }
 
-  if (profile?.role === 'superadmin' || profile?.role === 'editor') {
-    return { role: profile.role, source: 'admin_profiles' };
+  if (profile?.role === 'superadmin' || profile?.role === 'administrador' || profile?.role === 'editor') {
+    return { role: profile.role as AdminRole, source: 'admin_profiles' };
   }
 
   return { role: null, source: null };

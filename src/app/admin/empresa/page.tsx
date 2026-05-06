@@ -88,7 +88,7 @@ export default function EmpresaAdmin() {
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
-    const [masterRole, setMasterRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [masterRole, setMasterRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
     const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
     const [newStudent, setNewStudent] = useState<any>({ 
         first_name: "", 
@@ -114,7 +114,7 @@ export default function EmpresaAdmin() {
 
         if (storedMaster === 'true') {
             setIsMasterAdmin(true);
-            if (storedMasterRole === 'superadmin' || storedMasterRole === 'editor') {
+            if (storedMasterRole === 'superadmin' || storedMasterRole === 'administrador' || storedMasterRole === 'editor') {
                 setMasterRole(storedMasterRole);
             }
         }
@@ -442,7 +442,7 @@ export default function EmpresaAdmin() {
                                 <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand">
                                     <Shield className="w-3.5 h-3.5" />
                                     <span>Sesión Metaverso</span>
-                                    <span className="text-white/70">{masterRole === 'editor' ? 'Editor' : 'SuperAdmin'}</span>
+                                    <span className="text-white/70">{masterRole === 'superadmin' ? 'Super Admin' : masterRole === 'administrador' ? 'Administrador' : 'Editor'}</span>
                                 </div>
                             )}
                         </div>
@@ -473,7 +473,7 @@ export default function EmpresaAdmin() {
                 </header>
 
                 {role === 'manager' ? (
-                    <EnhancedManagerDashboard companyName={companyName} companyId={companyId || undefined} isMasterAdmin={!!masterRole} />
+                    <EnhancedManagerDashboard companyName={companyName} companyId={companyId || undefined} isMasterAdmin={masterRole === 'superadmin'} />
                 ) : (
                     <div className="space-y-6">
                         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">

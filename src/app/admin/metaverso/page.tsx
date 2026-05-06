@@ -63,7 +63,7 @@ export default function MetaversoAdmin() {
     const [isCreatingStudent, setIsCreatingStudent] = useState(false);
 
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    const [userRole, setUserRole] = useState<'superadmin' | 'editor' | null>(null);
+    const [userRole, setUserRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
 
     useEffect(() => {
         checkAuth();
