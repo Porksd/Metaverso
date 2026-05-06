@@ -230,6 +230,7 @@ export default function CompaniesAdmin() {
                                             label="Subir Logo Base"
                                             accept="image/*"
                                             currentValue={editingCompany.logo_url}
+                                            skipDbSave
                                             onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url: url })}
                                         />
                                     </div>
@@ -241,6 +242,7 @@ export default function CompaniesAdmin() {
                                             label="Para fondos claros"
                                             accept="image/*"
                                             currentValue={editingCompany.logo_url_dark}
+                                            skipDbSave
                                             onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_dark: url })}
                                         />
                                     </div>
@@ -252,6 +254,7 @@ export default function CompaniesAdmin() {
                                             label="Para fondos oscuros"
                                             accept="image/*"
                                             currentValue={editingCompany.logo_url_light}
+                                            skipDbSave
                                             onUploadComplete={(url) => setEditingCompany({ ...editingCompany, logo_url_light: url })}
                                         />
                                     </div>

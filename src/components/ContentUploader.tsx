@@ -12,6 +12,7 @@ interface ContentUploaderProps {
     currentValue?: string;
     onUploadComplete: (url: string) => void;
     compact?: boolean;
+    skipDbSave?: boolean;
 }
 
 export default function ContentUploader({
@@ -21,7 +22,8 @@ export default function ContentUploader({
     accept,
     currentValue,
     onUploadComplete,
-    compact = false
+    compact = false,
+    skipDbSave = false
 }: ContentUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -90,16 +92,18 @@ export default function ContentUploader({
                 
                 finalUrl = urlData.publicUrl;
 
-                const { error: dbError } = await supabase
-                    .from('course_content')
-                    .upsert({ 
-                        course_id: courseId, 
-                        key: sectionKey, 
-                        value: finalUrl, 
-                        updated_at: new Date().toISOString() 
-                    }, { onConflict: 'course_id,key' });
+                if (!skipDbSave) {
+                    const { error: dbError } = await supabase
+                        .from('course_content')
+                        .upsert({ 
+                            course_id: courseId, 
+                            key: sectionKey, 
+                            value: finalUrl, 
+                            updated_at: new Date().toISOString() 
+                        }, { onConflict: 'course_id,key' });
 
-                if (dbError) throw dbError;
+                    if (dbError) throw dbError;
+                }
             }
 
             if (finalUrl) {
