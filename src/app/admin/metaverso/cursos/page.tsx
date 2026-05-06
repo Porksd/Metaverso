@@ -298,7 +298,7 @@ export default function CoursesAdmin() {
                                 >
                                     <Settings className="w-4 h-4" />
                                 </button>
-                                {userRole === 'superadmin' && (
+                                {(userRole === 'superadmin' || userRole === 'administrador') && (
                                     <button
                                         onClick={() => handleDeleteCourse(course)}
                                         className="p-3 bg-red-500/5 text-red-500/40 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all"

@@ -9,7 +9,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/AdminSidebar";
-import { resolveAdminRole } from "@/lib/adminAuth";
+import { resolveAdminRole, SUPER_ADMIN_EMAILS, ADMINISTRADOR_EMAILS } from "@/lib/adminAuth";
 
 interface AdminProfile {
     id: string;
@@ -63,13 +63,33 @@ export default function AdminUsersPage() {
             .from('admin_profiles')
             .select('*')
             .order('created_at', { ascending: false });
-        
-        if (data) setAdmins(data);
+
+        if (data && data.length > 0) {
+            setAdmins(data);
+        } else {
+            // Fallback visible list so superadmins can still manage access when DB rows are incomplete.
+            const fallbackRows: AdminProfile[] = [
+                ...SUPER_ADMIN_EMAILS.map((email) => ({
+                    id: `fallback-superadmin-${email}`,
+                    email,
+                    role: 'superadmin' as const,
+                    permissions: { all: true },
+                    created_at: new Date(0).toISOString()
+                })),
+                ...ADMINISTRADOR_EMAILS.map((email) => ({
+                    id: `fallback-administrador-${email}`,
+                    email,
+                    role: 'administrador' as const,
+                    permissions: { delete_courses: true, export_excel: false },
+                    created_at: new Date(0).toISOString()
+                }))
+            ];
+            setAdmins(fallbackRows);
+        }
+
         if (error) {
             console.error("Error loading admins:", error);
-            if (error.code === '42P01' || error.code === 'PGRST205' || (error.message || '').includes('not find') || (error.message || '').includes('does not exist')) {
-                setDbError(true);
-            }
+            setDbError(true);
         }
         setLoading(false);
     };
