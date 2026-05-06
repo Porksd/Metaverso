@@ -28,6 +28,7 @@ export default function AdminUsersPage() {
     const [showForm, setShowForm] = useState(false);
     const [editingAdmin, setEditingAdmin] = useState<Partial<AdminProfile> | null>(null);
     const [dbError, setDbError] = useState(false);
+    const [dbErrorMessage, setDbErrorMessage] = useState("");
 
     useEffect(() => {
         checkAuth();
@@ -59,6 +60,7 @@ export default function AdminUsersPage() {
     const loadAdmins = async () => {
         setLoading(true);
         setDbError(false);
+        setDbErrorMessage("");
         const { data, error } = await supabase
             .from('admin_profiles')
             .select('*')
@@ -90,6 +92,14 @@ export default function AdminUsersPage() {
         if (error) {
             console.error("Error loading admins:", error);
             setDbError(true);
+            const msg = (error.message || '').toLowerCase();
+            if (error.code === '42P01' || error.code === 'PGRST205' || msg.includes('does not exist') || msg.includes('not find')) {
+                setDbErrorMessage('La tabla admin_profiles no existe. Ejecuta la migración 026 (base RBAC) y luego la 028/033.');
+            } else if (msg.includes('permission') || msg.includes('rls') || msg.includes('policy') || error.code === '42501') {
+                setDbErrorMessage('No hay permisos suficientes para leer admin_profiles (RLS/policies). Revisa la migración 028 y que tu correo esté como superadmin en admin_profiles.');
+            } else {
+                setDbErrorMessage(`No se pudo cargar admin_profiles: ${error.message}`);
+            }
         }
         setLoading(false);
     };
@@ -179,7 +189,7 @@ export default function AdminUsersPage() {
                             <Shield className="w-5 h-5 shrink-0" />
                             <div>
                                 <p className="uppercase tracking-wider">Error de Base de Datos</p>
-                                <p className="font-normal opacity-70">La tabla de perfiles administrativos no existe. Ejecute la migración 030.</p>
+                                <p className="font-normal opacity-70">{dbErrorMessage || 'No se pudo cargar la tabla admin_profiles.'}</p>
                             </div>
                         </div>
                     )}
