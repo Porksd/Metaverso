@@ -19,6 +19,12 @@ interface AdminProfile {
     created_at: string;
 }
 
+const ROLE_CAPABILITIES: Record<AdminProfile['role'], string[]> = {
+    superadmin: ['Editar', 'Eliminar Cursos', 'Eliminar Empresas/Alumnos', 'Exportar Excel', 'Gestionar Admins'],
+    administrador: ['Editar', 'Eliminar Cursos'],
+    editor: ['Editar']
+};
+
 export default function AdminUsersPage() {
     const router = useRouter();
     const [admins, setAdmins] = useState<AdminProfile[]>([]);
@@ -213,16 +219,17 @@ export default function AdminUsersPage() {
                                 <tr className="bg-white/5 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/10">
                                     <th className="px-6 py-4">Usuario / Email</th>
                                     <th className="px-6 py-4">Nivel de Acceso</th>
+                                    <th className="px-6 py-4">Permisos</th>
                                     <th className="px-6 py-4">Fecha Registro</th>
                                     <th className="px-6 py-4 text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {loading ? (
-                                    <tr><td colSpan={4} className="px-6 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">Sincronizando Usuarios...</td></tr>
+                                    <tr><td colSpan={5} className="px-6 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">Sincronizando Usuarios...</td></tr>
                                 ) : filteredAdmins.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-20 text-center space-y-4">
+                                        <td colSpan={5} className="px-6 py-20 text-center space-y-4">
                                             <Mail className="w-12 h-12 text-white/10 mx-auto" />
                                             <div className="space-y-1">
                                                 <p className="text-white/40 font-black uppercase tracking-widest text-xs">No hay administradores registrados</p>
@@ -250,6 +257,15 @@ export default function AdminUsersPage() {
                                             }`}>
                                                 {admin.role === 'superadmin' ? 'Super Admin' : admin.role === 'administrador' ? 'Administrador' : 'Editor'}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {ROLE_CAPABILITIES[admin.role].map((cap) => (
+                                                    <span key={`${admin.id}-${cap}`} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/5 text-white/60 border border-white/10">
+                                                        {cap}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-5">
                                             <span className="text-[10px] font-mono text-white/20">{new Date(admin.created_at).toLocaleDateString()}</span>
