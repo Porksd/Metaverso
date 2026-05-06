@@ -105,7 +105,7 @@ export default function EmpresaAdmin() {
         const storedId = getStoredCompanyValue('empresa_id');
         const storedName = getStoredCompanyValue('empresa_name');
         const storedMaster = getStoredCompanyValue('is_master_admin');
-        const storedMasterRole = getStoredCompanyValue('master_role') as 'superadmin' | 'editor' | null;
+        const storedMasterRole = getStoredCompanyValue('master_role') as 'superadmin' | 'administrador' | 'editor' | null;
         
         if (!storedId) {
             window.location.href = "/admin/empresa/login";
