@@ -39,6 +39,7 @@ export default function StudentRegister() {
         const { data } = await supabase
             .from('companies_list')
             .select('*')
+            .eq('company_id', formData.client_id)
             .eq('active', true)
             .order('code');
         if (data) setCompanies(data);

@@ -380,10 +380,51 @@ export default function EmpresaAdmin() {
     const [allCompanies, setAllCompanies] = useState<any[]>([]);
     const [editingCompanyListId, setEditingCompanyListId] = useState<string | null>(null);
     const [editingCompanyListName, setEditingCompanyListName] = useState("");
+    const [userRegistrationConfig, setUserRegistrationConfig] = useState<Record<string, any> | null>(null);
+
+    const isCompanyCollabVisible = userRegistrationConfig?.company_collab?.visible !== false;
+
+    const buildCompanyCollaboratorCode = (name: string) => {
+        const normalizedName = name
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '');
+        const companySuffix = (companyId || '').replace(/-/g, '').slice(0, 8) || 'COMPANY';
+        return `${companySuffix}_${normalizedName}`.slice(0, 50);
+    };
+
+    const fetchUserRegistrationConfig = async () => {
+        if (!companyId) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('companies')
+                .select('user_registration_config')
+                .eq('id', companyId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching user registration config:', error);
+                return;
+            }
+
+            setUserRegistrationConfig(data?.user_registration_config || null);
+        } catch (err) {
+            console.error('Unexpected error in fetchUserRegistrationConfig:', err);
+        }
+    };
 
     const fetchCompanyList = async () => {
+        if (!companyId) return;
+
         try {
-            const { data, error } = await supabase.from('companies_list').select('*').order('name_es');
+            const { data, error } = await supabase
+                .from('companies_list')
+                .select('*')
+                .eq('company_id', companyId)
+                .order('name_es');
             if (error) {
                 console.error("Error fetching companies_list:", error);
                 if (error.code === '42P01') alert("La tabla companies_list no existe en la base de datos.");
@@ -398,16 +439,28 @@ export default function EmpresaAdmin() {
 
     useEffect(() => {
         if (showCompanyManager) fetchCompanyList();
-    }, [showCompanyManager]);
+    }, [showCompanyManager, companyId]);
 
     // Also load companies on initial page load so the edit modal has them
     useEffect(() => {
-        if (companyId) fetchCompanyList();
+        if (companyId) {
+            fetchCompanyList();
+            fetchUserRegistrationConfig();
+        }
     }, [companyId]);
 
     const handleCreateCompany = async (name: string) => {
-        const code = name.toUpperCase().replace(/\s+/g, '_');
-        const { error } = await supabase.from('companies_list').insert({ name_es: name, code });
+        if (!companyId) return;
+
+        const trimmedName = name.trim();
+        if (!trimmedName) return;
+
+        const code = buildCompanyCollaboratorCode(trimmedName);
+        const { error } = await supabase.from('companies_list').insert({
+            name_es: trimmedName,
+            code,
+            company_id: companyId
+        });
         if (error) {
             console.error("Error creating company:", error);
             if (error.message.includes("policy")) {
@@ -482,7 +535,9 @@ export default function EmpresaAdmin() {
                                 <input type="text" placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm outline-none" />
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => setShowCompanyManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><BookOpen className="w-4 h-4" /> Empresas Colaboradoras</button>
+                                {isCompanyCollabVisible && (
+                                    <button onClick={() => setShowCompanyManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><BookOpen className="w-4 h-4" /> Empresas Colaboradoras</button>
+                                )}
                                 <button onClick={() => setShowCargoManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><Shield className="w-4 h-4" /> Cargos</button>
                                 <button onClick={() => setIsCreating(true)} className="p-4 bg-brand text-black rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-brand/10"><UserPlus className="w-4 h-4" /> Nuevo</button>
                             </div>
@@ -775,18 +830,20 @@ export default function EmpresaAdmin() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa</label>
-                                    <select 
-                                        value={isEditing.company_name || ""} 
-                                        onChange={(e) => setIsEditing({ ...isEditing, company_name: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    >
-                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
-                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
-                                    </select>
-                                </div>
+                                {isCompanyCollabVisible && (
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa</label>
+                                        <select 
+                                            value={isEditing.company_name || ""} 
+                                            onChange={(e) => setIsEditing({ ...isEditing, company_name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                            style={{ colorScheme: 'dark' }}
+                                        >
+                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
+                                            {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
+                                        </select>
+                                    </div>
+                                )}
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo</label>
                                     <select
@@ -1010,18 +1067,20 @@ export default function EmpresaAdmin() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa Sub-contratista</label>
-                                    <select 
-                                        value={newStudent.company_name || ""} 
-                                        onChange={(e) => setNewStudent({ ...newStudent, company_name: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    >
-                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
-                                        {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
-                                    </select>
-                                </div>
+                                {isCompanyCollabVisible && (
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa Sub-contratista</label>
+                                        <select 
+                                            value={newStudent.company_name || ""} 
+                                            onChange={(e) => setNewStudent({ ...newStudent, company_name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                            style={{ colorScheme: 'dark' }}
+                                        >
+                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
+                                            {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
+                                        </select>
+                                    </div>
+                                )}
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo</label>
                                     <select
@@ -1298,7 +1357,7 @@ export default function EmpresaAdmin() {
                     </div>
                 )}
 
-                {showCompanyManager && (
+                {showCompanyManager && isCompanyCollabVisible && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
                         <div className="glass p-10 w-full max-w-lg space-y-6">
                             <h3 className="text-xl font-black uppercase text-brand">Empresas Colaboradoras</h3>
@@ -1329,7 +1388,11 @@ export default function EmpresaAdmin() {
                                             {editingCompanyListId === c.id ? (
                                                 <>
                                                     <button onClick={async () => {
-                                                        const { error } = await supabase.from('companies_list').update({ name_es: editingCompanyListName }).eq('id', c.id);
+                                                        const { error } = await supabase
+                                                            .from('companies_list')
+                                                            .update({ name_es: editingCompanyListName.trim() })
+                                                            .eq('id', c.id)
+                                                            .eq('company_id', companyId);
                                                         if(error) alert("Error al actualizar: "+error.message);
                                                         setEditingCompanyListId(null);
                                                         fetchCompanyList();
@@ -1348,7 +1411,7 @@ export default function EmpresaAdmin() {
 
                                             <button onClick={async () => { 
                                                 if(confirm('¿Eliminar esta empresa de la lista?')) {
-                                                    await supabase.from('companies_list').delete().eq('id', c.id); 
+                                                    await supabase.from('companies_list').delete().eq('id', c.id).eq('company_id', companyId); 
                                                     fetchCompanyList(); 
                                                 }
                                             }} className="text-red-500 hover:text-red-400 transition-colors" title="Eliminar"><Trash2 className="w-4 h-4" /></button>

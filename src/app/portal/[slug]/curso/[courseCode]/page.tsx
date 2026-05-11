@@ -182,6 +182,7 @@ export default function CourseAuthPage() {
                 const { data: clData } = await supabase
                     .from('companies_list')
                     .select('*')
+                    .eq('company_id', comp.id)
                     .order('name_es');
                 setCompaniesList(clData || []);
 
@@ -311,8 +312,14 @@ export default function CourseAuthPage() {
             if (trimmedEmpresa) {
                 const exists = companiesList.some(c => c.name_es?.toLowerCase() === trimmedEmpresa.toLowerCase());
                 if (!exists) {
-                    const code = trimmedEmpresa.toUpperCase().replace(/\s+/g, '_');
-                    await supabase.from('companies_list').insert({ name_es: trimmedEmpresa, code });
+                    const normalizedCode = trimmedEmpresa
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '_')
+                        .replace(/_+/g, '_')
+                        .replace(/^_|_$/g, '');
+                    const companySuffix = (company.id || '').replace(/-/g, '').slice(0, 8) || 'COMPANY';
+                    const code = `${companySuffix}_${normalizedCode}`.slice(0, 50);
+                    await supabase.from('companies_list').insert({ name_es: trimmedEmpresa, code, company_id: company.id });
                 }
             }
 
