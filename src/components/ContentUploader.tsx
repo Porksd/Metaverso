@@ -46,7 +46,7 @@ export default function ContentUploader({
 
             console.log(`Uploading directly to storage: ${path} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
             
-            const { data: uploadData, error: uploadError } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
                 .from('course-content')
                 .upload(path, file, {
                     cacheControl: '3600',
@@ -58,53 +58,27 @@ export default function ContentUploader({
                 throw new Error(`Error en Storage: ${uploadError.message}`);
             }
 
-            let finalUrl = '';
-
-            if (isZip) {
-                // 2a. If ZIP, call API to extract it from the storage path
-                console.log("Calling API to process ZIP from storage...");
-                const formData = new FormData();
-                formData.append('storagePath', path);
-                formData.append('courseId', courseId);
-                formData.append('sectionKey', sectionKey);
-
-                const res = await fetch('/api/upload/course-content', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!res.ok) {
-                    const errorMsg = await res.text();
-                    throw new Error(errorMsg || 'Server processing failed');
-                }
-
-                const data = await res.json();
-                if (data.success) {
-                    finalUrl = data.url;
-                } else {
-                    throw new Error(data.error || 'Server processing failed');
-                }
-            } else {
-                // 2b. Simple file: Just get public URL and update DB
-                const { data: urlData } = supabase.storage
-                    .from('course-content')
-                    .getPublicUrl(path);
-                
-                finalUrl = urlData.publicUrl;
-
-                if (!skipDbSave) {
-                    const { error: dbError } = await supabase
-                        .from('course_content')
-                        .upsert({ 
-                            course_id: courseId, 
-                            key: sectionKey, 
-                            value: finalUrl, 
-                            updated_at: new Date().toISOString() 
-                        }, { onConflict: 'course_id,key' });
-
-                    if (dbError) throw dbError;
-                }
+            // 2. Finalize upload via server API so course_content write uses admin client (avoids RLS issues)
+            console.log(isZip ? "Calling API to process ZIP from storage..." : "Calling API to finalize media from storage...");
+            const formData = new FormData();
+            formData.append('storagePath', path);
+            formData.append('courseId', courseId);
+            formData.append('sectionKey', sectionKey);
+            if (skipDbSave) {
+                formData.append('skipDbSave', 'true');
             }
+
+            const res = await fetch('/api/upload/course-content', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data?.success) {
+                throw new Error(data?.error || 'Server processing failed');
+            }
+
+            const finalUrl = data.url as string;
 
             if (finalUrl) {
                 setProgress(100);

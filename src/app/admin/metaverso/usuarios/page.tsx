@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { 
     ShieldCheck, UserPlus, Trash2, Mail, Shield, 
-    X, Check, Search, ArrowLeft, MoreVertical
+    X, Check, Search, KeyRound
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -35,6 +35,11 @@ export default function AdminUsersPage() {
     const [editingAdmin, setEditingAdmin] = useState<Partial<AdminProfile> | null>(null);
     const [dbError, setDbError] = useState(false);
     const [dbErrorMessage, setDbErrorMessage] = useState("");
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [passwordTargetEmail, setPasswordTargetEmail] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
     useEffect(() => {
         checkAuth();
@@ -147,6 +152,66 @@ export default function AdminUsersPage() {
         if (!confirm(`¿Seguro que desea eliminar el acceso de ${email}?`)) return;
         await supabase.from('admin_profiles').delete().eq('id', id);
         loadAdmins();
+    };
+
+    const openPasswordModal = (email: string) => {
+        setPasswordTargetEmail(email);
+        setNewPassword("");
+        setConfirmPassword("");
+        setShowPasswordForm(true);
+    };
+
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!passwordTargetEmail) {
+            alert('Debes seleccionar un usuario.');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert('La contraseña debe tener al menos 6 caracteres.');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
+        setPasswordSubmitting(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token;
+
+            if (!accessToken) {
+                throw new Error('Sesión no válida. Inicia sesión nuevamente.');
+            }
+
+            const res = await fetch('/api/admin/users/password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    email: passwordTargetEmail,
+                    password: newPassword
+                })
+            });
+
+            const result = await res.json().catch(() => null);
+            if (!res.ok || !result?.success) {
+                throw new Error(result?.error || 'No fue posible actualizar la contraseña.');
+            }
+
+            alert(`Contraseña actualizada para ${passwordTargetEmail}.`);
+            setShowPasswordForm(false);
+        } catch (err: any) {
+            alert('Error actualizando contraseña: ' + (err?.message || 'Error desconocido'));
+        } finally {
+            setPasswordSubmitting(false);
+        }
     };
 
     const filteredAdmins = admins.filter(a => 
@@ -278,6 +343,13 @@ export default function AdminUsersPage() {
                                                 >
                                                     <Shield className="w-4 h-4" />
                                                 </button>
+                                                <button
+                                                    onClick={() => openPasswordModal(admin.email)}
+                                                    className="p-2.5 rounded-xl bg-white/5 hover:bg-amber-500/10 text-white/20 hover:text-amber-400 transition-all border border-white/5"
+                                                    title="Actualizar contraseña"
+                                                >
+                                                    <KeyRound className="w-4 h-4" />
+                                                </button>
                                                 <button 
                                                     onClick={() => handleDeleteAdmin(admin.id, admin.email)}
                                                     className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all border border-white/5"
@@ -332,6 +404,72 @@ export default function AdminUsersPage() {
                                     <div className="pt-4 flex gap-3">
                                         <button type="submit" className="flex-1 py-4 bg-brand text-black rounded-xl font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                                             <Check className="w-4 h-4" /> {editingAdmin?.id ? 'Actualizar' : 'Autorizar'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {showPasswordForm && (
+                        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="glass p-10 w-full max-w-md border-amber-500/20 space-y-8">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-amber-400">/actualizar_password</h2>
+                                    <button
+                                        onClick={() => setShowPasswordForm(false)}
+                                        className="text-white/20 hover:text-white"
+                                        disabled={passwordSubmitting}
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleUpdatePassword} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Usuario</label>
+                                        <input
+                                            value={passwordTargetEmail}
+                                            readOnly
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm opacity-70"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Nueva Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                            minLength={6}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-amber-400 outline-none transition-all"
+                                            placeholder="Mínimo 6 caracteres"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Confirmar Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            minLength={6}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-amber-400 outline-none transition-all"
+                                            placeholder="Repite la contraseña"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex gap-3">
+                                        <button
+                                            type="submit"
+                                            disabled={passwordSubmitting}
+                                            className="flex-1 py-4 bg-amber-400 text-black rounded-xl font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                                        >
+                                            <KeyRound className="w-4 h-4" /> {passwordSubmitting ? 'Actualizando...' : 'Actualizar Password'}
                                         </button>
                                     </div>
                                 </form>

@@ -24,14 +24,15 @@ export async function POST(request: NextRequest) {
         const storagePath = formData.get('storagePath') as string | null;
         const courseId = formData.get('courseId') as string;
         const sectionKey = formData.get('sectionKey') as string;
+        const skipDbSave = formData.get('skipDbSave') === 'true';
 
         if ((!file && !storagePath) || !courseId || !sectionKey) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        let buffer: Buffer;
+        let buffer: Buffer | null = null;
         let fileName: string;
-        let contentTypeStr: string;
+        let contentTypeStr = 'application/octet-stream';
 
         if (file) {
             // Direct upload (limited to 4.5MB on Vercel)
@@ -40,15 +41,8 @@ export async function POST(request: NextRequest) {
             fileName = file.name;
             contentTypeStr = file.type;
         } else {
-            // Processing from storage (No size limit proxying through server)
-            console.log(`Processing ZIP from storage path: ${storagePath}`);
-            const { data, error } = await supabaseAdmin.storage.from(BUCKET_NAME).download(storagePath!);
-            if (error) throw new Error(`Error downloading from storage: ${error.message}`);
-            
-            const bytes = await data.arrayBuffer();
-            buffer = Buffer.from(bytes);
+            // Processing from an already uploaded object in storage
             fileName = storagePath!.split('/').pop() || 'package.zip';
-            contentTypeStr = 'application/zip';
         }
 
         const contentType = getContentType(fileName);
@@ -60,6 +54,17 @@ export async function POST(request: NextRequest) {
 
         let finalUrl = '';
         if (contentType === 'package') {
+            if (!buffer && storagePath) {
+                console.log(`Processing ZIP from storage path: ${storagePath}`);
+                const { data, error } = await supabaseAdmin.storage.from(BUCKET_NAME).download(storagePath);
+                if (error) throw new Error(`Error downloading from storage: ${error.message}`);
+
+                const bytes = await data.arrayBuffer();
+                buffer = Buffer.from(bytes);
+            }
+
+            if (!buffer) throw new Error('No package file data found');
+
             const zip = new AdmZip(buffer);
             const zipEntries = zip.getEntries();
             const folder = `${timestamp}_${safeName.replace('.zip', '')}`;
@@ -89,21 +94,32 @@ export async function POST(request: NextRequest) {
                 await supabaseAdmin.storage.from(BUCKET_NAME).remove([storagePath]);
             }
         } else {
-            // This part is legacy or for small files, but we'll keep it for compatibility
-            const path = `${courseId}/${subDir}/${timestamp}_${safeName}`;
-            const { error } = await supabaseAdmin.storage.from(BUCKET_NAME).upload(path, buffer, { contentType: contentTypeStr, upsert: true });
-            if (error) throw error;
-            
-            const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(path);
-            finalUrl = data.publicUrl;
+            if (storagePath) {
+                // Reuse object already uploaded from client to avoid duplicate upload.
+                const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(storagePath);
+                finalUrl = data.publicUrl;
+            } else {
+                // Legacy direct upload flow for small files
+                const path = `${courseId}/${subDir}/${timestamp}_${safeName}`;
+                if (!buffer) throw new Error('No file data found');
+                const { error } = await supabaseAdmin.storage.from(BUCKET_NAME).upload(path, buffer, { contentType: contentTypeStr, upsert: true });
+                if (error) throw error;
+
+                const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(path);
+                finalUrl = data.publicUrl;
+            }
         }
 
-        await supabaseAdmin.from('course_content').upsert({ 
-            course_id: courseId, 
-            key: sectionKey, 
-            value: finalUrl, 
-            updated_at: new Date().toISOString() 
-        }, { onConflict: 'course_id,key' });
+        if (!skipDbSave) {
+            const { error: dbError } = await supabaseAdmin.from('course_content').upsert({
+                course_id: courseId,
+                key: sectionKey,
+                value: finalUrl,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'course_id,key' });
+
+            if (dbError) throw dbError;
+        }
 
         return NextResponse.json({ success: true, url: finalUrl, type: contentType });
     } catch (e: any) {
