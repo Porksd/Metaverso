@@ -64,6 +64,22 @@ const isSuperAdmin = async (email: string): Promise<boolean> => {
   return profile?.role === 'superadmin';
 };
 
+const hasAdminProfile = async (email: string): Promise<boolean> => {
+  const normalizedEmail = email.toLowerCase().trim();
+  const { data, error } = await supabaseAdmin
+    .from('admin_profiles')
+    .select('id')
+    .eq('email', normalizedEmail)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('No se pudo validar admin_profiles del objetivo en reset de password:', error.message);
+    return false;
+  }
+
+  return Boolean(data?.id);
+};
+
 export async function POST(req: Request) {
   try {
     if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
@@ -100,9 +116,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'La contrasena debe tener al menos 6 caracteres.' }, { status: 400 });
     }
 
-    const { user: targetUser, error: listError } = await findAuthUserByEmail(targetEmail);
+    const { user: targetUserByEmail, error: listError } = await findAuthUserByEmail(targetEmail);
     if (listError) {
       return NextResponse.json({ error: `No se pudo listar usuarios: ${listError.message}` }, { status: 500 });
+    }
+
+    let targetUser = targetUserByEmail;
+
+    if (!targetUser) {
+      const targetHasAdminProfile = await hasAdminProfile(targetEmail);
+      if (!targetHasAdminProfile) {
+        return NextResponse.json({ error: 'Usuario no encontrado en Supabase Auth.' }, { status: 404 });
+      }
+
+      const { data: createdUserData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: targetEmail,
+        password: newPassword,
+        email_confirm: true
+      });
+
+      if (createError) {
+        return NextResponse.json({ error: `No se pudo crear usuario en Auth: ${createError.message}` }, { status: 500 });
+      }
+
+      targetUser = createdUserData.user ?? null;
     }
 
     if (!targetUser) {
