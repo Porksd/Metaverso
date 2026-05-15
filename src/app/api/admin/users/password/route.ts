@@ -19,6 +19,33 @@ type UpdatePasswordPayload = {
   password?: string;
 };
 
+const findAuthUserByEmail = async (email: string) => {
+  const targetEmail = email.toLowerCase().trim();
+  const perPage = 1000;
+
+  for (let page = 1; page <= 50; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage
+    });
+
+    if (error) {
+      return { user: null, error };
+    }
+
+    const foundUser = data.users.find((u) => (u.email || '').toLowerCase() === targetEmail);
+    if (foundUser) {
+      return { user: foundUser, error: null };
+    }
+
+    if (data.users.length < perPage) {
+      break;
+    }
+  }
+
+  return { user: null, error: null };
+};
+
 const isSuperAdmin = async (email: string): Promise<boolean> => {
   const normalizedEmail = email.toLowerCase().trim();
   if (SUPER_ADMIN_EMAILS.includes(normalizedEmail)) return true;
@@ -73,16 +100,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'La contrasena debe tener al menos 6 caracteres.' }, { status: 400 });
     }
 
-    const { data: usersPage, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000
-    });
-
+    const { user: targetUser, error: listError } = await findAuthUserByEmail(targetEmail);
     if (listError) {
       return NextResponse.json({ error: `No se pudo listar usuarios: ${listError.message}` }, { status: 500 });
     }
 
-    const targetUser = usersPage.users.find((u) => (u.email || '').toLowerCase() === targetEmail);
     if (!targetUser) {
       return NextResponse.json({ error: 'Usuario no encontrado en Supabase Auth.' }, { status: 404 });
     }
