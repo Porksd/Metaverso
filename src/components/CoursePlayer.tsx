@@ -436,8 +436,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         });
     };
 
-    const handleSignatureSave = async (data: string, itemId: string) => {
-        handleItemCompletion(itemId);
+    const handleSignatureSave = async (data: string, itemId: string): Promise<boolean> => {
         if (mode === 'student' && studentId && studentId !== "preview-admin") {
             try {
                 console.log(`[CoursePlayer] Saving signature for student ${studentId}, data length: ${data.length} chars`);
@@ -452,6 +451,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 
                 if (error) {
                     console.error("[CoursePlayer] ❌ Error saving signature:", error);
+                    alert('No se pudo guardar tu firma. Intenta nuevamente.');
+                    return false;
                 } else {
                     console.log("[CoursePlayer] ✅ Signature and consent saved successfully for student:", studentId);
                     
@@ -464,11 +465,20 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     
                     console.log("[CoursePlayer] 🔍 Verification - Signature in DB:", verification?.digital_signature_url ? `YES (${verification.digital_signature_url.length} chars)` : 'NO');
                     console.log("[CoursePlayer] 🔍 Verification - Consent at:", verification?.consent_accepted_at || 'NO');
+
+                    handleItemCompletion(itemId);
+                    return true;
                 }
             } catch (err) {
                 console.error("[CoursePlayer] Exception saving signature:", err);
+                alert('Ocurrio un error al guardar tu firma. Intenta nuevamente.');
+                return false;
             }
         }
+
+        // Preview mode or missing student context: keep previous behavior to unblock testing.
+        handleItemCompletion(itemId);
+        return true;
     };
 
     useEffect(() => {
