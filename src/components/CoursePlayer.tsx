@@ -17,7 +17,7 @@ import SurveyEngine from "./SurveyEngine";
 // Types
 type ModuleItem = {
     id: string;
-    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'gamma' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
     content: any;
     order_index: number;
 };
@@ -488,18 +488,18 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             return;
         }
 
-        // Timer automático para Genially (15 segundos)
-        const geniallyItems = currentItems.filter((i: ModuleItem) => i.type === 'genially');
-        const geniallyTimers: NodeJS.Timeout[] = [];
+        // Timer automático para contenidos embebidos (15 segundos)
+        const interactiveEmbedItems = currentItems.filter((i: ModuleItem) => i.type === 'genially' || i.type === 'gamma');
+        const interactiveEmbedTimers: NodeJS.Timeout[] = [];
         
-        geniallyItems.forEach((item: ModuleItem) => {
+        interactiveEmbedItems.forEach((item: ModuleItem) => {
             if (!itemsCompleted.has(item.id)) {
-                console.log(`[CoursePlayer] Iniciando timer de 15s para Genially: ${item.id}`);
+                console.log(`[CoursePlayer] Iniciando timer de 15s para embed interactivo (${item.type}): ${item.id}`);
                 const timer = setTimeout(() => {
-                    console.log(`[CoursePlayer] Timer de Genially completado: ${item.id}`);
+                    console.log(`[CoursePlayer] Timer de embed interactivo completado (${item.type}): ${item.id}`);
                     handleItemCompletion(item.id);
                 }, 15000); // 15 segundos
-                geniallyTimers.push(timer);
+                interactiveEmbedTimers.push(timer);
             }
         });
 
@@ -516,7 +516,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             // - video (onEnded o 90%)
             // - audio (onEnded)
             // - scorm (onComplete)
-            // - genially (15s timer o interacción)
+            // - genially / gamma (15s timer o interacción)
             // - quiz (onComplete)
             // - signature (onSave)
             // - survey (onComplete)
@@ -535,7 +535,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         setModuleCompleted(isDone);
 
         return () => {
-            geniallyTimers.forEach(clearTimeout);
+            interactiveEmbedTimers.forEach(clearTimeout);
         };
     }, [itemsCompleted, activeModuleIndex, modules.length, enrollment?.current_module_index]);
 
@@ -727,10 +727,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                     )}
 
                                     {/* Genially */}
-                                    {item.type === 'genially' && (
+                                    {(item.type === 'genially' || item.type === 'gamma') && (
                                         <div className="rounded-lg sm:rounded-xl overflow-hidden border border-white/10 bg-black">
                                             <div className="w-full h-[52svh] min-h-[260px] max-h-[620px] max-[430px]:h-[46svh] max-[430px]:min-h-[220px] [@media(max-height:430px)]:h-[calc(100svh-12rem)] [@media(max-height:430px)]:min-h-[190px] md:h-[600px]">
-                                            <GeniallyEmbed src={item.content?.url} onInteract={() => handleItemCompletion(item.id)} />
+                                            <GeniallyEmbed
+                                                src={item.content?.url}
+                                                provider={item.type === 'gamma' ? 'gamma' : 'genially'}
+                                                onInteract={() => handleItemCompletion(item.id)}
+                                            />
                                             </div>
                                         </div>
                                     )}
