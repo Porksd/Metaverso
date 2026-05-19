@@ -742,7 +742,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                             <div className="w-full h-[52svh] min-h-[260px] max-h-[620px] max-[430px]:h-[46svh] max-[430px]:min-h-[220px] [@media(max-height:430px)]:h-[calc(100svh-12rem)] [@media(max-height:430px)]:min-h-[190px] md:h-[600px]">
                                             <GeniallyEmbed
                                                 src={item.content?.url}
-                                                provider={item.type === 'gamma' ? 'gamma' : 'genially'}
+                                                provider={(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'gamma' : 'genially'}
                                                 onInteract={() => handleItemCompletion(item.id)}
                                             />
                                             </div>
