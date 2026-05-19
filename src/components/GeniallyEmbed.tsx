@@ -7,12 +7,19 @@ interface GeniallyEmbedProps {
     provider?: 'genially' | 'gamma';
 }
 
-function normalizeEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): string | null {
+type EmbedResolution = {
+    iframeUrl: string | null;
+    openUrl: string | null;
+    embeddable: boolean;
+};
+
+function resolveEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): EmbedResolution {
     const raw = (rawSrc || '').trim();
-    if (!raw) return null;
+    if (!raw) return { iframeUrl: null, openUrl: null, embeddable: false };
 
     const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/i);
     const candidate = (iframeSrcMatch?.[1] || raw).replace(/&amp;/g, '&').trim();
+    const cameFromIframe = Boolean(iframeSrcMatch?.[1]);
 
     if (
         candidate.startsWith('/') ||
@@ -20,7 +27,7 @@ function normalizeEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): stri
         candidate.startsWith('../') ||
         candidate.startsWith('data:')
     ) {
-        return candidate;
+        return { iframeUrl: candidate, openUrl: candidate, embeddable: true };
     }
 
     const withProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(candidate)
@@ -55,9 +62,22 @@ function normalizeEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): stri
         }
 
         url.protocol = 'https:';
-        return url.toString();
+        const finalUrl = url.toString();
+
+        if (provider === 'gamma') {
+            const looksEmbeddable =
+                cameFromIframe ||
+                url.pathname.toLowerCase().includes('/embed') ||
+                url.searchParams.get('mode') === 'embed';
+
+            if (!looksEmbeddable) {
+                return { iframeUrl: null, openUrl: finalUrl, embeddable: false };
+            }
+        }
+
+        return { iframeUrl: finalUrl, openUrl: finalUrl, embeddable: true };
     } catch {
-        return null;
+        return { iframeUrl: null, openUrl: null, embeddable: false };
     }
 }
 
@@ -67,7 +87,8 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
     const [interacted, setInteracted] = useState(false);
     const completedRef = React.useRef(false);
     const providerLabel = provider === 'gamma' ? 'Gamma' : 'Genially';
-    const normalizedSrc = normalizeEmbedUrl(src, provider);
+    const embedResolution = resolveEmbedUrl(src, provider);
+    const normalizedSrc = embedResolution.iframeUrl;
 
     useEffect(() => {
         setLoaded(false);
@@ -75,6 +96,12 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
         setInteracted(false);
         completedRef.current = false;
     }, [normalizedSrc]);
+
+    useEffect(() => {
+        if (!embedResolution.embeddable) {
+            setLoaded(true);
+        }
+    }, [embedResolution.embeddable]);
 
     const handleComplete = React.useCallback(() => {
         if (completedRef.current) return;
@@ -151,8 +178,26 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
             {!normalizedSrc && (
                 <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 p-4">
                     <div className="max-w-md rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-center text-red-100">
-                        <p className="text-sm font-bold uppercase tracking-wide">No se pudo cargar {providerLabel}</p>
-                        <p className="mt-2 text-xs text-red-200/90">La URL es invalida o no corresponde a un enlace publico de {providerLabel}.</p>
+                        {provider === 'gamma' && embedResolution.openUrl ? (
+                            <>
+                                <p className="text-sm font-bold uppercase tracking-wide">Gamma bloqueo la visualizacion embebida</p>
+                                <p className="mt-2 text-xs text-red-200/90">Este enlace de Gamma no permite mostrarse dentro de la plataforma. Puedes abrirlo en una pestaña nueva, o pegar el codigo embed oficial de Gamma si dispones de uno.</p>
+                                <a
+                                    href={embedResolution.openUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={handleComplete}
+                                    className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-xs font-black uppercase tracking-wide text-black transition hover:opacity-90"
+                                >
+                                    Abrir Gamma
+                                </a>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-sm font-bold uppercase tracking-wide">No se pudo cargar {providerLabel}</p>
+                                <p className="mt-2 text-xs text-red-200/90">La URL es invalida o no corresponde a un enlace publico de {providerLabel}.</p>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -163,14 +208,16 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
                 </div>
             )}
             
-            <iframe
-                src={normalizedSrc || ''}
-                className="w-full h-full border-0 flex-1"
-                allowFullScreen
-                onLoad={() => setLoaded(true)}
-            />
+            {normalizedSrc && (
+                <iframe
+                    src={normalizedSrc}
+                    className="w-full h-full border-0 flex-1"
+                    allowFullScreen
+                    onLoad={() => setLoaded(true)}
+                />
+            )}
 
-            {hideNativeControls && (
+            {normalizedSrc && hideNativeControls && (
                 <div className="absolute bottom-0 right-0 h-11 w-28 max-[430px]:w-24 sm:h-12 sm:w-40 [@media(max-height:430px)]:h-10 [@media(max-height:430px)]:w-32 bg-black z-20 pointer-events-none" />
             )}
 
