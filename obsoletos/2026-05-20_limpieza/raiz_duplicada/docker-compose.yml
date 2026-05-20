@@ -1,0 +1,25 @@
+services:
+  web:
+    container_name: metaverso-app
+    build: .
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./next.config.ts:/app/next.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      - ./eslint.config.mjs:/app/eslint.config.mjs
+      - ./next-env.d.ts:/app/next-env.d.ts
+      - ./.env:/app/.env
+      - ./.env.local:/app/.env.local
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    stdin_open: true
+    tty: true

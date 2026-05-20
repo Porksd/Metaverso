@@ -1,0 +1,485 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { 
+    ShieldCheck, UserPlus, Trash2, Mail, Shield, 
+    X, Check, Search, KeyRound
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
+import { resolveAdminRole, SUPER_ADMIN_EMAILS, ADMINISTRADOR_EMAILS } from "@/lib/adminAuth";
+
+interface AdminProfile {
+    id: string;
+    email: string;
+    role: 'superadmin' | 'administrador' | 'editor';
+    permissions: any;
+    created_at: string;
+}
+
+const ROLE_CAPABILITIES: Record<AdminProfile['role'], string[]> = {
+    superadmin: ['Editar', 'Eliminar Cursos', 'Eliminar Empresas/Alumnos', 'Exportar Excel', 'Gestionar Admins'],
+    administrador: ['Editar', 'Eliminar Cursos'],
+    editor: ['Editar']
+};
+
+export default function AdminUsersPage() {
+    const router = useRouter();
+    const [admins, setAdmins] = useState<AdminProfile[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showForm, setShowForm] = useState(false);
+    const [editingAdmin, setEditingAdmin] = useState<Partial<AdminProfile> | null>(null);
+    const [dbError, setDbError] = useState(false);
+    const [dbErrorMessage, setDbErrorMessage] = useState("");
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [passwordTargetEmail, setPasswordTargetEmail] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+            router.push("/admin/metaverso/login");
+            return;
+        }
+
+        // Only superadmins can manage other admins
+        const email = session.user.email?.toLowerCase();
+        const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso/usuarios');
+
+        // Legacy fallback kept for historical bootstrap account.
+        const legacySuperAdmins = ['admin@metaversotec.com'];
+        if (role !== 'superadmin' && (!email || !legacySuperAdmins.includes(email))) {
+            setIsAuthorized(false);
+            return;
+        }
+        
+        setIsAuthorized(true);
+        loadAdmins();
+    };
+
+    const loadAdmins = async () => {
+        setLoading(true);
+        setDbError(false);
+        setDbErrorMessage("");
+        const { data, error } = await supabase
+            .from('admin_profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (data && data.length > 0) {
+            setAdmins(data);
+        } else {
+            // Fallback visible list so superadmins can still manage access when DB rows are incomplete.
+            const fallbackRows: AdminProfile[] = [
+                ...SUPER_ADMIN_EMAILS.map((email) => ({
+                    id: `fallback-superadmin-${email}`,
+                    email,
+                    role: 'superadmin' as const,
+                    permissions: { all: true },
+                    created_at: new Date(0).toISOString()
+                })),
+                ...ADMINISTRADOR_EMAILS.map((email) => ({
+                    id: `fallback-administrador-${email}`,
+                    email,
+                    role: 'administrador' as const,
+                    permissions: { delete_courses: true, export_excel: false },
+                    created_at: new Date(0).toISOString()
+                }))
+            ];
+            setAdmins(fallbackRows);
+        }
+
+        if (error) {
+            console.error("Error loading admins:", error);
+            setDbError(true);
+            const msg = (error.message || '').toLowerCase();
+            if (error.code === '42P01' || error.code === 'PGRST205' || msg.includes('does not exist') || msg.includes('not find')) {
+                setDbErrorMessage('La tabla admin_profiles no existe. Ejecuta la migración 026 (base RBAC) y luego la 028/033.');
+            } else if (msg.includes('permission') || msg.includes('rls') || msg.includes('policy') || error.code === '42501') {
+                setDbErrorMessage('No hay permisos suficientes para leer admin_profiles (RLS/policies). Revisa la migración 028 y que tu correo esté como superadmin en admin_profiles.');
+            } else {
+                setDbErrorMessage(`No se pudo cargar admin_profiles: ${error.message}`);
+            }
+        }
+        setLoading(false);
+    };
+
+    const handleSaveAdmin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        const email = (formData.get('email') as string).toLowerCase();
+        const role = formData.get('role') as 'superadmin' | 'administrador' | 'editor';
+
+        const adminData = { email, role };
+
+        let saveError;
+        if (editingAdmin?.id) {
+            const { error } = await supabase.from('admin_profiles').update(adminData).eq('id', editingAdmin.id);
+            saveError = error;
+        } else {
+            const { error } = await supabase.from('admin_profiles').insert([adminData]);
+            saveError = error;
+        }
+
+        if (saveError) {
+            console.error('Error guardando administrador:', saveError);
+            alert('Error al guardar: ' + saveError.message + '\n\nVerifica que tu cuenta tenga permisos de escritura en la base de datos (ejecuta la migración 033).');
+            return;
+        }
+
+        setShowForm(false);
+        setEditingAdmin(null);
+        loadAdmins();
+    };
+
+    const handleDeleteAdmin = async (id: string, email: string) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user.email?.toLowerCase() === email.toLowerCase()) {
+            return alert("No puedes eliminarte a ti mismo.");
+        }
+
+        if (!confirm(`¿Seguro que desea eliminar el acceso de ${email}?`)) return;
+        await supabase.from('admin_profiles').delete().eq('id', id);
+        loadAdmins();
+    };
+
+    const openPasswordModal = (email: string) => {
+        setPasswordTargetEmail(email);
+        setNewPassword("");
+        setConfirmPassword("");
+        setShowPasswordForm(true);
+    };
+
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!passwordTargetEmail) {
+            alert('Debes seleccionar un usuario.');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            alert('La contraseña debe tener al menos 6 caracteres.');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
+        setPasswordSubmitting(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token;
+
+            if (!accessToken) {
+                throw new Error('Sesión no válida. Inicia sesión nuevamente.');
+            }
+
+            const res = await fetch('/api/admin/users/password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    email: passwordTargetEmail,
+                    password: newPassword
+                })
+            });
+
+            const result = await res.json().catch(() => null);
+            if (!res.ok || !result?.success) {
+                throw new Error(result?.error || 'No fue posible actualizar la contraseña.');
+            }
+
+            alert(`Contraseña actualizada para ${passwordTargetEmail}.`);
+            setShowPasswordForm(false);
+        } catch (err: any) {
+            alert('Error actualizando contraseña: ' + (err?.message || 'Error desconocido'));
+        } finally {
+            setPasswordSubmitting(false);
+        }
+    };
+
+    const filteredAdmins = admins.filter(a => 
+        a.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (isAuthorized === null) return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="text-brand font-black animate-pulse uppercase tracking-widest text-xs">Verificando Credenciales...</div>
+        </div>
+    );
+
+    if (isAuthorized === false) return (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center space-y-6">
+            <ShieldCheck className="w-20 h-20 text-red-500" />
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase text-white">Acceso Restringido</h1>
+            <p className="text-white/40 max-w-md uppercase text-[10px] font-bold">Solo usuarios con perfil SUPERADMIN pueden gestionar permisos.</p>
+            <button onClick={() => router.push("/admin/metaverso")} className="bg-white text-black px-8 py-4 rounded-xl font-black uppercase text-xs">Regresar al Panel</button>
+        </div>
+    );
+
+    return (
+        <AdminSidebar title="Gestión de Accesos">
+            <div className="min-h-screen bg-[#060606] text-white p-4 md:p-8 font-sans pt-20">
+                <div className="max-w-5xl mx-auto space-y-10">
+                    
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-4">
+                                <ShieldCheck className="w-10 h-10 text-brand" />
+                                Control de Acceso
+                            </h1>
+                            <p className="text-white/40 font-medium text-sm mt-1">Gestión de usuarios administradores y niveles de permiso</p>
+                        </div>
+                        <button
+                            onClick={() => { setEditingAdmin(null); setShowForm(true); }}
+                            className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-brand/20"
+                        >
+                            <UserPlus className="w-4 h-4" /> Agregar Administrador
+                        </button>
+                    </div>
+
+                    {dbError && (
+                        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-500 text-xs font-bold mb-6 flex items-center gap-3">
+                            <Shield className="w-5 h-5 shrink-0" />
+                            <div>
+                                <p className="uppercase tracking-wider">Error de Base de Datos</p>
+                                <p className="font-normal opacity-70">{dbErrorMessage || 'No se pudo cargar la tabla admin_profiles.'}</p>
+                            </div>
+                        </div>
+                    )}
+
+                {/* List */}
+                <div className="space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-white/[0.02] border border-white/5 rounded-2xl py-4 pl-12 pr-4 focus:border-brand/40 outline-none transition-all font-medium text-sm"
+                        />
+                    </div>
+
+                    <div className="glass overflow-hidden border-white/5">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/5 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/10">
+                                    <th className="px-6 py-4">Usuario / Email</th>
+                                    <th className="px-6 py-4">Nivel de Acceso</th>
+                                    <th className="px-6 py-4">Permisos</th>
+                                    <th className="px-6 py-4">Fecha Registro</th>
+                                    <th className="px-6 py-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {loading ? (
+                                    <tr><td colSpan={5} className="px-6 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">Sincronizando Usuarios...</td></tr>
+                                ) : filteredAdmins.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-20 text-center space-y-4">
+                                            <Mail className="w-12 h-12 text-white/10 mx-auto" />
+                                            <div className="space-y-1">
+                                                <p className="text-white/40 font-black uppercase tracking-widest text-xs">No hay administradores registrados</p>
+                                                <p className="text-white/20 text-[10px] font-medium max-w-xs mx-auto">Usa el botón "Agregar Administrador" para registrar correos en la base de datos y asignar roles (Editor/SuperAdmin).</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : filteredAdmins.map(admin => (
+                                    <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-brand/20 transition-all">
+                                                    <Mail className="w-5 h-5 text-white/20 group-hover:text-brand" />
+                                                </div>
+                                                <span className="font-bold text-sm tracking-tight">{admin.email}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
+                                                admin.role === 'superadmin' 
+                                                ? 'bg-brand/10 text-brand border-brand/20' 
+                                                : admin.role === 'administrador'
+                                                ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                                                : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                            }`}>
+                                                {admin.role === 'superadmin' ? 'Super Admin' : admin.role === 'administrador' ? 'Administrador' : 'Editor'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {ROLE_CAPABILITIES[admin.role].map((cap) => (
+                                                    <span key={`${admin.id}-${cap}`} className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-white/5 text-white/60 border border-white/10">
+                                                        {cap}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <span className="text-[10px] font-mono text-white/20">{new Date(admin.created_at).toLocaleDateString()}</span>
+                                        </td>
+                                        <td className="px-6 py-5 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <button 
+                                                    onClick={() => { setEditingAdmin(admin); setShowForm(true); }}
+                                                    className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5"
+                                                >
+                                                    <Shield className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => openPasswordModal(admin.email)}
+                                                    className="p-2.5 rounded-xl bg-white/5 hover:bg-amber-500/10 text-white/20 hover:text-amber-400 transition-all border border-white/5"
+                                                    title="Actualizar contraseña"
+                                                >
+                                                    <KeyRound className="w-4 h-4" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteAdmin(admin.id, admin.email)}
+                                                    className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-all border border-white/5"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Modal Form */}
+                <AnimatePresence>
+                    {showForm && (
+                        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="glass p-10 w-full max-w-md border-brand/20 space-y-8">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-brand">/permisos_usuario</h2>
+                                    <button onClick={() => { setShowForm(false); setEditingAdmin(null); }} className="text-white/20 hover:text-white"><X className="w-6 h-6" /></button>
+                                </div>
+
+                                <form onSubmit={handleSaveAdmin} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Correo Electrónico</label>
+                                        <input 
+                                            name="email" 
+                                            defaultValue={editingAdmin?.email} 
+                                            required 
+                                            readOnly={!!editingAdmin?.id}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand outline-none transition-all disabled:opacity-50" 
+                                            placeholder="ejemplo@lobus.cl"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Rol de Administrador</label>
+                                        <select 
+                                            name="role" 
+                                            defaultValue={editingAdmin?.role || 'editor'} 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand outline-none transition-all"
+                                        >
+                                            <option value="superadmin" className="bg-[#0A0A0A]">Super Admin — Acceso total</option>
+                                            <option value="administrador" className="bg-[#0A0A0A]">Administrador — Puede eliminar cursos, sin exportar Excel</option>
+                                            <option value="editor" className="bg-[#0A0A0A]">Editor — Sin eliminación, sin exportar Excel</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="pt-4 flex gap-3">
+                                        <button type="submit" className="flex-1 py-4 bg-brand text-black rounded-xl font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                            <Check className="w-4 h-4" /> {editingAdmin?.id ? 'Actualizar' : 'Autorizar'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {showPasswordForm && (
+                        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="glass p-10 w-full max-w-md border-amber-500/20 space-y-8">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-2xl font-black uppercase italic tracking-tighter text-amber-400">/actualizar_password</h2>
+                                    <button
+                                        onClick={() => setShowPasswordForm(false)}
+                                        className="text-white/20 hover:text-white"
+                                        disabled={passwordSubmitting}
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                <form onSubmit={handleUpdatePassword} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Usuario</label>
+                                        <input
+                                            value={passwordTargetEmail}
+                                            readOnly
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm opacity-70"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Nueva Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                            minLength={6}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-amber-400 outline-none transition-all"
+                                            placeholder="Mínimo 6 caracteres"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-black text-white/20 pl-1">Confirmar Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            minLength={6}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-amber-400 outline-none transition-all"
+                                            placeholder="Repite la contraseña"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex gap-3">
+                                        <button
+                                            type="submit"
+                                            disabled={passwordSubmitting}
+                                            className="flex-1 py-4 bg-amber-400 text-black rounded-xl font-black uppercase text-xs tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                                        >
+                                            <KeyRound className="w-4 h-4" /> {passwordSubmitting ? 'Actualizando...' : 'Actualizar Password'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                </div>
+            </div>
+        </AdminSidebar>
+    );
+}

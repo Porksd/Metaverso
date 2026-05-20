@@ -1,0 +1,178 @@
+import React, { useRef, useState, useEffect } from 'react';
+import { Eraser, Save } from 'lucide-react';
+
+interface SignatureCanvasProps {
+    onSave: (signatureUrl: string) => Promise<boolean | void> | boolean | void;
+    isLight?: boolean;
+}
+
+export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [hasSignature, setHasSignature] = useState(false);
+    const [consentAccepted, setConsentAccepted] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            canvas.width = canvas.parentElement?.clientWidth || 500;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                // Fill with white background for certificate compatibility
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000'; // Always black for visibility on certificates
+            }
+        }
+    }, [isLight]);
+
+    const getCoordinates = (e: React.PointerEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) => {
+        const rect = canvas.getBoundingClientRect();
+
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    };
+
+    const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        canvas.setPointerCapture(e.pointerId);
+        setIsDrawing(true);
+        const { x, y } = getCoordinates(e, canvas);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    };
+
+    const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+        if (!isDrawing) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const { x, y } = getCoordinates(e, canvas);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        setHasSignature(true);
+        setIsSaved(false);
+    };
+
+    const stopDrawing = (e?: React.PointerEvent<HTMLCanvasElement>) => {
+        if (e && canvasRef.current?.hasPointerCapture(e.pointerId)) {
+            canvasRef.current.releasePointerCapture(e.pointerId);
+        }
+        setIsDrawing(false);
+    };
+
+    const clear = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Restore white background after clear
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            setHasSignature(false);
+            setIsSaved(false);
+        }
+    };
+
+    const save = async () => {
+        if (!hasSignature) {
+            alert('Por favor, firma en el recuadro antes de guardar.');
+            return;
+        }
+        if (!consentAccepted) {
+            alert('Debes aceptar el tratamiento de datos personales para continuar.');
+            return;
+        }
+        const canvas = canvasRef.current;
+        if (canvas) {
+            // Canvas already has white background from initialization, so PNG will be opaque
+            const dataUrl = canvas.toDataURL("image/png");
+            console.log("[SignatureCanvas] Signature saved in BLACK on WHITE background");
+            console.log("[SignatureCanvas] Data length:", dataUrl.length, "chars");
+            console.log("[SignatureCanvas] Consent accepted: YES");
+
+            setIsSaving(true);
+            try {
+                const persisted = await Promise.resolve(onSave(dataUrl));
+                if (persisted === false) return;
+                setIsSaved(true);
+            } catch (error) {
+                console.error("[SignatureCanvas] Error saving signature:", error);
+            } finally {
+                setIsSaving(false);
+            }
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center gap-4">
+            <div className="border border-white/20 rounded-xl overflow-hidden bg-white/5 relative" style={{ width: 500, height: 200 }}>
+                <canvas
+                    ref={canvasRef}
+                    className="w-full h-full cursor-crosshair touch-none"
+                    onPointerDown={startDrawing}
+                    onPointerMove={draw}
+                    onPointerUp={stopDrawing}
+                    onPointerLeave={stopDrawing}
+                    onPointerCancel={stopDrawing}
+                />
+                {!hasSignature && (
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-white/20 text-xl font-bold uppercase select-none">
+                        Firma Aquí
+                    </div>
+                )}
+            </div>
+            
+            {/* Checkbox de Consentimiento */}
+            <label className="flex items-start gap-3 cursor-pointer max-w-xl text-left group">
+                <input 
+                    type="checkbox" 
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="mt-1 w-5 h-5 rounded border-2 border-white/20 bg-white/5 checked:bg-brand checked:border-brand focus:ring-2 focus:ring-brand/50 cursor-pointer transition-all"
+                />
+                <span className="text-sm text-white/70 group-hover:text-white/90 transition-colors leading-relaxed">
+                    Acepto el tratamiento de mis datos personales para fines de <strong className="text-white">certificación y gestión académica</strong>.
+                </span>
+            </label>
+            
+            <div className="flex gap-4">
+                <button onClick={clear} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-xs uppercase font-bold transition-colors">
+                    <Eraser className="w-4 h-4" /> Borrar
+                </button>
+                <button
+                    onClick={save}
+                    disabled={!hasSignature || !consentAccepted || isSaving}
+                    className={`
+                        flex items-center gap-2 px-6 py-2 rounded-lg text-xs uppercase font-bold shadow-lg transition-all
+                        ${hasSignature && consentAccepted && !isSaving ? 'bg-brand text-black hover:bg-white hover:scale-105 shadow-brand/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}
+                    `}
+                >
+                    <Save className="w-4 h-4" /> {isSaving ? 'Guardando...' : 'Guardar Firma'}
+                </button>
+            </div>
+
+            {isSaved && (
+                <div className="w-full max-w-xl text-center rounded-lg border border-brand/30 bg-brand/10 px-4 py-2">
+                    <p className="text-brand text-xs md:text-sm font-bold uppercase tracking-wide">Firma guardada correctamente</p>
+                </div>
+            )}
+        </div>
+    );
+}
