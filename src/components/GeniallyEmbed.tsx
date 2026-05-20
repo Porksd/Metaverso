@@ -4,14 +4,22 @@ interface GeniallyEmbedProps {
     src: string;
     onInteract?: () => void;
     hideNativeControls?: boolean;
+    provider?: 'genially' | 'gamma';
 }
 
-function normalizeGeniallyUrl(rawSrc: string): string | null {
+type EmbedResolution = {
+    iframeUrl: string | null;
+    openUrl: string | null;
+    embeddable: boolean;
+};
+
+function resolveEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): EmbedResolution {
     const raw = (rawSrc || '').trim();
-    if (!raw) return null;
+    if (!raw) return { iframeUrl: null, openUrl: null, embeddable: false };
 
     const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/i);
     const candidate = (iframeSrcMatch?.[1] || raw).replace(/&amp;/g, '&').trim();
+    const cameFromIframe = Boolean(iframeSrcMatch?.[1]);
 
     if (
         candidate.startsWith('/') ||
@@ -19,7 +27,7 @@ function normalizeGeniallyUrl(rawSrc: string): string | null {
         candidate.startsWith('../') ||
         candidate.startsWith('data:')
     ) {
-        return candidate;
+        return { iframeUrl: candidate, openUrl: candidate, embeddable: true };
     }
 
     const withProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(candidate)
@@ -37,7 +45,11 @@ function normalizeGeniallyUrl(rawSrc: string): string | null {
             host === 'genial.ly' ||
             host.endsWith('.genial.ly');
 
-        if (isGeniallyHost) {
+        const isGammaHost =
+            host === 'gamma.app' ||
+            host.endsWith('.gamma.app');
+
+        if (provider === 'genially' && isGeniallyHost) {
             const idMatch = url.pathname.match(/[0-9a-f]{24}/i);
             if (idMatch?.[0]) {
                 url.hostname = 'view.genially.com';
@@ -45,19 +57,38 @@ function normalizeGeniallyUrl(rawSrc: string): string | null {
             }
         }
 
+        if (provider === 'gamma' && isGammaHost && !url.searchParams.has('mode')) {
+            url.searchParams.set('mode', 'doc');
+        }
+
         url.protocol = 'https:';
-        return url.toString();
+        const finalUrl = url.toString();
+
+        if (provider === 'gamma') {
+            const looksEmbeddable =
+                cameFromIframe ||
+                url.pathname.toLowerCase().includes('/embed') ||
+                url.searchParams.get('mode') === 'embed';
+
+            if (!looksEmbeddable) {
+                return { iframeUrl: null, openUrl: finalUrl, embeddable: false };
+            }
+        }
+
+        return { iframeUrl: finalUrl, openUrl: finalUrl, embeddable: true };
     } catch {
-        return null;
+        return { iframeUrl: null, openUrl: null, embeddable: false };
     }
 }
 
-export default function GeniallyEmbed({ src, onInteract, hideNativeControls = true }: GeniallyEmbedProps) {
+export default function GeniallyEmbed({ src, onInteract, hideNativeControls = true, provider = 'genially' }: GeniallyEmbedProps) {
     const [loaded, setLoaded] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [interacted, setInteracted] = useState(false);
     const completedRef = React.useRef(false);
-    const normalizedSrc = normalizeGeniallyUrl(src);
+    const providerLabel = provider === 'gamma' ? 'Gamma' : 'Genially';
+    const embedResolution = resolveEmbedUrl(src, provider);
+    const normalizedSrc = embedResolution.iframeUrl;
 
     useEffect(() => {
         setLoaded(false);
@@ -65,6 +96,12 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
         setInteracted(false);
         completedRef.current = false;
     }, [normalizedSrc]);
+
+    useEffect(() => {
+        if (!embedResolution.embeddable) {
+            setLoaded(true);
+        }
+    }, [embedResolution.embeddable]);
 
     const handleComplete = React.useCallback(() => {
         if (completedRef.current) return;
@@ -76,7 +113,7 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             // Log de depuración detallado
-            console.log('[Genially Debug] Mensaje:', event.data);
+            console.log(`[${providerLabel} Debug] Mensaje:`, event.data);
 
             try {
                 let data = event.data;
@@ -85,7 +122,7 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
                 // 1. Detección por palabras clave (prioridad máxima)
                 const completionKeywords = ['FIN', 'CERRAR', 'FINISHED', 'COMPLETED', 'END_SCENE', 'FINALIZAR', 'TERMINAR', 'EXIT', 'CLOSE', 'LAST_SLIDE'];
                 if (completionKeywords.some(key => rawString.toUpperCase().includes(key))) {
-                    console.log('✅ Genially: Detectada palabra clave de fin - auto-completando');
+                    console.log(`✅ ${providerLabel}: Detectada palabra clave de fin - auto-completando`);
                     handleComplete();
                     return;
                 }
@@ -97,7 +134,7 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
                         const current = parseInt(parts[parts.length - 2]);
                         const total = parseInt(parts[parts.length - 1]);
                         if (!isNaN(current) && !isNaN(total) && current > 0 && current >= total) {
-                            console.log('✅ Genially: Detectada última slide - auto-completando');
+                            console.log(`✅ ${providerLabel}: Detectada última slide - auto-completando`);
                             handleComplete();
                         }
                     }
@@ -108,10 +145,10 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
         // 3. SECCIÓN CRÍTICA: Detección de interacción por foco (Fallback infalible)
         const checkFocus = () => {
             if (document.activeElement instanceof HTMLIFrameElement) {
-                // El usuario ha hecho clic dentro del Genially
+                // El usuario ha hecho clic dentro del iframe interactivo
                 if (!interacted) {
                     setInteracted(true);
-                    console.log('🖱️ Genially: Interacción detectada (clic en iframe)');
+                    console.log(`🖱️ ${providerLabel}: Interacción detectada (clic en iframe)`);
                 }
             }
         };
@@ -123,26 +160,44 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
             window.removeEventListener('message', handleMessage);
             clearInterval(focusInterval);
         };
-    }, [interacted, handleComplete, completed]);
+    }, [interacted, handleComplete, completed, providerLabel]);
 
     // Si hubo interacción y han pasado 15 segundos, auto-completar
     useEffect(() => {
         if (interacted && !completed) {
             const timer = setTimeout(() => {
-                console.log('✅ Genially: Auto-completando por interacción prolongada (15s fallback)');
+                console.log(`✅ ${providerLabel}: Auto-completando por interacción prolongada (15s fallback)`);
                 handleComplete();
             }, 15000);
             return () => clearTimeout(timer);
         }
-    }, [interacted, completed, handleComplete]);
+    }, [interacted, completed, handleComplete, providerLabel]);
     
     return (
         <div className="w-full h-full relative flex flex-col bg-black">
             {!normalizedSrc && (
                 <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/85 p-4">
                     <div className="max-w-md rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-center text-red-100">
-                        <p className="text-sm font-bold uppercase tracking-wide">No se pudo cargar Genially</p>
-                        <p className="mt-2 text-xs text-red-200/90">La URL es invalida o no corresponde a un enlace publico de Genially.</p>
+                        {provider === 'gamma' && embedResolution.openUrl ? (
+                            <>
+                                <p className="text-sm font-bold uppercase tracking-wide">Gamma bloqueo la visualizacion embebida</p>
+                                <p className="mt-2 text-xs text-red-200/90">Este enlace de Gamma no permite mostrarse dentro de la plataforma. Puedes abrirlo en una pestaña nueva, o pegar el codigo embed oficial de Gamma si dispones de uno.</p>
+                                <a
+                                    href={embedResolution.openUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={handleComplete}
+                                    className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-xs font-black uppercase tracking-wide text-black transition hover:opacity-90"
+                                >
+                                    Abrir Gamma
+                                </a>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-sm font-bold uppercase tracking-wide">No se pudo cargar {providerLabel}</p>
+                                <p className="mt-2 text-xs text-red-200/90">La URL es invalida o no corresponde a un enlace publico de {providerLabel}.</p>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -153,14 +208,16 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
                 </div>
             )}
             
-            <iframe
-                src={normalizedSrc || ''}
-                className="w-full h-full border-0 flex-1"
-                allowFullScreen
-                onLoad={() => setLoaded(true)}
-            />
+            {normalizedSrc && (
+                <iframe
+                    src={normalizedSrc}
+                    className="w-full h-full border-0 flex-1"
+                    allowFullScreen
+                    onLoad={() => setLoaded(true)}
+                />
+            )}
 
-            {hideNativeControls && (
+            {normalizedSrc && hideNativeControls && (
                 <div className="absolute bottom-0 right-0 h-11 w-28 max-[430px]:w-24 sm:h-12 sm:w-40 [@media(max-height:430px)]:h-10 [@media(max-height:430px)]:w-32 bg-black z-20 pointer-events-none" />
             )}
 

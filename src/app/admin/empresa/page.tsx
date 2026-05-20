@@ -15,6 +15,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
 import { resolveAdminRole } from "@/lib/adminAuth";
+import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 
 // Utility functions for RUT validation
 const cleanRut = (rut: string) => {
@@ -220,15 +221,33 @@ export default function EmpresaAdmin() {
             const { data: cgData } = await rolesQuery.order('name');
             setCargos(cgData || []);
 
-            // Fetch ONLY assigned courses for this company
-            const { data: assignedData, error: assignedError } = await supabase
-                .from('company_courses')
-                .select('course_id, courses(*)')
-                .eq('company_id', companyId);
+            // Fetch ONLY assigned courses for this company (with cert flags)
+            const [{ data: assignedData, error: assignedError }, { data: dipConfig }] = await Promise.all([
+                supabase
+                    .from('company_courses')
+                    .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, courses(*)')
+                    .eq('company_id', companyId),
+                supabase
+                    .from('diploma_config')
+                    .select('*')
+                    .eq('id', '00000000-0000-0000-0000-000000000001')
+                    .single()
+            ]);
             
             if (assignedError) {
                 console.error("Error fetching assigned courses:", assignedError);
             }
+
+            // Build cert flags map
+            const flags: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+            (assignedData || []).forEach((ad: any) => {
+                flags[ad.course_id] = {
+                    participacion: ad.cert_participacion_enabled !== false,
+                    aprobacion: ad.diploma_metaverso_enabled === true,
+                };
+            });
+            setCourseCertFlags(flags);
+            setDiplomaConfig(dipConfig || null);
             
             const filteredCourses = (assignedData || []).map((ad: any) => ad.courses).filter(Boolean);
             setCourses(filteredCourses);

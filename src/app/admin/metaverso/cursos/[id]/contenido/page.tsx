@@ -19,7 +19,7 @@ import {
 // Simple helper types
 type ModuleItem = {
     id?: string;
-    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
+    type: 'video' | 'audio' | 'image' | 'pdf' | 'genially' | 'gamma' | 'scorm' | 'quiz' | 'signature' | 'text' | 'header' | 'survey';
     content: any;
     order_index: number;
 };
@@ -442,11 +442,27 @@ export default function DynamicCourseEditor() {
         const module = modules[activeModuleIndex];
         if (!module.id) return;
 
+        const normalizedType =
+            resoureType === 'header'
+                ? 'text'
+                : resoureType === 'gamma'
+                    ? 'genially'
+                    : resoureType;
+
+        // Backward-compatible payload: Gamma is persisted as genially + provider flag
+        // so production works even if DB CHECK still does not include 'gamma'.
+        const initialContent =
+            resoureType === 'header'
+                ? { isHeader: true, tag: 'h1', text: 'Nuevo Título' }
+                : resoureType === 'gamma'
+                    ? { provider: 'gamma' }
+                    : {};
+
         // Create Item Stub
         const newItemPayload = {
             module_id: module.id,
-            type: resoureType === 'header' ? 'text' : resoureType, // Fallback 'header' to 'text' if DB check fails
-            content: resoureType === 'header' ? { isHeader: true, tag: 'h1', text: 'Nuevo Título' } : {},
+            type: normalizedType,
+            content: initialContent,
             order_index: module.items.length
         };
 
@@ -868,6 +884,7 @@ export default function DynamicCourseEditor() {
                                                 {item.type === 'header' && <Type className="w-3 h-3" />}
                                                 {item.type === 'audio' && <Music className="w-3 h-3" />}
                                                 {item.type === 'genially' && <Gamepad2 className="w-3 h-3" />}
+                                                {(item.type === 'gamma' || item.content?.provider === 'gamma') && <Gamepad2 className="w-3 h-3" />}
                                                 {item.type} Component
                                             </span>
                                             <button onClick={() => {
@@ -971,13 +988,13 @@ export default function DynamicCourseEditor() {
                                             />
                                         )}
 
-                                        {item.type === 'genially' && (
+                                        {(item.type === 'genially' || item.type === 'gamma') && (
                                             <div className="space-y-2">
                                                 <ContentUploader
                                                     courseId={courseId}
-                                                    sectionKey={`genially_${item.id}`}
-                                                    label="Paquete ZIP o URL"
-                                                    accept=".zip"
+                                                    sectionKey={`${(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'gamma' : 'genially'}_${item.id}`}
+                                                    label={(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'Gamma URL' : 'Paquete ZIP o URL'}
+                                                    accept={(item.type === 'gamma' || item.content?.provider === 'gamma') ? '*' : '.zip'}
                                                     currentValue={item.content.url}
                                                     onUploadComplete={(url) => {
                                                         const exactModIdx = modules.findIndex(m => m.id === module.id);
@@ -985,7 +1002,7 @@ export default function DynamicCourseEditor() {
                                                     }}
                                                 />
                                                 <input
-                                                    placeholder="O pega la URL directa de Genially..."
+                                                    placeholder={(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'Pega la URL pública de Gamma.app...' : 'O pega la URL directa de Genially...'}
                                                     value={item.content.url || ''}
                                                     onChange={(e) => {
                                                         const exactModIdx = modules.findIndex(m => m.id === module.id);
@@ -1362,6 +1379,7 @@ export default function DynamicCourseEditor() {
                                                     {item.type === 'scorm' && <GripVertical className="w-3 h-3" />}
                                                     {item.type === 'quiz' && <PenTool className="w-3 h-3" />}
                                                     {item.type === 'genially' && <Gamepad2 className="w-3 h-3" />}
+                                                    {(item.type === 'gamma' || item.content?.provider === 'gamma') && <Gamepad2 className="w-3 h-3" />}
                                                     {item.type === 'survey' && <ClipboardList className="w-3 h-3" />}
                                                     {item.type} Component
                                                 </span>
@@ -1565,12 +1583,12 @@ export default function DynamicCourseEditor() {
                                             )}
 
                                             {/* Genially Uploader */}
-                                            {item.type === 'genially' && (
+                                            {(item.type === 'genially' || item.type === 'gamma') && (
                                                 <div className="space-y-2">
                                                     <ContentUploader
                                                         courseId={courseId}
-                                                        sectionKey={`genially_${item.id}`}
-                                                        label="Genially URL"
+                                                        sectionKey={`${(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'gamma' : 'genially'}_${item.id}`}
+                                                        label={(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'Gamma URL' : 'Genially URL'}
                                                         accept="*"
                                                         currentValue={item.content.url || ''}
                                                         onUploadComplete={(url) => {
@@ -1579,7 +1597,7 @@ export default function DynamicCourseEditor() {
                                                         }}
                                                     />
                                                     <input
-                                                        placeholder="O pega la URL directa..."
+                                                        placeholder={(item.type === 'gamma' || item.content?.provider === 'gamma') ? 'Pega la URL pública de Gamma.app...' : 'O pega la URL directa...'}
                                                         value={item.content.url || ''}
                                                         onChange={(e) => {
                                                             const exactModIdx = modules.findIndex(m => m.id === module.id);
@@ -1632,6 +1650,7 @@ export default function DynamicCourseEditor() {
                                 { id: 'video', label: "Video", icon: Video },
                                 { id: 'audio', label: "Audio", icon: Music },
                                 { id: 'genially', label: "Genially / HTML", icon: Gamepad2 },
+                                { id: 'gamma', label: "Gamma.app", icon: Gamepad2 },
                                 { id: 'pdf', label: "PDF Document", icon: FileIcon },
                                 { id: 'scorm', label: "Paquete SCORM", icon: GripVertical }, // Icon placeholder
                                 { id: 'quiz', label: "Quiz / Eval", icon: PenTool },

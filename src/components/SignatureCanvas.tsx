@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Eraser, Save } from 'lucide-react';
 
 interface SignatureCanvasProps {
-    onSave: (signatureUrl: string) => void;
+    onSave: (signatureUrl: string) => Promise<boolean | void> | boolean | void;
     isLight?: boolean;
 }
 
@@ -12,6 +12,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
     const [hasSignature, setHasSignature] = useState(false);
     const [consentAccepted, setConsentAccepted] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -89,7 +90,7 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
         }
     };
 
-    const save = () => {
+    const save = async () => {
         if (!hasSignature) {
             alert('Por favor, firma en el recuadro antes de guardar.');
             return;
@@ -105,8 +106,17 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
             console.log("[SignatureCanvas] Signature saved in BLACK on WHITE background");
             console.log("[SignatureCanvas] Data length:", dataUrl.length, "chars");
             console.log("[SignatureCanvas] Consent accepted: YES");
-            onSave(dataUrl);
-            setIsSaved(true);
+
+            setIsSaving(true);
+            try {
+                const persisted = await Promise.resolve(onSave(dataUrl));
+                if (persisted === false) return;
+                setIsSaved(true);
+            } catch (error) {
+                console.error("[SignatureCanvas] Error saving signature:", error);
+            } finally {
+                setIsSaving(false);
+            }
         }
     };
 
@@ -148,13 +158,13 @@ export default function SignatureCanvas({ onSave, isLight }: SignatureCanvasProp
                 </button>
                 <button
                     onClick={save}
-                    disabled={!hasSignature || !consentAccepted}
+                    disabled={!hasSignature || !consentAccepted || isSaving}
                     className={`
                         flex items-center gap-2 px-6 py-2 rounded-lg text-xs uppercase font-bold shadow-lg transition-all
-                        ${hasSignature && consentAccepted ? 'bg-brand text-black hover:bg-white hover:scale-105 shadow-brand/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}
+                        ${hasSignature && consentAccepted && !isSaving ? 'bg-brand text-black hover:bg-white hover:scale-105 shadow-brand/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}
                     `}
                 >
-                    <Save className="w-4 h-4" /> Guardar Firma
+                    <Save className="w-4 h-4" /> {isSaving ? 'Guardando...' : 'Guardar Firma'}
                 </button>
             </div>
 

@@ -15,6 +15,7 @@ import CoursePlayer from "@/components/CoursePlayer";
 import SignatureCanvas from "@/components/SignatureCanvas";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
+import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 
 const translations: any = {
     es: {
@@ -114,9 +115,28 @@ export default function CoursesPage() {
             localStorage.setItem("user", JSON.stringify(studentData));
         }
 
-        // 1. Obtener Info Empresa (Firmas)
-        const { data: comp } = await supabase.from('companies').select('*').eq('id', clientId).single();
+        // 1. Obtener Info Empresa (Firmas) + cert flags + diploma config
+        const [{ data: comp }, { data: ccData }, { data: dipCfg }] = await Promise.all([
+            supabase.from('companies').select('*').eq('id', clientId).single(),
+            supabase.from('company_courses')
+                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled')
+                .eq('company_id', clientId),
+            supabase.from('diploma_config')
+                .select('*')
+                .eq('id', '00000000-0000-0000-0000-000000000001')
+                .single()
+        ]);
         if (comp) setCompanyInfo(comp);
+        if (dipCfg) setDiplomaConfig(dipCfg);
+        // Build cert flags map
+        const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+        (ccData || []).forEach((cc: any) => {
+            flagsMap[cc.course_id] = {
+                participacion: cc.cert_participacion_enabled !== false,
+                aprobacion: cc.diploma_metaverso_enabled === true,
+            };
+        });
+        setCertFlagsMap(flagsMap);
 
                         // 2. Obtener Inscripciones (Revertido a query simple para evitar errores de relación profunda)
         const { data: enrData, error: enrError } = await supabase
@@ -732,7 +752,7 @@ export default function CoursesPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-3">
+                                        <div className="flex gap-3 flex-wrap">
                                             {/* Solo mostrar botón de acción si NO está completado o si falta encuesta */}
                                             {(!isCompleted || surveyPending) && (
                                             <button
