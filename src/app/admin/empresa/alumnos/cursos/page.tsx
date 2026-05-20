@@ -73,6 +73,8 @@ export default function CoursesPage() {
     const [certData, setCertData] = useState<any>(null);
     const [companyInfo, setCompanyInfo] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
+    const [certFlagsMap, setCertFlagsMap] = useState<Record<string, { participacion: boolean; aprobacion: boolean }>>({});
+    const [diplomaConfig, setDiplomaConfig] = useState<any>(null);
     const [showSignatureModal, setShowSignatureModal] = useState(false);
     const [signatureTargetCourse, setSignatureTargetCourse] = useState<string>("");
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga

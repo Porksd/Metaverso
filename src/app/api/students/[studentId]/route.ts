@@ -11,12 +11,12 @@ const PROTECTED_ADMIN_EMAILS = [
     'm.poblete.m@gmail.com'
 ];
 
-const getStudentId = async (context: { params: RouteParams | Promise<RouteParams> }) => {
+const getStudentId = async (context: { params: Promise<RouteParams> }) => {
     const params = await Promise.resolve(context.params);
     return params.studentId;
 };
 
-export async function DELETE(_request: Request, context: { params: RouteParams | Promise<RouteParams> }) {
+export async function DELETE(_request: Request, context: { params: Promise<RouteParams> }) {
     try {
         if (!supabaseAdmin) {
             return NextResponse.json({ error: 'Configuracion invalida: supabaseAdmin no disponible' }, { status: 500 });

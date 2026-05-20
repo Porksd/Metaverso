@@ -85,6 +85,8 @@ export default function EmpresaAdmin() {
     const [cargoDescHT, setCargoDescHT] = useState("");
     const [descLang, setDescLang] = useState<'es' | 'ht'>('es');
     const [certData, setCertData] = useState<any>(null);
+    const [courseCertFlags, setCourseCertFlags] = useState<Record<string, { participacion: boolean; aprobacion: boolean }>>({});
+    const [diplomaConfig, setDiplomaConfig] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
     const certGenerationLock = useRef(false);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
