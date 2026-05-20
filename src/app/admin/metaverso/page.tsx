@@ -43,6 +43,8 @@ export default function MetaversoAdmin() {
         use_generic_password: boolean;
         generic_password: string;
         pass_saved: boolean;
+        diploma_metaverso_enabled: boolean;
+        cert_participacion_enabled: boolean;
     }>>({}); 
 
     const copyToClipboard = (text: string, id: string) => {
@@ -506,7 +508,7 @@ export default function MetaversoAdmin() {
         const [{ data: coursesData }, { data: assignData }] = await Promise.all([
             supabase.from('courses').select('id, name, code').order('name'),
             supabase.from('company_courses')
-                .select('course_id, registration_mode, use_generic_password, generic_password')
+                .select('course_id, registration_mode, use_generic_password, generic_password, diploma_metaverso_enabled, cert_participacion_enabled')
                 .eq('company_id', company.id)
         ]);
         const map: Record<string, any> = {};
@@ -517,7 +519,9 @@ export default function MetaversoAdmin() {
                 access_mode: a?.registration_mode || 'open',
                 use_generic_password: a?.use_generic_password || false,
                 generic_password: a?.generic_password || '',
-                pass_saved: false
+                pass_saved: false,
+                diploma_metaverso_enabled: a?.diploma_metaverso_enabled || false,
+                cert_participacion_enabled: a ? (a.cert_participacion_enabled !== false) : true,
             };
         });
         setCmCourses(coursesData || []);
@@ -535,7 +539,9 @@ export default function MetaversoAdmin() {
                 course_id: courseId,
                 registration_mode: v.access_mode,
                 use_generic_password: v.use_generic_password,
-                generic_password: v.use_generic_password ? v.generic_password : null
+                generic_password: v.use_generic_password ? v.generic_password : null,
+                diploma_metaverso_enabled: v.diploma_metaverso_enabled || false,
+                cert_participacion_enabled: v.cert_participacion_enabled !== false,
             }));
         if (rows.length > 0) {
             const { error } = await supabase.from('company_courses').insert(rows);
@@ -623,6 +629,12 @@ export default function MetaversoAdmin() {
                         className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
                     >
                         Gestión de Cursos
+                    </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/diplomas')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
+                    >
+                        Diplomas
                     </button>
                 </div>
 
@@ -1311,6 +1323,22 @@ export default function MetaversoAdmin() {
                                                                 {cfg.pass_saved && <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />}
                                                             </div>
                                                         )}
+                                                    </div>
+                                                    {/* Certificados */}
+                                                    <div className="flex items-center gap-2 pt-1 border-t border-white/5 flex-wrap">
+                                                        <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Certificados</span>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], cert_participacion_enabled: !prev[course.id].cert_participacion_enabled } })); }}
+                                                            className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.cert_participacion_enabled ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                        >
+                                                            {cfg.cert_participacion_enabled ? '✓ Cert. Participación' : 'Cert. Participación'}
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], diploma_metaverso_enabled: !prev[course.id].diploma_metaverso_enabled } })); }}
+                                                            className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.diploma_metaverso_enabled ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                        >
+                                                            {cfg.diploma_metaverso_enabled ? '✓ Cert. Aprobación' : 'Cert. Aprobación'}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             )}

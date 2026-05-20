@@ -19,7 +19,8 @@ export default function CoursesAdmin() {
         name: '', 
         code: '', 
         company_ids: [] as string[], 
-        max_attempts: 3
+        max_attempts: 3,
+        hours: ''
     });
     const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
     const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
@@ -74,7 +75,8 @@ export default function CoursesAdmin() {
                 .update({ 
                     name: newCourse.name,
                     code: newCourse.code,
-                    max_attempts: newCourse.max_attempts
+                    max_attempts: newCourse.max_attempts,
+                    config: { ...(currentCourse?.config || {}), hours: newCourse.hours || undefined }
                 })
                 .eq('id', editingCourseId);
             
@@ -94,7 +96,7 @@ export default function CoursesAdmin() {
 
             setIsCreateModalOpen(false);
             setEditingCourseId(null);
-            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3 });
+            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
             fetchCourses();
         } else {
             handleCreateCourse();
@@ -146,7 +148,7 @@ export default function CoursesAdmin() {
             is_active: true,
             registration_mode: 'open',
             max_attempts: newCourse.max_attempts,
-            config: { questions: [] }
+            config: { questions: [], ...(newCourse.hours ? { hours: newCourse.hours } : {}) }
         };
 
         const { data: course, error: courseError } = await supabase
@@ -168,7 +170,7 @@ export default function CoursesAdmin() {
             }
 
             setIsCreateModalOpen(false);
-            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3 });
+            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
             fetchCourses();
         }
     };
@@ -201,7 +203,7 @@ export default function CoursesAdmin() {
                     <div className="flex gap-2 w-full md:w-auto">
                         <button
                             onClick={() => {
-                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3 });
+                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
                                 setEditingCourseId(null);
                                 setIsCreateModalOpen(true);
                             }}
@@ -288,7 +290,8 @@ export default function CoursesAdmin() {
                                             name: course.name, 
                                             code: course.code,
                                             company_ids: course.company_courses?.map((cc: any) => cc.company_id) || [], 
-                                            max_attempts: course.max_attempts || 3
+                                            max_attempts: course.max_attempts || 3,
+                                            hours: course.config?.hours || ''
                                         });
                                         setEditingCourseId(course.id);
                                         setIsCreateModalOpen(true);
@@ -330,7 +333,7 @@ export default function CoursesAdmin() {
                             <button onClick={() => { 
                                 setIsCreateModalOpen(false); 
                                 setEditingCourseId(null); 
-                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3 });
+                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
                             }} className="text-white/40 hover:text-white">
                                 <X className="w-6 h-6" />
                             </button>
@@ -357,6 +360,22 @@ export default function CoursesAdmin() {
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-brand transition-all font-mono text-sm"
                                     placeholder="Ej: SEG-IND-01"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-white/40 mb-1 block">Horas Cronológicas</label>
+                                <div className="flex items-center gap-3">
+                                    <input 
+                                        type="number" 
+                                        min="0"
+                                        max="9999"
+                                        value={newCourse.hours}
+                                        onChange={(e) => setNewCourse(prev => ({ ...prev, hours: e.target.value }))}
+                                        className="w-24 bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-brand transition-all font-black text-brand text-center text-lg"
+                                        placeholder="0"
+                                    />
+                                    <span className="text-xs text-white/30">horas del curso (aparece en el Certificado de Aprobación)</span>
+                                </div>
                             </div>
 
                             <div>
