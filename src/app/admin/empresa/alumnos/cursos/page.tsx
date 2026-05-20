@@ -12,6 +12,7 @@ import ScormPlayer from "@/components/ScormPlayer";
 import QuizEngine from "@/components/QuizEngine";
 import CertificateCanvas from "@/components/CertificateCanvas";
 import CoursePlayer from "@/components/CoursePlayer";
+import SignatureCanvas from "@/components/SignatureCanvas";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
 
@@ -35,6 +36,8 @@ const translations: any = {
         access_desc: "Accede a tus cursos asignados y mantén tu certificación al día.",
         collab: "Colaborador",
         logout: "Cerrar Sesión",
+        sign_now: "Firmar",
+        sign_to_unlock_cert: "Firma pendiente para habilitar certificado",
     },
     ht: {
         welcome: "Byenvini",
@@ -55,6 +58,8 @@ const translations: any = {
         access_desc: "Aksede kou ou asiyen yo epi kenbe sètifikasyon ou a jou.",
         collab: "Kolaboratè",
         logout: "Dekonekte",
+        sign_now: "Siyen",
+        sign_to_unlock_cert: "Siyati an reta pou aktive sètifika a",
     }
 };
 
@@ -67,9 +72,12 @@ export default function CoursesPage() {
     const [certData, setCertData] = useState<any>(null);
     const [companyInfo, setCompanyInfo] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
+    const [showSignatureModal, setShowSignatureModal] = useState(false);
+    const [signatureTargetCourse, setSignatureTargetCourse] = useState<string>("");
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga
 
     const t = translations[user?.language || 'es'];
+    const hasUserSignature = typeof user?.digital_signature_url === 'string' && user.digital_signature_url.trim().length > 0;
 
     const confirmExitCourse = useCallback(() => {
         if (window.confirm(t.exit_course_confirm)) {
@@ -364,6 +372,37 @@ export default function CoursesPage() {
             age: studentSrc.age,
             gender: studentSrc.gender
         });
+    };
+
+    const handleSaveMissingSignature = async (signatureUrl: string): Promise<boolean> => {
+        if (!user?.id) return false;
+
+        const nowIso = new Date().toISOString();
+        const { error } = await supabase
+            .from('students')
+            .update({
+                digital_signature_url: signatureUrl,
+                consent_accepted_at: nowIso
+            })
+            .eq('id', user.id);
+
+        if (error) {
+            console.error("❌ Error saving signature from courses list:", error);
+            alert('No se pudo guardar tu firma. Intenta nuevamente.');
+            return false;
+        }
+
+        const updatedUser = {
+            ...user,
+            digital_signature_url: signatureUrl,
+            consent_accepted_at: nowIso
+        };
+
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setShowSignatureModal(false);
+        setSignatureTargetCourse("");
+        return true;
     };
 
     // Stats
@@ -709,12 +748,24 @@ export default function CoursesPage() {
                                             )}
                                             
                                             {isCompleted && !surveyPending && (
-                                                <button
-                                                    onClick={() => handleDownloadCertificate(enrollment)}
-                                                    className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
-                                                >
-                                                    <Award className="w-5 h-5" /> {t?.certificate}
-                                                </button>
+                                                !hasUserSignature ? (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSignatureTargetCourse(enrollment.course?.name || '');
+                                                            setShowSignatureModal(true);
+                                                        }}
+                                                        className="flex-1 py-4 bg-yellow-500 text-black border border-yellow-400/40 rounded-2xl hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-yellow-500/20"
+                                                    >
+                                                        <ClipboardList className="w-5 h-5" /> {t?.sign_now}
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleDownloadCertificate(enrollment)}
+                                                        className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
+                                                    >
+                                                        <Award className="w-5 h-5" /> {t?.certificate}
+                                                    </button>
+                                                )
                                             )}
                                         </div>
                                     </div>
@@ -724,6 +775,39 @@ export default function CoursesPage() {
                     </div>
                 </section>
             </main>
+
+            <AnimatePresence>
+                {showSignatureModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 20, opacity: 0 }}
+                            className="w-full max-w-2xl bg-[#111827] border border-white/10 rounded-3xl p-5 sm:p-7"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-wider">{t?.sign_now}</h3>
+                                <button
+                                    onClick={() => {
+                                        setShowSignatureModal(false);
+                                        setSignatureTargetCourse("");
+                                    }}
+                                    className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <p className="text-sm text-white/70 mb-5">{t?.sign_to_unlock_cert}{signatureTargetCourse ? `: ${signatureTargetCourse}` : ''}</p>
+                            <SignatureCanvas onSave={handleSaveMissingSignature} isLight={false} />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Motor PDF (Oculto) */}
             {certData && (

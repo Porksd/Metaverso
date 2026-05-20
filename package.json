@@ -6,7 +6,8 @@
     "dev": "next dev --webpack -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "admin:ensure-critical": "node scripts/ensure_critical_admins.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

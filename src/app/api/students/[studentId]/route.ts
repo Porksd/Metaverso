@@ -3,6 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 type RouteParams = { studentId: string };
 
+const PROTECTED_ADMIN_EMAILS = [
+    'admin@metaversotec.com',
+    'apacheco@metaversotec.com',
+    'porksde@gmail.com',
+    'soporte@lobus.cl',
+    'm.poblete.m@gmail.com'
+];
+
 const getStudentId = async (context: { params: RouteParams | Promise<RouteParams> }) => {
     const params = await Promise.resolve(context.params);
     return params.studentId;
@@ -89,10 +97,26 @@ export async function DELETE(_request: Request, context: { params: RouteParams |
         }
 
         if (student.auth_user_id) {
-            const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(student.auth_user_id);
-            if (authDeleteError) {
-                console.error('Error eliminando usuario de auth:', authDeleteError);
-                // No revertimos porque el alumno ya fue eliminado de negocio.
+            const { data: authUserData, error: authLookupError } = await supabaseAdmin.auth.admin.getUserById(student.auth_user_id);
+            if (authLookupError) {
+                console.error('Error buscando usuario auth antes de eliminar:', authLookupError);
+            }
+
+            const authEmail = authUserData?.user?.email?.toLowerCase() || '';
+            const isProtectedAdmin = PROTECTED_ADMIN_EMAILS.includes(authEmail);
+
+            if (isProtectedAdmin) {
+                console.error('Bloqueado: intento de eliminar Auth de admin protegido desde flujo de alumno:', {
+                    studentId: student.id,
+                    authUserId: student.auth_user_id,
+                    email: authEmail
+                });
+            } else {
+                const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(student.auth_user_id);
+                if (authDeleteError) {
+                    console.error('Error eliminando usuario de auth:', authDeleteError);
+                    // No revertimos porque el alumno ya fue eliminado de negocio.
+                }
             }
         }
 

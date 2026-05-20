@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
     Users, BookOpen, Search, Download, CheckCircle2,
@@ -84,6 +84,8 @@ export default function EmpresaAdmin() {
     const [cargoDescHT, setCargoDescHT] = useState("");
     const [descLang, setDescLang] = useState<'es' | 'ht'>('es');
     const [certData, setCertData] = useState<any>(null);
+    const [isGeneratingCert, setIsGeneratingCert] = useState(false);
+    const certGenerationLock = useRef(false);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
@@ -100,6 +102,17 @@ export default function EmpresaAdmin() {
         company_name: "", 
         role_id: null 
     });
+
+    const normalizeStudentSignature = (raw?: string | null) => {
+        if (!raw) return null;
+        const value = raw.trim();
+        if (!value) return null;
+        if (value.startsWith('data:image/')) return value;
+        if (/^[A-Za-z0-9+/=\s]+$/.test(value) && value.length > 200) {
+            return `data:image/png;base64,${value.replace(/\s+/g, '')}`;
+        }
+        return value;
+    };
 
     useEffect(() => {
         const storedId = getStoredCompanyValue('empresa_id');
@@ -618,6 +631,7 @@ export default function EmpresaAdmin() {
                                                         {isCompleted ? (
                                                             <button 
                                                                 onClick={async () => {
+                                                                    if (isGeneratingCert || certGenerationLock.current) return;
                                                                     if (!companyId) return;
                                                                     const { data: comp } = await supabase.from('companies').select('*').eq('id', companyId).single();
                                                                     
@@ -650,15 +664,18 @@ export default function EmpresaAdmin() {
                                                                             { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 }, 
                                                                             { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 }
                                                                         ].filter(s => s.url || s.name),
-                                                                        studentSignature: studentData?.digital_signature_url,
+                                                                        studentSignature: normalizeStudentSignature(studentData?.digital_signature_url || st.digital_signature_url),
                                                                         companyLogo: comp.logo_url,
                                                                         companyName: studentData?.company_name || comp.name,
                                                                         jobPosition: jobName,
                                                                         age: studentData?.age,
                                                                         gender: studentData?.gender
                                                                     });
+                                                                    certGenerationLock.current = true;
+                                                                    setIsGeneratingCert(true);
                                                                 }} 
-                                                                className="p-2 rounded-lg bg-brand/10 text-brand text-[10px] font-black flex items-center gap-1 border border-brand/30 hover:bg-brand hover:text-black transition-all"
+                                                                disabled={isGeneratingCert}
+                                                                className="p-2 rounded-lg bg-brand/10 text-brand text-[10px] font-black flex items-center gap-1 border border-brand/30 hover:bg-brand hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 title="Descargar Certificado"
                                                             >
                                                                 <AwardIcon className="w-3 h-3" /> Certificado
@@ -784,6 +801,8 @@ export default function EmpresaAdmin() {
                 )}
 
                 {certData && <CertificateCanvas {...certData} onReady={(blob) => {
+                    if (!certGenerationLock.current) return;
+                    certGenerationLock.current = false;
                     const reader = new FileReader(); 
                     reader.readAsDataURL(blob);
                     reader.onloadend = () => { 
@@ -792,6 +811,7 @@ export default function EmpresaAdmin() {
                         pdf.addImage(base64data, "PNG", 0, 0, 1414, 2000); 
                         pdf.save(`Certificado_${certData.rut}.pdf`); 
                         setCertData(null); 
+                        setIsGeneratingCert(false);
                     };
                 }} />}
 

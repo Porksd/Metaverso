@@ -60,7 +60,8 @@ const translations: any = {
         survey_submit: "Enviar Encuesta",
         survey_thanks: "¡Muchas gracias por tu feedback!",
         survey_prerequisite: "Debes completar la encuesta obligatoria para descargar tu certificado.",
-        survey_pending_after_exam: "Evaluación aprobada. Para habilitar la descarga del certificado, envía la encuesta obligatoria."
+        survey_pending_after_exam: "Evaluación aprobada. Para habilitar la descarga del certificado, envía la encuesta obligatoria.",
+        signature_required_for_certificate: "Para descargar tu certificado debes registrar tu firma digital."
     },
     ht: {
         loading: "Chaje kou...",
@@ -90,7 +91,8 @@ const translations: any = {
         survey_submit: "Voye Sondaj",
         survey_thanks: "Mèsi anpil pou feedback ou!",
         survey_prerequisite: "Ou dwe manyen sondaj obligatwa a pou telechaje sètifika ou.",
-        survey_pending_after_exam: "Egzamen an apwouve. Pou aktive telechajman sètifika a, voye sondaj obligatwa a."
+        survey_pending_after_exam: "Egzamen an apwouve. Pou aktive telechajman sètifika a, voye sondaj obligatwa a.",
+        signature_required_for_certificate: "Pou telechaje sètifika ou, ou dwe anrejistre siyati dijital ou."
     }
 };
 
@@ -111,6 +113,9 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
 
     const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
     const videoRefs = useRef<Map<string, VideoPlayerRef>>(new Map());
+    const hasStudentSignature = typeof enrollment?.students?.digital_signature_url === 'string'
+        && enrollment.students.digital_signature_url.trim().length > 0;
+    const canDownloadCertificate = moduleCompleted && hasStudentSignature;
 
     const handleEvaluationItemScore = (itemId: string, score: number, type: string, passed?: boolean) => {
         console.log(`[CoursePlayer] handleEvaluationItemScore called - Type: ${type}, Score: ${score}, ItemId: ${itemId}, Passed: ${passed}`);
@@ -436,8 +441,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
         });
     };
 
-    const handleSignatureSave = async (data: string, itemId: string) => {
-        handleItemCompletion(itemId);
+    const handleSignatureSave = async (data: string, itemId?: string): Promise<boolean> => {
         if (mode === 'student' && studentId && studentId !== "preview-admin") {
             try {
                 console.log(`[CoursePlayer] Saving signature for student ${studentId}, data length: ${data.length} chars`);
@@ -452,6 +456,8 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                 
                 if (error) {
                     console.error("[CoursePlayer] ❌ Error saving signature:", error);
+                    alert('No se pudo guardar tu firma. Intenta nuevamente.');
+                    return false;
                 } else {
                     console.log("[CoursePlayer] ✅ Signature and consent saved successfully for student:", studentId);
                     
@@ -464,11 +470,32 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                     
                     console.log("[CoursePlayer] 🔍 Verification - Signature in DB:", verification?.digital_signature_url ? `YES (${verification.digital_signature_url.length} chars)` : 'NO');
                     console.log("[CoursePlayer] 🔍 Verification - Consent at:", verification?.consent_accepted_at || 'NO');
+
+                    setEnrollment((prev: any) => prev ? {
+                        ...prev,
+                        students: {
+                            ...(prev.students || {}),
+                            digital_signature_url: data,
+                            consent_accepted_at: verification?.consent_accepted_at || new Date().toISOString()
+                        }
+                    } : prev);
+
+                    if (itemId) {
+                        handleItemCompletion(itemId);
+                    }
+                    return true;
                 }
             } catch (err) {
                 console.error("[CoursePlayer] Exception saving signature:", err);
+                alert('Ocurrio un error al guardar tu firma. Intenta nuevamente.');
+                return false;
             }
         }
+
+        if (itemId) {
+            handleItemCompletion(itemId);
+        }
+        return true;
     };
 
     useEffect(() => {
@@ -847,7 +874,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                 <p className="text-sm md:text-lg text-white/60 mt-4 font-medium">{t.course_approved_desc}</p>
                                 <p className="text-white/40 text-sm mt-2">{t.diploma_desc}</p>
                                 
-                                {moduleCompleted ? (
+                                {!moduleCompleted ? (
+                                    <div className="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl flex flex-col items-center gap-2">
+                                        <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                            <Library className="w-5 h-5 text-yellow-500" />
+                                        </div>
+                                        <p className="text-yellow-500 text-sm font-bold">{t.survey_prerequisite}</p>
+                                    </div>
+                                ) : canDownloadCertificate ? (
                                     <button
                                         onClick={() => window.location.href = '/admin/empresa/alumnos/cursos?download=' + (currentModule.title || 'Certificado')}
                                         className="mt-8 w-full sm:w-auto px-6 sm:px-10 py-4 sm:py-5 bg-brand text-black font-black rounded-xl flex items-center justify-center gap-3 mx-auto hover:scale-105 transition-all shadow-xl shadow-brand/20 text-base sm:text-lg"
@@ -855,11 +889,14 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
                                         <Download className="w-6 h-6" /> {t.download_cert}
                                     </button>
                                 ) : (
-                                    <div className="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl flex flex-col items-center gap-2">
-                                        <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                                            <Library className="w-5 h-5 text-yellow-500" />
+                                    <div className="mt-8 w-full max-w-2xl mx-auto p-6 rounded-2xl border border-white/15 bg-white/5">
+                                        <p className="text-sm text-white/80 mb-5 font-semibold">{t.signature_required_for_certificate}</p>
+                                        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                                            <SignatureCanvas
+                                                onSave={(data) => handleSignatureSave(data)}
+                                                isLight={false}
+                                            />
                                         </div>
-                                        <p className="text-yellow-500 text-sm font-bold">{t.survey_prerequisite}</p>
                                     </div>
                                 )}
                             </motion.div>
