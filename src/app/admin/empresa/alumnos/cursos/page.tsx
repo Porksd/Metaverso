@@ -437,6 +437,37 @@ export default function CoursesPage() {
         return true;
     };
 
+    const handleSaveMissingSignature = async (signatureUrl: string): Promise<boolean> => {
+        if (!user?.id) return false;
+
+        const nowIso = new Date().toISOString();
+        const { error } = await supabase
+            .from('students')
+            .update({
+                digital_signature_url: signatureUrl,
+                consent_accepted_at: nowIso
+            })
+            .eq('id', user.id);
+
+        if (error) {
+            console.error("❌ Error saving signature from courses list:", error);
+            alert('No se pudo guardar tu firma. Intenta nuevamente.');
+            return false;
+        }
+
+        const updatedUser = {
+            ...user,
+            digital_signature_url: signatureUrl,
+            consent_accepted_at: nowIso
+        };
+
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setShowSignatureModal(false);
+        setSignatureTargetCourse("");
+        return true;
+    };
+
     // Stats
     const completedCount = enrollments.filter(e => e.status === 'completed').length;
     const avgScore = completedCount > 0
@@ -779,26 +810,49 @@ export default function CoursesPage() {
                                             </button>
                                             )}
                                             
-                                            {isCompleted && !surveyPending && (
-                                                !hasUserSignature ? (
-                                                    <button
-                                                        onClick={() => {
-                                                            setSignatureTargetCourse(enrollment.course?.name || '');
-                                                            setShowSignatureModal(true);
-                                                        }}
-                                                        className="flex-1 py-4 bg-yellow-500 text-black border border-yellow-400/40 rounded-2xl hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-yellow-500/20"
-                                                    >
-                                                        <ClipboardList className="w-5 h-5" /> {t?.sign_now}
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => handleDownloadCertificate(enrollment)}
-                                                        className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
-                                                    >
-                                                        <Award className="w-5 h-5" /> {t?.certificate}
-                                                    </button>
-                                                )
-                                            )}
+                                            {isCompleted && !surveyPending && (() => {
+                                                const cf = certFlagsMap[enrollment.course_id] || { participacion: false, aprobacion: false };
+                                                const hasAnyCert = cf.participacion || cf.aprobacion;
+                                                return (
+                                                    <>
+                                                        {!hasAnyCert ? (
+                                                            <div className="flex-1 py-4 flex items-center justify-center text-white/30 font-black uppercase tracking-widest text-xs">
+                                                                Finalizado
+                                                            </div>
+                                                        ) : !hasUserSignature ? (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSignatureTargetCourse(enrollment.course?.name || '');
+                                                                    setShowSignatureModal(true);
+                                                                }}
+                                                                className="flex-1 py-4 bg-yellow-500 text-black border border-yellow-400/40 rounded-2xl hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-yellow-500/20"
+                                                            >
+                                                                <ClipboardList className="w-5 h-5" /> {t?.sign_now}
+                                                            </button>
+                                                        ) : (
+                                                            <>
+                                                                {cf.participacion && (
+                                                                    <button
+                                                                        onClick={() => handleDownloadCertificate(enrollment)}
+                                                                        disabled={isGeneratingCert}
+                                                                        className="flex-1 py-4 bg-brand text-black border border-brand/30 rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20 disabled:opacity-50"
+                                                                    >
+                                                                        <Award className="w-5 h-5" /> Cert. Participación
+                                                                    </button>
+                                                                )}
+                                                                {cf.aprobacion && (
+                                                                    <button
+                                                                        onClick={() => handleDownloadAprobacion(enrollment)}
+                                                                        className="flex-1 py-4 bg-purple-600 text-white border border-purple-500/30 rounded-2xl hover:bg-purple-500 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-purple-600/20"
+                                                                    >
+                                                                        <Award className="w-5 h-5" /> Cert. Aprobación
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </motion.div>

@@ -659,59 +659,94 @@ export default function EmpresaAdmin() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        {isCompleted ? (
-                                                            <button 
-                                                                onClick={async () => {
-                                                                    if (isGeneratingCert || certGenerationLock.current) return;
-                                                                    if (!companyId) return;
-                                                                    const { data: comp } = await supabase.from('companies').select('*').eq('id', companyId).single();
-                                                                    
-                                                                    // Fetch student signature and details
-                                                                    const { data: studentData } = await supabase
-                                                                        .from('students')
-                                                                        .select('digital_signature_url, age, gender, company_name, job_position')
-                                                                        .eq('id', st.id)
-                                                                        .single();
-
-                                                                    // Obtener nombre del cargo
-                                                                    let jobName = st.company_roles?.name || studentData?.job_position;
-                                                                    if (studentData?.job_position && !st.company_roles?.name) {
-                                                                        const { data: jobInfo } = await supabase
-                                                                            .from('job_positions')
-                                                                            .select('name_es')
-                                                                            .eq('code', studentData.job_position)
-                                                                            .single();
-                                                                        if (jobInfo) jobName = jobInfo.name_es;
-                                                                    }
-
-                                                                    if (comp) setCertData({ 
-                                                                        studentName: `${st.first_name} ${st.last_name}`, 
-                                                                        rut: st.rut, 
-                                                                        courseName: courseName.toUpperCase(), 
-                                                                        date: new Date(en.completed_at || Date.now()).toLocaleDateString(),
-                                                                        score: en.best_score ?? 100,
-                                                                        signatures: [
-                                                                            { url: comp.signature_url_1, name: comp.signature_name_1, role: comp.signature_role_1 }, 
-                                                                            { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 }, 
-                                                                            { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 }
-                                                                        ].filter(s => s.url || s.name),
-                                                                        studentSignature: normalizeStudentSignature(studentData?.digital_signature_url || st.digital_signature_url),
-                                                                        companyLogo: comp.logo_url,
-                                                                        companyName: studentData?.company_name || comp.name,
-                                                                        jobPosition: jobName,
-                                                                        age: studentData?.age,
-                                                                        gender: studentData?.gender
-                                                                    });
-                                                                    certGenerationLock.current = true;
-                                                                    setIsGeneratingCert(true);
-                                                                }} 
-                                                                disabled={isGeneratingCert}
-                                                                className="p-2 rounded-lg bg-brand/10 text-brand text-[10px] font-black flex items-center gap-1 border border-brand/30 hover:bg-brand hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                title="Descargar Certificado"
-                                                            >
-                                                                <AwardIcon className="w-3 h-3" /> Certificado
-                                                            </button>
-                                                        ) : (
+                                                        {isCompleted ? (() => {
+                                                            const certF = courseCertFlags[en.course_id] || { participacion: false, aprobacion: false };
+                                                            const fetchStudentComp = async () => {
+                                                                if (!companyId) return null;
+                                                                const { data: comp } = await supabase.from('companies').select('*').eq('id', companyId).single();
+                                                                const studentData = {
+                                                                    digital_signature_url: st.digital_signature_url,
+                                                                    age: st.age,
+                                                                    gender: st.gender,
+                                                                    company_name: st.company_name,
+                                                                    job_position: st.job_position
+                                                                };
+                                                                let jobName = st.company_roles?.name || studentData?.job_position;
+                                                                if (studentData?.job_position && !st.company_roles?.name) {
+                                                                    const { data: jobInfo } = await supabase.from('job_positions').select('name_es').eq('code', studentData.job_position).single();
+                                                                    if (jobInfo) jobName = jobInfo.name_es;
+                                                                }
+                                                                return { comp, studentData, jobName };
+                                                            };
+                                                            return (
+                                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                                    {certF.participacion && (
+                                                                        <button
+                                                                            onClick={async () => {
+                                                                                if (isGeneratingCert || certGenerationLock.current) return;
+                                                                                const r = await fetchStudentComp();
+                                                                                if (r?.comp) {
+                                                                                    certGenerationLock.current = true;
+                                                                                    setIsGeneratingCert(true);
+                                                                                    setCertData({
+                                                                                    studentName: `${st.first_name} ${st.last_name}`,
+                                                                                    rut: st.rut,
+                                                                                    courseName: courseName.toUpperCase(),
+                                                                                    date: new Date(en.completed_at || Date.now()).toLocaleDateString(),
+                                                                                    score: en.best_score ?? 100,
+                                                                                    signatures: [
+                                                                                        { url: r.comp.signature_url_1, name: r.comp.signature_name_1, role: r.comp.signature_role_1 },
+                                                                                        { url: r.comp.signature_url_2, name: r.comp.signature_name_2, role: r.comp.signature_role_2 },
+                                                                                        { url: r.comp.signature_url_3, name: r.comp.signature_name_3, role: r.comp.signature_role_3 }
+                                                                                    ].filter(s => s.url || s.name),
+                                                                                    studentSignature: normalizeStudentSignature(r.studentData?.digital_signature_url),
+                                                                                    companyLogo: r.comp.logo_url,
+                                                                                    companyName: r.studentData?.company_name || r.comp.name,
+                                                                                    jobPosition: r.jobName,
+                                                                                    age: r.studentData?.age,
+                                                                                    gender: r.studentData?.gender
+                                                                                });
+                                                                                }
+                                                                            }}
+                                                                            disabled={isGeneratingCert}
+                                                                            className="p-2 rounded-lg bg-green-500/10 text-green-400 text-[10px] font-black flex items-center gap-1 border border-green-500/30 hover:bg-green-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            title="Certificado Participación"
+                                                                        >
+                                                                            <AwardIcon className="w-3 h-3" /> Participación
+                                                                        </button>
+                                                                    )}
+                                                                    {certF.aprobacion && (
+                                                                        <button
+                                                                            onClick={async () => {
+                                                                                if (!diplomaConfig) { alert('No hay configuración de diploma.'); return; }
+                                                                                const r = await fetchStudentComp();
+                                                                                if (!r?.comp) return;
+                                                                                const fc = diplomaConfig.fields_config || {};
+                                                                                await generateMetaversoCert({
+                                                                                    studentName: `${st.first_name} ${st.last_name}`,
+                                                                                    rut: st.rut,
+                                                                                    companyName: r.studentData?.company_name || r.comp.name,
+                                                                                    companyRut: r.comp.rut || '',
+                                                                                    courseName: courseName.toUpperCase(),
+                                                                                    hours: course?.config?.hours,
+                                                                                    date: new Date(en.completed_at || Date.now()).toLocaleDateString('es-CL'),
+                                                                                    backgroundUrl: diplomaConfig.background_url,
+                                                                                    layoutConfig: fc.layout,
+                                                                                    fieldsConfig: fc,
+                                                                                });
+                                                                            }}
+                                                                            className="p-2 rounded-lg bg-purple-500/10 text-purple-400 text-[10px] font-black flex items-center gap-1 border border-purple-500/30 hover:bg-purple-500 hover:text-black transition-all"
+                                                                            title="Certificado Aprobación"
+                                                                        >
+                                                                            <AwardIcon className="w-3 h-3" /> Aprobación
+                                                                        </button>
+                                                                    )}
+                                                                    {!certF.participacion && !certF.aprobacion && (
+                                                                        <span className="text-[9px] text-white/30 font-bold uppercase">Sin cert.</span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })() : (
                                                             <div className="flex items-center gap-1 text-white/20">
                                                                 <Lock className="w-3 h-3" />
                                                                 <span className="text-[8px] font-bold uppercase">Pendiente</span>

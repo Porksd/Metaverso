@@ -492,6 +492,7 @@ export default function CoursePlayer({ courseId, studentId, onComplete, mode = '
             }
         }
 
+        // Preview mode or missing student context: keep previous behavior to unblock testing.
         if (itemId) {
             handleItemCompletion(itemId);
         }

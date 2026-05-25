@@ -11,7 +11,7 @@ const PROTECTED_ADMIN_EMAILS = [
     'm.poblete.m@gmail.com'
 ];
 
-const getStudentId = async (context: { params: Promise<RouteParams> }) => {
+const getStudentId = async (context: { params: RouteParams | Promise<RouteParams> }) => {
     const params = await Promise.resolve(context.params);
     return params.studentId;
 };
