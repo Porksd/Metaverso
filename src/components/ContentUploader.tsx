@@ -66,6 +66,8 @@ export default function ContentUploader({
             formData.append('sectionKey', sectionKey);
             if (skipDbSave) {
                 formData.append('skipDbSave', 'true');
+            if (skipDbSave) {
+                formData.append('skipDbSave', 'true');
             }
 
             const res = await fetch('/api/upload/course-content', {
