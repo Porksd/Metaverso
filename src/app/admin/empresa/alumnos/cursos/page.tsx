@@ -406,35 +406,56 @@ export default function CoursesPage() {
         });
     };
 
-    const handleSaveMissingSignature = async (signatureUrl: string): Promise<boolean> => {
-        if (!user?.id) return false;
-
-        const nowIso = new Date().toISOString();
-        const { error } = await supabase
-            .from('students')
-            .update({
-                digital_signature_url: signatureUrl,
-                consent_accepted_at: nowIso
-            })
-            .eq('id', user.id);
-
-        if (error) {
-            console.error("❌ Error saving signature from courses list:", error);
-            alert('No se pudo guardar tu firma. Intenta nuevamente.');
-            return false;
+    const handleDownloadAprobacion = async (enrollment: any) => {
+        if (certGenerationLock.current) return;
+        if (!diplomaConfig) {
+            alert('No hay configuración de diploma.');
+            return;
+        }
+        if (!companyInfo) {
+            alert('No hay información de empresa para emitir el diploma.');
+            return;
         }
 
-        const updatedUser = {
-            ...user,
-            digital_signature_url: signatureUrl,
-            consent_accepted_at: nowIso
-        };
+        try {
+            certGenerationLock.current = true;
+            setIsGeneratingCert(true);
 
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        setShowSignatureModal(false);
-        setSignatureTargetCourse("");
-        return true;
+            const { data: freshStudent, error: freshError } = await supabase
+                .from('students')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (freshError) {
+                console.warn("⚠️ Could not refresh student data for diploma, using cached:", freshError.message);
+            } else if (freshStudent) {
+                setUser(freshStudent);
+                localStorage.setItem("user", JSON.stringify(freshStudent));
+            }
+
+            const studentSrc = freshStudent || user;
+            const fc = diplomaConfig.fields_config || {};
+
+            await generateMetaversoCert({
+                studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
+                rut: studentSrc.rut,
+                companyName: studentSrc.company_name || companyInfo.name,
+                companyRut: companyInfo.rut || '',
+                courseName: (enrollment.course?.name || '').toUpperCase(),
+                hours: enrollment.course?.config?.hours,
+                date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString('es-CL'),
+                backgroundUrl: diplomaConfig.background_url,
+                layoutConfig: fc.layout,
+                fieldsConfig: fc,
+            });
+        } catch (error: any) {
+            console.error("❌ Error generating approval diploma:", error);
+            alert('No se pudo generar el certificado de aprobación.');
+        } finally {
+            setIsGeneratingCert(false);
+            certGenerationLock.current = false;
+        }
     };
 
     const handleSaveMissingSignature = async (signatureUrl: string): Promise<boolean> => {
