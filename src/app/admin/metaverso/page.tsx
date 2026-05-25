@@ -65,6 +65,7 @@ export default function MetaversoAdmin() {
 
     const [view, setView] = useState<'companies' | 'participants'>('companies');
     const [participants, setParticipants] = useState<any[]>([]);
+    const [participantCourseCertFlags, setParticipantCourseCertFlags] = useState<Record<string, { participacion: boolean; aprobacion: boolean }>>({});
     const [roles, setRoles] = useState<any[]>([]);
     const [participantSearch, setParticipantSearch] = useState("");
     const [pPage, setPPage] = useState(1);
@@ -162,11 +163,45 @@ export default function MetaversoAdmin() {
                 *,
                 companies:client_id(id, name),
                 company_roles(id, name),
-                enrollments(*, courses(name))
+                enrollments(*, courses(id, name))
             `)
             .order('created_at', { ascending: false });
-        
-        if (!error) setParticipants(data || []);
+
+        if (error) {
+            console.error("Error fetching participants:", error);
+            setParticipants([]);
+            setParticipantCourseCertFlags({});
+            return;
+        }
+
+        const participantsData = data || [];
+        setParticipants(participantsData);
+
+        const companyIds = Array.from(new Set(participantsData.map((p: any) => p.client_id).filter(Boolean)));
+        if (companyIds.length === 0) {
+            setParticipantCourseCertFlags({});
+            return;
+        }
+
+        const { data: ccData, error: ccError } = await supabase
+            .from('company_courses')
+            .select('company_id, course_id, cert_participacion_enabled, diploma_metaverso_enabled')
+            .in('company_id', companyIds);
+
+        if (ccError) {
+            console.error("Error fetching company course certificate flags:", ccError);
+            setParticipantCourseCertFlags({});
+            return;
+        }
+
+        const flags: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+        (ccData || []).forEach((row: any) => {
+            flags[`${row.company_id}:${row.course_id}`] = {
+                participacion: resolveParticipationFlag(row),
+                aprobacion: row.diploma_metaverso_enabled === true,
+            };
+        });
+        setParticipantCourseCertFlags(flags);
     };
 
     const handleSaveStudent = async (student: any) => {
@@ -919,22 +954,35 @@ export default function MetaversoAdmin() {
                                                     <div className="flex flex-wrap gap-1">
                                                         {p.enrollments?.map((e: any, eIdx: number) => {
                                                             const isAprobado = e.status === 'completed' && (e.best_score === null || e.best_score >= 70);
+                                                            const certCfg = participantCourseCertFlags[`${p.client_id}:${e.course_id}`] || { participacion: false, aprobacion: false };
+                                                            const hasAnyCert = certCfg.participacion || certCfg.aprobacion;
+                                                            const certLabel = certCfg.aprobacion && !certCfg.participacion
+                                                                ? 'Aprobación'
+                                                                : certCfg.participacion && !certCfg.aprobacion
+                                                                    ? 'Participación'
+                                                                    : 'Certificado';
                                                             if (isAprobado) return (
+                                                                hasAnyCert ? (
                                                                 <button
                                                                     key={eIdx}
                                                                     onClick={() => handleDownloadCert(p, e)}
                                                                     disabled={isGeneratingCert === e.id}
                                                                     className="flex items-center gap-1 px-2.5 py-1 rounded-full font-black uppercase text-[8px] border bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black transition-all"
-                                                                    title={`Descargar Certificado: ${e.courses?.name}`}
+                                                                    title={`Descargar ${certLabel}: ${e.courses?.name}`}
                                                                 >
                                                                     {isGeneratingCert === e.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Award className="w-2.5 h-2.5" />}
-                                                                    <span>Certificado</span>
+                                                                    <span>{certLabel}</span>
                                                                 </button>
+                                                                ) : null
                                                             );
                                                             return null;
                                                         })}
                                                         {(() => {
-                                                            const hasCert = p.enrollments?.some((e: any) => e.status === 'completed' && (e.best_score === null || e.best_score >= 70));
+                                                            const hasCert = p.enrollments?.some((e: any) => {
+                                                                const isAprobado = e.status === 'completed' && (e.best_score === null || e.best_score >= 70);
+                                                                const certCfg = participantCourseCertFlags[`${p.client_id}:${e.course_id}`] || { participacion: false, aprobacion: false };
+                                                                return isAprobado && (certCfg.participacion || certCfg.aprobacion);
+                                                            });
                                                             if (hasCert) return null;
 
                                                             const isReprobado = p.enrollments?.some((e: any) => e.status === 'failed' || (e.status === 'completed' && e.best_score !== null && e.best_score < 70));
