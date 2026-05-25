@@ -47,6 +47,16 @@ export default function MetaversoAdmin() {
         cert_participacion_enabled: boolean;
     }>>({}); 
 
+    const resolveParticipationFlag = (row: {
+        cert_participacion_enabled?: boolean | null;
+        diploma_metaverso_enabled?: boolean | null;
+    }) => {
+        // Keep legacy behavior for NULL, except when approval certificate is enabled.
+        if (row.cert_participacion_enabled === true) return true;
+        if (row.cert_participacion_enabled === false) return false;
+        return row.diploma_metaverso_enabled !== true;
+    };
+
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
@@ -521,7 +531,7 @@ export default function MetaversoAdmin() {
                 generic_password: a?.generic_password || '',
                 pass_saved: false,
                 diploma_metaverso_enabled: a?.diploma_metaverso_enabled || false,
-                cert_participacion_enabled: a ? (a.cert_participacion_enabled !== false) : true,
+                cert_participacion_enabled: a ? resolveParticipationFlag(a) : true,
             };
         });
         setCmCourses(coursesData || []);

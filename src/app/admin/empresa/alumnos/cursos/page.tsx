@@ -82,6 +82,16 @@ export default function CoursesPage() {
     const t = translations[user?.language || 'es'];
     const hasUserSignature = typeof user?.digital_signature_url === 'string' && user.digital_signature_url.trim().length > 0;
 
+    const resolveParticipationFlag = (row: {
+        cert_participacion_enabled?: boolean | null;
+        diploma_metaverso_enabled?: boolean | null;
+    }) => {
+        // Keep legacy behavior for NULL, except when approval certificate is enabled.
+        if (row.cert_participacion_enabled === true) return true;
+        if (row.cert_participacion_enabled === false) return false;
+        return row.diploma_metaverso_enabled !== true;
+    };
+
     const confirmExitCourse = useCallback(() => {
         if (window.confirm(t.exit_course_confirm)) {
             setActiveCourse(null);
@@ -134,7 +144,7 @@ export default function CoursesPage() {
         const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
         (ccData || []).forEach((cc: any) => {
             flagsMap[cc.course_id] = {
-                participacion: cc.cert_participacion_enabled !== false,
+                participacion: resolveParticipationFlag(cc),
                 aprobacion: cc.diploma_metaverso_enabled === true,
             };
         });

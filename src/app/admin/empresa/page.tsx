@@ -117,6 +117,16 @@ export default function EmpresaAdmin() {
         return value;
     };
 
+    const resolveParticipationFlag = (row: {
+        cert_participacion_enabled?: boolean | null;
+        diploma_metaverso_enabled?: boolean | null;
+    }) => {
+        // Keep legacy behavior for NULL, except when approval certificate is enabled.
+        if (row.cert_participacion_enabled === true) return true;
+        if (row.cert_participacion_enabled === false) return false;
+        return row.diploma_metaverso_enabled !== true;
+    };
+
     useEffect(() => {
         const storedId = getStoredCompanyValue('empresa_id');
         const storedName = getStoredCompanyValue('empresa_name');
@@ -244,7 +254,7 @@ export default function EmpresaAdmin() {
             const flags: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
             (assignedData || []).forEach((ad: any) => {
                 flags[ad.course_id] = {
-                    participacion: ad.cert_participacion_enabled !== false,
+                    participacion: resolveParticipationFlag(ad),
                     aprobacion: ad.diploma_metaverso_enabled === true,
                 };
             });
