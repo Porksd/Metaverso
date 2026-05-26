@@ -1067,6 +1067,7 @@ export default function MetaversoAdmin() {
                                     
                                     {[
                                         { key: 'company_collab', label: 'Empresa Colaboradora' },
+                                        { key: 'rut', label: 'RUT' },
                                         { key: 'job_position', label: 'Cargo / Puesto' },
                                         { key: 'gender', label: 'Género' },
                                         { key: 'age', label: 'Edad' }

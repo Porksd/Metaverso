@@ -388,11 +388,35 @@ export default function CourseAuthPage() {
 
     const isRestricted = course.registration_mode === 'restricted';
 
+    const getFieldConfig = (field: string) => company?.user_registration_config?.[field];
+
     // Helper to check field visibility
     const isFieldVisible = (field: string) => {
+        if (field === 'rut') return getFieldConfig(field)?.visible !== false;
         if (!company?.user_registration_config) return true; // Default to visible if no config
-        return company.user_registration_config[field]?.visible !== false;
+        return getFieldConfig(field)?.visible !== false;
     };
+
+    const isFieldRequired = (field: string) => {
+        return getFieldConfig(field)?.required === true;
+    };
+
+    const isRutVisible = isFieldVisible('rut');
+    const isRutRequired = isFieldRequired('rut');
+
+    useEffect(() => {
+        if (!isRutVisible) {
+            setIdType('passport');
+            setRutError(null);
+            setRegData((prev) => ({ ...prev, rut: '' }));
+            return;
+        }
+
+        if (isRutRequired) {
+            setIdType('rut');
+            setRegData((prev) => ({ ...prev, passport: '' }));
+        }
+    }, [isRutVisible, isRutRequired]);
 
     const handleRutInput = (value: string) => {
         // Auto-format as user types
@@ -563,28 +587,30 @@ export default function CourseAuthPage() {
                                         <div className="space-y-1">
                                             <div className="flex justify-between items-center mb-1">
                                                 <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                                    {idType === 'rut' ? t.rut : t.passport}
+                                                    {isRutVisible ? (idType === 'rut' ? t.rut : t.passport) : t.passport}
                                                 </label>
-                                                <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => setIdType('rut')}
-                                                        className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'rut' ? 'bg-brand text-black' : 'text-white/40'}`}
-                                                    >RUT</button>
-                                                    <button 
-                                                        type="button"
-                                                        onClick={() => setIdType('passport')}
-                                                        className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'passport' ? 'bg-brand text-black' : 'text-white/40'}`}
-                                                    >PAS</button>
-                                                </div>
+                                                {isRutVisible && !isRutRequired && (
+                                                    <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setIdType('rut')}
+                                                            className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'rut' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                        >RUT</button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setIdType('passport')}
+                                                            className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'passport' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                        >PAS</button>
+                                                    </div>
+                                                )}
                                             </div>
-                                            {idType === 'rut' ? (
+                                            {isRutVisible && idType === 'rut' ? (
                                                 <>
                                                     <input 
                                                         type="text" 
                                                         className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
                                                         placeholder="12.345.678-9"
-                                                        required 
+                                                        required={isRutRequired}
                                                         value={regData.rut} 
                                                         onChange={e => handleRutInput(e.target.value)} 
                                                     />
@@ -597,7 +623,7 @@ export default function CourseAuthPage() {
                                                     type="text" 
                                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
                                                     placeholder="A1234567"
-                                                    required 
+                                                    required={!isRutVisible}
                                                     value={regData.passport} 
                                                     onChange={e => setRegData({...regData, passport: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')})} 
                                                 />
@@ -819,17 +845,38 @@ export default function CourseAuthPage() {
                                     )}
 
                                     <button onClick={() => {
-                                        const hasId = idType === 'rut' ? regData.rut : regData.passport;
-                                        if(!regData.email || !regData.password || !hasId) {
+                                        const selectedIdentifier = isRutVisible && idType === 'rut' ? regData.rut : regData.passport;
+                                        const hasAnyIdentifier = Boolean(regData.rut || regData.passport);
+                                        const missingIdentifier = isRutRequired ? !regData.rut : !hasAnyIdentifier;
+
+                                        if(!regData.email || !regData.password || missingIdentifier) {
                                             setError(t.required); return;
                                         }
                                         // Validate RUT before proceeding
-                                        if (idType === 'rut' && !validateRut(regData.rut)) {
+                                        if (isRutRequired && !validateRut(regData.rut)) {
+                                            setIdType('rut');
                                             setRutError(t.invalidRut);
                                             setError(t.invalidRut);
                                             return;
                                         }
-                                        if (isFieldVisible('age')) {
+                                        if (isRutVisible && idType === 'rut' && regData.rut && !validateRut(regData.rut)) {
+                                            setRutError(t.invalidRut);
+                                            setError(t.invalidRut);
+                                            return;
+                                        }
+                                        if (isFieldRequired('gender') && !regData.gender) {
+                                            setError(t.required);
+                                            return;
+                                        }
+                                        if (isFieldRequired('company_collab') && !empresaInput.trim()) {
+                                            setError(t.required);
+                                            return;
+                                        }
+                                        if (isFieldRequired('job_position') && !regData.role_id) {
+                                            setError(t.required);
+                                            return;
+                                        }
+                                        if (isFieldVisible('age') && isFieldRequired('age')) {
                                             const parsedAge = parseInt(regData.age, 10);
                                             if (!regData.age || Number.isNaN(parsedAge) || parsedAge < 18) {
                                                 setError(t.minAge);
