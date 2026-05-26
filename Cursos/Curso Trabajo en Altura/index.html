@@ -51,11 +51,30 @@
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       border: 0;
+      display: block;
+      background: #fff;
     }
     @supports not (aspect-ratio: 1 / 1){
       .embed16x9{ height: auto; }
       .embed16x9::before{ content:""; display:block; padding-top:56.25%; }
       .embed16x9 > iframe{ position:absolute; inset:0; }
+    }
+
+    /* Oculta el artefacto negro de Gamma en esquina inferior derecha */
+    .embed16x9.gamma-embed::after{
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 142px;
+      height: 46px;
+      background: #fff;
+      border-top-left-radius: 12px;
+      pointer-events: none;
+      z-index: 4;
+    }
+    @media (max-width: 768px){
+      .embed16x9.gamma-embed::after{ width: 114px; height: 36px; }
     }
 
     /* NUEVO: contenedor 1:1 para slide 1 (YouTube y HTML5) */
@@ -718,6 +737,18 @@
     }
     window.addEventListener('resize', recalcularHotspotActivo);
 
+    function setEmbeddedActivityUrl(iframeId, url){
+      const iframe = document.getElementById(iframeId);
+      if (!iframe) return;
+
+      const wrap = iframe.closest('.embed16x9');
+      const src = (url || '').trim();
+      const isGamma = /gamma\.app\/embed/i.test(src);
+
+      if (wrap) wrap.classList.toggle('gamma-embed', isGamma);
+      iframe.src = src;
+    }
+
     /* ====== YouTube (Shorts/normal) ====== */
     let YT_API_READY = false;
     let ytPlayer1 = null;
@@ -1132,11 +1163,11 @@
 
         // Slide 5
         document.getElementById("tituloJuegoSlide5").innerText = data.tituloJuegoSlide5 || t("tituloJuegoSlide5");
-        document.getElementById("juegoIframeSlide5").src = data.juegoSlide5 || "";
+        setEmbeddedActivityUrl("juegoIframeSlide5", data.juegoSlide5);
 
         // Slide 3
         document.getElementById("tituloJuego").innerText = t("tituloJuego") || "Actividad interactiva";
-        document.getElementById("juegoIframe").src = data.juegoSlide3 || "";
+        setEmbeddedActivityUrl("juegoIframe", data.juegoSlide3);
 
         // Slide 6
         document.getElementById("texto6").innerText = data.texto6 || t("slide6Texto");
