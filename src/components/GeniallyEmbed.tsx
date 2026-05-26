@@ -81,7 +81,7 @@ function resolveEmbedUrl(rawSrc: string, provider: 'genially' | 'gamma'): EmbedR
     }
 }
 
-export default function GeniallyEmbed({ src, onInteract, hideNativeControls = true, provider = 'genially' }: GeniallyEmbedProps) {
+export default function GeniallyEmbed({ src, onInteract, hideNativeControls = false, provider = 'genially' }: GeniallyEmbedProps) {
     const [loaded, setLoaded] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [interacted, setInteracted] = useState(false);
