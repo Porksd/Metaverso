@@ -87,6 +87,7 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
     const [interacted, setInteracted] = useState(false);
     const completedRef = React.useRef(false);
     const providerLabel = provider === 'gamma' ? 'Gamma' : 'Genially';
+    const isGamma = provider === 'gamma';
     const embedResolution = resolveEmbedUrl(src, provider);
     const normalizedSrc = embedResolution.iframeUrl;
 
@@ -218,7 +219,11 @@ export default function GeniallyEmbed({ src, onInteract, hideNativeControls = tr
             )}
 
             {normalizedSrc && hideNativeControls && (
-                <div className="absolute bottom-0 right-0 h-11 w-28 max-[430px]:w-24 sm:h-12 sm:w-40 [@media(max-height:430px)]:h-10 [@media(max-height:430px)]:w-32 bg-black z-20 pointer-events-none" />
+                isGamma ? (
+                    <div className="absolute bottom-0 right-0 z-20 pointer-events-none h-10 w-32 rounded-tl-2xl border-l border-t border-white/30 bg-slate-200/70 backdrop-blur-md max-[430px]:h-9 max-[430px]:w-28 sm:h-12 sm:w-36 [@media(max-height:430px)]:h-9 [@media(max-height:430px)]:w-28" />
+                ) : (
+                    <div className="absolute bottom-0 right-0 h-11 w-28 max-[430px]:w-24 sm:h-12 sm:w-40 [@media(max-height:430px)]:h-10 [@media(max-height:430px)]:w-32 bg-black z-20 pointer-events-none" />
+                )
             )}
 
             {completed && (
