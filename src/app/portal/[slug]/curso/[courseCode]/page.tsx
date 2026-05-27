@@ -324,7 +324,7 @@ export default function CourseAuthPage() {
             }
 
             // Store the clean RUT (without dots/dash) in the DB
-            const cleanedRut = idType === 'rut' ? cleanRut(regData.rut) : null;
+            const cleanedRut = isRutVisible && idType === 'rut' ? cleanRut(regData.rut) : null;
             
             // Clean up empty strings for optional fields to avoid type errors
             const ageVal = regData.age && regData.age.trim() !== '' ? parseInt(regData.age) : null;
@@ -343,7 +343,7 @@ export default function CourseAuthPage() {
                 body: JSON.stringify({
                     ...regData,
                     rut: cleanedRut,
-                    passport: idType === 'passport' ? regData.passport : null,
+                    passport: isRutVisible && idType === 'passport' ? regData.passport : null,
                     language: lang,
                     company_name: trimmedEmpresa || company.name, 
                     client_id: company.id,
@@ -403,9 +403,9 @@ export default function CourseAuthPage() {
 
     useEffect(() => {
         if (!isRutVisible) {
-            setIdType('passport');
+            setIdType('rut');
             setRutError(null);
-            setRegData((prev) => ({ ...prev, rut: '' }));
+            setRegData((prev) => ({ ...prev, rut: '', passport: '' }));
             return;
         }
 
@@ -583,53 +583,54 @@ export default function CourseAuthPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                                    {isRutVisible ? (idType === 'rut' ? t.rut : t.passport) : t.passport}
-                                                </label>
-                                                {isRutVisible && !isRutRequired && (
-                                                    <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => setIdType('rut')}
-                                                            className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'rut' ? 'bg-brand text-black' : 'text-white/40'}`}
-                                                        >RUT</button>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => setIdType('passport')}
-                                                            className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'passport' ? 'bg-brand text-black' : 'text-white/40'}`}
-                                                        >PAS</button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {isRutVisible && idType === 'rut' ? (
-                                                <>
+                                    {isRutVisible && (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+                                                        {idType === 'rut' ? t.rut : t.passport}
+                                                    </label>
+                                                    {!isRutRequired && (
+                                                        <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => setIdType('rut')}
+                                                                className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'rut' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                            >RUT</button>
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => setIdType('passport')}
+                                                                className={`px-2 py-0.5 text-[8px] font-black rounded ${idType === 'passport' ? 'bg-brand text-black' : 'text-white/40'}`}
+                                                            >PAS</button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {idType === 'rut' ? (
+                                                    <>
+                                                        <input 
+                                                            type="text" 
+                                                            className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
+                                                            placeholder="12.345.678-9"
+                                                            required={isRutRequired}
+                                                            value={regData.rut} 
+                                                            onChange={e => handleRutInput(e.target.value)} 
+                                                        />
+                                                        {rutError && (
+                                                            <p className="text-[10px] text-red-400 font-bold">{rutError}</p>
+                                                        )}
+                                                    </>
+                                                ) : (
                                                     <input 
                                                         type="text" 
-                                                        className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white text-sm ${rutError ? 'border-red-500/50' : 'border-white/10'}`}
-                                                        placeholder="12.345.678-9"
-                                                        required={isRutRequired}
-                                                        value={regData.rut} 
-                                                        onChange={e => handleRutInput(e.target.value)} 
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
+                                                        placeholder="A1234567"
+                                                        value={regData.passport} 
+                                                        onChange={e => setRegData({...regData, passport: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')})} 
                                                     />
-                                                    {rutError && (
-                                                        <p className="text-[10px] text-red-400 font-bold">{rutError}</p>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <input 
-                                                    type="text" 
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm"
-                                                    placeholder="A1234567"
-                                                    required={!isRutVisible}
-                                                    value={regData.passport} 
-                                                    onChange={e => setRegData({...regData, passport: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')})} 
-                                                />
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
@@ -845,9 +846,8 @@ export default function CourseAuthPage() {
                                     )}
 
                                     <button onClick={() => {
-                                        const selectedIdentifier = isRutVisible && idType === 'rut' ? regData.rut : regData.passport;
                                         const hasAnyIdentifier = Boolean(regData.rut || regData.passport);
-                                        const missingIdentifier = isRutRequired ? !regData.rut : !hasAnyIdentifier;
+                                        const missingIdentifier = isRutVisible ? (isRutRequired ? !regData.rut : !hasAnyIdentifier) : false;
 
                                         if(!regData.email || !regData.password || missingIdentifier) {
                                             setError(t.required); return;

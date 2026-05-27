@@ -306,7 +306,7 @@ export default function EmpresaAdmin() {
             }
         }
 
-        let normalizedDocument = documentValue || student.rut || null;
+        let normalizedDocument = isRutVisible ? (documentValue || student.rut || null) : (student.rut || null);
 
         if (usingRut && documentValue) {
             if (!validateRut(documentValue)) {
@@ -350,8 +350,8 @@ export default function EmpresaAdmin() {
         const documentValue = (newStudent.rut || '').trim();
         const usingRut = isRutVisible && (isRutRequired || newStudent.doc_type !== 'PASSPORT');
         
-        if (!newStudent.first_name || !newStudent.last_name || !documentValue) {
-            alert("Por favor complete los campos obligatorios (Nombre, Apellido, ID/RUT)");
+        if (!newStudent.first_name || !newStudent.last_name || (isRutVisible && !documentValue)) {
+            alert(`Por favor complete los campos obligatorios (${isRutVisible ? 'Nombre, Apellido, ID/RUT' : 'Nombre y Apellido'})`);
             return;
         }
 
@@ -378,10 +378,10 @@ export default function EmpresaAdmin() {
             }
         }
 
-        let normalizedDocument = documentValue;
+        let normalizedDocument = isRutVisible ? documentValue : null;
 
         // Validación de RUT Chileno
-        if (usingRut) {
+        if (usingRut && documentValue) {
             if (!validateRut(documentValue)) {
                 alert("El RUT ingresado no es válido. Por favor verifique el dígito verificador.");
                 return;
@@ -576,7 +576,8 @@ export default function EmpresaAdmin() {
             const next = { ...prev };
 
             if (!isRutVisible) {
-                next.doc_type = 'PASSPORT';
+                next.doc_type = 'RUT';
+                next.rut = '';
             } else if (isRutRequired) {
                 next.doc_type = 'RUT';
             }
@@ -1272,61 +1273,55 @@ export default function EmpresaAdmin() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-4">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Tipo de Documento: </label>
-                                    {isRutVisible && !isRutRequired ? (
-                                        <div className="flex bg-white/5 p-1 rounded-lg">
-                                            <button 
-                                                onClick={() => setNewStudent({...newStudent, doc_type: 'RUT'})}
-                                                className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
-                                            >
+                            {isRutVisible && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-4">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Tipo de Documento: </label>
+                                        {!isRutRequired ? (
+                                            <div className="flex bg-white/5 p-1 rounded-lg">
+                                                <button 
+                                                    onClick={() => setNewStudent({...newStudent, doc_type: 'RUT'})}
+                                                    className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    RUT Chileno
+                                                </button>
+                                                <button 
+                                                    onClick={() => setNewStudent({...newStudent, doc_type: 'PASSPORT'})}
+                                                    className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${newStudent.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Pasaporte
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="px-4 py-2 rounded-lg bg-white/5 text-[10px] font-black uppercase text-white/60">
                                                 RUT Chileno
-                                            </button>
-                                            <button 
-                                                onClick={() => setNewStudent({...newStudent, doc_type: 'PASSPORT'})}
-                                                className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${newStudent.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
-                                            >
-                                                Pasaporte
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="px-4 py-2 rounded-lg bg-white/5 text-[10px] font-black uppercase text-white/60">
-                                            {isRutVisible ? 'RUT Chileno' : 'Pasaporte'}
-                                        </div>
-                                    )}
-                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">
-                                        {(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) ? `RUT (Sin puntos, con guión)${isRutRequired ? ' *' : ''}` : 'Pasaporte / ID Extranjero *'}
-                                    </label>
-                                    <input 
-                                        placeholder={(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) ? "12345678-K" : "A1234567"} 
-                                        value={newStudent.rut} 
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setNewStudent({ ...newStudent, rut: val });
-                                            
-                                            // Validación visual en tiempo real para RUT
-                                            if (isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) {
-                                                if (val.includes('.')) {
-                                                    // Opcional: Auto-limpiar puntos o mostrar warning
-                                                }
-                                            }
-                                        }} 
-                                        className={`w-full bg-white/5 border p-3 rounded-xl text-sm uppercase ${
-                                            // Simple validación visual
-                                            (isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) && newStudent.rut && !/^[0-9]+-[0-9kK]{1}$/.test(newStudent.rut) 
-                                                ? 'border-red-500/50 text-red-200' 
-                                                : 'border-white/10'
-                                        }`} 
-                                    />
-                                    {(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) && (
-                                        <p className="text-[9px] text-white/30 ml-2">Formato: 12345678-K (Sin puntos)</p>
-                                    )}
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">
+                                            {(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? `RUT (Sin puntos, con guión)${isRutRequired ? ' *' : ''}` : 'Pasaporte / ID Extranjero *'}
+                                        </label>
+                                        <input 
+                                            placeholder={(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? "12345678-K" : "A1234567"} 
+                                            value={newStudent.rut} 
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setNewStudent({ ...newStudent, rut: val });
+                                            }} 
+                                            className={`w-full bg-white/5 border p-3 rounded-xl text-sm uppercase ${
+                                                (!newStudent.doc_type || newStudent.doc_type === 'RUT') && newStudent.rut && !/^[0-9]+-[0-9kK]{1}$/.test(newStudent.rut) 
+                                                    ? 'border-red-500/50 text-red-200' 
+                                                    : 'border-white/10'
+                                            }`} 
+                                        />
+                                        {(!newStudent.doc_type || newStudent.doc_type === 'RUT') && (
+                                            <p className="text-[9px] text-white/30 ml-2">Formato: 12345678-K (Sin puntos)</p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">

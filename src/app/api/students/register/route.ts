@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
         const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
         const normalizedRut = typeof rut === 'string' ? rut.trim() : '';
         const normalizedPassport = typeof passport === 'string' ? passport.trim() : '';
+        let documentFieldVisible = true;
 
         // Validate required fields
         if (!normalizedEmail || !password || !first_name || !last_name) {
@@ -47,8 +48,26 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Must have either RUT or Passport
-        if (!normalizedRut && !normalizedPassport) {
+        if (normalizedClientId) {
+            const { data: companyConfig, error: companyConfigError } = await supabaseAdmin
+                .from('companies')
+                .select('user_registration_config')
+                .eq('id', normalizedClientId)
+                .maybeSingle();
+
+            if (companyConfigError && !isMissingRowError(companyConfigError.message)) {
+                console.error('Error loading company registration config:', companyConfigError);
+                return NextResponse.json(
+                    { error: 'No se pudo validar la configuración de registro de la empresa' },
+                    { status: 500 }
+                );
+            }
+
+            documentFieldVisible = companyConfig?.user_registration_config?.rut?.visible !== false;
+        }
+
+        // Must have either RUT or Passport only when the company keeps the document field visible
+        if (documentFieldVisible && !normalizedRut && !normalizedPassport) {
             return NextResponse.json(
                 { error: 'Debe proporcionar RUT o Pasaporte' },
                 { status: 400 }
