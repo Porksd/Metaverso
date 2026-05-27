@@ -103,7 +103,9 @@ export default function EmpresaAdmin() {
         email: "", 
         password: "", 
         company_name: "", 
-        role_id: null 
+        role_id: null,
+        age: "",
+        gender: ""
     });
 
     const normalizeStudentSignature = (raw?: string | null) => {
@@ -121,7 +123,6 @@ export default function EmpresaAdmin() {
         cert_participacion_enabled?: boolean | null;
         diploma_metaverso_enabled?: boolean | null;
     }) => {
-        // Keep legacy behavior for NULL, except when approval certificate is enabled.
         if (row.cert_participacion_enabled === true) return true;
         if (row.cert_participacion_enabled === false) return false;
         return row.diploma_metaverso_enabled !== true;
@@ -269,9 +270,57 @@ export default function EmpresaAdmin() {
     };
 
     const handleUpdateStudent = async (student: any) => {
+        const documentValue = (student.rut || '').trim();
+        const usingRut = isRutVisible && (isRutRequired || student.doc_type !== 'PASSPORT');
+
+        if (!student.first_name || !student.last_name) {
+            alert("Por favor complete nombre y apellido.");
+            return;
+        }
+
+        if (isRutVisible && !documentValue) {
+            alert("Por favor complete el documento del trabajador.");
+            return;
+        }
+
+        if (isCompanyCollabRequired && !student.company_name) {
+            alert("Por favor complete la empresa colaboradora obligatoria.");
+            return;
+        }
+
+        if (isJobPositionRequired && !student.role_id) {
+            alert("Por favor seleccione el cargo obligatorio.");
+            return;
+        }
+
+        if (isGenderRequired && !student.gender) {
+            alert("Por favor complete el género obligatorio.");
+            return;
+        }
+
+        if (isAgeRequired) {
+            const parsedAge = parseInt(student.age, 10);
+            if (!student.age || Number.isNaN(parsedAge) || parsedAge < 1) {
+                alert("Por favor complete la edad obligatoria.");
+                return;
+            }
+        }
+
+        let normalizedDocument = documentValue || student.rut || null;
+
+        if (usingRut && documentValue) {
+            if (!validateRut(documentValue)) {
+                alert("El RUT ingresado no es válido. Por favor verifique el dígito verificador.");
+                return;
+            }
+
+            normalizedDocument = formatRut(documentValue);
+        }
+
         const payload = {
             first_name: student.first_name,
             last_name: student.last_name,
+            rut: normalizedDocument,
             email: student.email,
             company_name: student.company_name,
             role_id: (student.role_id && student.role_id !== "") ? student.role_id : null,
@@ -297,31 +346,61 @@ export default function EmpresaAdmin() {
             alert("No se detectó el ID de la empresa. Por favor, re-inicie sesión.");
             return;
         }
+
+        const documentValue = (newStudent.rut || '').trim();
+        const usingRut = isRutVisible && (isRutRequired || newStudent.doc_type !== 'PASSPORT');
         
-        if (!newStudent.first_name || !newStudent.last_name || !newStudent.rut) {
+        if (!newStudent.first_name || !newStudent.last_name || !documentValue) {
             alert("Por favor complete los campos obligatorios (Nombre, Apellido, ID/RUT)");
             return;
         }
 
+        if (isCompanyCollabRequired && !newStudent.company_name) {
+            alert("Por favor complete la empresa colaboradora obligatoria.");
+            return;
+        }
+
+        if (isJobPositionRequired && !newStudent.role_id) {
+            alert("Por favor seleccione el cargo obligatorio.");
+            return;
+        }
+
+        if (isGenderRequired && !newStudent.gender) {
+            alert("Por favor complete el género obligatorio.");
+            return;
+        }
+
+        if (isAgeRequired) {
+            const parsedAge = parseInt(newStudent.age, 10);
+            if (!newStudent.age || Number.isNaN(parsedAge) || parsedAge < 1) {
+                alert("Por favor complete la edad obligatoria.");
+                return;
+            }
+        }
+
+        let normalizedDocument = documentValue;
+
         // Validación de RUT Chileno
-        if (!newStudent.doc_type || newStudent.doc_type === 'RUT') {
-            if (!validateRut(newStudent.rut)) {
+        if (usingRut) {
+            if (!validateRut(documentValue)) {
                 alert("El RUT ingresado no es válido. Por favor verifique el dígito verificador.");
                 return;
             }
             // Formatear RUT antes de guardar
-            newStudent.rut = formatRut(newStudent.rut); 
+            normalizedDocument = formatRut(documentValue); 
         }
 
         const payload = { 
             first_name: newStudent.first_name,
             last_name: newStudent.last_name,
-            rut: newStudent.rut, // Se guarda el RUT o Pasaporte aquí
+            rut: normalizedDocument, // Se guarda el RUT o Pasaporte aquí
             email: newStudent.email || null,
             password: newStudent.password || '123456',
             client_id: companyId, 
             company_name: newStudent.company_name || companyName,
             role_id: newStudent.role_id,
+            age: isAgeVisible && newStudent.age ? parseInt(newStudent.age, 10) : null,
+            gender: isGenderVisible ? (newStudent.gender || null) : null,
             // Nota: Si la tabla 'students' no tiene columna 'doc_type', este dato se perderá,
             // pero la validación ya ocurrió. Si se requiere persistir el tipo, se debe agregar la columna.
             // Por ahora asumimos que solo se valida.
@@ -344,7 +423,18 @@ export default function EmpresaAdmin() {
             }
         } else { 
             setIsCreating(false); 
-            setNewStudent({ first_name: "", last_name: "", rut: "", email: "", password: "", company_name: "", role_id: null });
+            setNewStudent({ 
+                first_name: "", 
+                last_name: "", 
+                rut: "", 
+                doc_type: isRutVisible && isRutRequired ? "RUT" : isRutVisible ? "RUT" : "PASSPORT", 
+                email: "", 
+                password: "", 
+                company_name: "", 
+                role_id: null,
+                age: "",
+                gender: ""
+            });
             fetchData(); 
         }
     };
@@ -364,6 +454,13 @@ export default function EmpresaAdmin() {
         } catch (error: any) {
             alert("Error al eliminar trabajador: " + (error?.message || 'Error inesperado'));
         }
+    };
+
+    const openEditStudent = (student: any) => {
+        setIsEditing({
+            ...student,
+            doc_type: validateRut(student.rut || '') ? 'RUT' : 'PASSPORT'
+        });
     };
 
     const sortedStudents = [...students].sort((a, b) => {
@@ -426,7 +523,21 @@ export default function EmpresaAdmin() {
     const [editingCompanyListName, setEditingCompanyListName] = useState("");
     const [userRegistrationConfig, setUserRegistrationConfig] = useState<Record<string, any> | null>(null);
 
-    const isCompanyCollabVisible = userRegistrationConfig?.company_collab?.visible !== false;
+    const getRegistrationFieldConfig = (field: string) => userRegistrationConfig?.[field] || null;
+    const isRegistrationFieldVisible = (field: string) => getRegistrationFieldConfig(field)?.visible !== false;
+    const isRegistrationFieldRequired = (field: string) => getRegistrationFieldConfig(field)?.required === true;
+
+    const isCompanyCollabVisible = isRegistrationFieldVisible('company_collab');
+    const isJobPositionVisible = isRegistrationFieldVisible('job_position');
+    const isGenderVisible = isRegistrationFieldVisible('gender');
+    const isAgeVisible = isRegistrationFieldVisible('age');
+    const isRutVisible = isRegistrationFieldVisible('rut');
+
+    const isCompanyCollabRequired = isRegistrationFieldRequired('company_collab');
+    const isJobPositionRequired = isRegistrationFieldRequired('job_position');
+    const isGenderRequired = isRegistrationFieldRequired('gender');
+    const isAgeRequired = isRegistrationFieldRequired('age');
+    const isRutRequired = isRegistrationFieldRequired('rut');
 
     const buildCompanyCollaboratorCode = (name: string) => {
         const normalizedName = name
@@ -459,6 +570,25 @@ export default function EmpresaAdmin() {
             console.error('Unexpected error in fetchUserRegistrationConfig:', err);
         }
     };
+
+    useEffect(() => {
+        setNewStudent((prev: any) => {
+            const next = { ...prev };
+
+            if (!isRutVisible) {
+                next.doc_type = 'PASSPORT';
+            } else if (isRutRequired) {
+                next.doc_type = 'RUT';
+            }
+
+            if (!isGenderVisible) next.gender = '';
+            if (!isAgeVisible) next.age = '';
+            if (!isCompanyCollabVisible) next.company_name = '';
+            if (!isJobPositionVisible) next.role_id = null;
+
+            return next;
+        });
+    }, [isRutVisible, isRutRequired, isGenderVisible, isAgeVisible, isCompanyCollabVisible, isJobPositionVisible]);
 
     const fetchCompanyList = async () => {
         if (!companyId) return;
@@ -616,7 +746,7 @@ export default function EmpresaAdmin() {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
-                                                        <button onClick={() => setIsEditing(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
+                                                        <button onClick={() => openEditStudent(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
                                                         <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400"><Trash2 className="w-4 h-4" /></button>
                                                     </td>
                                                 </tr>
@@ -766,7 +896,7 @@ export default function EmpresaAdmin() {
                                                     <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                         {idx === 0 && (
                                                             <>
-                                                                <button onClick={() => setIsEditing(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
+                                                                <button onClick={() => openEditStudent(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
                                                                 <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400"><Trash2 className="w-4 h-4" /></button>
                                                             </>
                                                         )}
@@ -895,14 +1025,57 @@ export default function EmpresaAdmin() {
                             <h3 className="text-xl font-black uppercase tracking-tight">Editar Trabajador</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Nombre</label>
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Nombre *</label>
                                     <input value={isEditing.first_name} onChange={(e) => setIsEditing({ ...isEditing, first_name: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Apellido</label>
+                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Apellido *</label>
                                     <input value={isEditing.last_name} onChange={(e) => setIsEditing({ ...isEditing, last_name: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" />
                                 </div>
                             </div>
+
+                            {isRutVisible && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-4">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Tipo de Documento:</label>
+                                        {isRutVisible && !isRutRequired ? (
+                                            <div className="flex bg-white/5 p-1 rounded-lg">
+                                                <button
+                                                    onClick={() => setIsEditing({ ...isEditing, doc_type: 'RUT' })}
+                                                    className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!isEditing.doc_type || isEditing.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    RUT Chileno
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditing({ ...isEditing, doc_type: 'PASSPORT' })}
+                                                    className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${isEditing.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
+                                                >
+                                                    Pasaporte
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="px-4 py-2 rounded-lg bg-white/5 text-[10px] font-black uppercase text-white/60">
+                                                RUT Chileno
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">
+                                            {(!isEditing.doc_type || isEditing.doc_type === 'RUT') ? `RUT (Sin puntos, con guión)${isRutRequired ? ' *' : ''}` : 'Pasaporte / ID Extranjero *'}
+                                        </label>
+                                        <input
+                                            placeholder={(!isEditing.doc_type || isEditing.doc_type === 'RUT') ? '12345678-K' : 'A1234567'}
+                                            value={isEditing.rut || ''}
+                                            onChange={(e) => setIsEditing({ ...isEditing, rut: e.target.value })}
+                                            className={`w-full bg-white/5 border p-3 rounded-xl text-sm uppercase ${(!isEditing.doc_type || isEditing.doc_type === 'RUT') && isEditing.rut && !/^[0-9]+-[0-9kK]{1}$/.test(isEditing.rut) ? 'border-red-500/50 text-red-200' : 'border-white/10'}`}
+                                        />
+                                        {(!isEditing.doc_type || isEditing.doc_type === 'RUT') && (
+                                            <p className="text-[9px] text-white/30 ml-2">Formato: 12345678-K (Sin puntos)</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
@@ -918,7 +1091,7 @@ export default function EmpresaAdmin() {
                             <div className="grid grid-cols-2 gap-4">
                                 {isCompanyCollabVisible && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa</label>
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa{isCompanyCollabRequired ? ' *' : ''}</label>
                                         <select 
                                             value={isEditing.company_name || ""} 
                                             onChange={(e) => setIsEditing({ ...isEditing, company_name: e.target.value })}
@@ -930,44 +1103,52 @@ export default function EmpresaAdmin() {
                                         </select>
                                     </div>
                                 )}
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo</label>
-                                    <select
-                                        value={isEditing.role_id || ""}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setIsEditing({ ...isEditing, role_id: val === "" ? null : val });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    >
-                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
-                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
-                                    </select>
-                                </div>
+                                {isJobPositionVisible && (
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo{isJobPositionRequired ? ' *' : ''}</label>
+                                        <select
+                                            value={isEditing.role_id || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setIsEditing({ ...isEditing, role_id: val === "" ? null : val });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                            style={{ colorScheme: 'dark' }}
+                                        >
+                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
+                                            {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Edad</label>
-                                    <input type="number" min="1" max="120" value={isEditing.age || ""} onChange={(e) => setIsEditing({ ...isEditing, age: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" placeholder="Ej: 35" />
+                            {(isAgeVisible || isGenderVisible) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {isAgeVisible && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 ml-2">Edad{isAgeRequired ? ' *' : ''}</label>
+                                            <input type="number" min="1" max="120" value={isEditing.age || ""} onChange={(e) => setIsEditing({ ...isEditing, age: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" placeholder="Ej: 35" />
+                                        </div>
+                                    )}
+                                    {isGenderVisible && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 ml-2">Género{isGenderRequired ? ' *' : ''}</label>
+                                            <select
+                                                value={isEditing.gender || ""}
+                                                onChange={(e) => setIsEditing({ ...isEditing, gender: e.target.value || null })}
+                                                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                                style={{ colorScheme: 'dark' }}
+                                            >
+                                                <option value="" className="bg-neutral-900 text-white">Seleccionar</option>
+                                                <option value="Masculino" className="bg-neutral-900 text-white">Masculino</option>
+                                                <option value="Femenino" className="bg-neutral-900 text-white">Femenino</option>
+                                                <option value="No binario" className="bg-neutral-900 text-white">No binario</option>
+                                                <option value="Prefiero no decir" className="bg-neutral-900 text-white">Prefiero no decir</option>
+                                            </select>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Género</label>
-                                    <select
-                                        value={isEditing.gender || ""}
-                                        onChange={(e) => setIsEditing({ ...isEditing, gender: e.target.value || null })}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    >
-                                        <option value="" className="bg-neutral-900 text-white">Seleccionar</option>
-                                        <option value="Masculino" className="bg-neutral-900 text-white">Masculino</option>
-                                        <option value="Femenino" className="bg-neutral-900 text-white">Femenino</option>
-                                        <option value="No binario" className="bg-neutral-900 text-white">No binario</option>
-                                        <option value="Prefiero no decir" className="bg-neutral-900 text-white">Prefiero no decir</option>
-                                    </select>
-                                </div>
-                            </div>
+                            )}
 
                             <div className="flex gap-4">
                                 <button onClick={() => setIsEditing(null)} className="flex-1 p-4 bg-white/5 rounded-xl uppercase font-black text-[10px]">Cancelar</button>
@@ -1094,35 +1275,41 @@ export default function EmpresaAdmin() {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-4">
                                     <label className="text-[10px] font-black uppercase text-white/40 ml-2">Tipo de Documento: </label>
-                                    <div className="flex bg-white/5 p-1 rounded-lg">
-                                        <button 
-                                            onClick={() => setNewStudent({...newStudent, doc_type: 'RUT'})}
-                                            className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
-                                        >
-                                            RUT Chileno
-                                        </button>
-                                        <button 
-                                            onClick={() => setNewStudent({...newStudent, doc_type: 'PASSPORT'})}
-                                            className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${newStudent.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
-                                        >
-                                            Pasaporte
-                                        </button>
-                                    </div>
+                                    {isRutVisible && !isRutRequired ? (
+                                        <div className="flex bg-white/5 p-1 rounded-lg">
+                                            <button 
+                                                onClick={() => setNewStudent({...newStudent, doc_type: 'RUT'})}
+                                                className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white'}`}
+                                            >
+                                                RUT Chileno
+                                            </button>
+                                            <button 
+                                                onClick={() => setNewStudent({...newStudent, doc_type: 'PASSPORT'})}
+                                                className={`px-4 py-1 rounded-md text-[10px] font-black uppercase transition-all ${newStudent.doc_type === 'PASSPORT' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-white/40 hover:text-white'}`}
+                                            >
+                                                Pasaporte
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="px-4 py-2 rounded-lg bg-white/5 text-[10px] font-black uppercase text-white/60">
+                                            {isRutVisible ? 'RUT Chileno' : 'Pasaporte'}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase text-white/40 ml-2">
-                                        {(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? 'RUT (Sin puntos, con guión) *' : 'Pasaporte / ID Extranjero *'}
+                                        {(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) ? `RUT (Sin puntos, con guión)${isRutRequired ? ' *' : ''}` : 'Pasaporte / ID Extranjero *'}
                                     </label>
                                     <input 
-                                        placeholder={(!newStudent.doc_type || newStudent.doc_type === 'RUT') ? "12345678-K" : "A1234567"} 
+                                        placeholder={(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) ? "12345678-K" : "A1234567"} 
                                         value={newStudent.rut} 
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setNewStudent({ ...newStudent, rut: val });
                                             
                                             // Validación visual en tiempo real para RUT
-                                            if (!newStudent.doc_type || newStudent.doc_type === 'RUT') {
+                                            if (isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) {
                                                 if (val.includes('.')) {
                                                     // Opcional: Auto-limpiar puntos o mostrar warning
                                                 }
@@ -1130,12 +1317,12 @@ export default function EmpresaAdmin() {
                                         }} 
                                         className={`w-full bg-white/5 border p-3 rounded-xl text-sm uppercase ${
                                             // Simple validación visual
-                                            (!newStudent.doc_type || newStudent.doc_type === 'RUT') && newStudent.rut && !/^[0-9]+-[0-9kK]{1}$/.test(newStudent.rut) 
+                                            (isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) && newStudent.rut && !/^[0-9]+-[0-9kK]{1}$/.test(newStudent.rut) 
                                                 ? 'border-red-500/50 text-red-200' 
                                                 : 'border-white/10'
                                         }`} 
                                     />
-                                    {(!newStudent.doc_type || newStudent.doc_type === 'RUT') && (
+                                    {(isRutVisible && (!newStudent.doc_type || newStudent.doc_type === 'RUT')) && (
                                         <p className="text-[9px] text-white/30 ml-2">Formato: 12345678-K (Sin puntos)</p>
                                     )}
                                 </div>
@@ -1155,7 +1342,7 @@ export default function EmpresaAdmin() {
                             <div className="grid grid-cols-2 gap-4">
                                 {isCompanyCollabVisible && (
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa Sub-contratista</label>
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa Sub-contratista{isCompanyCollabRequired ? ' *' : ''}</label>
                                         <select 
                                             value={newStudent.company_name || ""} 
                                             onChange={(e) => setNewStudent({ ...newStudent, company_name: e.target.value })}
@@ -1167,22 +1354,52 @@ export default function EmpresaAdmin() {
                                         </select>
                                     </div>
                                 )}
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo</label>
-                                    <select
-                                        value={newStudent.role_id || ""}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setNewStudent({ ...newStudent, role_id: val === "" ? null : val });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    >
-                                        <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
-                                        {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
-                                    </select>
-                                </div>
+                                {isJobPositionVisible && (
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo{isJobPositionRequired ? ' *' : ''}</label>
+                                        <select
+                                            value={newStudent.role_id || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setNewStudent({ ...newStudent, role_id: val === "" ? null : val });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                            style={{ colorScheme: 'dark' }}
+                                        >
+                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Cargo</option>
+                                            {cargos.map(c => <option key={c.id} value={c.id} className="bg-neutral-900 text-white">{c.name}</option>)}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
+
+                            {(isGenderVisible || isAgeVisible) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {isGenderVisible && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 ml-2">Género{isGenderRequired ? ' *' : ''}</label>
+                                            <select
+                                                value={newStudent.gender || ""}
+                                                onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
+                                                style={{ colorScheme: 'dark' }}
+                                            >
+                                                <option value="" className="bg-neutral-900 text-white">Seleccionar</option>
+                                                <option value="Masculino" className="bg-neutral-900 text-white">Masculino</option>
+                                                <option value="Femenino" className="bg-neutral-900 text-white">Femenino</option>
+                                                <option value="No binario" className="bg-neutral-900 text-white">No binario</option>
+                                                <option value="Prefiero no decir" className="bg-neutral-900 text-white">Prefiero no decir</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    {isAgeVisible && (
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-black uppercase text-white/40 ml-2">Edad{isAgeRequired ? ' *' : ''}</label>
+                                            <input type="number" min="1" max="120" value={newStudent.age || ""} onChange={(e) => setNewStudent({ ...newStudent, age: e.target.value })} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm" placeholder="Ej: 35" />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="flex gap-4">
                                 <button onClick={() => setIsCreating(false)} className="flex-1 p-4 bg-white/5 rounded-xl uppercase font-black text-[10px]">Cancelar</button>
@@ -1248,26 +1465,22 @@ export default function EmpresaAdmin() {
                                                 />
                                             )}
                                         </div>
-                                        <p className="text-[9px] text-white/20 italic text-right">
-                                            {descLang === 'es' ? 'Edita el contenido principal en español.' : 'Traduce el contenido para los trabajadores haitianos.'}
-                                        </p>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => {
-                                                setEditingCargo(null);
-                                                setShowCreateCargo(false);
-                                                setCargoDesc("");
-                                                setCargoDescHT("");
-                                                const n = document.getElementById('newCargoName') as HTMLInputElement;
-                                                const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
-                                                if(n) n.value = '';
-                                                if(nHT) nHT.value = '';
-                                            }}
-                                            className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all text-center"
-                                        >
-                                            Cancelar
-                                        </button>
+                                        <div className="flex gap-4 pt-2">
+                                            <button
+                                                onClick={() => {
+                                                    setShowCreateCargo(false);
+                                                    setEditingCargo(null);
+                                                    setCargoDesc("");
+                                                    setCargoDescHT("");
+                                                    const n = document.getElementById('newCargoName') as HTMLInputElement;
+                                                    const nHT = document.getElementById('newCargoNameHT') as HTMLInputElement;
+                                                    if(n) n.value = '';
+                                                    if(nHT) nHT.value = '';
+                                                }}
+                                                className="px-6 bg-white/10 text-white py-4 rounded-xl font-black text-xs uppercase hover:bg-white/20 transition-all text-center"
+                                            >
+                                                Cancelar
+                                            </button>
                                         <button 
                                             onClick={async () => { 
                                                 const n = document.getElementById('newCargoName') as HTMLInputElement; 
@@ -1324,6 +1537,7 @@ export default function EmpresaAdmin() {
                                             {editingCargo ? 'Guardar Cambios' : 'Agregar Cargo'}
                                         </button>
                                     </div>
+                                </div>
                                 </div>
                             )}
 
