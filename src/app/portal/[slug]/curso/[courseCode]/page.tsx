@@ -383,10 +383,7 @@ export default function CourseAuthPage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center text-white/20" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Cargando...</div>;
-    if (!company || !course) return <div className="min-h-screen flex items-center justify-center text-red-500" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Recurso no disponible</div>;
-
-    const isRestricted = course.registration_mode === 'restricted';
+    const isRestricted = course?.registration_mode === 'restricted';
 
     const getFieldConfig = (field: string) => company?.user_registration_config?.[field];
 
@@ -417,6 +414,9 @@ export default function CourseAuthPage() {
             setRegData((prev) => ({ ...prev, passport: '' }));
         }
     }, [isRutVisible, isRutRequired]);
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-white/20" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Cargando...</div>;
+    if (!company || !course) return <div className="min-h-screen flex items-center justify-center text-red-500" style={{ backgroundImage: 'url(/alumno_background.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>Recurso no disponible</div>;
 
     const handleRutInput = (value: string) => {
         // Auto-format as user types

@@ -20,6 +20,29 @@ import AdminSidebar from "@/components/AdminSidebar";
 import RichTextEditor from "@/components/RichTextEditor";
 import { resolveAdminRole } from "@/lib/adminAuth";
 
+const REGISTRATION_FIELD_DEFAULTS: Record<string, { visible: boolean; required: boolean }> = {
+    company_collab: { visible: true, required: false },
+    rut: { visible: true, required: false },
+    job_position: { visible: true, required: false },
+    gender: { visible: true, required: false },
+    age: { visible: true, required: false }
+};
+
+const normalizeRegistrationConfig = (config?: Record<string, any> | null) => {
+    const currentConfig = config || {};
+
+    return Object.fromEntries(
+        Object.entries(REGISTRATION_FIELD_DEFAULTS).map(([key, defaults]) => {
+            const savedConfig = currentConfig[key] || {};
+            const visible = savedConfig.visible ?? defaults.visible;
+            return [key, {
+                visible,
+                required: visible ? (savedConfig.required ?? defaults.required) : false
+            }];
+        })
+    );
+};
+
 export default function MetaversoAdmin() {
     const router = useRouter();
     const [companies, setCompanies] = useState<any[]>([]);
@@ -532,11 +555,13 @@ export default function MetaversoAdmin() {
 
     const handleSaveConfig = async (configRef: any) => {
         if (!configRef?.id || !configRef?.user_registration_config) return;
+
+        const normalizedConfig = normalizeRegistrationConfig(configRef.user_registration_config);
         
         const { error } = await supabase
             .from('companies')
             .update({ 
-                user_registration_config: configRef.user_registration_config,
+                user_registration_config: normalizedConfig,
                 max_login_attempts: configRef.max_login_attempts ?? 5
             })
             .eq('id', configRef.id);
@@ -779,7 +804,7 @@ export default function MetaversoAdmin() {
                                             {company.slug && (
                                                 <>
                                                     <button 
-                                                        onClick={() => setFieldsConfigModal(company)}
+                                                        onClick={() => setFieldsConfigModal({ ...company, user_registration_config: normalizeRegistrationConfig(company.user_registration_config) })}
                                                         className="p-2.5 rounded-xl bg-white/5 text-white/40 border border-white/10 hover:bg-brand/10 hover:text-brand hover:border-brand/20 transition-all"
                                                         title="Configuración Campos de Registro"
                                                     >
@@ -1072,10 +1097,8 @@ export default function MetaversoAdmin() {
                                         { key: 'gender', label: 'Género' },
                                         { key: 'age', label: 'Edad' }
                                     ].map((field) => {
-                                        const currentConfig = fieldsConfigModal.user_registration_config || {};
-                                        // Defaults: Visible=false, Required=false mostly safely? No, usually true for some system fields.
-                                        // Assuming migration default was true.
-                                        const fieldConfig = currentConfig[field.key] || { visible: false, required: false };
+                                        const currentConfig = normalizeRegistrationConfig(fieldsConfigModal.user_registration_config);
+                                        const fieldConfig = currentConfig[field.key];
 
                                         return (
                                             <div key={field.key} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-white/5 last:border-0">
