@@ -87,8 +87,7 @@ export default function CourseAuthPage() {
             passport: 'Pasaporte',
             male: 'Masculino', female: 'Femenino', other: 'Otro', language: 'Idioma',
             empresa: 'Empresa Colaboradora', empresaPh: 'Escribe para buscar o agregar...',
-            continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios',
-            requiredFieldsLabel: 'Campos obligatorios', missingLabel: 'Faltan',
+            continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios', missingLabel: 'Faltan',
             invalidRut: 'RUT inválido. Verifica el número.',
             digitalSign: 'Firma Digital', signDesc: 'Dibuja tu firma para aceptar el consentimiento de datos.',
             back: 'Volver', finish: 'Finalizar Registro', registering: 'Registrando...',
@@ -107,8 +106,7 @@ export default function CourseAuthPage() {
             passport: 'Paspò',
             male: 'Gason', female: 'Fi', other: 'Lòt', language: 'Lang',
             empresa: 'Antrepriz Kolaboratè', empresaPh: 'Ekri pou chèche oswa ajoute...',
-            continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo',
-            requiredFieldsLabel: 'Chan obligatwa yo', missingLabel: 'Chan ki manke',
+            continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo', missingLabel: 'Chan ki manke',
             invalidRut: 'RUT envalid. Verifye nimewo a.',
             digitalSign: 'Siyati Dijital', signDesc: 'Desine siyati ou pou aksepte konsantman done yo.',
             back: 'Retounen', finish: 'Fini Enskripsyon', registering: 'Anrejistreman...',
@@ -403,17 +401,6 @@ export default function CourseAuthPage() {
     const isRutVisible = isFieldVisible('rut');
     const isRutRequired = isFieldRequired('rut');
     const requiredAsterisk = <span className="text-red-400"> *</span>;
-    const requiredFieldLabels = [
-        t.name,
-        t.surname,
-        t.email,
-        t.password,
-        ...(isRutVisible ? [isRutRequired ? t.rut : `${t.rut}/${t.passport}`] : []),
-        ...(isFieldRequired('gender') ? [t.gender] : []),
-        ...(isFieldVisible('age') && isFieldRequired('age') ? [t.age] : []),
-        ...(isFieldRequired('company_collab') ? [t.empresa] : []),
-        ...(isFieldRequired('job_position') ? [t.cargo] : []),
-    ];
 
     useEffect(() => {
         if (!isRutVisible) {
@@ -584,11 +571,6 @@ export default function CourseAuthPage() {
                         <div className="space-y-6">
                             {regStep === 1 && (
                                 <div className="space-y-4">
-                                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-[11px] text-white/70">
-                                        <span className="font-black uppercase tracking-widest text-white/50 text-[10px]">{t.requiredFieldsLabel}:</span>{' '}
-                                        {requiredFieldLabels.join(', ')}
-                                    </div>
-
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.name}{requiredAsterisk}</label>
@@ -607,7 +589,7 @@ export default function CourseAuthPage() {
                                             <div className="space-y-1">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                                        {idType === 'rut' ? t.rut : t.passport}{requiredAsterisk}
+                                                        {idType === 'rut' ? t.rut : t.passport}{isRutRequired && requiredAsterisk}
                                                     </label>
                                                     {!isRutRequired && (
                                                         <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
