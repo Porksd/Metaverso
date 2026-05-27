@@ -40,6 +40,15 @@ export async function POST(request: NextRequest) {
         const normalizedPassport = typeof passport === 'string' ? passport.trim() : '';
         let documentFieldVisible = true;
 
+        if (!supabaseAdmin) {
+            return NextResponse.json(
+                { error: 'Error de configuración: supabaseAdmin no disponible' },
+                { status: 500 }
+            );
+        }
+
+        const admin = supabaseAdmin;
+
         // Validate required fields
         if (!normalizedEmail || !password || !first_name || !last_name) {
             return NextResponse.json(
@@ -49,7 +58,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedClientId) {
-            const { data: companyConfig, error: companyConfigError } = await supabaseAdmin
+            const { data: companyConfig, error: companyConfigError } = await admin
                 .from('companies')
                 .select('user_registration_config')
                 .eq('id', normalizedClientId)
@@ -75,15 +84,9 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Create or Update Supabase Auth User
-        // Usamos supabaseAdmin para crear el usuario y confirmar el email inmediatamente.
-        if (!supabaseAdmin) {
-            return NextResponse.json(
-                { error: 'Error de configuración: supabaseAdmin no disponible' },
-                { status: 500 }
-            );
-        }
+        // Usamos admin para crear el usuario y confirmar el email inmediatamente.
 
-        let emailQuery = supabaseAdmin
+        let emailQuery = admin
             .from('students')
             .select('id')
             .eq('email', normalizedEmail);
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedRut) {
-            let rutQuery = supabaseAdmin
+            let rutQuery = admin
                 .from('students')
                 .select('id')
                 .eq('rut', normalizedRut);
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (normalizedPassport) {
-            let passportQuery = supabaseAdmin
+            let passportQuery = admin
                 .from('students')
                 .select('id')
                 .eq('passport', normalizedPassport);
@@ -156,7 +159,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const { data: authUsersData, error: authUsersError } = await supabaseAdmin.auth.admin.listUsers({
+        const { data: authUsersData, error: authUsersError } = await admin.auth.admin.listUsers({
             page: 1,
             perPage: 1000
         });
@@ -174,7 +177,7 @@ export async function POST(request: NextRequest) {
         const existingAuthUser = authUsersData.users.find((user) => user.email?.toLowerCase() === normalizedEmail);
 
         if (existingAuthUser) {
-            const { data: updatedAuthData, error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
+            const { data: updatedAuthData, error: updateAuthError } = await admin.auth.admin.updateUserById(
                 existingAuthUser.id,
                 {
                     password,
@@ -192,7 +195,7 @@ export async function POST(request: NextRequest) {
 
             authUser = updatedAuthData.user;
         } else {
-            const { data: createData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            const { data: createData, error: createError } = await admin.auth.admin.createUser({
                 email: normalizedEmail,
                 password,
                 email_confirm: true,
@@ -204,7 +207,7 @@ export async function POST(request: NextRequest) {
 
             if (createError) {
                 if (createError.message.includes('already registered') || createError.message.includes('already exists')) {
-                    const refreshedList = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+                    const refreshedList = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
                     if (refreshedList.error) {
                         return NextResponse.json({ error: refreshedList.error.message }, { status: 500 });
                     }
@@ -214,7 +217,7 @@ export async function POST(request: NextRequest) {
                         return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
                     }
 
-                    const { data: updatedAuthData, error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(
+                    const { data: updatedAuthData, error: updateAuthError } = await admin.auth.admin.updateUserById(
                         raceAuthUser.id,
                         {
                             password,
@@ -245,7 +248,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create Student Profile
-        const { data: student, error: studentError } = await supabaseAdmin
+        const { data: student, error: studentError } = await admin
             .from('students')
             .insert({
                 auth_user_id: authUser.id,
@@ -271,7 +274,7 @@ export async function POST(request: NextRequest) {
             console.error('Error creating student profile:', studentError);
 
             if (createdAuthUser && authUser?.id) {
-                await supabaseAdmin.auth.admin.deleteUser(authUser.id);
+                await admin.auth.admin.deleteUser(authUser.id);
             }
 
             const normalizedStudentError = studentError.message?.toLowerCase() || '';
