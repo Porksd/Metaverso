@@ -88,6 +88,7 @@ export default function CourseAuthPage() {
             male: 'Masculino', female: 'Femenino', other: 'Otro', language: 'Idioma',
             empresa: 'Empresa Colaboradora', empresaPh: 'Escribe para buscar o agregar...',
             continueSign: 'Continuar a Firma', required: 'Completa los campos obligatorios',
+            requiredFieldsLabel: 'Campos obligatorios', missingLabel: 'Faltan',
             invalidRut: 'RUT inválido. Verifica el número.',
             digitalSign: 'Firma Digital', signDesc: 'Dibuja tu firma para aceptar el consentimiento de datos.',
             back: 'Volver', finish: 'Finalizar Registro', registering: 'Registrando...',
@@ -107,6 +108,7 @@ export default function CourseAuthPage() {
             male: 'Gason', female: 'Fi', other: 'Lòt', language: 'Lang',
             empresa: 'Antrepriz Kolaboratè', empresaPh: 'Ekri pou chèche oswa ajoute...',
             continueSign: 'Kontinye nan Siyati', required: 'Ranpli tout chan obligatwa yo',
+            requiredFieldsLabel: 'Chan obligatwa yo', missingLabel: 'Chan ki manke',
             invalidRut: 'RUT envalid. Verifye nimewo a.',
             digitalSign: 'Siyati Dijital', signDesc: 'Desine siyati ou pou aksepte konsantman done yo.',
             back: 'Retounen', finish: 'Fini Enskripsyon', registering: 'Anrejistreman...',
@@ -400,6 +402,18 @@ export default function CourseAuthPage() {
 
     const isRutVisible = isFieldVisible('rut');
     const isRutRequired = isFieldRequired('rut');
+    const requiredAsterisk = <span className="text-red-400"> *</span>;
+    const requiredFieldLabels = [
+        t.name,
+        t.surname,
+        t.email,
+        t.password,
+        ...(isRutVisible ? [isRutRequired ? t.rut : `${t.rut}/${t.passport}`] : []),
+        ...(isFieldRequired('gender') ? [t.gender] : []),
+        ...(isFieldVisible('age') && isFieldRequired('age') ? [t.age] : []),
+        ...(isFieldRequired('company_collab') ? [t.empresa] : []),
+        ...(isFieldRequired('job_position') ? [t.cargo] : []),
+    ];
 
     useEffect(() => {
         if (!isRutVisible) {
@@ -570,14 +584,19 @@ export default function CourseAuthPage() {
                         <div className="space-y-6">
                             {regStep === 1 && (
                                 <div className="space-y-4">
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl text-[11px] text-white/70">
+                                        <span className="font-black uppercase tracking-widest text-white/50 text-[10px]">{t.requiredFieldsLabel}:</span>{' '}
+                                        {requiredFieldLabels.join(', ')}
+                                    </div>
+
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.name}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.name}{requiredAsterisk}</label>
                                             <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Juan" required 
                                                 value={regData.first_name} onChange={e => setRegData({...regData, first_name: e.target.value})} />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.surname}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.surname}{requiredAsterisk}</label>
                                             <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" placeholder="Pérez" required 
                                                 value={regData.last_name} onChange={e => setRegData({...regData, last_name: e.target.value})} />
                                         </div>
@@ -588,7 +607,7 @@ export default function CourseAuthPage() {
                                             <div className="space-y-1">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
-                                                        {idType === 'rut' ? t.rut : t.passport}
+                                                        {idType === 'rut' ? t.rut : t.passport}{requiredAsterisk}
                                                     </label>
                                                     {!isRutRequired && (
                                                         <div className="flex gap-1 bg-white/5 p-0.5 rounded-lg">
@@ -634,12 +653,12 @@ export default function CourseAuthPage() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.email}{requiredAsterisk}</label>
                                             <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm" required 
                                                 value={regData.email} onChange={e => setRegData({...regData, email: e.target.value})} />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.password}{requiredAsterisk}</label>
                                             {course?.use_generic_password ? (
                                                 <div className="relative">
                                                     <input 
@@ -667,7 +686,7 @@ export default function CourseAuthPage() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.gender}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.gender}{isFieldRequired('gender') && requiredAsterisk}</label>
                                             {isFieldVisible('gender') ? (
                                                 <div className="relative">
                                                     <select 
@@ -690,7 +709,7 @@ export default function CourseAuthPage() {
                                             )}
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.age}{isFieldVisible('age') && isFieldRequired('age') && requiredAsterisk}</label>
                                             {isFieldVisible('age') ? (
                                                 <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden">
                                                     <span className="flex-1 px-4 py-3 text-white text-sm text-center" aria-label="Edad">
@@ -728,7 +747,7 @@ export default function CourseAuthPage() {
                                     {/* Empresa autocomplete */}
                                     {isFieldVisible('company_collab') && (
                                     <div className="space-y-1 relative empresa-autocomplete">
-                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}</label>
+                                        <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.empresa}{isFieldRequired('company_collab') && requiredAsterisk}</label>
                                         <div className="relative">
                                             <input 
                                                 type="text" 
@@ -776,7 +795,7 @@ export default function CourseAuthPage() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}</label>
+                                            <label className="text-[10px] font-black uppercase text-white/40 tracking-widest">{t.cargo}{isFieldRequired('job_position') && requiredAsterisk}</label>
                                             {isFieldVisible('job_position') ? (
                                                 <div className="relative">
                                                     <select 
@@ -848,9 +867,20 @@ export default function CourseAuthPage() {
                                     <button onClick={() => {
                                         const hasAnyIdentifier = Boolean(regData.rut || regData.passport);
                                         const missingIdentifier = isRutVisible ? (isRutRequired ? !regData.rut : !hasAnyIdentifier) : false;
+                                        const missingFields: string[] = [];
 
-                                        if(!regData.email || !regData.password || missingIdentifier) {
-                                            setError(t.required); return;
+                                        if (!regData.first_name.trim()) missingFields.push(t.name);
+                                        if (!regData.last_name.trim()) missingFields.push(t.surname);
+                                        if (!regData.email.trim()) missingFields.push(t.email);
+                                        if (!regData.password.trim()) missingFields.push(t.password);
+                                        if (missingIdentifier) missingFields.push(isRutRequired ? t.rut : `${t.rut}/${t.passport}`);
+                                        if (isFieldRequired('gender') && !regData.gender) missingFields.push(t.gender);
+                                        if (isFieldRequired('company_collab') && !empresaInput.trim()) missingFields.push(t.empresa);
+                                        if (isFieldRequired('job_position') && !regData.role_id) missingFields.push(t.cargo);
+
+                                        if (missingFields.length > 0) {
+                                            setError(`${t.missingLabel}: ${missingFields.join(', ')}`);
+                                            return;
                                         }
                                         // Validate RUT before proceeding
                                         if (isRutRequired && !validateRut(regData.rut)) {
@@ -862,18 +892,6 @@ export default function CourseAuthPage() {
                                         if (isRutVisible && idType === 'rut' && regData.rut && !validateRut(regData.rut)) {
                                             setRutError(t.invalidRut);
                                             setError(t.invalidRut);
-                                            return;
-                                        }
-                                        if (isFieldRequired('gender') && !regData.gender) {
-                                            setError(t.required);
-                                            return;
-                                        }
-                                        if (isFieldRequired('company_collab') && !empresaInput.trim()) {
-                                            setError(t.required);
-                                            return;
-                                        }
-                                        if (isFieldRequired('job_position') && !regData.role_id) {
-                                            setError(t.required);
                                             return;
                                         }
                                         if (isFieldVisible('age') && isFieldRequired('age')) {
