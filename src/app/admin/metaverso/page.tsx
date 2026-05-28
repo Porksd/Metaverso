@@ -65,6 +65,8 @@ export default function MetaversoAdmin() {
         access_mode: string;
         use_generic_password: boolean;
         generic_password: string;
+        start_date: string;
+        validez_anios: string;
         pass_saved: boolean;
         diploma_metaverso_enabled: boolean;
         cert_participacion_enabled: boolean;
@@ -78,6 +80,13 @@ export default function MetaversoAdmin() {
         if (row.cert_participacion_enabled === true) return true;
         if (row.cert_participacion_enabled === false) return false;
         return row.diploma_metaverso_enabled !== true;
+    };
+
+    const toDateInputValue = (value?: string | null) => {
+        if (!value) return '';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return '';
+        return parsed.toISOString().slice(0, 10);
     };
 
     const copyToClipboard = (text: string, id: string) => {
@@ -578,7 +587,7 @@ export default function MetaversoAdmin() {
         const [{ data: coursesData }, { data: assignData }] = await Promise.all([
             supabase.from('courses').select('id, name, code').order('name'),
             supabase.from('company_courses')
-                .select('course_id, registration_mode, use_generic_password, generic_password, diploma_metaverso_enabled, cert_participacion_enabled')
+                .select('course_id, registration_mode, use_generic_password, generic_password, diploma_metaverso_enabled, cert_participacion_enabled, start_date, validez_anios')
                 .eq('company_id', company.id)
         ]);
         const map: Record<string, any> = {};
@@ -589,6 +598,8 @@ export default function MetaversoAdmin() {
                 access_mode: a?.registration_mode || 'open',
                 use_generic_password: a?.use_generic_password || false,
                 generic_password: a?.generic_password || '',
+                start_date: toDateInputValue(a?.start_date),
+                validez_anios: a?.validez_anios != null ? String(a.validez_anios) : '',
                 pass_saved: false,
                 diploma_metaverso_enabled: a?.diploma_metaverso_enabled || false,
                 cert_participacion_enabled: a ? resolveParticipationFlag(a) : true,
@@ -601,6 +612,7 @@ export default function MetaversoAdmin() {
 
     const saveCourseManagement = async () => {
         if (!courseManagementModal) return;
+
         await supabase.from('company_courses').delete().eq('company_id', courseManagementModal.id);
         const rows = Object.entries(cmAssignments)
             .filter(([, v]) => v.enabled)
@@ -610,6 +622,8 @@ export default function MetaversoAdmin() {
                 registration_mode: v.access_mode,
                 use_generic_password: v.use_generic_password,
                 generic_password: v.use_generic_password ? v.generic_password : null,
+                start_date: v.start_date || null,
+                validez_anios: v.validez_anios ? parseInt(v.validez_anios, 10) || null : null,
                 diploma_metaverso_enabled: v.diploma_metaverso_enabled || false,
                 cert_participacion_enabled: v.cert_participacion_enabled !== false,
             }));
@@ -1405,6 +1419,37 @@ export default function MetaversoAdmin() {
                                                                 {cfg.pass_saved && <Check className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />}
                                                             </div>
                                                         )}
+                                                    </div>
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                        <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Fechas</span>
+                                                        <div className="flex items-center gap-3 flex-wrap">
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className="text-[8px] font-black uppercase text-white/25">Inicio</span>
+                                                                <input
+                                                                    type="date"
+                                                                    value={cfg.start_date || ''}
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    onChange={(e) => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], start_date: e.target.value } }))}
+                                                                    className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white outline-none focus:border-brand/50"
+                                                                />
+                                                            </div>
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className="text-[8px] font-black uppercase text-white/25">Validez (años)</span>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <input
+                                                                        type="number"
+                                                                        min="1"
+                                                                        max="99"
+                                                                        placeholder="1"
+                                                                        value={cfg.validez_anios || ''}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        onChange={(e) => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], validez_anios: e.target.value } }))}
+                                                                        className="bg-black/40 border border-brand/30 rounded-lg px-2 py-1 text-[10px] text-brand font-black outline-none focus:border-brand/60 w-16 text-center"
+                                                                    />
+                                                                    <span className="text-[9px] text-white/30 font-bold uppercase">años</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     {/* Certificados */}
                                                     <div className="flex items-center gap-2 pt-1 border-t border-white/5 flex-wrap">

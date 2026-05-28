@@ -21,6 +21,8 @@ interface FieldsConfig {
     course_name: boolean;
     hours: boolean;
     date: boolean;
+    course_code: boolean;
+    expiration_date: boolean;
 }
 
 const FIELD_LABELS: Record<keyof FieldsConfig, string> = {
@@ -31,6 +33,8 @@ const FIELD_LABELS: Record<keyof FieldsConfig, string> = {
     course_name: "Nombre del curso",
     hours: "Horas cronológicas",
     date: "Fecha de realización",
+    course_code: "Código del curso",
+    expiration_date: "Fecha de expiración",
 };
 
 export default function DiplomasAdminPage() {
@@ -47,6 +51,8 @@ export default function DiplomasAdminPage() {
         course_name: true,
         hours: true,
         date: true,
+        course_code: true,
+        expiration_date: true,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -160,8 +166,10 @@ export default function DiplomasAdminPage() {
                 companyName: "DEMO EMPRESA S.A.",
                 companyRut: "76.135.878-2",
                 courseName: "Trabajo en Altura - Teórico Práctico",
+                courseCode: "VÉRTICE-174523185-TATP-03/2026-PR-1238092246",
                 hours: "16",
                 date: "27 de marzo de 2026",
+                expirationDate: "27 de marzo de 2028",
                 backgroundUrl: previewObjectUrl || backgroundUrl,
                 fieldsConfig,
                 layoutConfig,
@@ -428,12 +436,14 @@ export default function DiplomasAdminPage() {
                                     <LRow label="Nombre del curso" yKey="course_name_y" sizeKey="course_name_size" />
                                 </div>
 
-                                {/* Block 4: Hours / Date (relative gap) */}
+                                {/* Block 4: Hours / Dates / Course code (relative gap) */}
                                 <div>
                                     <p className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Bloque 4 — Duración / Fecha</p>
                                     <LRow label="Horas" yKey="hours_gap" sizeKey="hours_size" yLabel="Gap (mm)" />
                                     <LRow label="Fecha (con horas)" yKey="date_gap" sizeKey="date_size" yLabel="Gap (mm)" />
                                     <LRow label="Fecha (sin horas)" yKey="date_gap_no_hours" sizeKey="date_size" yLabel="Gap (mm)" sizeLabel="—" />
+                                    <LRow label="Código curso (gap)" yKey="course_code_gap" sizeKey="course_code_size" yLabel="Gap (mm)" />
+                                    <LRow label="Expiración (gap)" yKey="expiration_date_gap" sizeKey="expiration_date_size" yLabel="Gap (mm)" />
                                 </div>
                             </div>
 

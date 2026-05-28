@@ -53,6 +53,15 @@ const formatRut = (rut: string) => {
     return `${body}-${dv}`;
 };
 
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const calcExpirationDate = (completedAt?: string | null, validezAnios?: number | null): string | undefined => {
+    if (!completedAt || !validezAnios) return undefined;
+    const d = new Date(completedAt);
+    if (isNaN(d.getTime())) return undefined;
+    d.setFullYear(d.getFullYear() + validezAnios);
+    return `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}`;
+};
+
 const COMPANY_CONTEXT_KEYS = ["empresa_id", "empresa_name", "empresa_slug", "is_master_admin", "master_role", "master_return_url", "master_entry_mode"] as const;
 
 const getStoredCompanyValue = (key: (typeof COMPANY_CONTEXT_KEYS)[number]) => {
@@ -238,7 +247,7 @@ export default function EmpresaAdmin() {
             const [{ data: assignedData, error: assignedError }, { data: dipConfig }] = await Promise.all([
                 supabase
                     .from('company_courses')
-                    .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, courses(*)')
+                    .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, start_date, validez_anios, courses(*)')
                     .eq('company_id', companyId),
                 supabase
                     .from('diploma_config')
@@ -262,7 +271,12 @@ export default function EmpresaAdmin() {
             setCourseCertFlags(flags);
             setDiplomaConfig(dipConfig || null);
             
-            const filteredCourses = (assignedData || []).map((ad: any) => ad.courses).filter(Boolean);
+            const filteredCourses = (assignedData || [])
+                .map((ad: any) => ({
+                    ...(ad.courses || {}),
+                    company_course_validez_anios: ad.validez_anios ?? null,
+                }))
+                .filter((course: any) => !!course.id);
             setCourses(filteredCourses);
         } catch (err) {
             console.error("Unexpected error in fetchData:", err);
@@ -859,8 +873,12 @@ export default function EmpresaAdmin() {
                                                                                     companyName: r.studentData?.company_name || r.comp.name,
                                                                                     companyRut: r.comp.rut || '',
                                                                                     courseName: courseName.toUpperCase(),
+                                                                                    courseCode: course?.code || '',
                                                                                     hours: course?.config?.hours,
-                                                                                    date: new Date(en.completed_at || Date.now()).toLocaleDateString('es-CL'),
+                                                                                    date: en.completed_at
+                                                                                        ? new Date(en.completed_at).toLocaleDateString('es-CL')
+                                                                                        : new Date().toLocaleDateString('es-CL'),
+                                                                                    expirationDate: calcExpirationDate(en.completed_at, course?.company_course_validez_anios),
                                                                                     backgroundUrl: diplomaConfig.background_url,
                                                                                     layoutConfig: fc.layout,
                                                                                     fieldsConfig: fc,

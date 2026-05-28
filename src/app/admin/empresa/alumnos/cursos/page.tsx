@@ -92,6 +92,15 @@ export default function CoursesPage() {
         return row.diploma_metaverso_enabled !== true;
     };
 
+    const MONTHS_ES_LOCAL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const calcExpirationDate = (completedAt?: string | null, validezAnios?: number | null): string | undefined => {
+        if (!completedAt || !validezAnios) return undefined;
+        const d = new Date(completedAt);
+        if (isNaN(d.getTime())) return undefined;
+        d.setFullYear(d.getFullYear() + validezAnios);
+        return `${d.getDate()} de ${MONTHS_ES_LOCAL[d.getMonth()]} de ${d.getFullYear()}`;
+    };
+
     const confirmExitCourse = useCallback(() => {
         if (window.confirm(t.exit_course_confirm)) {
             setActiveCourse(null);
@@ -131,7 +140,7 @@ export default function CoursesPage() {
         const [{ data: comp }, { data: ccData }, { data: dipCfg }] = await Promise.all([
             supabase.from('companies').select('*').eq('id', clientId).single(),
             supabase.from('company_courses')
-                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled')
+                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, start_date, validez_anios')
                 .eq('company_id', clientId),
             supabase.from('diploma_config')
                 .select('*')
@@ -142,10 +151,14 @@ export default function CoursesPage() {
         if (dipCfg) setDiplomaConfig(dipCfg);
         // Build cert flags map
         const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+        const scheduleMap: Record<string, { validez_anios: number | null }> = {};
         (ccData || []).forEach((cc: any) => {
             flagsMap[cc.course_id] = {
                 participacion: resolveParticipationFlag(cc),
                 aprobacion: cc.diploma_metaverso_enabled === true,
+            };
+            scheduleMap[cc.course_id] = {
+                validez_anios: cc.validez_anios ?? null,
             };
         });
         setCertFlagsMap(flagsMap);
@@ -223,7 +236,10 @@ export default function CoursesPage() {
 
                 return {
                     ...e,
-                    course: e.courses,
+                    course: {
+                        ...e.courses,
+                        company_course_validez_anios: scheduleMap[e.course_id]?.validez_anios ?? null,
+                    },
                     config: e.courses?.config,
                     scorm_completed: scormCompleted,
                     partial_progress: Math.round(partialProgress),
@@ -443,8 +459,12 @@ export default function CoursesPage() {
                 companyName: studentSrc.company_name || companyInfo.name,
                 companyRut: companyInfo.rut || '',
                 courseName: (enrollment.course?.name || '').toUpperCase(),
+                courseCode: enrollment.course?.code || '',
                 hours: enrollment.course?.config?.hours,
-                date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString('es-CL'),
+                date: enrollment.completed_at
+                    ? new Date(enrollment.completed_at).toLocaleDateString('es-CL')
+                    : new Date().toLocaleDateString('es-CL'),
+                expirationDate: calcExpirationDate(enrollment.completed_at, enrollment.course?.company_course_validez_anios),
                 backgroundUrl: diplomaConfig.background_url,
                 layoutConfig: fc.layout,
                 fieldsConfig: fc,

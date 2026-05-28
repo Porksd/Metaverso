@@ -20,6 +20,8 @@ export interface LayoutConfig {
   course_name_y: number;     course_name_size: number;
   hours_gap: number;         hours_size: number;
   date_gap: number;          date_gap_no_hours: number;  date_size: number;
+  course_code_gap: number;   course_code_size: number;
+  expiration_date_gap: number; expiration_date_size: number;
 }
 
 export const DEFAULT_LAYOUT: LayoutConfig = {
@@ -31,6 +33,8 @@ export const DEFAULT_LAYOUT: LayoutConfig = {
   course_name_y: 168,    course_name_size: 20,
   hours_gap: 16,         hours_size: 11,
   date_gap: 24,          date_gap_no_hours: 16, date_size: 11,
+  course_code_gap: 9,    course_code_size: 11,
+  expiration_date_gap: 10, expiration_date_size: 11,
 };
 
 export interface MetaversoCertData {
@@ -39,8 +43,10 @@ export interface MetaversoCertData {
   companyName: string;
   companyRut: string;
   courseName: string;
+  courseCode?: string;
   hours?: string | number;
   date: string;
+  expirationDate?: string;
   backgroundUrl?: string;
   layoutConfig?: Partial<LayoutConfig>;
   fieldsConfig?: {
@@ -51,6 +57,8 @@ export interface MetaversoCertData {
     course_name?: boolean;
     hours?: boolean;
     date?: boolean;
+    course_code?: boolean;
+    expiration_date?: boolean;
   };
 }
 
@@ -126,6 +134,16 @@ function drawMixedCentered(
     pdf.text(p.text, x, y);
     x += strWidthMm(pdf, p.text, p.size);
   }
+}
+
+function getMixedWidthMm(
+  pdf: jsPDF,
+  parts: Array<{ text: string; bold: boolean; size: number }>
+): number {
+  return parts.reduce((acc, p) => {
+    pdf.setFont("helvetica", p.bold ? "bold" : "normal");
+    return acc + strWidthMm(pdf, p.text, p.size);
+  }, 0);
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
@@ -259,6 +277,7 @@ export async function generateMetaversoCert(
   }
 
   // ── 9. Date ───────────────────────────────────────────────────────────────
+  const dateY = afterCourseY + (cfg.hours !== false && data.hours ? lc.date_gap : lc.date_gap_no_hours);
   if (cfg.date !== false) {
     drawMixedCentered(
       pdf,
@@ -266,7 +285,45 @@ export async function generateMetaversoCert(
         { text: "Fecha de realización: ", bold: false, size: lc.date_size },
         { text: data.date, bold: true, size: lc.date_size, color: [30, 30, 30] },
       ],
-      afterCourseY + (cfg.hours !== false && data.hours ? lc.date_gap : lc.date_gap_no_hours),
+      dateY,
+      W
+    );
+  }
+
+  // ── 10. Course code ───────────────────────────────────────────────────────
+  const hasCourseCode = cfg.course_code !== false && !!data.courseCode;
+  if (hasCourseCode) {
+    // Auto-fit for long course codes to keep a single line inside page width.
+    let codeSize = lc.course_code_size;
+    while (codeSize > 7) {
+      const testParts = [
+        { text: "Código del Curso: ", bold: true, size: codeSize },
+        { text: data.courseCode || "", bold: false, size: codeSize },
+      ];
+      if (getMixedWidthMm(pdf, testParts) <= W - 20) break;
+      codeSize -= 0.5;
+    }
+
+    drawMixedCentered(
+      pdf,
+      [
+        { text: "Código del Curso: ", bold: true, size: codeSize, color: [30, 30, 30] },
+        { text: data.courseCode || "", bold: false, size: codeSize, color: [60, 60, 60] },
+      ],
+      dateY + lc.course_code_gap,
+      W
+    );
+  }
+
+  // ── 11. Expiration date ───────────────────────────────────────────────────
+  if (cfg.expiration_date !== false && data.expirationDate) {
+    drawMixedCentered(
+      pdf,
+      [
+        { text: "Fecha de expiración: ", bold: false, size: lc.expiration_date_size },
+        { text: data.expirationDate, bold: true, size: lc.expiration_date_size, color: [30, 30, 30] },
+      ],
+      dateY + (hasCourseCode ? lc.course_code_gap : 0) + lc.expiration_date_gap,
       W
     );
   }
