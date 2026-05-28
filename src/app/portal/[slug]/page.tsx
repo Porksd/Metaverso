@@ -22,6 +22,14 @@ export default function CompanyPortal() {
         const fetchPortalData = async () => {
             setLoading(true);
             try {
+                const todayLocalISO = (() => {
+                    const now = new Date();
+                    const y = now.getFullYear();
+                    const m = String(now.getMonth() + 1).padStart(2, '0');
+                    const d = String(now.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                })();
+
                 // 1. Get Company by Slug
                 const { data: comp, error: compError } = await supabase
                     .from('companies')
@@ -37,18 +45,22 @@ export default function CompanyPortal() {
                 // 2. Get Courses linked to this company via company_courses join
                 const { data: assignments, error: courseError } = await supabase
                     .from('company_courses')
-                    .select('registration_mode, courses(*)')
+                    .select('registration_mode, start_date, courses(*)')
                     .eq('company_id', comp.id);
 
                 if (courseError) throw courseError;
 
-                // Flatten the courses array and inject the specific registration_mode
+                // Only expose courses that are active and already started.
+                // start_date is a DATE (YYYY-MM-DD), so local date string comparison
+                // enables activation exactly at 00:00 of that day.
                 const courseData = assignments
                     ?.map((a: any) => ({
                         ...a.courses,
-                        registration_mode: a.registration_mode || a.courses?.registration_mode || 'open'
+                        registration_mode: a.registration_mode || a.courses?.registration_mode || 'open',
+                        start_date: a.start_date || null,
                     }))
-                    .filter((c: any) => c.id && c.is_active !== false) || [];
+                    .filter((c: any) => c.id && c.is_active !== false)
+                    .filter((c: any) => !c.start_date || c.start_date <= todayLocalISO) || [];
 
                 setCourses(courseData);
 
