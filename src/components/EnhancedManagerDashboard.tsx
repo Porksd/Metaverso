@@ -97,6 +97,13 @@ interface ActivityLog {
     raw_data?: any;
 }
 
+interface UpcomingCourse {
+    courseId: string;
+    courseName: string;
+    courseCode: string;
+    startDate: string;
+}
+
 export default function EnhancedManagerDashboard({ companyName, companyId, isMasterAdmin }: { companyName: string, companyId?: string, isMasterAdmin?: boolean }) {
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
@@ -107,6 +114,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
     const [showGlobalFilters, setShowGlobalFilters] = useState(true);
     const [activeTab, setActiveTab] = useState<'listado' | 'barras' | 'preguntas' | 'sesiones'>('listado');
     const [lastUpdatedAt, setLastUpdatedAt] = useState<Date>(new Date());
+    const [upcomingCourses, setUpcomingCourses] = useState<UpcomingCourse[]>([]);
     const [globalFilters, setGlobalFilters] = useState({
         course: 'Todos',
         student: 'Todos',
@@ -120,6 +128,17 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
 
     const fetchData = async () => {
         setLoading(true);
+
+        const resolveCompanyId = async () => {
+            if (companyId) return companyId;
+            if (!companyName) return null;
+            const { data } = await supabase
+                .from('companies')
+                .select('id')
+                .eq('name', companyName)
+                .maybeSingle();
+            return data?.id || null;
+        };
 
         let query = supabase
             .from('enrollments')
@@ -135,7 +154,12 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             query = query.eq('students.company_name', companyName);
         }
 
-        const { data, error } = await query.order('created_at', { ascending: false });
+        const [enrollmentsResp, resolvedCompanyId] = await Promise.all([
+            query.order('created_at', { ascending: false }),
+            resolveCompanyId()
+        ]);
+
+        const { data, error } = enrollmentsResp;
 
         if (error) {
             console.error('Error fetching enrollments:', error);
@@ -163,7 +187,57 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             }
         }
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayISO = today.toISOString().slice(0, 10);
+
+        if (resolvedCompanyId) {
+            const { data: upcomingData, error: upcomingError } = await supabase
+                .from('company_courses')
+                .select('course_id, start_date, courses(name, code)')
+                .eq('company_id', resolvedCompanyId)
+                .not('start_date', 'is', null)
+                .gt('start_date', todayISO)
+                .order('start_date', { ascending: true });
+
+            if (upcomingError) {
+                console.error('Error fetching upcoming courses:', upcomingError);
+                setUpcomingCourses([]);
+            } else {
+                const mapped = (upcomingData || []).map((row: any) => ({
+                    courseId: row.course_id,
+                    courseName: row.courses?.name || 'Curso sin nombre',
+                    courseCode: row.courses?.code || '',
+                    startDate: row.start_date,
+                }));
+                setUpcomingCourses(mapped);
+            }
+        } else {
+            setUpcomingCourses([]);
+        }
+
         setLoading(false);
+    };
+
+    const formatUpcomingDate = (dateValue: string) => {
+        const date = new Date(`${dateValue}T00:00:00`);
+        if (Number.isNaN(date.getTime())) return dateValue;
+        return date.toLocaleDateString('es-CL', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const getDaysUntil = (dateValue: string) => {
+        const target = new Date(`${dateValue}T00:00:00`);
+        if (Number.isNaN(target.getTime())) return null;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const diffMs = target.getTime() - today.getTime();
+        return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     };
 
     // Filtrar enrollments por fecha
@@ -1429,6 +1503,60 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                                 })}
                             </tbody>
                         </table>
+                    </div>
+                )}
+            </div>
+
+            {/* Próximos cursos */}
+            <div className="glass p-6 rounded-2xl border-white/5">
+                <h3 className="text-xl font-black mb-4 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-brand" />
+                    Próximos Cursos
+                </h3>
+
+                {upcomingCourses.length === 0 ? (
+                    <div className="text-center py-10 text-white/40">
+                        <Calendar className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                        <p>No hay cursos próximos programados</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {upcomingCourses.slice(0, 9).map((course, i) => (
+                            <motion.div
+                                key={`${course.courseId}-${course.startDate}-${i}`}
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04 }}
+                                className="bg-white/[0.02] border border-white/5 rounded-xl p-4 hover:bg-white/[0.04] transition-all"
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <p className="font-bold text-sm leading-snug">{course.courseName}</p>
+                                    {(() => {
+                                        const daysLeft = getDaysUntil(course.startDate);
+                                        if (daysLeft == null) return null;
+                                        if (daysLeft <= 0) {
+                                            return (
+                                                <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-1 rounded-lg font-black whitespace-nowrap">
+                                                    Inicia hoy
+                                                </span>
+                                            );
+                                        }
+                                        return (
+                                            <span className="text-[10px] bg-brand/20 text-brand px-2 py-1 rounded-lg font-black whitespace-nowrap">
+                                                Faltan {daysLeft} días
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+                                {course.courseCode && (
+                                    <p className="text-xs text-white/40 mt-1">{course.courseCode}</p>
+                                )}
+                                <div className="mt-3 flex items-center justify-between text-xs">
+                                    <span className="text-white/60 uppercase tracking-wide">Inicio</span>
+                                    <span className="font-bold text-brand">{formatUpcomingDate(course.startDate)}</span>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
                 )}
             </div>
