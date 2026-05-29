@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 const DUPLICATE_EMAIL_MESSAGE = 'Ya existe una cuenta registrada con este correo. Inicia sesion o recupera tu contrasena.';
-const DUPLICATE_DOCUMENT_MESSAGE = 'Ya existe un alumno registrado con este RUT o pasaporte en esta empresa.';
+const DUPLICATE_RUT_MESSAGE = 'Ya existe un alumno registrado con este RUT en esta empresa.';
+
+const normalizeRut = (value: string) => value.replace(/[^0-9kK]/g, '').toUpperCase();
 
 const isMissingRowError = (message?: string) => {
     if (!message) {
@@ -36,9 +38,8 @@ export async function POST(request: NextRequest) {
         const normalizedClientId = typeof client_id === 'string' ? client_id.trim() : '';
 
         const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
-        const normalizedRut = typeof rut === 'string' ? rut.trim() : '';
+        const normalizedRut = typeof rut === 'string' ? normalizeRut(rut.trim()) : '';
         const normalizedPassport = typeof passport === 'string' ? passport.trim() : '';
-        let documentFieldVisible = true;
 
         if (!supabaseAdmin) {
             return NextResponse.json(
@@ -53,32 +54,6 @@ export async function POST(request: NextRequest) {
         if (!normalizedEmail || !password || !first_name || !last_name) {
             return NextResponse.json(
                 { error: 'Campos requeridos: email, password, first_name, last_name' },
-                { status: 400 }
-            );
-        }
-
-        if (normalizedClientId) {
-            const { data: companyConfig, error: companyConfigError } = await admin
-                .from('companies')
-                .select('user_registration_config')
-                .eq('id', normalizedClientId)
-                .maybeSingle();
-
-            if (companyConfigError && !isMissingRowError(companyConfigError.message)) {
-                console.error('Error loading company registration config:', companyConfigError);
-                return NextResponse.json(
-                    { error: 'No se pudo validar la configuración de registro de la empresa' },
-                    { status: 500 }
-                );
-            }
-
-            documentFieldVisible = companyConfig?.user_registration_config?.rut?.visible !== false;
-        }
-
-        // Must have either RUT or Passport only when the company keeps the document field visible
-        if (documentFieldVisible && !normalizedRut && !normalizedPassport) {
-            return NextResponse.json(
-                { error: 'Debe proporcionar RUT o Pasaporte' },
                 { status: 400 }
             );
         }
@@ -109,53 +84,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: DUPLICATE_EMAIL_MESSAGE }, { status: 409 });
         }
 
-        if (normalizedRut) {
-            let rutQuery = admin
+        // RUT can repeat across different companies, but must be unique inside the same company.
+        if (normalizedRut && normalizedClientId) {
+            const { data: sameCompanyStudents, error: sameCompanyStudentsError } = await admin
                 .from('students')
-                .select('id')
-                .eq('rut', normalizedRut);
+                .select('id, rut')
+                .eq('client_id', normalizedClientId)
+                .not('rut', 'is', null);
 
-            if (normalizedClientId) {
-                rutQuery = rutQuery.eq('client_id', normalizedClientId);
-            }
-
-            const { data: existingStudentByRut, error: existingStudentByRutError } = await rutQuery.maybeSingle();
-
-            if (existingStudentByRutError && !isMissingRowError(existingStudentByRutError.message)) {
-                console.error('Error checking existing student by RUT:', existingStudentByRutError);
+            if (sameCompanyStudentsError && !isMissingRowError(sameCompanyStudentsError.message)) {
+                console.error('Error checking existing student by RUT:', sameCompanyStudentsError);
                 return NextResponse.json(
                     { error: 'No se pudo validar el RUT antes del registro' },
                     { status: 500 }
                 );
             }
 
-            if (existingStudentByRut) {
-                return NextResponse.json({ error: DUPLICATE_DOCUMENT_MESSAGE }, { status: 409 });
-            }
-        }
+            const rutAlreadyExistsInCompany = (sameCompanyStudents || []).some((student) => {
+                const studentRut = typeof student.rut === 'string' ? normalizeRut(student.rut) : '';
+                return studentRut && studentRut === normalizedRut;
+            });
 
-        if (normalizedPassport) {
-            let passportQuery = admin
-                .from('students')
-                .select('id')
-                .eq('passport', normalizedPassport);
-
-            if (normalizedClientId) {
-                passportQuery = passportQuery.eq('client_id', normalizedClientId);
-            }
-
-            const { data: existingStudentByPassport, error: existingStudentByPassportError } = await passportQuery.maybeSingle();
-
-            if (existingStudentByPassportError && !isMissingRowError(existingStudentByPassportError.message)) {
-                console.error('Error checking existing student by passport:', existingStudentByPassportError);
-                return NextResponse.json(
-                    { error: 'No se pudo validar el pasaporte antes del registro' },
-                    { status: 500 }
-                );
-            }
-
-            if (existingStudentByPassport) {
-                return NextResponse.json({ error: DUPLICATE_DOCUMENT_MESSAGE }, { status: 409 });
+            if (rutAlreadyExistsInCompany) {
+                return NextResponse.json({ error: DUPLICATE_RUT_MESSAGE }, { status: 409 });
             }
         }
 

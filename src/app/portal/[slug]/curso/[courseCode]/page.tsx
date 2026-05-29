@@ -217,20 +217,24 @@ export default function CourseAuthPage() {
         setActionLoading(true);
         setError(null);
         try {
-            const rawIdentifier = loginData.email.trim();
-            const normalizedIdentifier = rawIdentifier.toLowerCase();
-            const normalizedRut = cleanRut(rawIdentifier);
+            const normalizedEmail = loginData.email.trim().toLowerCase();
 
-            // Step 1: Find student by identifier (NOT by password in query)
+            if (!normalizedEmail) {
+                setError(lang === 'es' ? 'Debes ingresar tu email.' : 'Ou dwe antre imèl ou.');
+                setActionLoading(false);
+                return;
+            }
+
+            // Step 1: Find student by corporate email in this company
             const { data: student, error: studentError } = await supabase
                 .from('students')
                 .select('*')
                 .eq('client_id', company.id)
-                .or(`email.eq.${normalizedIdentifier},rut.eq.${rawIdentifier},rut.eq.${normalizedRut}`)
+                .eq('email', normalizedEmail)
                 .maybeSingle();
 
             if (studentError || !student) {
-                setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email/RUT y contraseña.' : 'Kredansyèl envalid. Verifye imèl/RUT ou ak modpas ou.');
+                setError(lang === 'es' ? 'Credenciales inválidas. Verifica tu email y contraseña.' : 'Kredansyèl envalid. Verifye imèl ou ak modpas ou.');
                 setActionLoading(false);
                 return;
             }

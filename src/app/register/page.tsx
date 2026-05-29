@@ -44,11 +44,6 @@ export default function RegisterPage() {
             return;
         }
 
-        if (!formData.rut && !formData.passport) {
-            setError("Debes proporcionar RUT o Pasaporte");
-            return;
-        }
-
         setError(null);
         setStep(2);
     };
