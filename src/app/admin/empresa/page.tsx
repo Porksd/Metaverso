@@ -111,7 +111,6 @@ export default function EmpresaAdmin() {
         doc_type: "RUT",
         email: "", 
         password: "", 
-        company_name: "", 
         role_id: null,
         age: "",
         gender: ""
@@ -297,11 +296,6 @@ export default function EmpresaAdmin() {
             return;
         }
 
-        if (isCompanyCollabRequired && !student.company_name) {
-            alert("Por favor complete la empresa colaboradora obligatoria.");
-            return;
-        }
-
         if (isJobPositionRequired && !student.role_id) {
             alert("Por favor seleccione el cargo obligatorio.");
             return;
@@ -365,11 +359,6 @@ export default function EmpresaAdmin() {
         
         if (!newStudent.first_name || !newStudent.last_name || (isRutVisible && !documentValue)) {
             alert(`Por favor complete los campos obligatorios (${isRutVisible ? 'Nombre, Apellido, ID/RUT' : 'Nombre y Apellido'})`);
-            return;
-        }
-
-        if (isCompanyCollabRequired && !newStudent.company_name) {
-            alert("Por favor complete la empresa colaboradora obligatoria.");
             return;
         }
 
@@ -442,7 +431,6 @@ export default function EmpresaAdmin() {
                 doc_type: isRutVisible && isRutRequired ? "RUT" : isRutVisible ? "RUT" : "PASSPORT", 
                 email: "", 
                 password: "", 
-                company_name: "", 
                 role_id: null,
                 age: "",
                 gender: ""
@@ -596,7 +584,6 @@ export default function EmpresaAdmin() {
 
             if (!isGenderVisible) next.gender = '';
             if (!isAgeVisible) next.age = '';
-            if (!isCompanyCollabVisible) next.company_name = '';
             if (!isJobPositionVisible) next.role_id = null;
 
             return next;
@@ -1107,20 +1094,6 @@ export default function EmpresaAdmin() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {isCompanyCollabVisible && (
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa{isCompanyCollabRequired ? ' *' : ''}</label>
-                                        <select 
-                                            value={isEditing.company_name || ""} 
-                                            onChange={(e) => setIsEditing({ ...isEditing, company_name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                            style={{ colorScheme: 'dark' }}
-                                        >
-                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
-                                            {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
-                                        </select>
-                                    </div>
-                                )}
                                 {isJobPositionVisible && (
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo{isJobPositionRequired ? ' *' : ''}</label>
@@ -1352,20 +1325,6 @@ export default function EmpresaAdmin() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {isCompanyCollabVisible && (
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black uppercase text-white/40 ml-2">Empresa Sub-contratista{isCompanyCollabRequired ? ' *' : ''}</label>
-                                        <select 
-                                            value={newStudent.company_name || ""} 
-                                            onChange={(e) => setNewStudent({ ...newStudent, company_name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm text-white outline-none"
-                                            style={{ colorScheme: 'dark' }}
-                                        >
-                                            <option value="" className="bg-neutral-900 text-white">Seleccionar Empresa</option>
-                                            {allCompanies.map(c => <option key={c.id} value={c.name_es} className="bg-neutral-900 text-white">{c.name_es}</option>)}
-                                        </select>
-                                    </div>
-                                )}
                                 {isJobPositionVisible && (
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase text-white/40 ml-2">Cargo{isJobPositionRequired ? ' *' : ''}</label>

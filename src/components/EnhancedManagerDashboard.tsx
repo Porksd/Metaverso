@@ -131,16 +131,22 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
     const fetchData = async () => {
         setLoading(true);
 
-        const resolveCompanyId = async () => {
-            if (companyId) return companyId;
-            if (!companyName) return null;
+        const resolvedCompanyId = companyId || (companyName ? await (async () => {
             const { data } = await supabase
                 .from('companies')
                 .select('id')
                 .eq('name', companyName)
                 .maybeSingle();
             return data?.id || null;
-        };
+        })() : null);
+
+        if (!resolvedCompanyId) {
+            setEnrollments([]);
+            setActivityLogs([]);
+            setUpcomingCourses([]);
+            setLoading(false);
+            return;
+        }
 
         let query = supabase
             .from('enrollments')
@@ -150,16 +156,9 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                 courses(name, code)
             `);
 
-        if (companyId) {
-            query = query.eq('students.client_id', companyId);
-        } else {
-            query = query.eq('students.company_name', companyName);
-        }
+        query = query.eq('students.client_id', resolvedCompanyId);
 
-        const [enrollmentsResp, resolvedCompanyId] = await Promise.all([
-            query.order('created_at', { ascending: false }),
-            resolveCompanyId()
-        ]);
+        const enrollmentsResp = await query.order('created_at', { ascending: false });
 
         const { data, error } = enrollmentsResp;
 
@@ -1241,7 +1240,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                                         <td>{enrollment?.students?.email || '-'}</td>
                                         <td>{enrollment?.students?.rut || '-'}</td>
                                         <td>{enrollment?.students?.position || '-'}</td>
-                                        <td>{enrollment?.students?.company_name || companyName}</td>
+                                        <td>{enrollment?.students?.companies?.name || companyName}</td>
                                     </tr>
                                 ))}
                             </tbody>

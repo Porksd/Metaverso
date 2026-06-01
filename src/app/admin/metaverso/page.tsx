@@ -282,7 +282,7 @@ export default function MetaversoAdmin() {
                 p.rut.includes(participantSearch) || 
                 `${p.first_name} ${p.last_name}`.toLowerCase().includes(participantSearch.toLowerCase());
             
-            const matchesCompany = !filters.company || (p.companies?.name === filters.company || p.company_name === filters.company);
+            const matchesCompany = !filters.company || p.companies?.name === filters.company;
             const matchesCourse = !filters.course || (p.enrollments?.some((e: any) => e.courses?.name === filters.course));
             const matchesStatus = !filters.status || (
                 filters.status === 'completed' ? p.enrollments?.some((e: any) => e.status === 'completed' && (e.best_score === null || e.best_score >= 70)) :
@@ -305,8 +305,8 @@ export default function MetaversoAdmin() {
                 aVal = `${a.first_name} ${a.last_name}`.toLowerCase();
                 bVal = `${b.first_name} ${b.last_name}`.toLowerCase();
             } else if (key === 'company') {
-                aVal = (a.companies?.name || a.company_name || '').toLowerCase();
-                bVal = (b.companies?.name || b.company_name || '').toLowerCase();
+                aVal = (a.companies?.name || '').toLowerCase();
+                bVal = (b.companies?.name || '').toLowerCase();
             } else if (key === 'course') {
                 aVal = (a.enrollments?.[0]?.courses?.name || '').toLowerCase();
                 bVal = (b.enrollments?.[0]?.courses?.name || '').toLowerCase();
@@ -327,7 +327,7 @@ export default function MetaversoAdmin() {
     };
 
     // Extract unique values for filters with useMemo for performance and reliability
-    const uniqueCompanies = Array.from(new Set(participants.map(p => p.companies?.name || p.company_name).filter(Boolean))).sort();
+    const uniqueCompanies = Array.from(new Set(participants.map(p => p.companies?.name).filter(Boolean))).sort();
     const uniqueCourses = Array.from(new Set(participants.flatMap(p => p.enrollments?.map((e: any) => e.courses?.name)).filter(Boolean))).sort();
 
     useEffect(() => {
