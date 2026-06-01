@@ -37,6 +37,13 @@ export const DEFAULT_LAYOUT: LayoutConfig = {
   expiration_date_gap: 10, expiration_date_size: 11,
 };
 
+const QR_META_CODE_X = 84;
+const QR_META_EXPIRATION_X = 87;
+const QR_META_CODE_BASE_Y = 245;
+const QR_META_EXPIRATION_BASE_Y = 254;
+const QR_META_MIN_Y = 225;
+const QR_META_MAX_Y = 286;
+
 export interface MetaversoCertData {
   studentName: string;
   rut: string;
@@ -144,6 +151,10 @@ function getMixedWidthMm(
     pdf.setFont("helvetica", p.bold ? "bold" : "normal");
     return acc + strWidthMm(pdf, p.text, p.size);
   }, 0);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
@@ -293,39 +304,35 @@ export async function generateMetaversoCert(
   // ── 10. Course code ───────────────────────────────────────────────────────
   const hasCourseCode = cfg.course_code !== false && !!data.courseCode;
   if (hasCourseCode) {
-    // Auto-fit for long course codes to keep a single line inside page width.
+    // Auto-fit for long course codes to keep a single line in the QR info area.
     let codeSize = lc.course_code_size;
     while (codeSize > 7) {
-      const testParts = [
-        { text: "Código del Curso: ", bold: true, size: codeSize },
-        { text: data.courseCode || "", bold: false, size: codeSize },
-      ];
-      if (getMixedWidthMm(pdf, testParts) <= W - 20) break;
+      if (strWidthMm(pdf, data.courseCode || "", codeSize) <= W - QR_META_CODE_X - 20) break;
       codeSize -= 0.5;
     }
 
-    drawMixedCentered(
-      pdf,
-      [
-        { text: "Código del Curso: ", bold: true, size: codeSize, color: [30, 30, 30] },
-        { text: data.courseCode || "", bold: false, size: codeSize, color: [60, 60, 60] },
-      ],
-      dateY + lc.course_code_gap,
-      W
+    const qrMetaCodeY = clamp(
+      QR_META_CODE_BASE_Y + (lc.course_code_gap - DEFAULT_LAYOUT.course_code_gap),
+      QR_META_MIN_Y,
+      QR_META_MAX_Y
     );
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(codeSize);
+    pdf.setTextColor(60, 60, 60);
+    pdf.text(data.courseCode || "", QR_META_CODE_X, qrMetaCodeY);
   }
 
   // ── 11. Expiration date ───────────────────────────────────────────────────
   if (cfg.expiration_date !== false && data.expirationDate) {
-    drawMixedCentered(
-      pdf,
-      [
-        { text: "Fecha de expiración: ", bold: false, size: lc.expiration_date_size },
-        { text: data.expirationDate, bold: true, size: lc.expiration_date_size, color: [30, 30, 30] },
-      ],
-      dateY + (hasCourseCode ? lc.course_code_gap : 0) + lc.expiration_date_gap,
-      W
+    const qrMetaExpirationY = clamp(
+      QR_META_EXPIRATION_BASE_Y + (lc.expiration_date_gap - DEFAULT_LAYOUT.expiration_date_gap),
+      QR_META_MIN_Y,
+      QR_META_MAX_Y
     );
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(lc.expiration_date_size);
+    pdf.setTextColor(30, 30, 30);
+    pdf.text(data.expirationDate, QR_META_EXPIRATION_X, qrMetaExpirationY);
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────
