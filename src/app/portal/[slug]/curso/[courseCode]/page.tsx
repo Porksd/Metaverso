@@ -163,11 +163,11 @@ export default function CourseAuthPage() {
                     .eq('is_visible', true);
                 
                 if (assignErr || !assignedRoles || assignedRoles.length === 0) {
-                    // Fallback to basic visibility: roles of this company or global roles
+                    // Keep behavior aligned with company admin: without assignments, show only company-owned roles.
                     const { data: allRoles } = await supabase
                         .from('company_roles')
                         .select('id, name, name_ht, description, description_ht, company_id, active')
-                        .or(`company_id.eq.${comp.id},company_id.is.null`)
+                        .eq('company_id', comp.id)
                         .eq('active', true) // Only active roles
                         .order('name');
                     setCompanyRoles(allRoles || []);
