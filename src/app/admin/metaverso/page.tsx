@@ -980,7 +980,7 @@ export default function MetaversoAdmin() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-white/80">{p.company_roles?.name || 'Sin Cargo'}</span>
-                                                        <span className="text-[9px] text-white/30 uppercase">{p.company_name || 'Particular'}</span>
+                                                        <span className="text-[9px] text-white/30 uppercase">{p.companies?.name || 'Particular'}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 max-w-[180px] truncate" title={courseNames}>
@@ -1626,15 +1626,6 @@ export default function MetaversoAdmin() {
                                         <option value="">-- Seleccionar Cargo --</option>
                                         {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                                     </select>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-white/40">Empresa (Texto)</label>
-                                    <input 
-                                        className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm"
-                                        placeholder="Ej: Sacyr / Particular"
-                                        value={editingStudent?.company_name || ''}
-                                        onChange={(e) => setEditingStudent({...editingStudent, company_name: e.target.value})}
-                                    />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase text-white/40">Edad</label>

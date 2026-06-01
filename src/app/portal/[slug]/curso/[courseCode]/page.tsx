@@ -349,7 +349,6 @@ export default function CourseAuthPage() {
                     rut: cleanedRut,
                     passport: isRutVisible && idType === 'passport' ? regData.passport : null,
                     language: lang,
-                    company_name: trimmedEmpresa || company.name, 
                     client_id: company.id,
                     role_id: roleVal || null,
                     position: regData.position || null,

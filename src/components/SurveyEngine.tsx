@@ -53,7 +53,6 @@ export default function SurveyEngine({ surveyId, studentId, enrollmentId, onComp
                         rut, 
                         passport, 
                         position, 
-                        company_name,
                         client_id,
                         companies (name)
                     )
@@ -70,7 +69,7 @@ export default function SurveyEngine({ surveyId, studentId, enrollmentId, onComp
                     nombre_completo: `${s.first_name} ${s.last_name}`,
                     identificacion: s.rut || s.passport || 'N/A',
                     cargo: s.position || 'N/A',
-                    empresa_colaboradora: s.company_name || 'N/A',
+                    empresa_colaboradora: s.companies?.name || 'N/A',
                     nombre_curso: c.name || 'N/A'
                 });
             }

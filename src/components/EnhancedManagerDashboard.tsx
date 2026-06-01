@@ -49,7 +49,9 @@ interface Enrollment {
         last_name: string;
         age: number;
         gender: string;
-        company_name: string;
+        companies?: {
+            name?: string;
+        };
     };
     courses: {
         name: string;
@@ -144,7 +146,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             .from('enrollments')
             .select(`
                 *,
-                students!inner(rut, first_name, last_name, age, gender, company_name, position, email, client_id),
+                students!inner(rut, first_name, last_name, age, gender, position, email, client_id, companies:client_id(name)),
                 courses(name, code)
             `);
 
@@ -574,7 +576,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             Estudiante_Nombre: `${e.students?.first_name || ''} ${e.students?.last_name || ''}`.trim(),
             Correo: e.students?.email || '',
             Cargo: e.students?.position || '',
-            Empresa: e.students?.company_name || companyName,
+            Empresa: e.students?.companies?.name || companyName,
             Curso: e.courses?.name || '',
             Codigo_Curso: e.courses?.code || '',
             Intentos: Number(e.current_attempt || e.attempt_number || 1),
@@ -889,7 +891,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             Correo: e.students?.email || '',
             RUT: e.students?.rut || '',
             Cargo: e.students?.position || '',
-            Empresa: e.students?.company_name || companyName,
+            Empresa: e.students?.companies?.name || companyName,
             Porcentaje: Number(e.best_score || 0),
             Intentos: Number(e.current_attempt || e.attempt_number || 1),
             'Tiempo(HH:MM:SS)': formatSeconds(enrollmentTimeById.get(e.id) || 0),
@@ -923,7 +925,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             Correo: enrollment?.students?.email || '',
             RUT: enrollment?.students?.rut || '',
             Cargo: enrollment?.students?.position || '',
-            Empresa: enrollment?.students?.company_name || companyName
+            Empresa: enrollment?.students?.companies?.name || companyName
         }));
 
         XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(filtersSheet), 'Filtros');

@@ -104,7 +104,6 @@ export default function SurveyStats() {
                     rut, 
                     passport, 
                     position, 
-                    company_name,
                     companies (name)
                 ),
                 enrollments (
@@ -160,7 +159,7 @@ export default function SurveyStats() {
                         nombre: meta.nombre_completo || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Desconocido',
                         identificacion: meta.identificacion || student.rut || student.passport || 'N/A',
                         empresa: meta.empresa_principal || student.companies?.name || 'N/A',
-                        colab_empresa: meta.empresa_colaboradora || student.company_name || 'N/A',
+                        colab_empresa: meta.empresa_colaboradora || student.companies?.name || 'N/A',
                         cargo: meta.cargo || student.position || 'N/A',
                         curso: meta.nombre_curso || course.name || 'N/A'
                     }
