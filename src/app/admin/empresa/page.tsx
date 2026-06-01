@@ -798,6 +798,7 @@ export default function EmpresaAdmin() {
                                                                     digital_signature_url: st.digital_signature_url,
                                                                     age: st.age,
                                                                     gender: st.gender,
+                                                                    client_id: st.client_id,
                                                                     job_position: st.job_position
                                                                 };
                                                                 let jobName = st.company_roles?.name || studentData?.job_position;
