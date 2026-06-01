@@ -519,6 +519,7 @@ export default function MetaversoAdmin() {
         const companyPayload = {
             name: data.name,
             tax_id: data.tax_id,
+            branch_zone: data.branch_zone,
             address: data.address,
             phone: data.phone,
             email: data.email,
@@ -681,7 +682,7 @@ export default function MetaversoAdmin() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "" })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "" })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -755,7 +756,7 @@ export default function MetaversoAdmin() {
                             <thead>
                                 <tr className="bg-white/5 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/10">
                                     <th className="px-6 py-4">Empresa</th>
-                                    <th className="px-6 py-4">RUT / Estado</th>
+                                    <th className="px-6 py-4">Estado</th>
                                     <th className="px-6 py-4">Cursos Asignados</th>
                                     <th className="px-6 py-4">Cupos</th>
                                     <th className="px-6 py-4 text-right">Acciones</th>
@@ -778,17 +779,16 @@ export default function MetaversoAdmin() {
                                                 />
                                                 <div className="flex flex-col">
                                                     <span className="font-bold">{company.name}</span>
-                                                    <span className="text-[10px] text-white/20 uppercase font-black">{company.email}</span>
+                                                    <span className="text-[10px] text-white/20 uppercase font-black">
+                                                        {[company.branch_zone, company.tax_id].filter(Boolean).join(' / ') || 'Sin RUT'}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="font-mono text-xs text-white/60">{company.tax_id}</span>
-                                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full w-fit ${company.is_active ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                                    {company.is_active ? 'Activo' : 'Inactivo'}
-                                                </span>
-                                            </div>
+                                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full w-fit ${company.is_active ? 'bg-brand/10 text-brand border border-brand/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                                {company.is_active ? 'Activo' : 'Inactivo'}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-wrap gap-1 max-w-[200px]">
@@ -1201,6 +1201,10 @@ export default function MetaversoAdmin() {
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">RUT Empresa</label>
                                     <input value={editingCompany.tax_id} onChange={(e) => setEditingCompany({ ...editingCompany, tax_id: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none" />
+                                </div>
+                                <div className="space-y-1.5 col-span-2">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Sucursal / Zona</label>
+                                    <input value={editingCompany.branch_zone || ""} onChange={(e) => setEditingCompany({ ...editingCompany, branch_zone: e.target.value })} placeholder="Opcional" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none" />
                                 </div>
                                 <div className="space-y-1.5 col-span-2">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Dirección Casa Matriz</label>
