@@ -336,7 +336,6 @@ export default function EmpresaAdmin() {
             last_name: student.last_name,
             rut: normalizedDocument,
             email: student.email,
-            company_name: student.company_name,
             role_id: (student.role_id && student.role_id !== "") ? student.role_id : null,
             password: student.password,
             age: student.age ? parseInt(student.age, 10) : null,
@@ -411,7 +410,6 @@ export default function EmpresaAdmin() {
             email: newStudent.email || null,
             password: newStudent.password || '123456',
             client_id: companyId, 
-            company_name: newStudent.company_name || companyName,
             role_id: newStudent.role_id,
             age: isAgeVisible && newStudent.age ? parseInt(newStudent.age, 10) : null,
             gender: isGenderVisible ? (newStudent.gender || null) : null,
@@ -747,7 +745,7 @@ export default function EmpresaAdmin() {
                                         if (!validEnrollments || validEnrollments.length === 0) {
                                             return [(
                                                 <tr key={`${st.id}-no-course`} className="hover:bg-white/[0.02] text-sm font-medium">
-                                                    <td className="px-6 py-4"><p className="font-bold">{st.first_name} {st.last_name}</p><p className="text-[10px] text-white/40 font-mono">{st.rut} • {st.company_name}</p></td>
+                                                    <td className="px-6 py-4"><p className="font-bold">{st.first_name} {st.last_name}</p><p className="text-[10px] text-white/40 font-mono">{st.rut} • {companyName}</p></td>
                                                     <td className="px-6 py-4">{st.company_roles?.name || "Sin Cargo"}</td>
                                                     <td className="px-6 py-4"><span className="text-[8px] text-white/20 uppercase font-bold">Sin Cursos</span></td>
                                                     <td className="px-6 py-4">-</td>
@@ -784,7 +782,7 @@ export default function EmpresaAdmin() {
                                                 <tr key={`${st.id}-${en.course_id}`} className="hover:bg-white/[0.02] text-sm font-medium">
                                                     <td className="px-6 py-4">
                                                         <p className="font-bold">{st.first_name} {st.last_name}</p>
-                                                        <p className="text-[10px] text-white/40 font-mono">{st.rut} • {st.company_name}</p>
+                                                        <p className="text-[10px] text-white/40 font-mono">{st.rut} • {companyName}</p>
                                                     </td>
                                                     <td className="px-6 py-4">{st.company_roles?.name || "Sin Cargo"}</td>
                                                     <td className="px-6 py-4">
@@ -813,7 +811,6 @@ export default function EmpresaAdmin() {
                                                                     digital_signature_url: st.digital_signature_url,
                                                                     age: st.age,
                                                                     gender: st.gender,
-                                                                    company_name: st.company_name,
                                                                     job_position: st.job_position
                                                                 };
                                                                 let jobName = st.company_roles?.name || studentData?.job_position;

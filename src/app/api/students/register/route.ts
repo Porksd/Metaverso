@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
             last_name,
             gender,
             age,
-            company_name,
             client_id, // Add support for direct company linking
             role_id,   // Support for company-specific roles
             position,
@@ -211,7 +210,6 @@ export async function POST(request: NextRequest) {
                 password, // Store password for corporate login bypass
                 gender: gender || null,
                 age: age || null,
-                company_name: company_name || null,
                 client_id: normalizedClientId || null, // Insert FK
                 role_id: role_id || null,     // Specific role FK
                 position: position || null,

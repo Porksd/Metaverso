@@ -206,7 +206,6 @@ export default function StudentRegister() {
                 email: formData.email,
                 gender: formData.gender,
                 age: parseInt(formData.age),
-                company_name: companyName,
                 rut: formData.rut,
                 client_id: formData.client_id
             };

@@ -20,7 +20,6 @@ export default function RegisterPage() {
         passport: "",
         gender: "",
         age: "",
-        company_name: "",
         position: "",
         language: "es"
     });
@@ -225,18 +224,6 @@ export default function RegisterPage() {
                                     <option value="ht">Kreyòl</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-bold text-white/80 mb-2">Empresa</label>
-                            <input
-                                type="text"
-                                name="company_name"
-                                value={formData.company_name}
-                                onChange={handleChange}
-                                placeholder="SACYR, MetaversOtec, etc."
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand"
-                            />
                         </div>
 
                         <div>
