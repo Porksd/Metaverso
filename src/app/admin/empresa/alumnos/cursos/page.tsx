@@ -365,7 +365,7 @@ export default function CoursesPage() {
             job_position: studentSrc.job_position, 
             age: studentSrc.age, 
             gender: studentSrc.gender,
-            company_name: studentSrc.company_name,
+            company_name: companyInfo.name,
             digital_signature_url: studentSrc.digital_signature_url ? '✓' : '✗'
         });
 
@@ -404,7 +404,7 @@ export default function CoursesPage() {
             console.log("✅ Student signature found, will be included in certificate");
         }
 
-        console.log("📋 Certificate final data:", { jobName, age: studentSrc.age, gender: studentSrc.gender, company_name: studentSrc.company_name });
+        console.log("📋 Certificate final data:", { jobName, age: studentSrc.age, gender: studentSrc.gender, company_name: companyInfo.name });
 
         setCertData({
             studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
@@ -415,7 +415,7 @@ export default function CoursesPage() {
             signatures: sigs,
             studentSignature: studentSignature,
             companyLogo: companyInfo.logo_url,
-            companyName: studentSrc.company_name || companyInfo.name,
+            companyName: companyInfo.name,
             jobPosition: jobName,
             age: studentSrc.age,
             gender: studentSrc.gender
@@ -456,8 +456,10 @@ export default function CoursesPage() {
             await generateMetaversoCert({
                 studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
                 rut: studentSrc.rut,
-                companyName: studentSrc.company_name || companyInfo.name,
+                companyName: companyInfo.name,
                 companyRut: companyInfo.rut || '',
+                companyId: studentSrc.client_id,
+                courseId: enrollment.course_id || enrollment.course?.id,
                 courseName: (enrollment.course?.name || '').toUpperCase(),
                 courseCode: enrollment.course?.code || '',
                 hours: enrollment.course?.config?.hours,

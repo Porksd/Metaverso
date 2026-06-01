@@ -7,6 +7,7 @@
  */
 
 import jsPDF from "jspdf";
+import { supabase } from "@/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,8 +50,10 @@ export interface MetaversoCertData {
   rut: string;
   companyName: string;
   companyRut: string;
+  companyId?: string;
   courseName: string;
   courseCode?: string;
+  courseId?: string;
   hours?: string | number;
   date: string;
   expirationDate?: string;
@@ -172,6 +175,42 @@ export async function generateMetaversoCert(
   const W = 210;
   const cfg = data.fieldsConfig ?? {};
   const lc: LayoutConfig = { ...DEFAULT_LAYOUT, ...(data.layoutConfig ?? {}) };
+  const officialCompanyId = typeof data.companyId === 'string' ? data.companyId.trim() : '';
+  const officialCourseId = typeof data.courseId === 'string' ? data.courseId.trim() : '';
+
+  let companyName = data.companyName;
+  let companyRut = data.companyRut;
+  let courseName = data.courseName;
+  let courseCode = data.courseCode;
+  let hours = data.hours;
+
+  if (officialCompanyId || officialCourseId) {
+    const [companyResult, courseResult] = await Promise.all([
+      officialCompanyId
+        ? supabase.from('companies').select('name, rut').eq('id', officialCompanyId).maybeSingle()
+        : Promise.resolve({ data: null, error: null } as any),
+      officialCourseId
+        ? supabase.from('courses').select('name, code, config').eq('id', officialCourseId).maybeSingle()
+        : Promise.resolve({ data: null, error: null } as any),
+    ]);
+
+    if (companyResult?.data?.name) {
+      companyName = companyResult.data.name;
+    }
+    if (companyResult?.data?.rut) {
+      companyRut = companyResult.data.rut;
+    }
+
+    if (courseResult?.data?.name) {
+      courseName = courseResult.data.name;
+    }
+    if (courseResult?.data?.code) {
+      courseCode = courseResult.data.code;
+    }
+    if (courseResult?.data?.config?.hours !== undefined && courseResult?.data?.config?.hours !== null) {
+      hours = courseResult.data.config.hours;
+    }
+  }
 
   // ── 1. Background image ──────────────────────────────────────────────────
   const bgUrl =
@@ -212,7 +251,7 @@ export async function generateMetaversoCert(
       [
         { text: "De la empresa ", bold: false, size: lc.company_name_size },
         {
-          text: data.companyName.toUpperCase(),
+          text: companyName.toUpperCase(),
           bold: true,
           size: lc.company_name_size,
           color: [30, 30, 30],
@@ -224,12 +263,12 @@ export async function generateMetaversoCert(
   }
 
   // ── 5. Company RUT ───────────────────────────────────────────────────────
-  if (cfg.company_rut !== false && data.companyRut) {
+  if (cfg.company_rut !== false && companyRut) {
     drawMixedCentered(
       pdf,
       [
         { text: "con RUT: ", bold: false, size: lc.company_rut_size },
-        { text: data.companyRut, bold: true, size: lc.company_rut_size, color: [30, 30, 30] },
+        { text: companyRut, bold: true, size: lc.company_rut_size, color: [30, 30, 30] },
       ],
       lc.company_rut_y,
       W
@@ -254,7 +293,7 @@ export async function generateMetaversoCert(
     pdf.setFontSize(lc.course_name_size);
     pdf.setTextColor(30, 30, 30);
     const lineH = lc.course_name_size * 0.45;
-    const lines: string[] = pdf.splitTextToSize(data.courseName, 165);
+    const lines: string[] = pdf.splitTextToSize(courseName, 165);
     lines.forEach((line: string, i: number) => {
       pdf.text(line, W / 2, lc.course_name_y + i * lineH, { align: "center" });
     });
@@ -263,20 +302,20 @@ export async function generateMetaversoCert(
   // Compute Y after course name to position hours/date below it
   pdf.setFontSize(lc.course_name_size);
   const courseLines: string[] = pdf.splitTextToSize(
-    cfg.course_name !== false ? data.courseName : "",
+    cfg.course_name !== false ? courseName : "",
     165
   );
   const lineH = lc.course_name_size * 0.45;
   const afterCourseY = lc.course_name_y + Math.max(0, courseLines.length - 1) * lineH;
 
   // ── 8. Hours ─────────────────────────────────────────────────────────────
-  if (cfg.hours !== false && data.hours) {
+  if (cfg.hours !== false && hours) {
     drawMixedCentered(
       pdf,
       [
         { text: "Con un total de ", bold: false, size: lc.hours_size },
         {
-          text: `${data.hours} horas cronológicas`,
+          text: `${hours} horas cronológicas`,
           bold: true,
           size: lc.hours_size,
           color: [30, 30, 30],
@@ -288,7 +327,7 @@ export async function generateMetaversoCert(
   }
 
   // ── 9. Date ───────────────────────────────────────────────────────────────
-  const dateY = afterCourseY + (cfg.hours !== false && data.hours ? lc.date_gap : lc.date_gap_no_hours);
+  const dateY = afterCourseY + (cfg.hours !== false && hours ? lc.date_gap : lc.date_gap_no_hours);
   if (cfg.date !== false) {
     drawMixedCentered(
       pdf,
@@ -302,12 +341,12 @@ export async function generateMetaversoCert(
   }
 
   // ── 10. Course code ───────────────────────────────────────────────────────
-  const hasCourseCode = cfg.course_code !== false && !!data.courseCode;
+  const hasCourseCode = cfg.course_code !== false && !!courseCode;
   if (hasCourseCode) {
     // Auto-fit for long course codes to keep a single line in the QR info area.
     let codeSize = lc.course_code_size;
     while (codeSize > 7) {
-      if (strWidthMm(pdf, data.courseCode || "", codeSize) <= W - QR_META_CODE_X - 20) break;
+      if (strWidthMm(pdf, courseCode || "", codeSize) <= W - QR_META_CODE_X - 20) break;
       codeSize -= 0.5;
     }
 
@@ -319,7 +358,7 @@ export async function generateMetaversoCert(
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(codeSize);
     pdf.setTextColor(60, 60, 60);
-    pdf.text(data.courseCode || "", QR_META_CODE_X, qrMetaCodeY);
+    pdf.text(courseCode || "", QR_META_CODE_X, qrMetaCodeY);
   }
 
   // ── 11. Expiration date ───────────────────────────────────────────────────
@@ -337,6 +376,6 @@ export async function generateMetaversoCert(
 
   // ── Save ──────────────────────────────────────────────────────────────────
   const safeName = data.studentName.replace(/[^a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ ]/g, "").replace(/\s+/g, "_");
-  const safeCourse = data.courseName.replace(/\s+/g, "_").substring(0, 25);
+  const safeCourse = courseName.replace(/\s+/g, "_").substring(0, 25);
   pdf.save(`Certificado_${safeName}_${safeCourse}.pdf`);
 }

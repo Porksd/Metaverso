@@ -846,7 +846,7 @@ export default function EmpresaAdmin() {
                                                                                     ].filter(s => s.url || s.name),
                                                                                     studentSignature: normalizeStudentSignature(r.studentData?.digital_signature_url),
                                                                                     companyLogo: r.comp.logo_url,
-                                                                                    companyName: r.studentData?.company_name || r.comp.name,
+                                                                                    companyName: r.comp.name,
                                                                                     jobPosition: r.jobName,
                                                                                     age: r.studentData?.age,
                                                                                     gender: r.studentData?.gender
@@ -870,8 +870,10 @@ export default function EmpresaAdmin() {
                                                                                 await generateMetaversoCert({
                                                                                     studentName: `${st.first_name} ${st.last_name}`,
                                                                                     rut: st.rut,
-                                                                                    companyName: r.studentData?.company_name || r.comp.name,
+                                                                                    companyName: r.comp.name,
                                                                                     companyRut: r.comp.rut || '',
+                                                                                    companyId: r.studentData?.client_id || r.comp.id,
+                                                                                    courseId: course?.id || en.course_id,
                                                                                     courseName: courseName.toUpperCase(),
                                                                                     courseCode: course?.code || '',
                                                                                     hours: course?.config?.hours,
