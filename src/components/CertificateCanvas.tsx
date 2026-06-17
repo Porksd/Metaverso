@@ -89,25 +89,10 @@ export default function CertificateCanvas({
         const LINE_LT = "#E0E0E0";
 
         const draw = async () => {
-            const title = certificateType === 'aprobacion'
-                ? 'CERTIFICADO DE APROBACIÓN'
-                : certificateType === 'irl'
-                    ? 'CERTIFICADO IRL'
-                    : 'CERTIFICADO DE PARTICIPACIÓN';
-
-            const introText = certificateType === 'aprobacion'
-                ? (jobPosition
-                    ? `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, con el cargo de ${jobPosition}, ha aprobado satisfactoriamente el curso:`
-                    : `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, ha aprobado satisfactoriamente el curso:`)
-                : (jobPosition
-                    ? `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, con el cargo de ${jobPosition}, ha completado satisfactoriamente el contenido del curso:`
-                    : `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, ha completado satisfactoriamente el contenido del curso:`);
-
-            const dataHeader = certificateType === 'aprobacion'
-                ? 'Los siguientes son los datos obtenidos en su aprobación:'
-                : certificateType === 'irl'
-                    ? 'Los siguientes son los datos obtenidos en su certificado IRL:'
-                    : 'Los siguientes son los datos obtenidos en su participación:';
+            const cargoText = jobPosition || "";
+            const introText = jobPosition
+                ? `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, con el cargo de ${cargoText}, ha completado satisfactoriamente el contenido del curso:`
+                : `Se certifica que ${studentName}, de la empresa ${companyName || 'la empresa'}, ha completado satisfactoriamente el contenido del curso:`;
 
             // ── Fondo blanco ──
             ctx.fillStyle = "#FFFFFF";
@@ -157,7 +142,7 @@ export default function CertificateCanvas({
             ctx.textAlign = "center";
             ctx.fillStyle = BLACK;
             ctx.font = "600 54px 'Georgia', 'Times New Roman', serif";
-            ctx.fillText(title, CX, Y);
+            ctx.fillText("CERTIFICADO DE PARTICIPACIÓN", CX, Y);
             Y += 25;
 
             // Línea decorativa bajo título
@@ -202,7 +187,7 @@ export default function CertificateCanvas({
             ctx.textAlign = "left";
             ctx.font = "italic 20px 'Georgia', serif";
             ctx.fillStyle = LIGHT;
-            ctx.fillText(dataHeader, ML, Y);
+            ctx.fillText("Los siguientes son los datos obtenidos en su participación:", ML, Y);
             Y += 40;
 
             // ── 7. Tabla de datos (solo campos con valor) ──
