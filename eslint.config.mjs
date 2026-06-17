@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Keep WordPress mirror out of Next app lint scope.
+    "Webs2026/**",
   ]),
 ]);
 

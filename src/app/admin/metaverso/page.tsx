@@ -59,9 +59,12 @@ export default function MetaversoAdmin() {
     const [isGeneratingCert, setIsGeneratingCert] = useState<string | null>(null);
     const [fieldsConfigModal, setFieldsConfigModal] = useState<any>(null); // New state for fields config
     const [courseManagementModal, setCourseManagementModal] = useState<any>(null);
+    const [companyCoursesModal, setCompanyCoursesModal] = useState<any>(null);
     const [cmCourses, setCmCourses] = useState<any[]>([]);
+    const [cmRoleOptions, setCmRoleOptions] = useState<any[]>([]);
     const [cmAssignments, setCmAssignments] = useState<Record<string, {
         enabled: boolean;
+        assignment_active: boolean;
         access_mode: string;
         use_generic_password: boolean;
         generic_password: string;
@@ -70,6 +73,8 @@ export default function MetaversoAdmin() {
         pass_saved: boolean;
         diploma_metaverso_enabled: boolean;
         cert_participacion_enabled: boolean;
+        cert_irl_enabled: boolean;
+        irl_role_ids: string[];
     }>>({}); 
 
     const resolveParticipationFlag = (row: {
@@ -93,6 +98,16 @@ export default function MetaversoAdmin() {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const getCompanyAssignedCourses = (company: any) => {
+        const assignedCourseIds = Array.isArray(company?.company_courses)
+            ? company.company_courses.map((cc: any) => cc.course_id).filter(Boolean)
+            : [];
+
+        return assignedCourseIds
+            .map((courseId: string) => courses.find((course: any) => course.id === courseId))
+            .filter(Boolean);
     };
 
     const [view, setView] = useState<'companies' | 'participants'>('companies');
@@ -217,7 +232,7 @@ export default function MetaversoAdmin() {
 
         const { data: ccData, error: ccError } = await supabase
             .from('company_courses')
-            .select('company_id, course_id, cert_participacion_enabled, diploma_metaverso_enabled')
+            .select('company_id, course_id, cert_participacion_enabled, diploma_metaverso_enabled, cert_irl_enabled')
             .in('company_id', companyIds);
 
         if (ccError) {
@@ -585,17 +600,56 @@ export default function MetaversoAdmin() {
     };
 
     const openCourseManagement = async (company: any) => {
-        const [{ data: coursesData }, { data: assignData }] = await Promise.all([
+        const [{ data: coursesData }, { data: assignData }, { data: assignmentRows, error: assignmentErr }] = await Promise.all([
             supabase.from('courses').select('id, name, code').order('name'),
             supabase.from('company_courses')
-                .select('course_id, registration_mode, use_generic_password, generic_password, diploma_metaverso_enabled, cert_participacion_enabled, start_date, validez_anios')
+                .select('course_id, assignment_active, registration_mode, use_generic_password, generic_password, diploma_metaverso_enabled, cert_participacion_enabled, cert_irl_enabled, irl_role_id, irl_role_ids, start_date, validez_anios')
+                .eq('company_id', company.id),
+            supabase
+                .from('role_company_assignments')
+                .select('role_id, is_visible')
                 .eq('company_id', company.id)
         ]);
+
+        let companyRoleRows: any[] = [];
+        if (assignmentErr) {
+            const { data: fallbackRoles } = await supabase
+                .from('company_roles')
+                .select('id, name, company_id, active')
+                .or(`company_id.eq.${company.id},company_id.is.null`)
+                .eq('active', true)
+                .order('name');
+            companyRoleRows = fallbackRoles || [];
+        } else {
+            const visibleAssignedIds = (assignmentRows || [])
+                .filter((a: any) => a.is_visible === true)
+                .map((a: any) => a.role_id);
+
+            let rolesQuery = supabase
+                .from('company_roles')
+                .select('id, name, company_id, active');
+
+            if (visibleAssignedIds.length > 0) {
+                rolesQuery = rolesQuery.or(`company_id.eq.${company.id},id.in.(${visibleAssignedIds.map((id: string) => `"${id}"`).join(',')})`);
+            } else {
+                rolesQuery = rolesQuery.eq('company_id', company.id);
+            }
+
+            const { data: scopedRoles } = await rolesQuery.eq('active', true).order('name');
+            companyRoleRows = scopedRoles || [];
+        }
+
+        setCmRoleOptions(companyRoleRows);
+
         const map: Record<string, any> = {};
         (coursesData || []).forEach((course: any) => {
             const a = (assignData || []).find((r: any) => r.course_id === course.id);
+            const roleIds = Array.isArray(a?.irl_role_ids)
+                ? a.irl_role_ids.filter(Boolean)
+                : (a?.irl_role_id ? [a.irl_role_id] : []);
             map[course.id] = {
                 enabled: !!a,
+                assignment_active: a?.assignment_active !== false,
                 access_mode: a?.registration_mode || 'open',
                 use_generic_password: a?.use_generic_password || false,
                 generic_password: a?.generic_password || '',
@@ -604,6 +658,8 @@ export default function MetaversoAdmin() {
                 pass_saved: false,
                 diploma_metaverso_enabled: a?.diploma_metaverso_enabled || false,
                 cert_participacion_enabled: a ? resolveParticipationFlag(a) : true,
+                cert_irl_enabled: a?.cert_irl_enabled === true,
+                irl_role_ids: roleIds,
             };
         });
         setCmCourses(coursesData || []);
@@ -614,12 +670,19 @@ export default function MetaversoAdmin() {
     const saveCourseManagement = async () => {
         if (!courseManagementModal) return;
 
+        const invalidIrl = Object.entries(cmAssignments).find(([, v]) => v.enabled && v.cert_irl_enabled && (!Array.isArray(v.irl_role_ids) || v.irl_role_ids.length === 0));
+        if (invalidIrl) {
+            alert('Para habilitar IRL en un curso debes seleccionar un cargo obligatoriamente.');
+            return;
+        }
+
         await supabase.from('company_courses').delete().eq('company_id', courseManagementModal.id);
         const rows = Object.entries(cmAssignments)
             .filter(([, v]) => v.enabled)
             .map(([courseId, v]) => ({
                 company_id: courseManagementModal.id,
                 course_id: courseId,
+                assignment_active: v.assignment_active !== false,
                 registration_mode: v.access_mode,
                 use_generic_password: v.use_generic_password,
                 generic_password: v.use_generic_password ? v.generic_password : null,
@@ -627,6 +690,9 @@ export default function MetaversoAdmin() {
                 validez_anios: v.validez_anios ? parseInt(v.validez_anios, 10) || null : null,
                 diploma_metaverso_enabled: v.diploma_metaverso_enabled || false,
                 cert_participacion_enabled: v.cert_participacion_enabled !== false,
+                cert_irl_enabled: v.cert_irl_enabled === true,
+                irl_role_ids: v.cert_irl_enabled ? (v.irl_role_ids || []) : [],
+                irl_role_id: v.cert_irl_enabled && (v.irl_role_ids || []).length > 0 ? v.irl_role_ids[0] : null,
             }));
         if (rows.length > 0) {
             const { error } = await supabase.from('company_courses').insert(rows);
@@ -704,16 +770,22 @@ export default function MetaversoAdmin() {
                         Gestión de Participantes
                     </button>
                     <button 
-                        onClick={() => router.push('/admin/metaverso/encuestas')} 
-                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
-                    >
-                        Gestión de Encuestas
-                    </button>
-                    <button 
                         onClick={() => router.push('/admin/metaverso/cursos')} 
                         className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
                     >
                         Gestión de Cursos
+                    </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/cargos')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
+                    >
+                        Gestión de Cargos
+                    </button>
+                    <button 
+                        onClick={() => router.push('/admin/metaverso/encuestas')} 
+                        className="pb-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 text-white/40 border-transparent hover:text-white"
+                    >
+                        Gestión de Encuestas
                     </button>
                     <button 
                         onClick={() => router.push('/admin/metaverso/diplomas')} 
@@ -791,20 +863,21 @@ export default function MetaversoAdmin() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                                {company.company_courses && company.company_courses.length > 0 ? (
-                                                    company.company_courses.map((cc: any, idx: number) => {
-                                                        const course = courses.find(c => c.id === cc.course_id);
-                                                        return (
-                                                            <span key={idx} className="text-[8px] bg-white/10 px-2 py-0.5 rounded-md border border-white/10">
-                                                                {course?.name || course?.title || 'Cargando...'}
-                                                            </span>
-                                                        );
-                                                    })
-                                                ) : (
-                                                    <span className="text-[8px] text-white/20 italic">Sin cursos asignados</span>
-                                                )}
-                                            </div>
+                                            {(() => {
+                                                const assignedCourses = getCompanyAssignedCourses(company);
+                                                return (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCompanyCoursesModal(company)}
+                                                        className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-black uppercase tracking-widest transition-all ${assignedCourses.length > 0 ? 'bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black' : 'bg-white/5 text-white/30 border-white/10 hover:bg-white/10 hover:text-white/60'}`}
+                                                        title="Ver cursos asignados"
+                                                    >
+                                                        <BookOpen className="w-3.5 h-3.5" />
+                                                        <span>{assignedCourses.length}</span>
+                                                        <span>curso{assignedCourses.length === 1 ? '' : 's'}</span>
+                                                    </button>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center gap-2 text-xs font-bold text-white/40">
@@ -1386,6 +1459,20 @@ export default function MetaversoAdmin() {
                                             {cfg.enabled && (
                                                 <div className="ml-8 mt-1 mb-2 p-4 bg-black/20 rounded-xl border border-white/5 space-y-3">
                                                     <div className="flex items-center gap-3">
+                                                        <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Estado</span>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], assignment_active: true } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.assignment_active ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >Activo</button>
+                                                            <button
+                                                                onClick={() => setCmAssignments(prev => ({ ...prev, [course.id]: { ...prev[course.id], assignment_active: false } }))}
+                                                                className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${!cfg.assignment_active ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                            >No Activo</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
                                                         <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0">Acceso</span>
                                                         <div className="flex gap-1">
                                                             <button
@@ -1470,7 +1557,62 @@ export default function MetaversoAdmin() {
                                                         >
                                                             {cfg.diploma_metaverso_enabled ? '✓ Cert. Aprobación' : 'Cert. Aprobación'}
                                                         </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setCmAssignments(prev => ({
+                                                                    ...prev,
+                                                                    [course.id]: {
+                                                                        ...prev[course.id],
+                                                                        cert_irl_enabled: !prev[course.id].cert_irl_enabled,
+                                                                        irl_role_ids: !prev[course.id].cert_irl_enabled ? (prev[course.id].irl_role_ids || []) : prev[course.id].irl_role_ids,
+                                                                    }
+                                                                }));
+                                                            }}
+                                                            className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${cfg.cert_irl_enabled ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-white/5 text-white/30 border border-transparent hover:border-white/10'}`}
+                                                        >
+                                                            {cfg.cert_irl_enabled ? '✓ Cert. IRL' : 'Cert. IRL'}
+                                                        </button>
                                                     </div>
+                                                    {cfg.cert_irl_enabled && (
+                                                        <div className="flex items-start gap-2 flex-wrap pt-2">
+                                                            <span className="text-[9px] font-black uppercase text-white/40 w-16 flex-shrink-0 mt-2">IRL</span>
+                                                            <div className="flex-1 min-w-[240px]">
+                                                                <div className="text-[9px] font-black uppercase text-white/30 mb-1">Cargos asociados</div>
+                                                                <div className={`max-h-28 overflow-y-auto rounded-lg border p-2 space-y-1 ${Array.isArray(cfg.irl_role_ids) && cfg.irl_role_ids.length > 0 ? 'border-cyan-500/30 bg-black/30' : 'border-red-500/30 bg-red-500/5'}`}>
+                                                                    {cmRoleOptions.length === 0 && (
+                                                                        <div className="text-[10px] text-white/40">No hay cargos disponibles para esta empresa.</div>
+                                                                    )}
+                                                                    {cmRoleOptions.map((role: any) => {
+                                                                        const selected = (cfg.irl_role_ids || []).includes(role.id);
+                                                                        return (
+                                                                            <label key={role.id} className="flex items-center gap-2 text-[11px] text-white/85">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={selected}
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                    onChange={(e) => {
+                                                                                        const checked = e.target.checked;
+                                                                                        setCmAssignments(prev => {
+                                                                                            const current = prev[course.id].irl_role_ids || [];
+                                                                                            const next = checked
+                                                                                                ? Array.from(new Set([...current, role.id]))
+                                                                                                : current.filter((id: string) => id !== role.id);
+                                                                                            return { ...prev, [course.id]: { ...prev[course.id], irl_role_ids: next } };
+                                                                                        });
+                                                                                    }}
+                                                                                />
+                                                                                <span>{role.name}</span>
+                                                                            </label>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                                {(cfg.irl_role_ids || []).length === 0 && (
+                                                                    <div className="text-[10px] text-red-300 mt-1">Seleccionar al menos un cargo (obligatorio).</div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -1511,6 +1653,67 @@ export default function MetaversoAdmin() {
                         <button onClick={() => router.push('/admin/metaverso/cargos')} className="w-full py-4 rounded-xl border-2 border-brand/20 hover:border-brand/50 text-brand font-black uppercase tracking-widest text-xs transition-all">Gestor de Cargos</button>
                     </div>
                 </section>
+
+                {/* Company Assigned Courses Modal */}
+                {companyCoursesModal && (
+                    <div
+                        className="fixed inset-0 z-[115] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+                        onClick={() => setCompanyCoursesModal(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="glass p-8 w-full max-w-2xl space-y-6 border-brand/20 max-h-[90vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-black">Cursos asignados</h3>
+                                    <p className="text-white/50 text-xs mt-1">{companyCoursesModal.name}</p>
+                                </div>
+                                <button
+                                    onClick={() => setCompanyCoursesModal(null)}
+                                    className="p-2 rounded-lg bg-white/5 hover:bg-white/10"
+                                    title="Cerrar"
+                                >
+                                    <X className="w-5 h-5 text-white/40" />
+                                </button>
+                            </div>
+
+                            {(() => {
+                                const assignedCourses = getCompanyAssignedCourses(companyCoursesModal);
+
+                                if (assignedCourses.length === 0) {
+                                    return (
+                                        <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-white/50">
+                                            Esta empresa no tiene cursos asignados.
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="space-y-2">
+                                        {assignedCourses.map((course: any) => (
+                                            <div
+                                                key={course.id}
+                                                className="rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 flex items-center justify-between gap-3"
+                                            >
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-black text-white truncate">{course.name || course.title || 'Curso sin título'}</p>
+                                                    <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">{course.code || 'Sin código'}</p>
+                                                </div>
+                                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-brand/30 bg-brand/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-brand">
+                                                    <BookOpen className="w-3 h-3" />
+                                                    Asignado
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
+                        </motion.div>
+                    </div>
+                )}
 
                 {/* Assign Courses Modal */}
                 {assignCoursesModal && (

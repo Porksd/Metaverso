@@ -131,9 +131,10 @@ export default function CourseAuthPage() {
                 // 2. Fetch course only if it is assigned to this company
                 const { data: assignment, error: assignmentError } = await supabase
                     .from('company_courses')
-                    .select('registration_mode, use_generic_password, generic_password, courses!inner(*)')
+                    .select('registration_mode, use_generic_password, generic_password, assignment_active, courses!inner(*)')
                     .eq('company_id', comp.id)
                     .eq('courses.code', courseCode)
+                    .eq('assignment_active', true)
                     .maybeSingle();
 
                 if (assignmentError) throw assignmentError;

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
     Users, BookOpen, Search, Download, CheckCircle2,
-    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil, Eye, EyeOff
+    Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil, Eye, EyeOff, RefreshCw
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import CertificateCanvas from "@/components/CertificateCanvas";
@@ -16,6 +16,7 @@ import { jsPDF } from "jspdf";
 import { useRouter } from "next/navigation";
 import { resolveAdminRole } from "@/lib/adminAuth";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
+import { generateIrlCert } from "@/lib/generateIrlCert";
 
 // Utility functions for RUT validation
 const cleanRut = (rut: string) => {
@@ -62,6 +63,12 @@ const calcExpirationDate = (completedAt?: string | null, validezAnios?: number |
     return `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}`;
 };
 
+const formatDateEsCL = (value?: string | null) => {
+    const parsedDate = value ? new Date(value) : new Date();
+    if (Number.isNaN(parsedDate.getTime())) return '';
+    return parsedDate.toLocaleDateString('es-CL');
+};
+
 const COMPANY_CONTEXT_KEYS = ["empresa_id", "empresa_name", "empresa_slug", "is_master_admin", "master_role", "master_return_url", "master_entry_mode"] as const;
 
 const getStoredCompanyValue = (key: (typeof COMPANY_CONTEXT_KEYS)[number]) => {
@@ -78,6 +85,53 @@ const clearCompanyContext = ({ clearLocalStorage }: { clearLocalStorage: boolean
 };
 
 export default function EmpresaAdmin() {
+    type CertificateType = 'participacion' | 'aprobacion' | 'irl';
+    type CertificateFlags = { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] };
+    type CertificateStudent = {
+        id: string;
+        first_name: string;
+        last_name: string;
+        rut: string;
+        role_id?: string | null;
+        digital_signature_url?: string | null;
+        company_roles?: { name?: string | null } | null;
+    };
+    type CertificateEnrollment = {
+        id: string;
+        course_id: string;
+        status?: string | null;
+        best_score?: number | null;
+        completed_at?: string | null;
+    };
+    type CertificateCourse = {
+        id: string;
+        name?: string | null;
+        code?: string | null;
+        config?: { hours?: number | null } | null;
+        company_course_validez_anios?: number | null;
+    };
+    type CertificateCompany = {
+        name: string;
+        rut?: string | null;
+        logo_url?: string | null;
+        signature_url_1?: string | null;
+        signature_name_1?: string | null;
+        signature_role_1?: string | null;
+        signature_url_2?: string | null;
+        signature_name_2?: string | null;
+        signature_role_2?: string | null;
+        signature_url_3?: string | null;
+        signature_name_3?: string | null;
+        signature_role_3?: string | null;
+    };
+    type CertificateStudentData = {
+        digital_signature_url?: string | null;
+        age?: number | string | null;
+        gender?: string | null;
+        company_name?: string | null;
+        job_position?: string | null;
+    };
+
     const router = useRouter();
     const [role, setRole] = useState<'manager' | 'trainer'>('manager');
     const [searchTerm, setSearchTerm] = useState("");
@@ -94,11 +148,16 @@ export default function EmpresaAdmin() {
     const [cargoDescHT, setCargoDescHT] = useState("");
     const [descLang, setDescLang] = useState<'es' | 'ht'>('es');
     const [certData, setCertData] = useState<any>(null);
-    const [courseCertFlags, setCourseCertFlags] = useState<Record<string, { participacion: boolean; aprobacion: boolean }>>({});
+    const [courseCertFlags, setCourseCertFlags] = useState<Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }>>({});
     const [diplomaConfig, setDiplomaConfig] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
     const certGenerationLock = useRef(false);
-    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+    const [lastIssuedSignatures, setLastIssuedSignatures] = useState<Record<string, string>>({});
+    const [pendingCertificateIssue, setPendingCertificateIssue] = useState<{ enrollmentId: string; studentId: string; courseId: string; certificateType: CertificateType; contentSignature: string } | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
+    const [trainerPage, setTrainerPage] = useState(1);
+    const [trainerPageSize, setTrainerPageSize] = useState(20);
+    const [selectedStudentCourses, setSelectedStudentCourses] = useState<any | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
@@ -136,12 +195,241 @@ export default function EmpresaAdmin() {
         return row.diploma_metaverso_enabled !== true;
     };
 
+    const buildIssueKey = (enrollmentId: string, certType: 'participacion' | 'aprobacion' | 'irl') => `${enrollmentId}:${certType}`;
+
+    const buildCertificateSignature = ({
+        certificateType,
+        course,
+        courseName,
+        enrollment,
+        certFlags,
+        studentRoleId,
+        currentCompanyName,
+    }: {
+        certificateType: CertificateType;
+        course: CertificateCourse;
+        courseName: string;
+        enrollment: CertificateEnrollment;
+        certFlags: CertificateFlags;
+        studentRoleId?: string | null;
+        currentCompanyName: string;
+    }) => {
+        const shared = {
+            cert: certificateType,
+            course_id: course?.id || enrollment?.course_id || null,
+            course_code: course?.code || null,
+            course_name: (courseName || '').toUpperCase(),
+            hours: course?.config?.hours ?? null,
+            validez_anios: course?.company_course_validez_anios ?? null,
+            company_name: currentCompanyName,
+            completed_at: enrollment?.completed_at || null,
+        };
+
+        if (certificateType === 'aprobacion') {
+            return JSON.stringify({
+                ...shared,
+                diploma_background: diplomaConfig?.background_url || null,
+                diploma_layout: diplomaConfig?.fields_config?.layout || null,
+                diploma_fields: diplomaConfig?.fields_config || null,
+            });
+        }
+
+        if (certificateType === 'irl') {
+            const roleIds = Array.isArray(certFlags.irlRoleIds) ? [...certFlags.irlRoleIds].sort() : [];
+            return JSON.stringify({
+                ...shared,
+                irl_enabled: certFlags.irl,
+                irl_role_ids: roleIds,
+                irl_role_match: roleIds.length === 0 || (!!studentRoleId && roleIds.includes(studentRoleId)),
+            });
+        }
+
+        return JSON.stringify({
+            ...shared,
+            participacion_enabled: certFlags.participacion,
+        });
+    };
+
+    const getEnrollmentCertificateTypes = (student: CertificateStudent, enrollment: CertificateEnrollment, course: CertificateCourse | undefined) => {
+        if (!course || enrollment?.status !== 'completed') return [] as CertificateType[];
+
+        const certFlags = courseCertFlags[enrollment.course_id] || { participacion: false, aprobacion: false, irl: false, irlRoleIds: [] } as CertificateFlags;
+        const roleIds = certFlags.irlRoleIds || [];
+        const studentRoleId = student?.role_id || null;
+        const irlAllowed = certFlags.irl && (roleIds.length === 0 || (!!studentRoleId && roleIds.includes(studentRoleId)));
+
+        return [
+            certFlags.participacion ? 'participacion' : null,
+            certFlags.aprobacion ? 'aprobacion' : null,
+            irlAllowed ? 'irl' : null,
+        ].filter(Boolean) as CertificateType[];
+    };
+
+    const downloadCourseCertificate = async (student: CertificateStudent, enrollment: CertificateEnrollment, certificateType: CertificateType) => {
+        if (isGeneratingCert || certGenerationLock.current) return;
+        if (!companyId) return;
+
+        const course = courses.find((c: any) => c.id === enrollment.course_id);
+        if (!course) {
+            alert('No se encontró el curso asociado para generar el certificado.');
+            return;
+        }
+
+        const availableTypes = getEnrollmentCertificateTypes(student, enrollment, course);
+        if (!availableTypes.includes(certificateType)) {
+            alert('Este certificado no está disponible para ese curso.');
+            return;
+        }
+
+        try {
+            const [{ data: compRaw }, { data: studentDataRaw }] = await Promise.all([
+                supabase.from('companies').select('*').eq('id', companyId).single(),
+                supabase
+                    .from('students')
+                    .select('digital_signature_url, age, gender, company_name, job_position')
+                    .eq('id', student.id)
+                    .single(),
+            ]);
+
+            const comp = compRaw as CertificateCompany | null;
+            const studentData = studentDataRaw as CertificateStudentData | null;
+
+            if (!comp) {
+                alert('No se encontró la configuración de la empresa para generar el certificado.');
+                return;
+            }
+
+            let jobName = student.company_roles?.name || studentData?.job_position;
+            if (studentData?.job_position && !student.company_roles?.name) {
+                const { data: jobInfo } = await supabase
+                    .from('job_positions')
+                    .select('name_es')
+                    .eq('code', studentData.job_position)
+                    .single();
+
+                if (jobInfo) jobName = jobInfo.name_es;
+            }
+
+            const currentCompanyName = studentData?.company_name || comp.name;
+            const contentSignature = buildCertificateSignature({
+                certificateType,
+                course,
+                courseName: course.name || 'Curso',
+                enrollment,
+                certFlags: courseCertFlags[enrollment.course_id] || { participacion: false, aprobacion: false, irl: false, irlRoleIds: [] },
+                studentRoleId: student.role_id,
+                currentCompanyName,
+            });
+
+            const certificateDate = formatDateEsCL(enrollment.completed_at);
+
+            if (certificateType === 'irl') {
+                certGenerationLock.current = true;
+                setIsGeneratingCert(true);
+
+                await generateIrlCert({
+                    studentName: `${student.first_name} ${student.last_name}`,
+                    rut: student.rut,
+                    age: studentData?.age,
+                    jobName: jobName || studentData?.job_position || student.company_roles?.name || 'Sin cargo',
+                    date: certificateDate,
+                    signatureUrl: normalizeStudentSignature(studentData?.digital_signature_url || student.digital_signature_url),
+                });
+
+                await trackCertificateIssuance({
+                    enrollmentId: enrollment.id,
+                    studentId: student.id,
+                    courseId: enrollment.course_id,
+                    certificateType,
+                    contentSignature,
+                });
+
+                certGenerationLock.current = false;
+                setIsGeneratingCert(false);
+                return;
+            }
+
+            setPendingCertificateIssue({
+                enrollmentId: enrollment.id,
+                studentId: student.id,
+                courseId: enrollment.course_id,
+                certificateType,
+                contentSignature,
+            });
+            setCertData({
+                studentName: `${student.first_name} ${student.last_name}`,
+                rut: student.rut,
+                courseName: course.name?.toUpperCase() || 'CURSO',
+                date: certificateDate,
+                score: enrollment.best_score ?? 100,
+                signatures: [
+                    { url: comp.signature_url_1, name: comp.signature_name_1, role: comp.signature_role_1 },
+                    { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 },
+                    { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 },
+                ].filter((sig: { url?: string | null; name?: string | null }) => sig.url || sig.name),
+                studentSignature: normalizeStudentSignature(studentData?.digital_signature_url || student.digital_signature_url),
+                companyLogo: comp.logo_url,
+                companyName: currentCompanyName,
+                jobPosition: jobName,
+                age: studentData?.age,
+                gender: studentData?.gender,
+            });
+            certGenerationLock.current = true;
+            setIsGeneratingCert(true);
+        } catch (error) {
+            console.error('Error generando certificado:', error);
+            certGenerationLock.current = false;
+            setIsGeneratingCert(false);
+            setPendingCertificateIssue(null);
+            setCertData(null);
+            alert('No se pudo generar el certificado. Intenta nuevamente.');
+        }
+    };
+
+    const trackCertificateIssuance = async ({
+        enrollmentId,
+        studentId,
+        courseId,
+        certificateType,
+        contentSignature,
+    }: {
+        enrollmentId: string;
+        studentId: string;
+        courseId: string;
+        certificateType: 'participacion' | 'aprobacion' | 'irl';
+        contentSignature: string;
+    }) => {
+        if (!companyId || !enrollmentId || !studentId || !courseId) return;
+
+        const { error } = await supabase
+            .from('certificate_issuances')
+            .insert({
+                company_id: companyId,
+                student_id: studentId,
+                enrollment_id: enrollmentId,
+                course_id: courseId,
+                certificate_type: certificateType,
+                content_signature: contentSignature,
+            });
+
+        if (error) {
+            console.error('Error registrando emisión de certificado:', error);
+            return;
+        }
+
+        const key = buildIssueKey(enrollmentId, certificateType);
+        setLastIssuedSignatures(prev => ({
+            ...prev,
+            [key]: contentSignature,
+        }));
+    };
+
     useEffect(() => {
         const storedId = getStoredCompanyValue('empresa_id');
         const storedName = getStoredCompanyValue('empresa_name');
         const storedMaster = getStoredCompanyValue('is_master_admin');
         const storedMasterRole = getStoredCompanyValue('master_role') as 'superadmin' | 'administrador' | 'editor' | null;
-        
+
         if (!storedId) {
             window.location.href = "/admin/empresa/login";
             return;
@@ -160,13 +448,12 @@ export default function EmpresaAdmin() {
 
     useEffect(() => {
         if (!companyId) return;
-        
+
         const checkAuth = async () => {
             setIsAuthenticating(true);
             const { data: { session } } = await supabase.auth.getSession();
-            
+
             if (session) {
-                // Verificar si es un Meta Admin (SuperAdmin o Editor)
                 const email = session.user.email?.toLowerCase();
                 const { role: roleToSet } = await resolveAdminRole(supabase, email, '/admin/empresa');
 
@@ -175,20 +462,16 @@ export default function EmpresaAdmin() {
                     setMasterRole(roleToSet);
                     sessionStorage.setItem('is_master_admin', 'true');
                     sessionStorage.setItem('master_role', roleToSet);
-                    console.log(`Acceso Maestro Detectado: ${roleToSet}. Omitiendo cierre de sesión.`);
                     setIsAuthenticating(false);
                     return;
                 }
 
-                // Si no es un Meta Admin, cerramos la sesión para evitar conflictos (flujo original)
-                console.warn("Sesión de Supabase común detectada. Cerrando sesión...");
                 await supabase.auth.signOut({ scope: 'local' });
-            } else if (sessionStorage.getItem('is_master_admin') === 'true' || localStorage.getItem('is_master_admin') === 'true') {
-                // Si esperábamos ser master admin pero no hay sesión, algo falló o expiró
-                // pero no bloqueamos por ahora para permitir el flujo normal de contraseña si falló el cross-login
             }
+
             setIsAuthenticating(false);
         };
+
         checkAuth();
         fetchData();
     }, [role, searchTerm, companyId]);
@@ -197,25 +480,22 @@ export default function EmpresaAdmin() {
         if (!companyId) return;
 
         try {
-            // Fetch students with enrollments details
             const { data: stData, error: stError } = await supabase
                 .from('students')
-                .select('*, company_roles(name), enrollments(course_id, status, best_score, completed_at, current_attempt, max_attempts)')
+                .select('*, company_roles(name), enrollments(id, course_id, status, best_score, completed_at, current_attempt, max_attempts, irl_confirmed)')
                 .eq('client_id', companyId)
                 .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,rut.ilike.%${searchTerm}%`)
                 .order('last_name');
             if (stError) console.error("Error fetching students:", stError);
             setStudents(stData || []);
 
-            // 1. Fetch assignments for this company to know which global/external roles are allowed
             const { data: assignments, error: assignError } = await supabase
                 .from('role_company_assignments')
                 .select('role_id')
                 .eq('company_id', companyId);
-            
-            const assignedRoleIds = (assignments || []).map(a => a.role_id);
 
-            // 2. Fetch roles that are EITHER owned by the company OR assigned to it
+            const assignedRoleIds = (assignments || []).map((a: any) => a.role_id);
+
             let rolesQuery = supabase
                 .from('company_roles')
                 .select(`
@@ -228,12 +508,10 @@ export default function EmpresaAdmin() {
                 `);
 
             if (assignError) {
-                // Fallback to old behavior if table doesn't exist
                 rolesQuery = rolesQuery.or(`company_id.eq.${companyId},company_id.is.null`);
             } else {
-                // Strictly owned or assigned
                 if (assignedRoleIds.length > 0) {
-                    rolesQuery = rolesQuery.or(`company_id.eq.${companyId},id.in.(${assignedRoleIds.map(id => `"${id}"`).join(',')})`);
+                    rolesQuery = rolesQuery.or(`company_id.eq.${companyId},id.in.(${assignedRoleIds.map((id: string) => `"${id}"`).join(',')})`);
                 } else {
                     rolesQuery = rolesQuery.eq('company_id', companyId);
                 }
@@ -242,34 +520,38 @@ export default function EmpresaAdmin() {
             const { data: cgData } = await rolesQuery.order('name');
             setCargos(cgData || []);
 
-            // Fetch ONLY assigned courses for this company (with cert flags)
             const [{ data: assignedData, error: assignedError }, { data: dipConfig }] = await Promise.all([
                 supabase
                     .from('company_courses')
-                    .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, start_date, validez_anios, courses(*)')
+                    .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, cert_irl_enabled, irl_role_id, irl_role_ids, start_date, validez_anios, courses(*)')
                     .eq('company_id', companyId),
                 supabase
                     .from('diploma_config')
                     .select('*')
                     .eq('id', '00000000-0000-0000-0000-000000000001')
-                    .single()
+                    .single(),
             ]);
-            
+
             if (assignedError) {
                 console.error("Error fetching assigned courses:", assignedError);
             }
 
-            // Build cert flags map
-            const flags: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+            const flags: Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }> = {};
             (assignedData || []).forEach((ad: any) => {
+                const roleIds = Array.isArray(ad.irl_role_ids)
+                    ? ad.irl_role_ids.filter(Boolean)
+                    : (ad.irl_role_id ? [ad.irl_role_id] : []);
+
                 flags[ad.course_id] = {
                     participacion: resolveParticipationFlag(ad),
                     aprobacion: ad.diploma_metaverso_enabled === true,
+                    irl: ad.cert_irl_enabled === true,
+                    irlRoleIds: roleIds,
                 };
             });
             setCourseCertFlags(flags);
             setDiplomaConfig(dipConfig || null);
-            
+
             const filteredCourses = (assignedData || [])
                 .map((ad: any) => ({
                     ...(ad.courses || {}),
@@ -277,6 +559,38 @@ export default function EmpresaAdmin() {
                 }))
                 .filter((course: any) => !!course.id);
             setCourses(filteredCourses);
+
+            const enrollmentIds = Array.from(new Set((stData || [])
+                .flatMap((st: any) => (st.enrollments || []).map((en: any) => en.id))
+                .filter(Boolean)));
+
+            const signaturesMap: Record<string, string> = {};
+            const { data: authData } = await supabase.auth.getSession();
+            if (authData?.session && enrollmentIds.length > 0) {
+                const chunkSize = 200;
+                for (let i = 0; i < enrollmentIds.length; i += chunkSize) {
+                    const idsChunk = enrollmentIds.slice(i, i + chunkSize);
+                    const { data: issuances, error: issuanceError } = await supabase
+                        .from('certificate_issuances')
+                        .select('enrollment_id, certificate_type, content_signature, issued_at')
+                        .eq('company_id', companyId)
+                        .in('enrollment_id', idsChunk)
+                        .order('issued_at', { ascending: false });
+
+                    if (issuanceError) {
+                        console.error('Error fetching certificate issuances:', issuanceError);
+                        continue;
+                    }
+
+                    (issuances || []).forEach((issue: any) => {
+                        const key = buildIssueKey(issue.enrollment_id, issue.certificate_type);
+                        if (!(key in signaturesMap)) {
+                            signaturesMap[key] = issue.content_signature;
+                        }
+                    });
+                }
+            }
+            setLastIssuedSignatures(signaturesMap);
         } catch (err) {
             console.error("Unexpected error in fetchData:", err);
         }
@@ -333,7 +647,7 @@ export default function EmpresaAdmin() {
             role_id: (student.role_id && student.role_id !== "") ? student.role_id : null,
             password: student.password,
             age: student.age ? parseInt(student.age, 10) : null,
-            gender: student.gender || null
+            gender: student.gender || null,
         };
 
         const { error } = await supabase
@@ -356,7 +670,7 @@ export default function EmpresaAdmin() {
 
         const documentValue = (newStudent.rut || '').trim();
         const usingRut = isRutVisible && (isRutRequired || newStudent.doc_type !== 'PASSPORT');
-        
+
         if (!newStudent.first_name || !newStudent.last_name || (isRutVisible && !documentValue)) {
             alert(`Por favor complete los campos obligatorios (${isRutVisible ? 'Nombre, Apellido, ID/RUT' : 'Nombre y Apellido'})`);
             return;
@@ -381,62 +695,54 @@ export default function EmpresaAdmin() {
         }
 
         let normalizedDocument = isRutVisible ? documentValue : null;
-
-        // Validación de RUT Chileno
         if (usingRut && documentValue) {
             if (!validateRut(documentValue)) {
                 alert("El RUT ingresado no es válido. Por favor verifique el dígito verificador.");
                 return;
             }
-            // Formatear RUT antes de guardar
-            normalizedDocument = formatRut(documentValue); 
+            normalizedDocument = formatRut(documentValue);
         }
 
-        const payload = { 
+        const payload = {
             first_name: newStudent.first_name,
             last_name: newStudent.last_name,
-            rut: normalizedDocument, // Se guarda el RUT o Pasaporte aquí
+            rut: normalizedDocument,
             email: newStudent.email || null,
             password: newStudent.password || '123456',
-            client_id: companyId, 
+            client_id: companyId,
             role_id: newStudent.role_id,
             age: isAgeVisible && newStudent.age ? parseInt(newStudent.age, 10) : null,
             gender: isGenderVisible ? (newStudent.gender || null) : null,
-            // Nota: Si la tabla 'students' no tiene columna 'doc_type', este dato se perderá,
-            // pero la validación ya ocurrió. Si se requiere persistir el tipo, se debe agregar la columna.
-            // Por ahora asumimos que solo se valida.
         };
-
-        console.log("Intentando crear alumno con payload:", payload);
 
         const { error } = await supabase
             .from('students')
             .insert(payload);
-            
+
         if (error) {
-            console.error("Error creating student details:", JSON.stringify(error, null, 2));
             if (error.message.includes("foreign key")) {
-                alert("Error Crítico de Base de Datos: El ID de tu empresa (" + companyId + ") no fue reconocido por el sistema de alumnos. Por favor contacta al administrador Master para verificar que tu ficha de empresa existe correctamente.");
+                alert("Error de base de datos: el ID de empresa no fue reconocido.");
             } else if (error.message.includes("policy")) {
-                alert("Error de Permisos (RLS): No tienes permiso para crear trabajadores. Verifica la migración 007.");
+                alert("Error de permisos (RLS): no tienes permiso para crear trabajadores.");
             } else {
                 alert("Error al crear alumno: " + error.message);
             }
-        } else { 
-            setIsCreating(false); 
-            setNewStudent({ 
-                first_name: "", 
-                last_name: "", 
-                rut: "", 
-                doc_type: isRutVisible && isRutRequired ? "RUT" : isRutVisible ? "RUT" : "PASSPORT", 
-                email: "", 
-                password: "", 
-                role_id: null,
-                age: "",
-                gender: ""
-            });
-            fetchData(); 
+            return;
         }
+
+        setIsCreating(false);
+        setNewStudent({
+            first_name: "",
+            last_name: "",
+            rut: "",
+            doc_type: isRutVisible && isRutRequired ? "RUT" : isRutVisible ? "RUT" : "PASSPORT",
+            email: "",
+            password: "",
+            role_id: null,
+            age: "",
+            gender: "",
+        });
+        fetchData();
     };
 
     const handleDeleteStudent = async (id: string) => {
@@ -459,19 +765,82 @@ export default function EmpresaAdmin() {
     const openEditStudent = (student: any) => {
         setIsEditing({
             ...student,
-            doc_type: validateRut(student.rut || '') ? 'RUT' : 'PASSPORT'
+            doc_type: validateRut(student.rut || '') ? 'RUT' : 'PASSPORT',
         });
     };
 
-    const sortedStudents = [...students].sort((a, b) => {
-        if (!sortConfig) return 0;
-        const { key, direction } = sortConfig;
-        let aVal = key === 'name' ? `${a.first_name} ${a.last_name}` : (key === 'cargo' ? (a.company_roles?.name || '') : '');
-        let bVal = key === 'name' ? `${b.first_name} ${b.last_name}` : (key === 'cargo' ? (b.company_roles?.name || '') : '');
-        if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return direction === 'asc' ? 1 : -1;
-        return 0;
-    });
+    const toggleSort = (key: 'name' | 'cargo' | 'course' | 'status' | 'certificate') => {
+        setSortConfig((prev) => {
+            if (prev && prev.key === key) {
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
+    const sortedStudentSummaries = useMemo(() => {
+        const summaries = students.map((st: any) => {
+            const validEnrollments = (st.enrollments || []).filter((en: any) =>
+                courses.some((c: any) => c.id === en.course_id)
+            );
+
+            const totalCourses = validEnrollments.length;
+            const completedEnrollments = validEnrollments.filter((en: any) => en.status === 'completed');
+            const completedCount = completedEnrollments.length;
+            const inProgressCount = validEnrollments.filter((en: any) => en.status === 'in_progress').length;
+
+            let availableCerts = 0;
+            completedEnrollments.forEach((en: any) => {
+                const course = courses.find((c: any) => c.id === en.course_id);
+                availableCerts += getEnrollmentCertificateTypes(st, en, course).length;
+            });
+
+            return {
+                student: st,
+                validEnrollments,
+                totalCourses,
+                completedCount,
+                inProgressCount,
+                availableCerts,
+            };
+        });
+
+        const directionFactor = sortConfig.direction === 'asc' ? 1 : -1;
+        return summaries.sort((a, b) => {
+            if (sortConfig.key === 'name') {
+                const av = `${a.student.first_name || ''} ${a.student.last_name || ''}`.toLowerCase();
+                const bv = `${b.student.first_name || ''} ${b.student.last_name || ''}`.toLowerCase();
+                return av.localeCompare(bv) * directionFactor;
+            }
+            if (sortConfig.key === 'cargo') {
+                const av = (a.student.company_roles?.name || '').toLowerCase();
+                const bv = (b.student.company_roles?.name || '').toLowerCase();
+                return av.localeCompare(bv) * directionFactor;
+            }
+            if (sortConfig.key === 'course') {
+                return (a.totalCourses - b.totalCourses) * directionFactor;
+            }
+            if (sortConfig.key === 'status') {
+                const aStatus = a.inProgressCount > 0 ? 1 : a.completedCount > 0 ? 2 : 0;
+                const bStatus = b.inProgressCount > 0 ? 1 : b.completedCount > 0 ? 2 : 0;
+                return (aStatus - bStatus) * directionFactor;
+            }
+            return (a.availableCerts - b.availableCerts) * directionFactor;
+        });
+    }, [students, courses, courseCertFlags, sortConfig]);
+
+    const totalTrainerPages = useMemo(() => {
+        return Math.max(1, Math.ceil(sortedStudentSummaries.length / trainerPageSize));
+    }, [sortedStudentSummaries.length, trainerPageSize]);
+
+    const pagedStudentSummaries = useMemo(() => {
+        const start = (trainerPage - 1) * trainerPageSize;
+        return sortedStudentSummaries.slice(start, start + trainerPageSize);
+    }, [sortedStudentSummaries, trainerPage, trainerPageSize]);
+
+    useEffect(() => {
+        setTrainerPage(1);
+    }, [searchTerm, sortConfig.key, sortConfig.direction, trainerPageSize]);
 
     const returnToMasterAdmin = () => {
         const masterReturnUrl = sessionStorage.getItem('master_return_url') || '/admin/metaverso';
@@ -487,8 +856,6 @@ export default function EmpresaAdmin() {
             }
 
             window.close();
-
-            // Fallback: si el navegador bloquea window.close(), forzamos salida inmediata
             window.setTimeout(() => {
                 window.location.replace(masterReturnUrl);
             }, 220);
@@ -720,284 +1087,80 @@ export default function EmpresaAdmin() {
                         <div className="glass overflow-hidden">
                             <table className="w-full text-left">
                                 <thead className="bg-white/5 text-[10px] font-black uppercase text-white/40">
-                                    <tr><th className="px-6 py-4">Colaborador</th><th className="px-6 py-4">Cargo</th><th className="px-6 py-4">Curso Asignado</th><th className="px-6 py-4">Estado</th><th className="px-6 py-4">Intentos</th><th className="px-6 py-4">Certificado</th><th className="px-6 py-4">Bloqueado</th><th className="px-6 py-4 text-right">Gestión</th></tr>
+                                    <tr>
+                                        <th className="px-6 py-4 cursor-pointer" onClick={() => toggleSort('name')}>Colaborador</th>
+                                        <th className="px-6 py-4 cursor-pointer" onClick={() => toggleSort('cargo')}>Cargo</th>
+                                        <th className="px-6 py-4 cursor-pointer" onClick={() => toggleSort('course')}>Cursos</th>
+                                        <th className="px-6 py-4 cursor-pointer" onClick={() => toggleSort('status')}>Estado</th>
+                                        <th className="px-6 py-4 cursor-pointer" onClick={() => toggleSort('certificate')}>Certificados</th>
+                                        <th className="px-6 py-4">Bloqueado</th>
+                                        <th className="px-6 py-4 text-right">Gestión</th>
+                                    </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {sortedStudents.flatMap((st) => {
-                                        // If student has no enrollments, show once
-                                        const validEnrollments = (st.enrollments || []).filter((en: any) =>
-                                            courses.some((c: any) => c.id === en.course_id)
-                                        );
-
-                                        if (!validEnrollments || validEnrollments.length === 0) {
-                                            return [(
-                                                <tr key={`${st.id}-no-course`} className="hover:bg-white/[0.02] text-sm font-medium">
-                                                    <td className="px-6 py-4"><p className="font-bold">{st.first_name} {st.last_name}</p><p className="text-[10px] text-white/40 font-mono">{st.rut} • {companyName}</p></td>
-                                                    <td className="px-6 py-4">{st.company_roles?.name || "Sin Cargo"}</td>
-                                                    <td className="px-6 py-4"><span className="text-[8px] text-white/20 uppercase font-bold">Sin Cursos</span></td>
-                                                    <td className="px-6 py-4">-</td>
-                                                    <td className="px-6 py-4">-</td>
-                                                    <td className="px-6 py-4">-</td>
-                                                    <td className="px-6 py-4">
-                                                        {st.is_locked ? (
-                                                            <button onClick={async () => { await supabase.from('students').update({ is_locked: false, login_attempts: 0 }).eq('id', st.id); fetchData(); }} className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[9px] font-black hover:bg-red-500/20 transition-all"><Lock className="w-3 h-3" /> Desbloquear</button>
-                                                        ) : (
-                                                            <span className="text-[9px] text-white/20 font-bold">-</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
-                                                        <button onClick={() => openEditStudent(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
-                                                        <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400"><Trash2 className="w-4 h-4" /></button>
-                                                    </td>
-                                                </tr>
-                                            )];
-                                        }
-
-                                        // Show one row per enrollment (course)
-                                        return validEnrollments.map((en: any, idx: number) => {
-                                            const course = courses.find(c => c.id === en.course_id);
-                                            const courseName = course?.name || "Curso Desconocido";
-
-                                            const isCompleted = en.status === 'completed';
-                                            const statusText = isCompleted ? 'Completado' : en.status === 'in_progress' ? 'En Progreso' : 'No Iniciado';
-                                            const statusColor = isCompleted ? 'text-brand' : en.status === 'in_progress' ? 'text-yellow-400' : 'text-white/40';
-                                            const attemptCount = en.current_attempt || 0;
-                                            const maxAttempts = en.max_attempts || course?.max_attempts || 3;
-                                            const attemptExhausted = attemptCount >= maxAttempts;
-
-                                            return (
-                                                <tr key={`${st.id}-${en.course_id}`} className="hover:bg-white/[0.02] text-sm font-medium">
-                                                    <td className="px-6 py-4">
-                                                        <p className="font-bold">{st.first_name} {st.last_name}</p>
-                                                        <p className="text-[10px] text-white/40 font-mono">{st.rut} • {companyName}</p>
-                                                    </td>
-                                                    <td className="px-6 py-4">{st.company_roles?.name || "Sin Cargo"}</td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="text-[8px] bg-brand/10 text-brand px-2 py-0.5 rounded-full font-black uppercase border border-brand/20">
-                                                            {courseName}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`text-[10px] font-black uppercase ${statusColor}`}>
-                                                            {statusText}
-                                                            {isCompleted && en.best_score && ` (${en.best_score}%)`}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className={`text-[10px] font-black tabular-nums ${attemptExhausted ? 'text-red-400' : 'text-white/60'}`}>
-                                                            {attemptCount}/{maxAttempts}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {isCompleted ? (() => {
-                                                            const certF = courseCertFlags[en.course_id] || { participacion: false, aprobacion: false };
-                                                            const fetchStudentComp = async () => {
-                                                                if (!companyId) return null;
-                                                                const { data: comp } = await supabase.from('companies').select('*').eq('id', companyId).single();
-                                                                const studentData = {
-                                                                    digital_signature_url: st.digital_signature_url,
-                                                                    age: st.age,
-                                                                    gender: st.gender,
-                                                                    client_id: st.client_id,
-                                                                    job_position: st.job_position
-                                                                };
-                                                                let jobName = st.company_roles?.name || studentData?.job_position;
-                                                                if (studentData?.job_position && !st.company_roles?.name) {
-                                                                    const { data: jobInfo } = await supabase.from('job_positions').select('name_es').eq('code', studentData.job_position).single();
-                                                                    if (jobInfo) jobName = jobInfo.name_es;
-                                                                }
-                                                                return { comp, studentData, jobName };
-                                                            };
-                                                            return (
-                                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                                    {certF.participacion && (
-                                                                        <button
-                                                                            onClick={async () => {
-                                                                                if (isGeneratingCert || certGenerationLock.current) return;
-                                                                                const r = await fetchStudentComp();
-                                                                                if (r?.comp) {
-                                                                                    certGenerationLock.current = true;
-                                                                                    setIsGeneratingCert(true);
-                                                                                    setCertData({
-                                                                                    studentName: `${st.first_name} ${st.last_name}`,
-                                                                                    rut: st.rut,
-                                                                                    courseName: courseName.toUpperCase(),
-                                                                                    date: new Date(en.completed_at || Date.now()).toLocaleDateString(),
-                                                                                    score: en.best_score ?? 100,
-                                                                                    signatures: [
-                                                                                        { url: r.comp.signature_url_1, name: r.comp.signature_name_1, role: r.comp.signature_role_1 },
-                                                                                        { url: r.comp.signature_url_2, name: r.comp.signature_name_2, role: r.comp.signature_role_2 },
-                                                                                        { url: r.comp.signature_url_3, name: r.comp.signature_name_3, role: r.comp.signature_role_3 }
-                                                                                    ].filter(s => s.url || s.name),
-                                                                                    studentSignature: normalizeStudentSignature(r.studentData?.digital_signature_url),
-                                                                                    companyLogo: r.comp.logo_url,
-                                                                                    companyName: r.comp.name,
-                                                                                    jobPosition: r.jobName,
-                                                                                    age: r.studentData?.age,
-                                                                                    gender: r.studentData?.gender
-                                                                                });
-                                                                                }
-                                                                            }}
-                                                                            disabled={isGeneratingCert}
-                                                                            className="p-2 rounded-lg bg-green-500/10 text-green-400 text-[10px] font-black flex items-center gap-1 border border-green-500/30 hover:bg-green-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                            title="Certificado Participación"
-                                                                        >
-                                                                            <AwardIcon className="w-3 h-3" /> Participación
-                                                                        </button>
-                                                                    )}
-                                                                    {certF.aprobacion && (
-                                                                        <button
-                                                                            onClick={async () => {
-                                                                                if (!diplomaConfig) { alert('No hay configuración de diploma.'); return; }
-                                                                                const r = await fetchStudentComp();
-                                                                                if (!r?.comp) return;
-                                                                                const fc = diplomaConfig.fields_config || {};
-                                                                                await generateMetaversoCert({
-                                                                                    studentName: `${st.first_name} ${st.last_name}`,
-                                                                                    rut: st.rut,
-                                                                                    companyName: r.comp.name,
-                                                                                    companyRut: r.comp.rut || '',
-                                                                                    companyId: r.studentData?.client_id || r.comp.id,
-                                                                                    courseId: course?.id || en.course_id,
-                                                                                    courseName: courseName.toUpperCase(),
-                                                                                    courseCode: course?.code || '',
-                                                                                    hours: course?.config?.hours,
-                                                                                    date: en.completed_at
-                                                                                        ? new Date(en.completed_at).toLocaleDateString('es-CL')
-                                                                                        : new Date().toLocaleDateString('es-CL'),
-                                                                                    expirationDate: calcExpirationDate(en.completed_at, course?.company_course_validez_anios),
-                                                                                    backgroundUrl: diplomaConfig.background_url,
-                                                                                    layoutConfig: fc.layout,
-                                                                                    fieldsConfig: fc,
-                                                                                });
-                                                                            }}
-                                                                            className="p-2 rounded-lg bg-purple-500/10 text-purple-400 text-[10px] font-black flex items-center gap-1 border border-purple-500/30 hover:bg-purple-500 hover:text-black transition-all"
-                                                                            title="Certificado Aprobación"
-                                                                        >
-                                                                            <AwardIcon className="w-3 h-3" /> Aprobación
-                                                                        </button>
-                                                                    )}
-                                                                    {!certF.participacion && !certF.aprobacion && (
-                                                                        <span className="text-[9px] text-white/30 font-bold uppercase">Sin cert.</span>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })() : (
-                                                            <div className="flex items-center gap-1 text-white/20">
-                                                                <Lock className="w-3 h-3" />
-                                                                <span className="text-[8px] font-bold uppercase">Pendiente</span>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        {idx === 0 && st.is_locked ? (
-                                                            <button
-                                                                onClick={async () => { await supabase.from('students').update({ is_locked: false, login_attempts: 0 }).eq('id', st.id); fetchData(); }}
-                                                                className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[9px] font-black hover:bg-red-500/20 transition-all whitespace-nowrap"
-                                                            ><Lock className="w-3 h-3" /> Desbloquear</button>
-                                                        ) : idx === 0 ? (
-                                                            <span className="text-[9px] text-white/20 font-bold">—</span>
-                                                        ) : null}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
-                                                        {idx === 0 && (
-                                                            <>
-                                                                <button onClick={() => openEditStudent(st)} className="p-2 rounded-xl bg-white/5 border border-white/10"><UserCog className="w-4 h-4" /></button>
-                                                                <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400"><Trash2 className="w-4 h-4" /></button>
-                                                            </>
-                                                        )}
-                                                        <button 
-                                                            onClick={async () => {
-                                                                try {
-                                                                    if (!confirm(`¿Desvincular a ${st.first_name} del curso "${courseName}"? Se eliminarán todas sus estadísticas.`)) return;
-                                                                    
-                                                                    console.log('Iniciando desvinculación...', { student_id: st.id, course_id: en.course_id });
-                                                                    
-                                                                    // Delete enrollment and all related data
-                                                                    const { data: enrollmentData, error: fetchError } = await supabase
-                                                                        .from('enrollments')
-                                                                        .select('id')
-                                                                        .eq('student_id', st.id)
-                                                                        .eq('course_id', en.course_id)
-                                                                        .single();
-
-                                                                    if (fetchError) {
-                                                                        console.error('Error fetching enrollment:', fetchError);
-                                                                        alert(`Error al obtener inscripción: ${fetchError.message}`);
-                                                                        return;
-                                                                    }
-
-                                                                    if (!enrollmentData) {
-                                                                        alert('No se encontró la inscripción');
-                                                                        return;
-                                                                    }
-
-                                                                    console.log('Enrollment encontrado:', enrollmentData.id);
-
-                                                                    // Delete course_progress
-                                                                    const { error: progressError } = await supabase
-                                                                        .from('course_progress')
-                                                                        .delete()
-                                                                        .eq('enrollment_id', enrollmentData.id);
-
-                                                                    if (progressError) {
-                                                                        console.error('Error deleting progress:', progressError);
-                                                                    }
-
-                                                                    // Delete activity_logs
-                                                                    const { error: logsError } = await supabase
-                                                                        .from('activity_logs')
-                                                                        .delete()
-                                                                        .eq('enrollment_id', enrollmentData.id);
-
-                                                                    if (logsError) {
-                                                                        console.error('Error deleting logs:', logsError);
-                                                                    }
-
-                                                                    // Delete enrollment
-                                                                    const { error: deleteError } = await supabase
-                                                                        .from('enrollments')
-                                                                        .delete()
-                                                                        .eq('id', enrollmentData.id);
-
-                                                                    if (deleteError) {
-                                                                        console.error('Error deleting enrollment:', deleteError);
-                                                                        alert(`Error al eliminar inscripción: ${deleteError.message}`);
-                                                                        return;
-                                                                    }
-                                                                    
-                                                                    // Clear student signature if this was their only course
-                                                                    const { data: remainingEnrollments } = await supabase
-                                                                        .from('enrollments')
-                                                                        .select('id')
-                                                                        .eq('student_id', st.id);
-                                                                    
-                                                                    if (!remainingEnrollments || remainingEnrollments.length === 0) {
-                                                                        await supabase
-                                                                            .from('students')
-                                                                            .update({ digital_signature_url: null })
-                                                                            .eq('id', st.id);
-                                                                    }
-                                                                    
-                                                                    alert('✅ Alumno desvinculado exitosamente');
-                                                                    fetchData();
-                                                                } catch (error: any) {
-                                                                    console.error('Error inesperado:', error);
-                                                                    alert(`Error inesperado: ${error.message}`);
-                                                                }
-                                                            }}
-                                                            className="p-2 rounded-xl bg-white/5 border border-white/10 text-orange-400 hover:bg-orange-500/10"
-                                                            title="Desvincular del curso"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        });
-                                    })}
+                                    {pagedStudentSummaries.map(({ student: st, validEnrollments, totalCourses, completedCount, inProgressCount, availableCerts }) => (
+                                        <tr key={st.id} className="hover:bg-white/[0.02] text-sm font-medium">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold">{st.first_name} {st.last_name}</p>
+                                                <p className="text-[10px] text-white/40 font-mono">{st.rut} • {companyName}</p>
+                                            </td>
+                                            <td className="px-6 py-4">{st.company_roles?.name || 'Sin Cargo'}</td>
+                                            <td className="px-6 py-4">
+                                                <button
+                                                    onClick={() => setSelectedStudentCourses({ student: st, enrollments: validEnrollments })}
+                                                    className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold"
+                                                >
+                                                    {totalCourses} curso{totalCourses === 1 ? '' : 's'}
+                                                </button>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-[11px] font-bold text-white/70">{completedCount} completados</span>
+                                                {inProgressCount > 0 && <span className="ml-2 text-[10px] text-yellow-300">{inProgressCount} en progreso</span>}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-[11px] font-bold text-brand">{availableCerts} disponibles</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {st.is_locked ? (
+                                                    <button
+                                                        onClick={async () => { await supabase.from('students').update({ is_locked: false, login_attempts: 0 }).eq('id', st.id); fetchData(); }}
+                                                        className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[9px] font-black hover:bg-red-500/20 transition-all whitespace-nowrap"
+                                                    ><Lock className="w-3 h-3" /> Desbloquear</button>
+                                                ) : (
+                                                    <span className="text-[9px] text-white/20 font-bold">—</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
+                                                <button
+                                                    onClick={() => setSelectedStudentCourses({ student: st, enrollments: validEnrollments })}
+                                                    className="p-2 rounded-xl bg-white/5 border border-white/10"
+                                                    title="Ver cursos"
+                                                ><BookOpen className="w-4 h-4" /></button>
+                                                <button onClick={() => openEditStudent(st)} className="p-2 rounded-xl bg-white/5 border border-white/10" title="Editar"><UserCog className="w-4 h-4" /></button>
+                                                <button onClick={() => handleDeleteStudent(st.id)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-red-400" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
+                            <div className="px-6 py-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-white/60">
+                                <div>Mostrando {pagedStudentSummaries.length} de {sortedStudentSummaries.length} alumnos</div>
+                                <div className="flex items-center gap-2">
+                                    <label>Filas</label>
+                                    <select
+                                        value={trainerPageSize}
+                                        onChange={(e) => { setTrainerPageSize(Number(e.target.value)); setTrainerPage(1); }}
+                                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white [&>option]:bg-slate-100 [&>option]:text-slate-900"
+                                    >
+                                        <option className="bg-slate-100 text-slate-900" value={10}>10</option>
+                                        <option className="bg-slate-100 text-slate-900" value={20}>20</option>
+                                        <option className="bg-slate-100 text-slate-900" value={50}>50</option>
+                                    </select>
+                                    <button onClick={() => setTrainerPage((p) => Math.max(1, p - 1))} disabled={trainerPage <= 1} className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed">Anterior</button>
+                                    <span>Página {trainerPage} de {totalTrainerPages}</span>
+                                    <button onClick={() => setTrainerPage((p) => Math.min(totalTrainerPages, p + 1))} disabled={trainerPage >= totalTrainerPages} className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed">Siguiente</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -1007,15 +1170,100 @@ export default function EmpresaAdmin() {
                     certGenerationLock.current = false;
                     const reader = new FileReader(); 
                     reader.readAsDataURL(blob);
-                    reader.onloadend = () => { 
+                    reader.onloadend = async () => { 
                         const base64data = reader.result as string;
                         const pdf = new jsPDF("p", "px", [1414, 2000]); // Portrait como el alumno
                         pdf.addImage(base64data, "PNG", 0, 0, 1414, 2000); 
                         pdf.save(`Certificado_${certData.rut}.pdf`); 
+                        if (pendingCertificateIssue) {
+                            await trackCertificateIssuance({
+                                enrollmentId: pendingCertificateIssue.enrollmentId,
+                                studentId: pendingCertificateIssue.studentId,
+                                courseId: pendingCertificateIssue.courseId,
+                                certificateType: pendingCertificateIssue.certificateType,
+                                contentSignature: pendingCertificateIssue.contentSignature,
+                            });
+                        }
+                        setPendingCertificateIssue(null);
                         setCertData(null); 
                         setIsGeneratingCert(false);
                     };
                 }} />}
+
+                {selectedStudentCourses && (
+                    <div className="fixed inset-0 z-[95] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="glass w-full max-w-4xl rounded-2xl border border-white/10 p-5 max-h-[85vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="text-xl font-black">Cursos de {selectedStudentCourses.student.first_name} {selectedStudentCourses.student.last_name}</h3>
+                                    <p className="text-xs text-white/40">{selectedStudentCourses.enrollments.length} curso(s) asociado(s)</p>
+                                </div>
+                                <button onClick={() => setSelectedStudentCourses(null)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10"><X className="w-4 h-4" /></button>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="text-white/40 border-b border-white/10">
+                                        <tr>
+                                            <th className="text-left py-2 pr-3">Curso</th>
+                                            <th className="text-left py-2 pr-3">Estado</th>
+                                            <th className="text-left py-2 pr-3">Intentos</th>
+                                            <th className="text-left py-2 pr-3">Nota</th>
+                                            <th className="text-left py-2">Completado</th>
+                                            <th className="text-left py-2 pl-3">Certificados</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {selectedStudentCourses.enrollments.map((en: any) => {
+                                            const course = courses.find((c: any) => c.id === en.course_id);
+                                            const courseName = course?.name || 'Curso desconocido';
+                                            const attempts = en.current_attempt || 0;
+                                            const availableCertificateTypes = getEnrollmentCertificateTypes(selectedStudentCourses.student, en, course);
+                                            return (
+                                                <tr key={en.id || `${selectedStudentCourses.student.id}-${en.course_id}`} className="border-b border-white/5">
+                                                    <td className="py-2 pr-3 text-white/90">{courseName}</td>
+                                                    <td className="py-2 pr-3 text-white/70">{en.status || 'pending'}</td>
+                                                    <td className="py-2 pr-3 text-white/70">{attempts}</td>
+                                                    <td className="py-2 pr-3 text-white/70">{Number(en.best_score || 0)}%</td>
+                                                    <td className="py-2 text-white/70">{en.completed_at ? new Date(en.completed_at).toLocaleDateString('es-CL') : '—'}</td>
+                                                    <td className="py-2 pl-3">
+                                                        {availableCertificateTypes.length > 0 ? (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {availableCertificateTypes.map((certificateType) => {
+                                                                    const certificateButtonClass =
+                                                                        certificateType === 'participacion'
+                                                                            ? 'border-brand/30 bg-brand/10 text-brand hover:bg-brand hover:text-black'
+                                                                            : certificateType === 'aprobacion'
+                                                                                ? 'border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 hover:bg-fuchsia-500 hover:text-black'
+                                                                                : 'border-cyan-500/40 bg-cyan-500/15 text-cyan-300 hover:bg-cyan-400 hover:text-black';
+
+                                                                    return (
+                                                                        <button
+                                                                            key={`${en.id}-${certificateType}`}
+                                                                            onClick={() => downloadCourseCertificate(selectedStudentCourses.student, en, certificateType)}
+                                                                            disabled={isGeneratingCert}
+                                                                            className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1 text-[10px] font-black uppercase transition-all disabled:cursor-not-allowed disabled:opacity-50 ${certificateButtonClass}`}
+                                                                            title={certificateType === 'participacion' ? 'Descargar certificado de participación' : certificateType === 'aprobacion' ? 'Descargar certificado de aprobación' : 'Descargar certificado IRL'}
+                                                                        >
+                                                                            <Download className="w-3 h-3" />
+                                                                            {certificateType === 'participacion' ? 'Participación' : certificateType === 'aprobacion' ? 'Aprobación' : 'IRL'}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold uppercase text-white/20">No disponible</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {isEditing && (
                     <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">

@@ -45,8 +45,9 @@ export default function CompanyPortal() {
                 // 2. Get Courses linked to this company via company_courses join
                 const { data: assignments, error: courseError } = await supabase
                     .from('company_courses')
-                    .select('registration_mode, start_date, courses(*)')
-                    .eq('company_id', comp.id);
+                    .select('registration_mode, start_date, assignment_active, courses(*)')
+                    .eq('company_id', comp.id)
+                    .eq('assignment_active', true);
 
                 if (courseError) throw courseError;
 

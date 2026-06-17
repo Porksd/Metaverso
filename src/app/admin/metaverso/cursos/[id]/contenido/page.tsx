@@ -61,6 +61,8 @@ export default function DynamicCourseEditor() {
     // Survey Picker State
     const [surveyTemplates, setSurveyTemplates] = useState<any[]>([]);
     const [showSurveyPicker, setShowSurveyPicker] = useState(false);
+    const [irlDocs, setIrlDocs] = useState<any[]>([]);
+    const [newIrlTitle, setNewIrlTitle] = useState('');
 
     // Drag Handlers
     const handleDragStart = (e: React.DragEvent, moduleId: string, index: number) => {
@@ -117,7 +119,53 @@ export default function DynamicCourseEditor() {
         fetchData();
         fetchCompanies();
         fetchSurveyTemplates();
+        fetchIrlDocuments();
     }, []);
+
+    const fetchIrlDocuments = async () => {
+        const { data, error } = await supabase
+            .from('course_irl_documents')
+            .select('id, title, file_url, sort_order, is_active')
+            .eq('course_id', courseId)
+            .order('sort_order', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching IRL docs:', error);
+            return;
+        }
+        setIrlDocs(data || []);
+    };
+
+    const handleAddIrlDocument = async (fileUrl: string) => {
+        const title = newIrlTitle.trim() || `Documento IRL ${irlDocs.length + 1}`;
+        const nextOrder = irlDocs.length;
+
+        const { error } = await supabase.from('course_irl_documents').insert({
+            course_id: courseId,
+            title,
+            file_url: fileUrl,
+            sort_order: nextOrder,
+            is_active: true,
+        });
+
+        if (error) {
+            alert('No se pudo guardar el documento IRL: ' + error.message);
+            return;
+        }
+
+        setNewIrlTitle('');
+        fetchIrlDocuments();
+    };
+
+    const handleDeleteIrlDocument = async (docId: string) => {
+        if (!confirm('Eliminar documento IRL?')) return;
+        const { error } = await supabase.from('course_irl_documents').delete().eq('id', docId);
+        if (error) {
+            alert('No se pudo eliminar el documento IRL: ' + error.message);
+            return;
+        }
+        fetchIrlDocuments();
+    };
 
     const fetchSurveyTemplates = async () => {
         const { data } = await supabase.from('surveys').select('id, title_es').order('title_es');
@@ -575,7 +623,8 @@ export default function DynamicCourseEditor() {
             if (tempCourseData.company_ids.length > 0) {
                 const assignments = tempCourseData.company_ids.map(id => ({
                     course_id: courseId,
-                    company_id: id
+                    company_id: id,
+                    assignment_active: true
                 }));
                 await supabase.from('company_courses').insert(assignments);
             }
@@ -687,6 +736,57 @@ export default function DynamicCourseEditor() {
             </div>
 
             <div className="max-w-5xl mx-auto space-y-8">
+
+                <div className="glass rounded-3xl border-cyan-500/20 p-5 space-y-3">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-cyan-300">Documentos IRL del Curso</h3>
+                            <p className="text-[11px] text-white/45">Estos PDFs se mostraran al alumno antes del checkbox de confirmacion IRL.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+                        <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Titulo del documento IRL</label>
+                            <input
+                                type="text"
+                                value={newIrlTitle}
+                                onChange={(e) => setNewIrlTitle(e.target.value)}
+                                placeholder="Ej: Riesgos del cargo operador de izaje"
+                                className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-cyan-500/40"
+                            />
+                        </div>
+                        <ContentUploader
+                            courseId={courseId}
+                            sectionKey={`irl_docs_${Date.now()}`}
+                            label="Subir PDF IRL"
+                            accept=".pdf"
+                            skipDbSave
+                            onUploadComplete={handleAddIrlDocument}
+                            compact
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        {irlDocs.length === 0 && (
+                            <div className="text-xs text-white/35">Sin documentos IRL cargados.</div>
+                        )}
+                        {irlDocs.map((doc) => (
+                            <div key={doc.id} className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-200 hover:text-cyan-100 underline underline-offset-2 truncate">
+                                    {doc.title}
+                                </a>
+                                <button
+                                    onClick={() => handleDeleteIrlDocument(doc.id)}
+                                    className="p-1.5 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                                    title="Eliminar documento"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
                 {/* Content Modules List */}
                 {modules.filter(m => m.type !== 'evaluation').map((module, mIdx) => (

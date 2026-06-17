@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, BookOpen, Award, TrendingUp, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Users, BookOpen, Award, TrendingUp, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useCallback } from "react";
 
 interface DashboardStats {
     totalStudents: number;
@@ -23,11 +24,7 @@ export default function ManagerDashboard({ companyId }: { companyId: string }) {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchStats();
-    }, [companyId]);
-
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         setLoading(true);
 
         // Total de estudiantes
@@ -85,7 +82,11 @@ export default function ManagerDashboard({ companyId }: { companyId: string }) {
         });
 
         setLoading(false);
-    };
+    }, [companyId]);
+
+    useEffect(() => {
+        void Promise.resolve().then(() => fetchStats());
+    }, [fetchStats]);
 
     if (loading) {
         return <div className="text-white/40 animate-pulse p-8">Cargando estadísticas...</div>;

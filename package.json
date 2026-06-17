@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:app": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
     "admin:ensure-critical": "node scripts/ensure_critical_admins.js"
   },
   "dependencies": {

@@ -16,6 +16,7 @@ import SignatureCanvas from "@/components/SignatureCanvas";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
+import { generateIrlCert } from "@/lib/generateIrlCert";
 
 const translations: any = {
     es: {
@@ -73,10 +74,12 @@ export default function CoursesPage() {
     const [certData, setCertData] = useState<any>(null);
     const [companyInfo, setCompanyInfo] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
-    const [certFlagsMap, setCertFlagsMap] = useState<Record<string, { participacion: boolean; aprobacion: boolean }>>({});
+    const [certFlagsMap, setCertFlagsMap] = useState<Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }>>({});
     const [diplomaConfig, setDiplomaConfig] = useState<any>(null);
     const [showSignatureModal, setShowSignatureModal] = useState(false);
     const [signatureTargetCourse, setSignatureTargetCourse] = useState<string>("");
+    const [irlDocsByCourse, setIrlDocsByCourse] = useState<Record<string, Array<{ id: string; title: string; file_url: string }>>>({});
+    const [irlConsentByEnrollment, setIrlConsentByEnrollment] = useState<Record<string, boolean>>({});
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga
 
     const t = translations[user?.language || 'es'];
@@ -140,7 +143,7 @@ export default function CoursesPage() {
         const [{ data: comp }, { data: ccData }, { data: dipCfg }] = await Promise.all([
             supabase.from('companies').select('*').eq('id', clientId).single(),
             supabase.from('company_courses')
-                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, start_date, validez_anios')
+                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, cert_irl_enabled, irl_role_id, irl_role_ids, start_date, validez_anios')
                 .eq('company_id', clientId),
             supabase.from('diploma_config')
                 .select('*')
@@ -150,12 +153,17 @@ export default function CoursesPage() {
         if (comp) setCompanyInfo(comp);
         if (dipCfg) setDiplomaConfig(dipCfg);
         // Build cert flags map
-        const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean }> = {};
+        const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }> = {};
         const scheduleMap: Record<string, { validez_anios: number | null }> = {};
         (ccData || []).forEach((cc: any) => {
+            const roleIds = Array.isArray(cc.irl_role_ids)
+                ? cc.irl_role_ids.filter(Boolean)
+                : (cc.irl_role_id ? [cc.irl_role_id] : []);
             flagsMap[cc.course_id] = {
                 participacion: resolveParticipationFlag(cc),
                 aprobacion: cc.diploma_metaverso_enabled === true,
+                irl: cc.cert_irl_enabled === true,
+                irlRoleIds: roleIds,
             };
             scheduleMap[cc.course_id] = {
                 validez_anios: cc.validez_anios ?? null,
@@ -250,6 +258,30 @@ export default function CoursesPage() {
             const processed = await Promise.all(processedPromises);
             console.log('Processed enrollments:', processed);
             setEnrollments(processed);
+            const consentState: Record<string, boolean> = {};
+            processed.forEach((e: any) => {
+                consentState[e.id] = e.irl_confirmed === true;
+            });
+            setIrlConsentByEnrollment(consentState);
+
+            const courseIds = Array.from(new Set(processed.map((e: any) => e.course_id).filter(Boolean)));
+            if (courseIds.length > 0) {
+                const { data: irlDocs } = await supabase
+                    .from('course_irl_documents')
+                    .select('id, course_id, title, file_url, sort_order, is_active')
+                    .in('course_id', courseIds)
+                    .eq('is_active', true)
+                    .order('sort_order', { ascending: true });
+
+                const byCourse: Record<string, Array<{ id: string; title: string; file_url: string }>> = {};
+                (irlDocs || []).forEach((d: any) => {
+                    if (!byCourse[d.course_id]) byCourse[d.course_id] = [];
+                    byCourse[d.course_id].push({ id: d.id, title: d.title, file_url: d.file_url });
+                });
+                setIrlDocsByCourse(byCourse);
+            } else {
+                setIrlDocsByCourse({});
+            }
         }
 
         setLoading(false);
@@ -509,6 +541,48 @@ export default function CoursesPage() {
         setShowSignatureModal(false);
         setSignatureTargetCourse("");
         return true;
+    };
+
+    const handleToggleIrlConsent = async (enrollmentId: string, checked: boolean) => {
+        setIrlConsentByEnrollment((prev) => ({ ...prev, [enrollmentId]: checked }));
+        const patch: any = {
+            irl_confirmed: checked,
+            irl_confirmed_at: checked ? new Date().toISOString() : null,
+        };
+        const { error } = await supabase.from('enrollments').update(patch).eq('id', enrollmentId);
+        if (error) {
+            setIrlConsentByEnrollment((prev) => ({ ...prev, [enrollmentId]: !checked }));
+            alert('No se pudo guardar la confirmacion IRL. Intenta nuevamente.');
+        }
+    };
+
+    const handleDownloadIrlCertificate = async (enrollment: any) => {
+        if (certGenerationLock.current || !user) return;
+        certGenerationLock.current = true;
+        setIsGeneratingCert(true);
+        try {
+            let jobName = user.job_position || 'Sin Cargo';
+            if (user.role_id) {
+                const { data: roleInfo } = await supabase
+                    .from('company_roles')
+                    .select('name')
+                    .eq('id', user.role_id)
+                    .single();
+                if (roleInfo?.name) jobName = roleInfo.name;
+            }
+
+            await generateIrlCert({
+                studentName: `${user.first_name} ${user.last_name}`.trim(),
+                rut: user.rut,
+                age: user.age,
+                jobName,
+                date: new Date().toLocaleDateString('es-CL'),
+                signatureUrl: user.digital_signature_url || null,
+            });
+        } finally {
+            setIsGeneratingCert(false);
+            certGenerationLock.current = false;
+        }
     };
 
     // Stats
@@ -854,8 +928,12 @@ export default function CoursesPage() {
                                             )}
                                             
                                             {isCompleted && !surveyPending && (() => {
-                                                const cf = certFlagsMap[enrollment.course_id] || { participacion: false, aprobacion: false };
-                                                const hasAnyCert = cf.participacion || cf.aprobacion;
+                                                const cf = certFlagsMap[enrollment.course_id] || { participacion: false, aprobacion: false, irl: false, irlRoleIds: [] };
+                                                const roleMatchesIrl = (cf.irlRoleIds || []).length === 0 || (cf.irlRoleIds || []).includes(user.role_id);
+                                                const irlAvailable = cf.irl && roleMatchesIrl;
+                                                const hasAnyCert = cf.participacion || cf.aprobacion || irlAvailable;
+                                                const irlDocs = irlDocsByCourse[enrollment.course_id] || [];
+                                                const irlConfirmed = irlConsentByEnrollment[enrollment.id] === true;
                                                 return (
                                                     <>
                                                         {!hasAnyCert ? (
@@ -890,6 +968,41 @@ export default function CoursesPage() {
                                                                     >
                                                                         <Award className="w-5 h-5" /> Cert. Aprobación
                                                                     </button>
+                                                                )}
+                                                                {irlAvailable && (
+                                                                    <div className="w-full mt-2 p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-2">
+                                                                        {irlDocs.length > 0 && (
+                                                                            <div className="flex flex-col gap-1.5">
+                                                                                {irlDocs.map((doc) => (
+                                                                                    <a
+                                                                                        key={doc.id}
+                                                                                        href={doc.file_url}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="text-[11px] text-cyan-200 hover:text-cyan-100 underline underline-offset-2"
+                                                                                    >
+                                                                                        {doc.title}
+                                                                                    </a>
+                                                                                ))}
+                                                                            </div>
+                                                                        )}
+                                                                        <label className="flex items-start gap-2 text-[11px] text-white/80">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={irlConfirmed}
+                                                                                onChange={(e) => handleToggleIrlConsent(enrollment.id, e.target.checked)}
+                                                                                className="mt-0.5"
+                                                                            />
+                                                                            <span>confirmo estar en conocimiento de los riesgos laborales que involucra mi cargo.</span>
+                                                                        </label>
+                                                                        <button
+                                                                            onClick={() => handleDownloadIrlCertificate(enrollment)}
+                                                                            disabled={!irlConfirmed || isGeneratingCert}
+                                                                            className="w-full py-3 bg-cyan-600 text-white border border-cyan-500/30 rounded-xl hover:bg-cyan-500 transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-[11px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            <Award className="w-4 h-4" /> Cert. IRL
+                                                                        </button>
+                                                                    </div>
                                                                 )}
                                                             </>
                                                         )}

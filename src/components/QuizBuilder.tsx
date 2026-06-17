@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Check, X, GripVertical, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Check, X, AlertCircle } from "lucide-react";
+import { useCallback } from "react";
 
 type QuestionType = 'single' | 'multiple' | 'truefalse';
 
@@ -14,6 +15,22 @@ type Question = {
     feedback?: string;
 };
 
+type RawOption = {
+    id?: string;
+    text?: string;
+};
+
+type RawQuestion = {
+    id?: string;
+    type?: QuestionType;
+    text?: string;
+    options?: RawOption[];
+    correctAnswer?: string | string[] | null;
+    points?: number;
+    weight?: number;
+    feedback?: string;
+};
+
 interface QuizBuilderProps {
     initialQuestions?: Question[];
     onSave: (questions: Question[]) => void;
@@ -22,7 +39,7 @@ interface QuizBuilderProps {
 
 export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }: QuizBuilderProps) {
     // Normalizar preguntas iniciales para asegurar que tengan el campo type y opciones con IDs únicos
-    const normalizeQuestions = (qs: any[]): Question[] => {
+    const normalizeQuestions = (qs: RawQuestion[]): Question[] => {
         return qs.map(q => {
             // Determinar el tipo de pregunta
             let type: QuestionType = 'single';
@@ -40,10 +57,10 @@ export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }:
             }
 
             // Asegurar que las opciones tengan IDs únicos y válidos
-            const seenOptionIds = new Set();
-            const idMap = new Map();
+            const seenOptionIds = new Set<string>();
+            const idMap = new Map<string, string>();
 
-            const options = (q.options || []).map((opt: any, idx: number) => {
+            const options = (q.options || []).map((opt: RawOption, idx: number) => {
                 let optId = opt.id;
                 if (!optId || seenOptionIds.has(optId)) {
                     const newId = crypto.randomUUID();
@@ -70,13 +87,14 @@ export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }:
             if (type === 'multiple') {
                 const rawAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : (q.correctAnswer ? [q.correctAnswer] : []);
                 correctAnswer = rawAnswers.map((id: string) => idMap.get(id) || id)
-                    .filter((id: string) => options.some((opt: any) => opt.id === id));
-                if (correctAnswer.length === 0) correctAnswer = [options[0]?.id];
+                    .filter((id: string) => options.some((opt) => opt.id === id));
+                if (correctAnswer.length === 0) correctAnswer = [options[0]?.id || ''];
             } else {
                 const rawAnswer = Array.isArray(q.correctAnswer) ? q.correctAnswer[0] : q.correctAnswer;
-                const mappedId = idMap.get(rawAnswer) || rawAnswer;
-                const isValidId = options.some((opt: any) => opt.id === mappedId);
-                correctAnswer = isValidId ? mappedId : options[0]?.id;
+                const normalizedRawAnswer = typeof rawAnswer === 'string' ? rawAnswer : '';
+                const mappedId = idMap.get(normalizedRawAnswer) || normalizedRawAnswer;
+                const isValidId = options.some((opt) => opt.id === mappedId);
+                correctAnswer = isValidId ? mappedId : (options[0]?.id || '');
             }
 
             return {
@@ -102,14 +120,7 @@ export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }:
         return normalized[0]?.id || null;
     });
 
-    // Initial load check
-    useEffect(() => {
-        if (questions.length === 0) {
-            handleAddQuestion();
-        }
-    }, []);
-
-    const handleAddQuestion = () => {
+    const handleAddQuestion = useCallback(() => {
         const opt1Id = crypto.randomUUID();
         const opt2Id = crypto.randomUUID();
         const newQ: Question = {
@@ -125,9 +136,16 @@ export default function QuizBuilder({ initialQuestions = [], onSave, onCancel }:
         };
         setQuestions(prevQuestions => [...prevQuestions, newQ]);
         setActiveQuestion(newQ.id);
-    };
+    }, []);
 
-    const handleUpdateQuestion = (qId: string, field: keyof Question, value: any) => {
+    // Initial load check
+    useEffect(() => {
+        if (questions.length === 0) {
+            void Promise.resolve().then(() => handleAddQuestion());
+        }
+    }, [questions.length, handleAddQuestion]);
+
+    const handleUpdateQuestion = <K extends keyof Question>(qId: string, field: K, value: Question[K]) => {
         setQuestions(prevQuestions => prevQuestions.map(q => q.id === qId ? { ...q, [field]: value } : q));
     };
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-    Users, BookOpen, Award, TrendingUp, Clock, CheckCircle2,
+    Users, BookOpen, Award, TrendingUp, Clock,
     AlertCircle, Download, Calendar, Filter, X, BarChart3, ClipboardList, HelpCircle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -49,6 +49,9 @@ interface Enrollment {
         last_name: string;
         age: number;
         gender: string;
+        email?: string;
+        position?: string;
+        company_name?: string;
         companies?: {
             name?: string;
         };
@@ -57,6 +60,13 @@ interface Enrollment {
         name: string;
         code: string;
     };
+    current_attempt?: number | null;
+    attempt_number?: number | null;
+    partial_progress?: number | null;
+    progress?: number | null;
+    current_module_index?: number | null;
+    total_modules?: number | null;
+    company_name?: string;
 }
 
 interface DailyActivity {
@@ -96,8 +106,53 @@ interface ActivityLog {
     attempt_number?: number | null;
     score?: number | null;
     interaction_type?: string | null;
-    raw_data?: any;
+    raw_data?: Record<string, unknown>;
 }
+
+type SupabaseStudentRow = {
+    id?: string;
+    rut: string;
+    first_name: string;
+    last_name: string;
+    age: number;
+    gender: string;
+    position?: string | null;
+    email?: string | null;
+    client_id?: string | null;
+    companies?: { name?: string | null } | null;
+    enrollments?: Array<Partial<Enrollment> & {
+        courses?:
+            | Enrollment['courses']
+            | Array<{ name?: string | null; code?: string | null }>
+            | null;
+    }>;
+};
+
+type UpcomingCourseRow = {
+    course_id: string;
+    start_date: string;
+    courses?:
+        | { name?: string | null; code?: string | null }
+        | Array<{ name?: string | null; code?: string | null }>
+        | null;
+};
+
+type ActivityLogRow = ActivityLog & { raw_data?: Record<string, unknown> };
+
+type QuestionStat = {
+    course: string;
+    question: string;
+    accuracy: number;
+    hits: number;
+    total: number;
+};
+
+type TabConfig = {
+    id: 'listado' | 'barras' | 'preguntas' | 'sesiones';
+    label: string;
+    icon: typeof ClipboardList;
+    iconClass: string;
+};
 
 interface UpcomingCourse {
     courseId: string;
@@ -121,14 +176,18 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         course: 'Todos',
         student: 'Todos',
         search: '',
-        range: '90d'
+        range: 'all'
     });
+    const [globalPage, setGlobalPage] = useState(1);
+    const [globalPageSize, setGlobalPageSize] = useState(25);
+    const [nowTs, setNowTs] = useState(() => Date.now());
 
     useEffect(() => {
-        fetchData();
-    }, [companyName, companyId]);
+        const timer = window.setInterval(() => setNowTs(Date.now()), 20000);
+        return () => window.clearInterval(timer);
+    }, []);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
 
         const resolvedCompanyId = companyId || (companyName ? await (async () => {
@@ -148,44 +207,196 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             return;
         }
 
-        let query = supabase
-            .from('enrollments')
-            .select(`
-                *,
-                students!inner(rut, first_name, last_name, age, gender, position, email, client_id, companies:client_id(name)),
-                courses(name, code)
-            `);
+        const enrollmentSelect = `
+            *,
+            students!inner(rut, first_name, last_name, age, gender, position, email, client_id, companies:client_id(name)),
+            courses(name, code)
+        `;
 
-        query = query.eq('students.client_id', resolvedCompanyId);
+        let allEnrollmentRows: Enrollment[] = [];
+        let enrollmentFetchError: { message?: string } | null = null;
+        const enrollmentPageSize = 1000;
 
-        const enrollmentsResp = await query.order('created_at', { ascending: false });
+        for (let from = 0; ; from += enrollmentPageSize) {
+            const { data: pageData, error: pageError } = await supabase
+                .from('enrollments')
+                .select(enrollmentSelect)
+                .eq('students.client_id', resolvedCompanyId)
+                .order('created_at', { ascending: false })
+                .range(from, from + enrollmentPageSize - 1);
 
-        const { data, error } = enrollmentsResp;
+            if (pageError) {
+                enrollmentFetchError = pageError;
+                break;
+            }
 
-        if (error) {
-            console.error('Error fetching enrollments:', error);
-        } else {
-            const enrollmentData = data as any[] || [];
-            setEnrollments(enrollmentData as any);
-            setLastUpdatedAt(new Date());
+            const rows = (Array.isArray(pageData) ? pageData : []) as Enrollment[];
+            allEnrollmentRows.push(...rows);
 
-            const enrollmentIds = enrollmentData.map((e: any) => e.id).filter(Boolean);
-            if (enrollmentIds.length > 0) {
+            if (rows.length < enrollmentPageSize) break;
+        }
+
+        const mapStudentRowsToEnrollments = (studentRows: SupabaseStudentRow[]): Enrollment[] => {
+            return studentRows.reduce<Enrollment[]>((acc, student) => {
+                const studentBase = {
+                    rut: student.rut,
+                    first_name: student.first_name,
+                    last_name: student.last_name,
+                    age: student.age,
+                    gender: student.gender,
+                    position: student.position ?? undefined,
+                    email: student.email ?? undefined,
+                    client_id: student.client_id,
+                    companies: student.companies
+                        ? { name: student.companies.name ?? undefined }
+                        : undefined,
+                };
+
+                (student.enrollments || []).forEach((enrollment) => {
+                    const enrollmentCourses = Array.isArray(enrollment.courses)
+                        ? (enrollment.courses[0] ?? null)
+                        : (enrollment.courses ?? null);
+
+                    const id = typeof enrollment.id === 'string' ? enrollment.id : '';
+                    const studentId = typeof enrollment.student_id === 'string' ? enrollment.student_id : '';
+                    const courseId = typeof enrollment.course_id === 'string' ? enrollment.course_id : '';
+                    if (!id || !studentId || !courseId) return;
+
+                    acc.push({
+                        id,
+                        student_id: studentId,
+                        course_id: courseId,
+                        status: typeof enrollment.status === 'string' ? enrollment.status : 'pending',
+                        best_score: String(enrollment.best_score ?? 0),
+                        completed_at: typeof enrollment.completed_at === 'string' ? enrollment.completed_at : null,
+                        created_at: typeof enrollment.created_at === 'string' ? enrollment.created_at : new Date().toISOString(),
+                        students: studentBase,
+                        courses: {
+                            name: enrollmentCourses?.name ?? 'Curso',
+                            code: enrollmentCourses?.code ?? '',
+                        },
+                        current_attempt: typeof enrollment.current_attempt === 'number' ? enrollment.current_attempt : null,
+                        attempt_number: typeof enrollment.attempt_number === 'number' ? enrollment.attempt_number : null,
+                        partial_progress: typeof enrollment.partial_progress === 'number' ? enrollment.partial_progress : null,
+                        progress: typeof enrollment.progress === 'number' ? enrollment.progress : null,
+                        current_module_index: typeof enrollment.current_module_index === 'number' ? enrollment.current_module_index : null,
+                        total_modules: typeof enrollment.total_modules === 'number' ? enrollment.total_modules : null,
+                        company_name: typeof enrollment.company_name === 'string' ? enrollment.company_name : undefined,
+                    } satisfies Enrollment);
+                });
+
+                return acc;
+            }, []);
+        };
+
+        const loadEnrollmentFallbackFromStudents = async () => {
+            const { data: studentRows, error: studentError } = await supabase
+                .from('students')
+                .select(`
+                    rut,
+                    first_name,
+                    last_name,
+                    age,
+                    gender,
+                    position,
+                    email,
+                    client_id,
+                    companies:client_id(name),
+                    enrollments(
+                        id,
+                        student_id,
+                        course_id,
+                        status,
+                        best_score,
+                        completed_at,
+                        created_at,
+                        current_attempt,
+                        max_attempts,
+                        irl_confirmed,
+                        courses(name, code)
+                    )
+                `)
+                .eq('client_id', resolvedCompanyId)
+                .order('last_name');
+
+            if (studentError) {
+                console.error('Fallback error fetching students for global participants:', studentError);
+                return [] as Enrollment[];
+            }
+
+            const normalizedStudentRows = (Array.isArray(studentRows) ? studentRows : []).map((row: unknown) => {
+                const candidate = (row ?? {}) as Record<string, unknown>;
+                const companiesRaw = candidate.companies;
+                const companyObj = Array.isArray(companiesRaw)
+                    ? ((companiesRaw[0] ?? null) as { name?: string | null } | null)
+                    : ((companiesRaw as { name?: string | null } | null) ?? null);
+
+                return {
+                    rut: String(candidate.rut ?? ''),
+                    first_name: String(candidate.first_name ?? ''),
+                    last_name: String(candidate.last_name ?? ''),
+                    age: Number(candidate.age ?? 0),
+                    gender: String(candidate.gender ?? ''),
+                    position: (candidate.position as string | null | undefined) ?? null,
+                    email: (candidate.email as string | null | undefined) ?? null,
+                    client_id: (candidate.client_id as string | null | undefined) ?? null,
+                    companies: companyObj,
+                    enrollments: Array.isArray(candidate.enrollments)
+                        ? (candidate.enrollments as SupabaseStudentRow['enrollments'])
+                        : [],
+                } satisfies SupabaseStudentRow;
+            });
+
+            return mapStudentRowsToEnrollments(normalizedStudentRows);
+        };
+
+        const directEnrollmentData = allEnrollmentRows;
+        const effectiveEnrollments = enrollmentFetchError || directEnrollmentData.length === 0
+            ? await loadEnrollmentFallbackFromStudents()
+            : directEnrollmentData;
+
+        if (enrollmentFetchError) {
+            console.error('Error fetching enrollments:', enrollmentFetchError);
+        }
+
+        setEnrollments(effectiveEnrollments);
+        setLastUpdatedAt(new Date());
+
+        const enrollmentIds = effectiveEnrollments.map((e) => e.id).filter(Boolean);
+        if (enrollmentIds.length > 0) {
+            const chunkSize = 250;
+            const chunks: string[][] = [];
+            for (let i = 0; i < enrollmentIds.length; i += chunkSize) {
+                chunks.push(enrollmentIds.slice(i, i + chunkSize));
+            }
+
+            const allLogs: ActivityLogRow[] = [];
+            let hadLogsError = false;
+
+            for (const idsChunk of chunks) {
                 const { data: logsData, error: logsError } = await supabase
                     .from('activity_logs')
                     .select('id, enrollment_id, created_at, attempt_number, score, interaction_type, raw_data')
-                    .in('enrollment_id', enrollmentIds)
+                    .in('enrollment_id', idsChunk)
                     .order('created_at', { ascending: false });
 
                 if (logsError) {
+                    hadLogsError = true;
                     console.error('Error fetching activity logs:', logsError);
-                    setActivityLogs([]);
-                } else {
-                    setActivityLogs((logsData as any) || []);
+                    break;
                 }
-            } else {
-                setActivityLogs([]);
+
+                if (Array.isArray(logsData)) allLogs.push(...(logsData as ActivityLogRow[]));
             }
+
+            if (hadLogsError) {
+                setActivityLogs([]);
+            } else {
+                allLogs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                setActivityLogs(allLogs);
+            }
+        } else {
+            setActivityLogs([]);
         }
 
         const today = new Date();
@@ -205,12 +416,19 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                 console.error('Error fetching upcoming courses:', upcomingError);
                 setUpcomingCourses([]);
             } else {
-                const mapped = (upcomingData || []).map((row: any) => ({
-                    courseId: row.course_id,
-                    courseName: row.courses?.name || 'Curso sin nombre',
-                    courseCode: row.courses?.code || '',
-                    startDate: row.start_date,
-                }));
+                const mapped = (upcomingData || []).map((rawRow: unknown) => {
+                    const row = rawRow as UpcomingCourseRow;
+                    const courseInfo = Array.isArray(row.courses)
+                        ? (row.courses[0] ?? null)
+                        : (row.courses ?? null);
+
+                    return {
+                        courseId: row.course_id,
+                        courseName: courseInfo?.name || 'Curso sin nombre',
+                        courseCode: courseInfo?.code || '',
+                        startDate: row.start_date,
+                    };
+                });
                 setUpcomingCourses(mapped);
             }
         } else {
@@ -218,7 +436,11 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         }
 
         setLoading(false);
-    };
+    }, [companyId, companyName]);
+
+    useEffect(() => {
+        void Promise.resolve().then(() => fetchData());
+    }, [fetchData]);
 
     const formatUpcomingDate = (dateValue: string) => {
         const date = new Date(`${dateValue}T00:00:00`);
@@ -564,7 +786,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             };
         });
 
-        const enrollmentRows = exportRows.map((e: any) => {
+        const enrollmentRows = exportRows.map((e: Enrollment) => {
             const track = getTrackProgressFields(e);
             return ({
             Fecha_Inscripcion: new Date(e.created_at).toLocaleDateString(),
@@ -605,7 +827,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         return `${h}:${m}:${s}`;
     };
 
-    const parseDurationSeconds = (value: any): number => {
+    const parseDurationSeconds = (value: unknown): number => {
         if (!value) return 0;
         if (typeof value === 'number' && Number.isFinite(value)) return value;
         if (typeof value !== 'string') return 0;
@@ -630,6 +852,15 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         return normalized || 'all';
     };
 
+    const normalizeSearchText = (value: string) => {
+        return (value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    };
+
     const formatExportStatus = (status?: string, bestScore?: string | number | null) => {
         const score = Number(bestScore || 0);
         if (status === 'completed') return score >= 70 ? 'aprobado' : 'reprobado';
@@ -638,7 +869,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         return 'pendiente';
     };
 
-    const getTrackProgressFields = (enrollment: any) => {
+    const getTrackProgressFields = (enrollment: Pick<Enrollment, 'total_modules' | 'current_module_index' | 'partial_progress' | 'progress'>) => {
         const totalModules = Math.max(0, Number(enrollment?.total_modules ?? 0));
         const currentModule = Math.max(0, Number(enrollment?.current_module_index ?? 0));
         const progressPercent = Math.max(0, Math.min(100, Number(enrollment?.partial_progress ?? enrollment?.progress ?? 0)));
@@ -662,7 +893,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         return map;
     }, [enrollments]);
 
-    const enrollmentTimeById = useMemo(() => {
+    const enrollmentTimeById = (() => {
         const map = new Map<string, number>();
         activityLogs.forEach(log => {
             const seconds =
@@ -674,18 +905,18 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             map.set(log.enrollment_id, (map.get(log.enrollment_id) || 0) + seconds);
         });
         return map;
-    }, [activityLogs]);
+    })();
 
-    const globalFilteredEnrollments = useMemo(() => {
-        const now = new Date();
+    const globalFilteredEnrollments = (() => {
+        const now = nowTs;
         const base = [...filteredEnrollments];
 
         return base.filter((e) => {
-            const created = new Date(e.created_at);
+            const created = new Date(e.created_at).getTime();
+            if (Number.isNaN(created)) return false;
             if (globalFilters.range !== 'all') {
                 const days = globalFilters.range === '30d' ? 30 : globalFilters.range === '90d' ? 90 : 365;
-                const since = new Date(now);
-                since.setDate(now.getDate() - days);
+                const since = now - (days * 24 * 60 * 60 * 1000);
                 if (created < since) return false;
             }
 
@@ -694,28 +925,50 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             }
 
             if (globalFilters.student !== 'Todos') {
-                const full = `${e.students?.first_name || ''} ${e.students?.last_name || ''}`.trim();
-                if (full !== globalFilters.student) return false;
+                const full = normalizeSearchText(`${e.students?.first_name || ''} ${e.students?.last_name || ''}`);
+                const selected = normalizeSearchText(globalFilters.student);
+                if (full !== selected) return false;
             }
 
             if (globalFilters.search.trim()) {
-                const term = globalFilters.search.toLowerCase();
-                const full = `${e.students?.first_name || ''} ${e.students?.last_name || ''}`.toLowerCase();
-                const rut = (e.students?.rut || '').toLowerCase();
-                const email = (e.students as any)?.email?.toLowerCase?.() || '';
+                const term = normalizeSearchText(globalFilters.search);
+                const full = normalizeSearchText(`${e.students?.first_name || ''} ${e.students?.last_name || ''}`);
+                const rut = normalizeSearchText(e.students?.rut || '');
+                const email = normalizeSearchText(e.students?.email || '');
                 if (!full.includes(term) && !rut.includes(term) && !email.includes(term)) return false;
             }
 
             return true;
         });
-    }, [filteredEnrollments, globalFilters]);
+    })();
 
-    const globalFilteredEnrollmentIds = useMemo(() => {
-        return new Set(globalFilteredEnrollments.map(e => e.id));
-    }, [globalFilteredEnrollments]);
+    const globalFilteredEnrollmentIds = useMemo(() => new Set(globalFilteredEnrollments.map(e => e.id)), [globalFilteredEnrollments]);
+
+    const totalGlobalPages = useMemo(() => {
+        return Math.max(1, Math.ceil(globalFilteredEnrollments.length / globalPageSize));
+    }, [globalFilteredEnrollments.length, globalPageSize]);
+
+    const effectiveGlobalPage = useMemo(() => {
+        return Math.max(1, Math.min(globalPage, totalGlobalPages));
+    }, [globalPage, totalGlobalPages]);
+
+    const pagedGlobalEnrollments = useMemo(() => {
+        const start = (effectiveGlobalPage - 1) * globalPageSize;
+        return globalFilteredEnrollments.slice(start, start + globalPageSize);
+    }, [globalFilteredEnrollments, effectiveGlobalPage, globalPageSize]);
 
     const globalCourses = useMemo(() => ['Todos', ...Array.from(new Set(enrollments.map(e => e.courses?.name).filter(Boolean)))], [enrollments]);
-    const globalStudents = useMemo(() => ['Todos', ...Array.from(new Set(enrollments.map(e => `${e.students?.first_name || ''} ${e.students?.last_name || ''}`.trim()).filter(Boolean)))], [enrollments]);
+    const globalStudents = useMemo(() => {
+        const names = Array.from(
+            new Set(
+                enrollments
+                    .map(e => `${e.students?.first_name || ''} ${e.students?.last_name || ''}`.trim())
+                    .filter(Boolean)
+            )
+        ).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+        return ['Todos', ...names];
+    }, [enrollments]);
 
     const globalMetrics = useMemo(() => {
         const total = globalFilteredEnrollments.length;
@@ -724,7 +977,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
         const withResult = approved + failed;
         const approvalRate = withResult > 0 ? Math.round((approved / withResult) * 100) : 0;
 
-        const attempts = globalFilteredEnrollments.map((e: any) => Number(e.current_attempt || e.attempt_number || 1));
+        const attempts = globalFilteredEnrollments.map((e) => Number(e.current_attempt || e.attempt_number || 1));
         const avgAttempts = attempts.length > 0 ? attempts.reduce((a, b) => a + b, 0) / attempts.length : 0;
 
         const totalSeconds = globalFilteredEnrollments.reduce((acc, e) => acc + (enrollmentTimeById.get(e.id) || 0), 0);
@@ -773,7 +1026,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             const enrollment = enrollmentMap.get(log.enrollment_id);
             const course = enrollment?.courses?.name || 'Curso';
 
-            perQuestion.forEach((q: any) => {
+            perQuestion.forEach((q: { id?: string | number; question_id?: string | number; correct?: boolean }) => {
                 const qId = String(q?.id || q?.question_id || 'Sin ID');
                 const key = `${course}::${qId}`;
                 const current = questionMap.get(key) || { course, hits: 0, misses: 0 };
@@ -803,10 +1056,10 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
     }, [activityLogs, enrollmentMap, globalFilteredEnrollmentIds]);
 
     const difficultByCourse = useMemo(() => {
-        const map = new Map<string, typeof difficultQuestions>();
+        const map = new Map<string, QuestionStat[]>();
         difficultQuestions.forEach((q) => {
-            if (!map.has(q.course)) map.set(q.course, [] as any);
-            (map.get(q.course) as any).push(q);
+            if (!map.has(q.course)) map.set(q.course, []);
+            map.get(q.course)!.push(q);
         });
 
         return Array.from(map.entries()).map(([course, questions]) => ({
@@ -816,7 +1069,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
     }, [difficultQuestions]);
 
     const activeSessions = useMemo(() => {
-        const threshold = Date.now() - (30 * 60 * 1000);
+        const threshold = nowTs - (30 * 60 * 1000);
         const latestPerEnrollment = new Map<string, ActivityLog>();
 
         activityLogs.forEach(log => {
@@ -830,14 +1083,14 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             }
         });
 
-        return Array.from(latestPerEnrollment.values()).map(log => {
+        return Array.from(latestPerEnrollment.values()).map((log) => {
             const enrollment = enrollmentMap.get(log.enrollment_id);
             return {
                 log,
                 enrollment
             };
         }).filter(x => !!x.enrollment);
-    }, [activityLogs, enrollmentMap, globalFilteredEnrollmentIds]);
+    }, [activityLogs, enrollmentMap, globalFilteredEnrollmentIds, nowTs]);
 
     const exportGlobalView = () => {
         const workbook = XLSX.utils.book_new();
@@ -880,7 +1133,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             };
         });
 
-        const listSheet = globalFilteredEnrollments.map((e: any) => {
+        const listSheet = globalFilteredEnrollments.map((e: Enrollment) => {
             const track = getTrackProgressFields(e);
             return ({
             Fecha: new Date(e.created_at).toLocaleDateString(),
@@ -916,8 +1169,8 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             Respuestas: q.total
         }));
 
-        const sessionsSheet = activeSessions.map(({ log, enrollment }: any) => ({
-            Hace: `${Math.max(0, Math.round((Date.now() - new Date(log.created_at).getTime()) / 60000))} min`,
+        const sessionsSheet = activeSessions.map(({ log, enrollment }: { log: ActivityLog; enrollment?: Enrollment }) => ({
+            Hace: `${Math.max(0, Math.round((nowTs - new Date(log.created_at).getTime()) / 60000))} min`,
             Fecha: new Date(log.created_at).toLocaleString(),
             Curso: enrollment?.courses?.name || '',
             Nombre: `${enrollment?.students?.first_name || ''} ${enrollment?.students?.last_name || ''}`.trim(),
@@ -969,6 +1222,8 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             }
         }
     };
+    const lineChartOptions = chartOptions as ChartOptions<'line'>;
+    const barChartOptions = chartOptions as ChartOptions<'bar'>;
 
     return (
         <div className="space-y-8">
@@ -1004,18 +1259,27 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                                 <input
                                     type="date"
                                     value={dateFilter.startDate}
-                                    onChange={(e) => setDateFilter(prev => ({ ...prev, startDate: e.target.value }))}
+                                    onChange={(e) => {
+                                        setDateFilter(prev => ({ ...prev, startDate: e.target.value }));
+                                        setGlobalPage(1);
+                                    }}
                                     className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-brand/40"
                                 />
                                 <input
                                     type="date"
                                     value={dateFilter.endDate}
-                                    onChange={(e) => setDateFilter(prev => ({ ...prev, endDate: e.target.value }))}
+                                    onChange={(e) => {
+                                        setDateFilter(prev => ({ ...prev, endDate: e.target.value }));
+                                        setGlobalPage(1);
+                                    }}
                                     className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-brand/40"
                                 />
                                 {(dateFilter.startDate || dateFilter.endDate) && (
                                     <button
-                                        onClick={() => setDateFilter({ startDate: "", endDate: "" })}
+                                        onClick={() => {
+                                            setDateFilter({ startDate: "", endDate: "" });
+                                            setGlobalPage(1);
+                                        }}
                                         className="p-2 hover:bg-white/5 rounded-lg transition-all"
                                         title="Limpiar filtro"
                                     >
@@ -1066,23 +1330,35 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
                     <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Curso</label>
-                        <select value={globalFilters.course} onChange={(e) => setGlobalFilters(prev => ({ ...prev, course: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
+                        <select value={globalFilters.course} onChange={(e) => {
+                            setGlobalFilters(prev => ({ ...prev, course: e.target.value }));
+                            setGlobalPage(1);
+                        }} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
                             {globalCourses.map(c => <option className="bg-slate-100 text-slate-900" key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Alumno (Nombre y Apellido)</label>
-                        <select value={globalFilters.student} onChange={(e) => setGlobalFilters(prev => ({ ...prev, student: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
+                        <select value={globalFilters.student} onChange={(e) => {
+                            setGlobalFilters(prev => ({ ...prev, student: e.target.value }));
+                            setGlobalPage(1);
+                        }} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
                             {globalStudents.map(s => <option className="bg-slate-100 text-slate-900" key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
                     <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Buscar libre</label>
-                        <input value={globalFilters.search} onChange={(e) => setGlobalFilters(prev => ({ ...prev, search: e.target.value }))} placeholder="Correo, RUT..." className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white" />
+                        <input value={globalFilters.search} onChange={(e) => {
+                            setGlobalFilters(prev => ({ ...prev, search: e.target.value }));
+                            setGlobalPage(1);
+                        }} placeholder="Correo, RUT..." className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white" />
                     </div>
                     <div className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Rango temporal</label>
-                        <select value={globalFilters.range} onChange={(e) => setGlobalFilters(prev => ({ ...prev, range: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
+                        <select value={globalFilters.range} onChange={(e) => {
+                            setGlobalFilters(prev => ({ ...prev, range: e.target.value }));
+                            setGlobalPage(1);
+                        }} className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white [&>option]:bg-slate-100 [&>option]:text-slate-900">
                             <option className="bg-slate-100 text-slate-900" value="30d">Ultimos 30 dias</option>
                             <option className="bg-slate-100 text-slate-900" value="90d">Ultimos 90 dias</option>
                             <option className="bg-slate-100 text-slate-900" value="365d">Ultimo ano</option>
@@ -1104,12 +1380,12 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
 
                 <div className="flex items-end justify-start gap-3 flex-wrap">
                     <div className="flex items-center gap-1 border-b border-white/10 overflow-x-auto">
-                        {[
+                        {([
                             { id: 'listado', label: 'Listado', icon: ClipboardList, iconClass: 'text-brand' },
                             { id: 'barras', label: 'Barras por curso', icon: BarChart3, iconClass: 'text-brand' },
                             { id: 'preguntas', label: 'Preguntas dificiles', icon: HelpCircle, iconClass: 'text-brand' },
                             { id: 'sesiones', label: 'Sesiones (30 min)', icon: Clock, iconClass: 'text-brand' }
-                        ].map((tab: any) => (
+                        ] as const).map((tab) => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-3.5 py-1.5 rounded-t-xl border border-b-0 text-sm font-semibold flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-transparent text-white/50 hover:text-white'}`}>
                                 <tab.icon className={`w-4 h-4 ${tab.iconClass}`} /> {tab.label}
                             </button>
@@ -1127,15 +1403,15 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                                 </tr>
                             </thead>
                             <tbody>
-                                {globalFilteredEnrollments.map((e) => (
+                                {pagedGlobalEnrollments.map((e) => (
                                     <tr key={e.id} className="border-b border-white/5">
                                         <td className="py-1.5 px-3">{new Date(e.created_at).toLocaleDateString()}</td>
                                         <td className="px-3">{e.courses?.name || '-'}</td>
                                         <td className="px-3">{`${e.students?.first_name || ''} ${e.students?.last_name || ''}`.trim()}</td>
-                                        <td className="px-3">{(e.students as any)?.email || '-'}</td>
+                                        <td className="px-3">{e.students?.email || '-'}</td>
                                         <td className="px-3">{e.students?.rut || '-'}</td>
                                         <td className="px-3">{Number(e.best_score || 0)}%</td>
-                                        <td className="px-3">{Number((e as any).current_attempt || (e as any).attempt_number || 1)}</td>
+                                        <td className="px-3">{Number(e.current_attempt || e.attempt_number || 1)}</td>
                                         <td className="px-3">{formatSeconds(enrollmentTimeById.get(e.id) || 0)}</td>
                                         <td className="px-3">
                                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${e.status === 'completed' ? 'bg-brand/20 text-brand' : e.status === 'failed' ? 'bg-red-500/20 text-red-400' : 'bg-white/10 text-white/70'}`}>
@@ -1146,6 +1422,37 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                                 ))}
                             </tbody>
                         </table>
+                        <div className="px-3 py-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-white/60">
+                            <div>
+                                Pagina {effectiveGlobalPage} de {totalGlobalPages}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-white/50">Filas</label>
+                                <select
+                                    value={globalPageSize}
+                                    onChange={(e) => {
+                                        setGlobalPageSize(Number(e.target.value));
+                                        setGlobalPage(1);
+                                    }}
+                                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white [&>option]:bg-slate-100 [&>option]:text-slate-900"
+                                >
+                                    <option className="bg-slate-100 text-slate-900" value={10}>10</option>
+                                    <option className="bg-slate-100 text-slate-900" value={25}>25</option>
+                                    <option className="bg-slate-100 text-slate-900" value={50}>50</option>
+                                    <option className="bg-slate-100 text-slate-900" value={100}>100</option>
+                                </select>
+                                <button
+                                    onClick={() => setGlobalPage((p) => Math.max(1, Math.min(totalGlobalPages, p) - 1))}
+                                    disabled={effectiveGlobalPage <= 1}
+                                    className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >Anterior</button>
+                                <button
+                                    onClick={() => setGlobalPage((p) => Math.min(totalGlobalPages, Math.min(totalGlobalPages, p) + 1))}
+                                    disabled={effectiveGlobalPage >= totalGlobalPages}
+                                    className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >Siguiente</button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -1231,9 +1538,9 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                             <tbody>
                                 {activeSessions.length === 0 ? (
                                     <tr><td colSpan={8} className="py-4 text-white/40">0 sesiones activas</td></tr>
-                                ) : activeSessions.map(({ log, enrollment }: any) => (
+                                ) : activeSessions.map(({ log, enrollment }: { log: ActivityLog; enrollment?: Enrollment }) => (
                                     <tr key={log.id} className="border-b border-white/5">
-                                        <td className="py-2">{Math.max(0, Math.round((Date.now() - new Date(log.created_at).getTime()) / 60000))} min</td>
+                                        <td className="py-2">{Math.max(0, Math.round((nowTs - new Date(log.created_at).getTime()) / 60000))} min</td>
                                         <td>{new Date(log.created_at).toLocaleString()}</td>
                                         <td>{enrollment?.courses?.name || '-'}</td>
                                         <td>{`${enrollment?.students?.first_name || ''} ${enrollment?.students?.last_name || ''}`.trim()}</td>
@@ -1306,7 +1613,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                     <div className="h-64">
                         {dailyActivity.length > 0 ? (
                             <Line
-                                options={chartOptions as any}
+                                options={lineChartOptions}
                                 data={{
                                     labels: dailyActivity.map(d => d.date),
                                     datasets: [
@@ -1342,7 +1649,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                     <div className="h-64">
                         {courseDistributionHistogram.labels.length > 0 ? (
                             <Bar
-                                options={chartOptions as any}
+                                options={barChartOptions}
                                 data={{
                                     labels: courseDistributionHistogram.labels.map(l => `${l} curso${Number(l) > 1 ? 's' : ''}`),
                                     datasets: [
@@ -1370,7 +1677,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                         <h3 className="text-lg font-bold">Promedio por Edad</h3>
                         <div className="h-64">
                             <Bar
-                                options={chartOptions as any}
+                                options={barChartOptions}
                                 data={{
                                     labels: Object.keys(demographicStats.ageGroups).sort(),
                                     datasets: [
@@ -1399,7 +1706,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                         <h3 className="text-lg font-bold">Promedio por Género</h3>
                         <div className="h-64">
                             <Bar
-                                options={chartOptions as any}
+                                options={barChartOptions}
                                 data={{
                                     labels: Object.keys(demographicStats.genderGroups),
                                     datasets: [

@@ -20,7 +20,8 @@ export default function CoursesAdmin() {
         code: '', 
         company_ids: [] as string[], 
         max_attempts: 3,
-        hours: ''
+        hours: '',
+        irl_certificate_enabled: false
     });
     const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
     const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
@@ -76,6 +77,7 @@ export default function CoursesAdmin() {
                     name: newCourse.name,
                     code: newCourse.code,
                     max_attempts: newCourse.max_attempts,
+                        irl_certificate_enabled: newCourse.irl_certificate_enabled,
                     config: { ...(currentCourse?.config || {}), hours: newCourse.hours || undefined }
                 })
                 .eq('id', editingCourseId);
@@ -88,7 +90,8 @@ export default function CoursesAdmin() {
             if (newCourse.company_ids.length > 0) {
                 const assignments = newCourse.company_ids.map(id => ({
                     course_id: editingCourseId,
-                    company_id: id
+                    company_id: id,
+                    assignment_active: true,
                 }));
                 const { error: assignError } = await supabase.from('company_courses').insert(assignments);
                 if (assignError) alert("Error asignando empresas: " + assignError.message);
@@ -96,7 +99,7 @@ export default function CoursesAdmin() {
 
             setIsCreateModalOpen(false);
             setEditingCourseId(null);
-            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
+            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '', irl_certificate_enabled: false });
             fetchCourses();
         } else {
             handleCreateCourse();
@@ -148,6 +151,7 @@ export default function CoursesAdmin() {
             is_active: true,
             registration_mode: 'open',
             max_attempts: newCourse.max_attempts,
+            irl_certificate_enabled: newCourse.irl_certificate_enabled,
             config: { questions: [], ...(newCourse.hours ? { hours: newCourse.hours } : {}) }
         };
 
@@ -164,13 +168,14 @@ export default function CoursesAdmin() {
             if (newCourse.company_ids.length > 0) {
                 const assignments = newCourse.company_ids.map(id => ({
                     course_id: course.id,
-                    company_id: id
+                    company_id: id,
+                    assignment_active: true,
                 }));
                 await supabase.from('company_courses').insert(assignments);
             }
 
             setIsCreateModalOpen(false);
-            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
+            setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '', irl_certificate_enabled: false });
             fetchCourses();
         }
     };
@@ -203,7 +208,7 @@ export default function CoursesAdmin() {
                     <div className="flex gap-2 w-full md:w-auto">
                         <button
                             onClick={() => {
-                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
+                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '', irl_certificate_enabled: false });
                                 setEditingCourseId(null);
                                 setIsCreateModalOpen(true);
                             }}
@@ -212,10 +217,10 @@ export default function CoursesAdmin() {
                             <Plus className="w-4 h-4" /> Nuevo Curso
                         </button>
                         <button
-                            onClick={() => router.push('/admin/metaverso/encuestas')}
+                            onClick={() => router.push('/admin/metaverso/cargos')}
                             className="bg-white/5 border border-white/10 text-white/40 px-6 py-3 rounded-xl font-black uppercase text-[10px] hover:bg-brand/10 hover:text-brand transition-all flex items-center gap-2"
                         >
-                            <Settings className="w-4 h-4" /> Gestión de Encuestas
+                            <Settings className="w-4 h-4" /> Gestión de Cargos
                         </button>
                     </div>
                 </div>
@@ -291,7 +296,8 @@ export default function CoursesAdmin() {
                                             code: course.code,
                                             company_ids: course.company_courses?.map((cc: any) => cc.company_id) || [], 
                                             max_attempts: course.max_attempts || 3,
-                                            hours: course.config?.hours || ''
+                                            hours: course.config?.hours || '',
+                                            irl_certificate_enabled: course.irl_certificate_enabled === true
                                         });
                                         setEditingCourseId(course.id);
                                         setIsCreateModalOpen(true);
@@ -333,7 +339,7 @@ export default function CoursesAdmin() {
                             <button onClick={() => { 
                                 setIsCreateModalOpen(false); 
                                 setEditingCourseId(null); 
-                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '' });
+                                setNewCourse({ name: '', code: '', company_ids: [], max_attempts: 3, hours: '', irl_certificate_enabled: false });
                             }} className="text-white/40 hover:text-white">
                                 <X className="w-6 h-6" />
                             </button>
@@ -391,6 +397,20 @@ export default function CoursesAdmin() {
                                     />
                                     <span className="text-xs text-white/30">veces máx. antes de bloquear el acceso al curso</span>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-black uppercase text-white/40 mb-2 block">Certificado IRL (Global)</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setNewCourse(prev => ({ ...prev, irl_certificate_enabled: !prev.irl_certificate_enabled }))}
+                                    className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase border transition-all ${newCourse.irl_certificate_enabled ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-white/5 text-white/50 border-white/10 hover:border-white/20'}`}
+                                >
+                                    {newCourse.irl_certificate_enabled ? '✓ IRL Habilitado' : 'IRL Deshabilitado'}
+                                </button>
+                                <p className="mt-2 text-[10px] text-white/30 leading-relaxed">
+                                    Requiere configurar el cargo obligatorio y su activacion por empresa en Gestion de Cursos por Empresa.
+                                </p>
                             </div>
 
                             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
