@@ -143,7 +143,7 @@ export default function CoursesPage() {
         const [{ data: comp }, { data: ccData }, { data: dipCfg }] = await Promise.all([
             supabase.from('companies').select('*').eq('id', clientId).single(),
             supabase.from('company_courses')
-                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, cert_irl_enabled, irl_role_id, irl_role_ids, start_date, validez_anios')
+                .select('course_id, cert_participacion_enabled, diploma_metaverso_enabled, cert_irl_enabled, irl_role_id, irl_role_ids, start_date, validez_anios, courses(irl_certificate_enabled)')
                 .eq('company_id', clientId),
             supabase.from('diploma_config')
                 .select('*')
@@ -156,14 +156,16 @@ export default function CoursesPage() {
         const flagsMap: Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }> = {};
         const scheduleMap: Record<string, { validez_anios: number | null }> = {};
         (ccData || []).forEach((cc: any) => {
+            const globalIrlEnabled = cc?.courses?.irl_certificate_enabled === true;
             const roleIds = Array.isArray(cc.irl_role_ids)
                 ? cc.irl_role_ids.filter(Boolean)
                 : (cc.irl_role_id ? [cc.irl_role_id] : []);
+            const effectiveRoleIds = globalIrlEnabled ? [] : roleIds;
             flagsMap[cc.course_id] = {
                 participacion: resolveParticipationFlag(cc),
                 aprobacion: cc.diploma_metaverso_enabled === true,
-                irl: cc.cert_irl_enabled === true,
-                irlRoleIds: roleIds,
+                irl: cc.cert_irl_enabled === true || globalIrlEnabled,
+                irlRoleIds: effectiveRoleIds,
             };
             scheduleMap[cc.course_id] = {
                 validez_anios: cc.validez_anios ?? null,
@@ -558,6 +560,13 @@ export default function CoursesPage() {
 
     const handleDownloadIrlCertificate = async (enrollment: any) => {
         if (certGenerationLock.current || !user) return;
+
+        const irlDocs = irlDocsByCourse[enrollment.course_id] || [];
+        if (irlDocs.length === 0) {
+            alert('Este curso no tiene documentos IRL cargados. El certificado IRL no esta disponible.');
+            return;
+        }
+
         certGenerationLock.current = true;
         setIsGeneratingCert(true);
         try {
@@ -930,9 +939,10 @@ export default function CoursesPage() {
                                             {isCompleted && !surveyPending && (() => {
                                                 const cf = certFlagsMap[enrollment.course_id] || { participacion: false, aprobacion: false, irl: false, irlRoleIds: [] };
                                                 const roleMatchesIrl = (cf.irlRoleIds || []).length === 0 || (cf.irlRoleIds || []).includes(user.role_id);
-                                                const irlAvailable = cf.irl && roleMatchesIrl;
-                                                const hasAnyCert = cf.participacion || cf.aprobacion || irlAvailable;
                                                 const irlDocs = irlDocsByCourse[enrollment.course_id] || [];
+                                                const hasIrlDocs = irlDocs.length > 0;
+                                                const irlAvailable = cf.irl && roleMatchesIrl && hasIrlDocs;
+                                                const hasAnyCert = cf.participacion || cf.aprobacion || irlAvailable;
                                                 const irlConfirmed = irlConsentByEnrollment[enrollment.id] === true;
                                                 return (
                                                     <>

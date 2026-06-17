@@ -149,6 +149,7 @@ export default function EmpresaAdmin() {
     const [descLang, setDescLang] = useState<'es' | 'ht'>('es');
     const [certData, setCertData] = useState<any>(null);
     const [courseCertFlags, setCourseCertFlags] = useState<Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }>>({});
+    const [irlDocsCountByCourse, setIrlDocsCountByCourse] = useState<Record<string, number>>({});
     const [diplomaConfig, setDiplomaConfig] = useState<any>(null);
     const [isGeneratingCert, setIsGeneratingCert] = useState(false);
     const certGenerationLock = useRef(false);
@@ -256,7 +257,8 @@ export default function EmpresaAdmin() {
         const certFlags = courseCertFlags[enrollment.course_id] || { participacion: false, aprobacion: false, irl: false, irlRoleIds: [] } as CertificateFlags;
         const roleIds = certFlags.irlRoleIds || [];
         const studentRoleId = student?.role_id || null;
-        const irlAllowed = certFlags.irl && (roleIds.length === 0 || (!!studentRoleId && roleIds.includes(studentRoleId)));
+        const hasIrlDocs = (irlDocsCountByCourse[enrollment.course_id] || 0) > 0;
+        const irlAllowed = certFlags.irl && hasIrlDocs && (roleIds.length === 0 || (!!studentRoleId && roleIds.includes(studentRoleId)));
 
         return [
             certFlags.participacion ? 'participacion' : null,
@@ -538,19 +540,38 @@ export default function EmpresaAdmin() {
 
             const flags: Record<string, { participacion: boolean; aprobacion: boolean; irl: boolean; irlRoleIds: string[] }> = {};
             (assignedData || []).forEach((ad: any) => {
+                const globalIrlEnabled = ad?.courses?.irl_certificate_enabled === true;
                 const roleIds = Array.isArray(ad.irl_role_ids)
                     ? ad.irl_role_ids.filter(Boolean)
                     : (ad.irl_role_id ? [ad.irl_role_id] : []);
+                const effectiveRoleIds = globalIrlEnabled ? [] : roleIds;
 
                 flags[ad.course_id] = {
                     participacion: resolveParticipationFlag(ad),
                     aprobacion: ad.diploma_metaverso_enabled === true,
-                    irl: ad.cert_irl_enabled === true,
-                    irlRoleIds: roleIds,
+                    irl: ad.cert_irl_enabled === true || globalIrlEnabled,
+                    irlRoleIds: effectiveRoleIds,
                 };
             });
             setCourseCertFlags(flags);
             setDiplomaConfig(dipConfig || null);
+
+            const assignedCourseIds = Array.from(new Set((assignedData || []).map((ad: any) => ad.course_id).filter(Boolean)));
+            if (assignedCourseIds.length > 0) {
+                const { data: irlDocs } = await supabase
+                    .from('course_irl_documents')
+                    .select('id, course_id')
+                    .in('course_id', assignedCourseIds)
+                    .eq('is_active', true);
+
+                const docsCountMap: Record<string, number> = {};
+                (irlDocs || []).forEach((doc: any) => {
+                    docsCountMap[doc.course_id] = (docsCountMap[doc.course_id] || 0) + 1;
+                });
+                setIrlDocsCountByCourse(docsCountMap);
+            } else {
+                setIrlDocsCountByCourse({});
+            }
 
             const filteredCourses = (assignedData || [])
                 .map((ad: any) => ({
@@ -827,7 +848,7 @@ export default function EmpresaAdmin() {
             }
             return (a.availableCerts - b.availableCerts) * directionFactor;
         });
-    }, [students, courses, courseCertFlags, sortConfig]);
+    }, [students, courses, courseCertFlags, irlDocsCountByCourse, sortConfig]);
 
     const totalTrainerPages = useMemo(() => {
         return Math.max(1, Math.ceil(sortedStudentSummaries.length / trainerPageSize));
