@@ -129,10 +129,6 @@ export default function CompanyPortal() {
                                 transition={{ delay: idx * 0.1 }}
                                 className="glass p-5 sm:p-8 rounded-3xl h-full border border-white/5 hover:border-brand/30 hover:bg-white/[0.03] transition-all group-hover:shadow-[0_0_30px_rgba(49,210,45,0.1)] relative overflow-hidden"
                             >
-                                <div className="absolute top-4 right-4 text-[10px] font-black uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/5 text-white/40 group-hover:text-brand group-hover:border-brand/20 transition-colors">
-                                    {course.code}
-                                </div>
-
                                 <div className="mb-6 mt-2">
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <BookOpen className="w-5 h-5 text-brand" />
@@ -142,6 +138,9 @@ export default function CompanyPortal() {
                                 <h3 className="text-xl font-bold mb-3 leading-tight group-hover:text-brand transition-colors">
                                     {course.name}
                                 </h3>
+                                <p className="text-[10px] font-black text-white/45 break-all mb-3 tracking-wide">
+                                    {course.code}
+                                </p>
                                 <p className="text-sm text-white/40 line-clamp-3 mb-6">
                                     {course.description || "Contenido exclusivo de capacitación corporativa."}
                                 </p>
