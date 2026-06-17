@@ -359,6 +359,7 @@ export default function EmpresaAdmin() {
                 contentSignature,
             });
             setCertData({
+                certificateType,
                 studentName: `${student.first_name} ${student.last_name}`,
                 rut: student.rut,
                 courseName: course.name?.toUpperCase() || 'CURSO',
@@ -1195,7 +1196,8 @@ export default function EmpresaAdmin() {
                         const base64data = reader.result as string;
                         const pdf = new jsPDF("p", "px", [1414, 2000]); // Portrait como el alumno
                         pdf.addImage(base64data, "PNG", 0, 0, 1414, 2000); 
-                        pdf.save(`Certificado_${certData.rut}.pdf`); 
+                        const fileSuffix = certData.certificateType === 'aprobacion' ? 'Aprobacion' : certData.certificateType === 'irl' ? 'IRL' : 'Participacion';
+                        pdf.save(`Certificado_${fileSuffix}_${certData.rut}.pdf`); 
                         if (pendingCertificateIssue) {
                             await trackCertificateIssuance({
                                 enrollmentId: pendingCertificateIssue.enrollmentId,
