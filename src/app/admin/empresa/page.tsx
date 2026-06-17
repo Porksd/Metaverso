@@ -325,6 +325,55 @@ export default function EmpresaAdmin() {
 
             const certificateDate = formatDateEsCL(enrollment.completed_at);
 
+            if (certificateType === 'aprobacion') {
+                if (!diplomaConfig) {
+                    alert('No hay configuración de diploma.');
+                    return;
+                }
+
+                try {
+                    certGenerationLock.current = true;
+                    setIsGeneratingCert(true);
+
+                    const fc = diplomaConfig.fields_config || {};
+
+                    await generateMetaversoCert({
+                        studentName: `${student.first_name} ${student.last_name}`,
+                        rut: student.rut,
+                        companyName: currentCompanyName,
+                        companyRut: comp.rut || '',
+                        companyId,
+                        courseId: enrollment.course_id,
+                        courseName: course.name?.toUpperCase() || 'CURSO',
+                        courseCode: course.code || '',
+                        hours: course.config?.hours,
+                        date: enrollment.completed_at
+                            ? new Date(enrollment.completed_at).toLocaleDateString('es-CL')
+                            : new Date().toLocaleDateString('es-CL'),
+                        expirationDate: calcExpirationDate(enrollment.completed_at, course.company_course_validez_anios),
+                        backgroundUrl: diplomaConfig.background_url,
+                        layoutConfig: fc.layout,
+                        fieldsConfig: fc,
+                    });
+
+                    await trackCertificateIssuance({
+                        enrollmentId: enrollment.id,
+                        studentId: student.id,
+                        courseId: enrollment.course_id,
+                        certificateType,
+                        contentSignature,
+                    });
+                } catch (error: any) {
+                    console.error('Error generando certificado de aprobación:', error);
+                    alert('No se pudo generar el certificado de aprobación.');
+                } finally {
+                    certGenerationLock.current = false;
+                    setIsGeneratingCert(false);
+                }
+
+                return;
+            }
+
             if (certificateType === 'irl') {
                 certGenerationLock.current = true;
                 setIsGeneratingCert(true);
