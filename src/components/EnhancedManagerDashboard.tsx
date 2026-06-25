@@ -139,10 +139,6 @@ type UpcomingCourseRow = {
 
 type CompanyCourseAssignmentRow = {
     course_id: string;
-    courses?:
-        | { active?: boolean | null }
-        | Array<{ active?: boolean | null }>
-        | null;
 };
 
 type ActivityLogRow = ActivityLog & { raw_data?: Record<string, unknown> };
@@ -217,21 +213,15 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
 
         const { data: companyCourseAssignments, error: companyCoursesError } = await supabase
             .from('company_courses')
-            .select('course_id, courses(active)')
+            .select('course_id')
             .eq('company_id', resolvedCompanyId);
 
         if (companyCoursesError) {
             console.error('Error fetching company course assignments:', companyCoursesError);
         }
 
-        const activeAssignedCourseIds = new Set(
+        const assignedCourseIds = new Set(
             ((companyCourseAssignments || []) as CompanyCourseAssignmentRow[])
-                .filter((row) => {
-                    const courseInfo = Array.isArray(row.courses)
-                        ? (row.courses[0] ?? null)
-                        : (row.courses ?? null);
-                    return courseInfo?.active !== false;
-                })
                 .map((row) => row.course_id)
                 .filter(Boolean)
         );
@@ -388,9 +378,9 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             console.error('Error fetching enrollments:', enrollmentFetchError);
         }
 
-        const enrollmentsForAssignedCourses = effectiveEnrollments.filter((enrollment) =>
-            activeAssignedCourseIds.has(enrollment.course_id)
-        );
+        const enrollmentsForAssignedCourses = companyCoursesError
+            ? effectiveEnrollments
+            : effectiveEnrollments.filter((enrollment) => assignedCourseIds.has(enrollment.course_id));
 
         setEnrollments(enrollmentsForAssignedCourses);
         setLastUpdatedAt(new Date());
