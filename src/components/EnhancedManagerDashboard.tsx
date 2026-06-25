@@ -132,8 +132,16 @@ type UpcomingCourseRow = {
     course_id: string;
     start_date: string;
     courses?:
-        | { name?: string | null; code?: string | null }
-        | Array<{ name?: string | null; code?: string | null }>
+        | { name?: string | null; code?: string | null; active?: boolean | null }
+        | Array<{ name?: string | null; code?: string | null; active?: boolean | null }>
+        | null;
+};
+
+type CompanyCourseAssignmentRow = {
+    course_id: string;
+    courses?:
+        | { active?: boolean | null }
+        | Array<{ active?: boolean | null }>
         | null;
 };
 
@@ -206,6 +214,27 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             setLoading(false);
             return;
         }
+
+        const { data: companyCourseAssignments, error: companyCoursesError } = await supabase
+            .from('company_courses')
+            .select('course_id, courses(active)')
+            .eq('company_id', resolvedCompanyId);
+
+        if (companyCoursesError) {
+            console.error('Error fetching company course assignments:', companyCoursesError);
+        }
+
+        const activeAssignedCourseIds = new Set(
+            ((companyCourseAssignments || []) as CompanyCourseAssignmentRow[])
+                .filter((row) => {
+                    const courseInfo = Array.isArray(row.courses)
+                        ? (row.courses[0] ?? null)
+                        : (row.courses ?? null);
+                    return courseInfo?.active !== false;
+                })
+                .map((row) => row.course_id)
+                .filter(Boolean)
+        );
 
         const enrollmentSelect = `
             *,
@@ -359,10 +388,14 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             console.error('Error fetching enrollments:', enrollmentFetchError);
         }
 
-        setEnrollments(effectiveEnrollments);
+        const enrollmentsForAssignedCourses = effectiveEnrollments.filter((enrollment) =>
+            activeAssignedCourseIds.has(enrollment.course_id)
+        );
+
+        setEnrollments(enrollmentsForAssignedCourses);
         setLastUpdatedAt(new Date());
 
-        const enrollmentIds = effectiveEnrollments.map((e) => e.id).filter(Boolean);
+        const enrollmentIds = enrollmentsForAssignedCourses.map((e) => e.id).filter(Boolean);
         if (enrollmentIds.length > 0) {
             const chunkSize = 250;
             const chunks: string[][] = [];
