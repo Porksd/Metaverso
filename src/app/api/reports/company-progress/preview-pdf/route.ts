@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '') || companyId;
 
-    return new NextResponse(payload.pdfBuffer, {
+    const pdfBytes = new Uint8Array(payload.pdfBuffer);
+
+    return new NextResponse(pdfBytes, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="informe-${safeCompanyName}.pdf"`,
