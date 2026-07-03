@@ -6,7 +6,7 @@ import {
     Building2, Users, BookOpen, Layers, Plus, Search,
     Settings, Save, Upload, Trash2, PieChart, ShieldCheck, X,
     ChevronUp, ChevronDown, ArrowUpDown, Filter, UserPlus, Globe,
-    Copy, Check, Medal, UserCog, Award, Loader2, LogIn, ListChecks, ToggleLeft, ToggleRight
+    Copy, Check, Medal, UserCog, Award, Loader2, LogIn, ListChecks, ToggleLeft, ToggleRight, Mail, ExternalLink
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -124,6 +124,7 @@ export default function MetaversoAdmin() {
 
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
     const [userRole, setUserRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
+    const [isSendingReportNow, setIsSendingReportNow] = useState(false);
 
     useEffect(() => {
         checkAuth();
@@ -548,7 +549,12 @@ export default function MetaversoAdmin() {
             logo_url_dark: data.logo_url_dark,
             logo_url_light: data.logo_url_light,
             primary_color: data.primary_color,
-            secondary_color: data.secondary_color
+            secondary_color: data.secondary_color,
+            report_auto_enabled: data.report_auto_enabled === true,
+            report_frequency: ['daily', 'weekly', 'monthly'].includes(data.report_frequency) ? data.report_frequency : 'weekly',
+            report_include_dashboard_body: data.report_include_dashboard_body !== false,
+            report_include_pdf_attachment: data.report_include_pdf_attachment !== false,
+            report_copy_emails: data.report_copy_emails_enabled ? ((data.report_copy_emails || '').trim() || null) : null
         };
 
         if (!id) {
@@ -568,6 +574,14 @@ export default function MetaversoAdmin() {
             error = result.error;
         }
 
+        if (error?.message?.includes('report_copy_emails')) {
+            const { report_copy_emails, ...fallbackPayload } = companyPayload;
+            result = !id
+                ? await supabase.from('companies').insert(fallbackPayload).select()
+                : await supabase.from('companies').update(fallbackPayload).eq('id', id).select();
+            error = result.error;
+        }
+
         console.log('handleSaveCompany result:', result);
 
         if (error) {
@@ -575,6 +589,61 @@ export default function MetaversoAdmin() {
         } else {
             setEditingCompany(null);
             fetchCompanies();
+        }
+    };
+
+    const handleSendCompanyReportNow = async () => {
+        if (!editingCompany?.id) {
+            alert('Guarda primero la empresa para habilitar el envio manual.');
+            return;
+        }
+
+        setIsSendingReportNow(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+
+            if (!token) {
+                alert('Sesion no valida. Inicia sesion nuevamente.');
+                return;
+            }
+
+            const response = await fetch('/api/reports/company-progress/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    companyId: editingCompany.id,
+                    force: true,
+                    overrides: {
+                        includeStudents: editingCompany.report_include_dashboard_body !== false,
+                        includePdfAttachment: editingCompany.report_include_pdf_attachment !== false,
+                        copyEmails: editingCompany.report_copy_emails_enabled === true
+                            ? (editingCompany.report_copy_emails || '')
+                            : ''
+                    }
+                })
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+                alert(payload?.error || 'No se pudo enviar el informe.');
+                return;
+            }
+
+            if (payload?.result?.sent) {
+                alert('Informe enviado correctamente.');
+                fetchCompanies();
+            } else {
+                alert(`Informe omitido: ${payload?.result?.reason || 'sin detalle'}`);
+            }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Error enviando informe.';
+            alert(message);
+        } finally {
+            setIsSendingReportNow(false);
         }
     };
 
@@ -748,7 +817,7 @@ export default function MetaversoAdmin() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "" })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "", report_auto_enabled: false, report_frequency: 'weekly', report_include_dashboard_body: true, report_include_pdf_attachment: true, report_copy_emails: '', report_copy_emails_enabled: false })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -937,7 +1006,7 @@ export default function MetaversoAdmin() {
                                                     </button>
                                                 </>
                                             )}
-                                            <button onClick={() => setEditingCompany(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
+                                            <button onClick={() => setEditingCompany({ ...company, report_copy_emails_enabled: Boolean((company.report_copy_emails || '').trim()) })} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
                                                 <Settings className="w-4 h-4" />
                                             </button>
                                             <button onClick={() => openCourseManagement(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Gestión de Cursos">
@@ -1310,6 +1379,118 @@ export default function MetaversoAdmin() {
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Contraseña</label>
                                     <input type="password" value={editingCompany.password || ""} onChange={(e) => setEditingCompany({ ...editingCompany, password: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none" />
+                                </div>
+                                <div className="space-y-1.5 col-span-2 border-t border-white/10 pt-4 mt-2">
+                                    <label className="text-[10px] font-black uppercase text-brand tracking-widest pl-1">Informes Automaticos</label>
+                                    <p className="text-[10px] text-white/40 px-1">Se enviara al email de acceso configurado para esta empresa.</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Envio Automatico</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setEditingCompany({ ...editingCompany, report_auto_enabled: true })}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${editingCompany.report_auto_enabled ? 'bg-brand/20 border-brand text-brand' : 'bg-white/5 border-white/10 text-white/40'}`}
+                                        >
+                                            Activo
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingCompany({ ...editingCompany, report_auto_enabled: false })}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${!editingCompany.report_auto_enabled ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-white/40'}`}
+                                        >
+                                            Inactivo
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Periodicidad</label>
+                                    <select
+                                        value={editingCompany.report_frequency || 'weekly'}
+                                        onChange={(e) => setEditingCompany({ ...editingCompany, report_frequency: e.target.value })}
+                                        className="w-full bg-slate-900 text-white border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none"
+                                    >
+                                        <option value="daily" className="bg-slate-900 text-white">Una vez al dia</option>
+                                        <option value="weekly" className="bg-slate-900 text-white">Una vez a la semana</option>
+                                        <option value="monthly" className="bg-slate-900 text-white">Una vez al mes</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2 col-span-2 bg-white/5 border border-white/10 rounded-xl p-4">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Formato del Informe</label>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="flex items-center gap-3 text-xs text-white/80">
+                                            <input
+                                                type="checkbox"
+                                                checked={editingCompany.report_include_dashboard_body !== false}
+                                                onChange={(e) => setEditingCompany({ ...editingCompany, report_include_dashboard_body: e.target.checked })}
+                                                className="accent-lime-400"
+                                            />
+                                            Incluir listado de alumnos en los informes
+                                        </label>
+                                        <label className="flex items-center gap-3 text-xs text-white/80">
+                                            <input
+                                                type="checkbox"
+                                                checked={editingCompany.report_include_pdf_attachment !== false}
+                                                onChange={(e) => setEditingCompany({ ...editingCompany, report_include_pdf_attachment: e.target.checked })}
+                                                className="accent-lime-400"
+                                            />
+                                            Incluir PDF adjunto con detalle de la pantalla
+                                        </label>
+                                        <div className="pt-2 border-t border-white/10 space-y-2">
+                                            <label className="flex items-center gap-3 text-xs text-white/80">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editingCompany.report_copy_emails_enabled === true}
+                                                    onChange={(e) => setEditingCompany({
+                                                        ...editingCompany,
+                                                        report_copy_emails_enabled: e.target.checked,
+                                                        report_copy_emails: e.target.checked ? (editingCompany.report_copy_emails || '') : ''
+                                                    })}
+                                                    className="accent-lime-400"
+                                                />
+                                                  Enviar copias del informe
+                                            </label>
+                                            {editingCompany.report_copy_emails_enabled === true && (
+                                                <div className="space-y-1.5">
+                                                    <textarea
+                                                        value={editingCompany.report_copy_emails || ''}
+                                                        onChange={(e) => setEditingCompany({ ...editingCompany, report_copy_emails: e.target.value })}
+                                                        placeholder="correo1@empresa.cl, correo2@empresa.cl"
+                                                        rows={3}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none resize-none"
+                                                    />
+                                                    <p className="text-[10px] text-white/35 pl-1">Separar por comas los correos que deben recibir copia del envío automático.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="pt-2">
+                                        <div className="flex flex-col md:flex-row gap-2">
+                                            <button
+                                                onClick={handleSendCompanyReportNow}
+                                                disabled={isSendingReportNow || !editingCompany.id}
+                                                className="w-full md:w-auto px-4 py-2 rounded-xl bg-blue-500/20 border border-blue-400/40 text-blue-200 hover:bg-blue-500/30 text-xs font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                                            >
+                                                {isSendingReportNow ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                                                Enviar Informe Ahora
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (!editingCompany.id) return;
+                                                    const includeStudents = editingCompany.report_include_dashboard_body !== false;
+                                                    window.open(
+                                                        `/reports/company-progress/viewer?companyId=${editingCompany.id}&includeStudents=${includeStudents}`,
+                                                        '_blank',
+                                                        'noopener,noreferrer'
+                                                    );
+                                                }}
+                                                disabled={!editingCompany.id}
+                                                className="w-full md:w-auto px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 text-xs font-black uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                                Ver Vista Previa
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Slug URL del Portal</label>

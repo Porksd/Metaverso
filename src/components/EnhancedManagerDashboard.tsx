@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
     Users, BookOpen, Award, TrendingUp, Clock,
-    AlertCircle, Download, Calendar, Filter, X, BarChart3, ClipboardList, HelpCircle
+    AlertCircle, Download, Calendar, Filter, X, BarChart3, ClipboardList, HelpCircle, ExternalLink
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import * as XLSX from 'xlsx';
@@ -185,6 +185,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
     const [globalPage, setGlobalPage] = useState(1);
     const [globalPageSize, setGlobalPageSize] = useState(25);
     const [nowTs, setNowTs] = useState(() => Date.now());
+    const [reportAutoEnabled, setReportAutoEnabled] = useState(false);
 
     useEffect(() => {
         const timer = window.setInterval(() => setNowTs(Date.now()), 20000);
@@ -207,14 +208,32 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             setEnrollments([]);
             setActivityLogs([]);
             setUpcomingCourses([]);
+            setReportAutoEnabled(false);
             setLoading(false);
             return;
         }
 
-        const { data: companyCourseAssignments, error: companyCoursesError } = await supabase
-            .from('company_courses')
-            .select('course_id')
-            .eq('company_id', resolvedCompanyId);
+        const [
+            { data: companyCourseAssignments, error: companyCoursesError },
+            { data: companySettings, error: companySettingsError }
+        ] = await Promise.all([
+            supabase
+                .from('company_courses')
+                .select('course_id')
+                .eq('company_id', resolvedCompanyId),
+            supabase
+                .from('companies')
+                .select('report_auto_enabled')
+                .eq('id', resolvedCompanyId)
+                .maybeSingle()
+        ]);
+
+        if (companySettingsError) {
+            console.error('Error fetching report settings:', companySettingsError);
+            setReportAutoEnabled(false);
+        } else {
+            setReportAutoEnabled(companySettings?.report_auto_enabled === true);
+        }
 
         if (companyCoursesError) {
             console.error('Error fetching company course assignments:', companyCoursesError);
@@ -232,7 +251,7 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
             courses(name, code)
         `;
 
-        let allEnrollmentRows: Enrollment[] = [];
+        const allEnrollmentRows: Enrollment[] = [];
         let enrollmentFetchError: { message?: string } | null = null;
         const enrollmentPageSize = 1000;
 
@@ -1260,6 +1279,15 @@ export default function EnhancedManagerDashboard({ companyName, companyId, isMas
                         <Users className="w-4 h-4" />
                         {showParticipantsView ? 'Volver a vista global' : 'Ver listado de participantes'}
                     </button>
+                    {companyId && reportAutoEnabled && (
+                        <button
+                            onClick={() => window.open(`/reports/company-progress/viewer?companyId=${companyId}`, '_blank', 'noopener,noreferrer')}
+                            className="px-4 py-2 rounded-xl border bg-white/5 border-white/10 hover:border-brand/40 hover:bg-brand/10 transition-all flex items-center gap-2"
+                        >
+                            <ExternalLink className="w-4 h-4" />
+                            Ver informe
+                        </button>
+                    )}
                 </div>
 
                 {!showParticipantsView ? (
