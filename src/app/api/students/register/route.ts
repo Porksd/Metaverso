@@ -4,7 +4,16 @@ import { supabaseAdmin } from '@/lib/supabase';
 const DUPLICATE_EMAIL_MESSAGE = 'Ya existe una cuenta registrada con este correo. Inicia sesion o recupera tu contrasena.';
 const DUPLICATE_RUT_MESSAGE = 'Ya existe un alumno registrado con este RUT en esta empresa.';
 
+/** Deja solo dígitos+K — usado para comparación de unicidad */
 const normalizeRut = (value: string) => value.replace(/[^0-9kK]/g, '').toUpperCase();
+
+/** Convierte cualquier RUT al formato chileno estándar con guión: 12345678-9 */
+const formatRutCl = (clean: string): string => {
+  if (clean.length < 2) return clean;
+  const body = clean.slice(0, -1);
+  const dv   = clean.slice(-1);
+  return `${body}-${dv}`;
+};
 
 const isMissingRowError = (message?: string) => {
     if (!message) {
@@ -202,7 +211,7 @@ export async function POST(request: NextRequest) {
             .from('students')
             .insert({
                 auth_user_id: authUser.id,
-                rut: normalizedRut || null,
+                rut: normalizedRut ? formatRutCl(normalizedRut) : null,
                 passport: normalizedPassport || null,
                 first_name,
                 last_name,

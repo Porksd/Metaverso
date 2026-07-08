@@ -586,7 +586,20 @@ export default function CoursesPage() {
                 age: user.age,
                 jobName,
                 date: new Date().toLocaleDateString('es-CL'),
-                signatureUrl: user.digital_signature_url || null,
+                companyName: companyInfo?.name || null,
+                studentSignatureUrl: user.digital_signature_url || null,
+                ...((() => {
+                    const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
+                    const idx = (cfg?.irl ?? [0])[0] ?? 0;
+                    const urlKey = `signature_url_${idx + 1}` as const;
+                    const nameKey = `signature_name_${idx + 1}` as const;
+                    const roleKey = `signature_role_${idx + 1}` as const;
+                    return {
+                        relatorSignatureUrl: (companyInfo as any)?.[urlKey] || null,
+                        relatorName:         (companyInfo as any)?.[nameKey] || null,
+                        relatorRole:         (companyInfo as any)?.[roleKey] || null,
+                    };
+                })()),
             });
         } finally {
             setIsGeneratingCert(false);

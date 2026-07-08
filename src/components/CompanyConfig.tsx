@@ -9,8 +9,39 @@ interface CompanyConfigProps {
     onClose: () => void;
 }
 
+// ─── Cert-signature config helpers ───────────────────────────────────────────
+type SigCertType = { participacion: boolean; aprobacion: boolean; irl: boolean };
+
+const DEFAULT_SIG_CERT_TYPES: SigCertType[] = [
+    { participacion: true,  aprobacion: true,  irl: true  },
+    { participacion: true,  aprobacion: true,  irl: false },
+    { participacion: false, aprobacion: false, irl: false },
+];
+
+function configToState(cfg: any): SigCertType[] {
+    if (!cfg) return DEFAULT_SIG_CERT_TYPES;
+    const p: number[] = cfg.participacion ?? [0, 1];
+    const a: number[] = cfg.aprobacion   ?? [0, 1];
+    const r: number[] = cfg.irl          ?? [0];
+    return [0, 1, 2].map(i => ({
+        participacion: p.includes(i),
+        aprobacion:    a.includes(i),
+        irl:           r.includes(i),
+    }));
+}
+
+function stateToConfig(state: SigCertType[]) {
+    return {
+        participacion: state.flatMap((s, i) => s.participacion ? [i] : []),
+        aprobacion:    state.flatMap((s, i) => s.aprobacion    ? [i] : []),
+        irl:           state.flatMap((s, i) => s.irl           ? [i] : []),
+    };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps) {
     const [uploading, setUploading] = useState(false);
+    const [sigCertTypes, setSigCertTypes] = useState<SigCertType[]>(DEFAULT_SIG_CERT_TYPES);
     const [signatures, setSignatures] = useState<Array<{
         file: File | null;
         preview: string | null;
@@ -30,7 +61,7 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
     const loadCurrentConfig = async () => {
         const { data } = await supabase
             .from('companies')
-            .select('signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3')
+            .select('signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3, cert_signature_config')
             .eq('id', companyId)
             .single();
 
@@ -40,6 +71,7 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
                 { file: null, preview: data.signature_url_2, name: data.signature_name_2 || "", role: data.signature_role_2 || "", url: data.signature_url_2 },
                 { file: null, preview: data.signature_url_3, name: data.signature_name_3 || "", role: data.signature_role_3 || "", url: data.signature_url_3 }
             ]);
+            setSigCertTypes(configToState(data.cert_signature_config));
         }
     };
 
@@ -92,6 +124,7 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
                 updateData[`signature_name_${i + 1}`] = sig.name || null;
                 updateData[`signature_role_${i + 1}`] = sig.role || null;
             });
+            updateData.cert_signature_config = stateToConfig(sigCertTypes);
 
             const { error } = await supabase
                 .from('companies')
@@ -181,6 +214,37 @@ export default function CompanyConfig({ companyId, onClose }: CompanyConfigProps
                                         placeholder="Ej: Gerente General"
                                         className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-brand focus:outline-none"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Certificados donde aparece esta firma */}
+                            <div>
+                                <label className="block text-xs text-white/40 uppercase font-bold mb-2">Aparece en certificados</label>
+                                <div className="flex gap-5 flex-wrap">
+                                    {([
+                                        { key: 'participacion', label: 'Participación', disabled: false },
+                                        { key: 'irl',           label: 'IRL',           disabled: false },
+                                    ] as { key: keyof SigCertType; label: string; disabled: boolean }[]).map(({ key, label }) => (
+                                        <label key={key} className="flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                checked={sigCertTypes[index][key]}
+                                                onChange={(e) => {
+                                                    const next = sigCertTypes.map((s, i) =>
+                                                        i === index ? { ...s, [key]: e.target.checked } : s
+                                                    );
+                                                    setSigCertTypes(next);
+                                                }}
+                                                className="w-4 h-4 accent-brand cursor-pointer"
+                                            />
+                                            <span className="text-sm text-white/70">{label}</span>
+                                        </label>
+                                    ))}
+                                    {/* Aprobación usa la firma del fondo de Metaverso — no configurable aquí */}
+                                    <div className="flex items-center gap-2 opacity-35 select-none" title="El certificado de aprobación usa la firma del fondo de Metaverso">
+                                        <input type="checkbox" disabled className="w-4 h-4 cursor-not-allowed" />
+                                        <span className="text-sm text-white/50 line-through">Aprobación</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

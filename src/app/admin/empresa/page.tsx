@@ -123,6 +123,7 @@ export default function EmpresaAdmin() {
         signature_url_3?: string | null;
         signature_name_3?: string | null;
         signature_role_3?: string | null;
+        cert_signature_config?: { participacion?: number[]; aprobacion?: number[]; irl?: number[] } | null;
     };
     type CertificateStudentData = {
         digital_signature_url?: string | null;
@@ -197,6 +198,21 @@ export default function EmpresaAdmin() {
     };
 
     const buildIssueKey = (enrollmentId: string, certType: 'participacion' | 'aprobacion' | 'irl') => `${enrollmentId}:${certType}`;
+
+    /** Returns the company signature slots assigned to a given certificate type. */
+    const getCompSigsForType = (
+        comp: CertificateCompany,
+        type: 'participacion' | 'aprobacion' | 'irl'
+    ) => {
+        const all = [
+            { url: comp.signature_url_1, name: comp.signature_name_1, role: comp.signature_role_1 },
+            { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 },
+            { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 },
+        ];
+        const defaults: Record<string, number[]> = { participacion: [0, 1], aprobacion: [0, 1], irl: [0] };
+        const indices = comp.cert_signature_config?.[type] ?? defaults[type];
+        return indices.map((i: number) => all[i]).filter(s => s?.url || s?.name);
+    };
 
     const buildCertificateSignature = ({
         certificateType,
@@ -378,13 +394,19 @@ export default function EmpresaAdmin() {
                 certGenerationLock.current = true;
                 setIsGeneratingCert(true);
 
+                const irlSigs = getCompSigsForType(comp, 'irl');
+                const irlSig = irlSigs[0];
                 await generateIrlCert({
                     studentName: `${student.first_name} ${student.last_name}`,
                     rut: student.rut,
                     age: studentData?.age,
                     jobName: jobName || studentData?.job_position || student.company_roles?.name || 'Sin cargo',
                     date: certificateDate,
-                    signatureUrl: normalizeStudentSignature(studentData?.digital_signature_url || student.digital_signature_url),
+                    companyName: currentCompanyName,
+                    studentSignatureUrl: normalizeStudentSignature(studentData?.digital_signature_url || student.digital_signature_url),
+                    relatorSignatureUrl: irlSig?.url || null,
+                    relatorName: irlSig?.name || null,
+                    relatorRole: irlSig?.role || null,
                 });
 
                 await trackCertificateIssuance({
@@ -414,11 +436,7 @@ export default function EmpresaAdmin() {
                 courseName: course.name?.toUpperCase() || 'CURSO',
                 date: certificateDate,
                 score: enrollment.best_score ?? 100,
-                signatures: [
-                    { url: comp.signature_url_1, name: comp.signature_name_1, role: comp.signature_role_1 },
-                    { url: comp.signature_url_2, name: comp.signature_name_2, role: comp.signature_role_2 },
-                    { url: comp.signature_url_3, name: comp.signature_name_3, role: comp.signature_role_3 },
-                ].filter((sig: { url?: string | null; name?: string | null }) => sig.url || sig.name),
+                signatures: getCompSigsForType(comp, certificateType as 'participacion' | 'aprobacion'),
                 studentSignature: normalizeStudentSignature(studentData?.digital_signature_url || student.digital_signature_url),
                 companyLogo: comp.logo_url,
                 companyName: currentCompanyName,
