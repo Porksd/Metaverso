@@ -487,6 +487,47 @@ function quickChartUrl(config: Record<string, unknown>, width = 700, height = 36
   return `https://quickchart.io/chart?c=${encoded}&w=${width}&h=${height}&devicePixelRatio=1&format=png&backgroundColor=white`;
 }
 
+async function sourceToBuffer(source: string | null | undefined): Promise<{ buffer: Buffer; contentType: string } | null> {
+  if (!source) return null;
+
+  if (source.startsWith('data:')) {
+    const dataMatch = source.match(/^data:([^;]+);base64,(.*)$/);
+    if (!dataMatch) return null;
+    return {
+      contentType: dataMatch[1],
+      buffer: Buffer.from(dataMatch[2], 'base64')
+    };
+  }
+
+  try {
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      const response = await fetch(source);
+      if (!response.ok) return null;
+      const contentType = response.headers.get('content-type') || 'image/png';
+      const buffer = Buffer.from(await response.arrayBuffer());
+      return { buffer, contentType };
+    }
+
+    const normalized = source.startsWith('/') ? source.slice(1) : source;
+    const localPath = path.join(process.cwd(), 'public', normalized);
+    if (!fs.existsSync(localPath)) return null;
+
+    const ext = path.extname(localPath).toLowerCase();
+    const contentType = ext === '.jpg' || ext === '.jpeg'
+      ? 'image/jpeg'
+      : ext === '.svg'
+        ? 'image/svg+xml'
+        : 'image/png';
+
+    return {
+      contentType,
+      buffer: fs.readFileSync(localPath)
+    };
+  } catch {
+    return null;
+  }
+}
+
 function buildCharts(report: ReportData) {
   const activityLabels = report.dailyActivity.map((point) => formatDateLabel(point.date));
   const activityEnrollments = report.dailyActivity.map((point) => point.enrollments);
@@ -597,9 +638,12 @@ function buildCharts(report: ReportData) {
   return { lineChart, statusDonut, topCoursesChart, scoreBands };
 }
 
-function buildEmailHtml(report: ReportData): string {
+function buildEmailHtml(
+  report: ReportData,
+  chartSources?: { lineChart: string; statusDonut: string; topCoursesChart: string; scoreBands: string }
+): string {
   const { company, totals, topCourses, generatedAt } = report;
-  const { lineChart, statusDonut, topCoursesChart, scoreBands } = buildCharts(report);
+  const { lineChart, statusDonut, topCoursesChart, scoreBands } = chartSources || buildCharts(report);
 
   const logoHtml = company.logo_url
     ? `<img src="${esc(company.logo_url)}" alt="Logo empresa" style="max-height:52px;max-width:180px;object-fit:contain;display:block;" />`
@@ -615,8 +659,8 @@ function buildEmailHtml(report: ReportData): string {
   `;
 
   return `
-    <div style="font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(160deg,#05070b,#0b1220 52%,#071a14);padding:28px 16px;color:#0f172a;">
-      <div style="max-width:1020px;margin:0 auto;background:#f8fafc;border-radius:20px;overflow:hidden;border:1px solid #1f2937;">
+    <div style="font-family:Segoe UI,Arial,sans-serif;background:#ffffff;padding:20px 10px;color:#0f172a;">
+      <div style="max-width:1020px;margin:0 auto;background:#f8fafc;border-radius:20px;overflow:hidden;border:1px solid #dbe4ef;">
         <div style="background:#ffffff;padding:24px 28px;color:#0f172a;border-bottom:1px solid #e2e8f0;">
           <table style="width:100%;border-collapse:collapse;">
             <tr>
@@ -1004,16 +1048,66 @@ async function sendMail(report: ReportData): Promise<void> {
     auth: smtpUser ? { user: smtpUser, pass: smtpPass } : undefined
   });
 
-  const attachments = [] as Array<{ filename: string; content: Buffer; contentType: string }>;
+  const attachments = [] as Array<{
+    filename: string;
+    content: Buffer;
+    contentType: string;
+    cid?: string;
+    contentDisposition?: 'inline' | 'attachment';
+  }>;
+
+  const chartUrls = buildCharts(report);
+  const chartRefs = {
+    lineChart: 'chart-line@metaverso',
+    statusDonut: 'chart-status@metaverso',
+    topCoursesChart: 'chart-top@metaverso',
+    scoreBands: 'chart-score@metaverso'
+  };
+
+  const emailChartSources = {
+    lineChart: chartUrls.lineChart,
+    statusDonut: chartUrls.statusDonut,
+    topCoursesChart: chartUrls.topCoursesChart,
+    scoreBands: chartUrls.scoreBands
+  };
+
+  const chartConfigs: Array<{
+    key: keyof typeof emailChartSources;
+    cid: string;
+    filename: string;
+    source: string;
+  }> = [
+    { key: 'lineChart', cid: chartRefs.lineChart, filename: 'chart-actividad.png', source: chartUrls.lineChart },
+    { key: 'statusDonut', cid: chartRefs.statusDonut, filename: 'chart-estado.png', source: chartUrls.statusDonut },
+    { key: 'topCoursesChart', cid: chartRefs.topCoursesChart, filename: 'chart-top-cursos.png', source: chartUrls.topCoursesChart },
+    { key: 'scoreBands', cid: chartRefs.scoreBands, filename: 'chart-puntajes.png', source: chartUrls.scoreBands }
+  ];
+
+  for (const chart of chartConfigs) {
+    const image = await sourceToBuffer(chart.source);
+    if (!image) continue;
+
+    attachments.push({
+      filename: chart.filename,
+      content: image.buffer,
+      contentType: image.contentType,
+      cid: chart.cid,
+      contentDisposition: 'inline'
+    });
+
+    emailChartSources[chart.key] = `cid:${chart.cid}`;
+  }
+
   if (report.company.report_include_pdf_attachment) {
     attachments.push({
       filename: `informe-${report.company.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`,
       content: await buildReportPdf(report),
-      contentType: 'application/pdf'
+      contentType: 'application/pdf',
+      contentDisposition: 'attachment'
     });
   }
 
-  const html = buildEmailHtml(report);
+  const html = buildEmailHtml(report, emailChartSources);
   const copyRecipients = parseReportCopyEmails(report.company.report_copy_emails);
 
   await transporter.sendMail({
