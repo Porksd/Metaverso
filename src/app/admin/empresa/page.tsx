@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { resolveAdminRole } from "@/lib/adminAuth";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 import { generateIrlCert } from "@/lib/generateIrlCert";
+import { SACYR_COMPANY_ID, SACYR_IRL_FORMS } from "@/lib/sacyrIrlData";
 
 // Utility functions for RUT validation
 const cleanRut = (rut: string) => {
@@ -156,6 +157,8 @@ export default function EmpresaAdmin() {
     const certGenerationLock = useRef(false);
     const [lastIssuedSignatures, setLastIssuedSignatures] = useState<Record<string, string>>({});
     const [pendingCertificateIssue, setPendingCertificateIssue] = useState<{ enrollmentId: string; studentId: string; courseId: string; certificateType: CertificateType; contentSignature: string } | null>(null);
+    const [sacyrIrlAssignments, setSacyrIrlAssignments] = useState<Array<{ form_id: string; form_slug: string; status: 'pending' | 'completed' }>>([]);
+    const [sacyrIrlLoading, setSacyrIrlLoading] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
     const [trainerPage, setTrainerPage] = useState(1);
     const [trainerPageSize, setTrainerPageSize] = useState(20);
@@ -856,6 +859,24 @@ export default function EmpresaAdmin() {
             ...student,
             doc_type: validateRut(student.rut || '') ? 'RUT' : 'PASSPORT',
         });
+        // Load Sacyr IRL assignments if this is Sacyr
+        if (companyId === SACYR_COMPANY_ID) {
+            setSacyrIrlLoading(true);
+            supabase
+                .from('sacyr_irl_assignments')
+                .select('form_id, status, sacyr_irl_forms(slug)')
+                .eq('student_id', student.id)
+                .then(({ data }) => {
+                    setSacyrIrlAssignments(
+                        (data || []).map((a: any) => ({
+                            form_id: a.form_id,
+                            form_slug: a.sacyr_irl_forms?.slug || '',
+                            status: a.status,
+                        }))
+                    );
+                    setSacyrIrlLoading(false);
+                });
+        }
     };
 
     const toggleSort = (key: 'name' | 'cargo' | 'course' | 'status' | 'certificate') => {
@@ -1583,6 +1604,62 @@ export default function EmpresaAdmin() {
                                     })}
                                 </div>
                             </div>
+
+                            {/* ── IRL Sacyr (only for Sacyr company) ─────────────────────── */}
+                            {companyId === SACYR_COMPANY_ID && (
+                                <div className="pt-6 border-t border-white/10 space-y-4">
+                                    <h4 className="text-sm font-black uppercase text-white/40 flex items-center gap-2">
+                                        <Shield className="w-3.5 h-3.5 text-orange-400" />
+                                        IRL Sacyr
+                                    </h4>
+                                    {sacyrIrlLoading ? (
+                                        <p className="text-white/30 text-xs">Cargando formularios IRL…</p>
+                                    ) : (
+                                        <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                                            {SACYR_IRL_FORMS.map(form => {
+                                                const assignment = sacyrIrlAssignments.find(a => a.form_slug === form.slug);
+                                                const isCompleted = assignment?.status === 'completed';
+                                                const isPending   = assignment?.status === 'pending';
+                                                return (
+                                                    <div key={form.slug} className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${isCompleted ? 'bg-green-900/20 border-green-500/30' : isPending ? 'bg-orange-900/20 border-orange-500/30' : 'bg-white/5 border-white/5'}`}>
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            {isCompleted && <CheckCircle2 className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />}
+                                                            {isPending   && <Lock className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />}
+                                                            {!assignment  && <div className="w-3.5 h-3.5 rounded-full border border-white/20 flex-shrink-0" />}
+                                                            <span className="text-xs font-bold truncate">{form.cargo_name}</span>
+                                                            {isCompleted && <span className="text-[8px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded-full font-black uppercase border border-green-500/30 flex-shrink-0">Realizado</span>}
+                                                            {isPending   && <span className="text-[8px] px-1.5 py-0.5 bg-orange-500/20 text-orange-400 rounded-full font-black uppercase border border-orange-500/30 flex-shrink-0">Pendiente</span>}
+                                                        </div>
+                                                        {!isCompleted && (
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (isPending) {
+                                                                        const a = sacyrIrlAssignments.find(x => x.form_slug === form.slug);
+                                                                        if (!a) return;
+                                                                        await fetch(`/api/sacyr-irl/assign?student_id=${isEditing.id}&form_id=${a.form_id}`, { method: 'DELETE' });
+                                                                        setSacyrIrlAssignments(prev => prev.filter(x => x.form_slug !== form.slug));
+                                                                    } else {
+                                                                        await fetch('/api/sacyr-irl/assign', {
+                                                                            method: 'POST',
+                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            body: JSON.stringify({ student_id: isEditing.id, form_slugs: [form.slug], company_id: companyId, assigned_by: companyName }),
+                                                                        });
+                                                                        const { data } = await supabase.from('sacyr_irl_assignments').select('form_id, status, sacyr_irl_forms(slug)').eq('student_id', isEditing.id);
+                                                                        setSacyrIrlAssignments((data || []).map((a: any) => ({ form_id: a.form_id, form_slug: a.sacyr_irl_forms?.slug || '', status: a.status })));
+                                                                    }
+                                                                }}
+                                                                className={`px-3 py-1.5 text-[9px] font-black uppercase rounded-lg transition-all flex-shrink-0 ${isPending ? 'bg-white/10 text-white/60 hover:bg-red-900/30 hover:text-red-400' : 'bg-orange-500/10 text-orange-400 hover:bg-orange-500/20'}`}
+                                                            >
+                                                                {isPending ? 'Quitar' : 'Habilitar'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

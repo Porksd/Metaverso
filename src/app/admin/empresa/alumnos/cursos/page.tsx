@@ -17,6 +17,9 @@ import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 import { generateIrlCert } from "@/lib/generateIrlCert";
+import { SACYR_COMPANY_ID, SACYR_IRL_FORMS } from "@/lib/sacyrIrlData";
+import SacyrIrlFormModal from "@/components/SacyrIrlFormModal";
+import { generateSacyrIrlPdf } from "@/lib/generateSacyrIrlPdf";
 
 const translations: any = {
     es: {
@@ -81,6 +84,13 @@ export default function CoursesPage() {
     const [irlDocsByCourse, setIrlDocsByCourse] = useState<Record<string, Array<{ id: string; title: string; file_url: string }>>>({});
     const [irlConsentByEnrollment, setIrlConsentByEnrollment] = useState<Record<string, boolean>>({});
     const certGenerationLock = useRef(false); // Lock robusto para evitar doble descarga
+
+    // ── Sacyr IRL ────────────────────────────────────────────────────────────
+    const [sacyrIrlAssignments, setSacyrIrlAssignments] = useState<Array<{
+        id: string; form_id: string; form_slug: string; status: 'pending' | 'completed';
+        form_cargo_name?: string;
+    }>>([]);
+    const [activeSacyrIrl, setActiveSacyrIrl] = useState<string | null>(null); // assignment_id being filled
 
     const t = translations[user?.language || 'es'];
     const hasUserSignature = typeof user?.digital_signature_url === 'string' && user.digital_signature_url.trim().length > 0;
@@ -284,6 +294,24 @@ export default function CoursesPage() {
             } else {
                 setIrlDocsByCourse({});
             }
+        }
+
+        // ── Sacyr IRL assignments ────────────────────────────────────────────
+        if (clientId === SACYR_COMPANY_ID) {
+            const { data: irlData } = await supabase
+                .from('sacyr_irl_assignments')
+                .select('id, form_id, status, sacyr_irl_forms(slug, cargo_name)')
+                .eq('student_id', studentId)
+                .order('assigned_at');
+            setSacyrIrlAssignments(
+                (irlData || []).map((a: any) => ({
+                    id: a.id,
+                    form_id: a.form_id,
+                    form_slug: a.sacyr_irl_forms?.slug || '',
+                    status: a.status,
+                    form_cargo_name: a.sacyr_irl_forms?.cargo_name || '',
+                }))
+            );
         }
 
         setLoading(false);
@@ -1073,6 +1101,115 @@ export default function CoursesPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* ── Sacyr IRL forms section ──────────────────────────────── */}
+            {user?.client_id === SACYR_COMPANY_ID && sacyrIrlAssignments.length > 0 && (
+                <div className="mt-8 px-4 sm:px-6 max-w-3xl mx-auto">
+                    <div className="mb-4 flex items-center gap-2">
+                        <ClipboardList className="w-4 h-4 text-orange-400" />
+                        <h2 className="text-base font-black uppercase tracking-widest text-orange-300">Formularios IRL Sacyr</h2>
+                    </div>
+                    <div className="space-y-3">
+                        {sacyrIrlAssignments.map(assignment => {
+                            const form = SACYR_IRL_FORMS.find(f => f.slug === assignment.form_slug);
+                            if (!form) return null;
+                            const isCompleted = assignment.status === 'completed';
+
+                            return (
+                                <div key={assignment.id} className={`flex items-center justify-between p-4 rounded-2xl border ${isCompleted ? 'bg-green-900/15 border-green-500/25' : 'bg-orange-900/15 border-orange-500/25'}`}>
+                                    <div className="flex items-center gap-3">
+                                        {isCompleted
+                                            ? <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                            : <Lock className="w-5 h-5 text-orange-400" />
+                                        }
+                                        <div>
+                                            <p className="font-bold text-sm text-white">{form.cargo_name}</p>
+                                            <p className="text-xs text-white/40">{isCompleted ? 'Completado' : 'Pendiente de completar'}</p>
+                                        </div>
+                                    </div>
+                                    {isCompleted ? (
+                                        <button
+                                            onClick={async () => {
+                                                // Re-generate PDF from stored response
+                                                const { data: resp } = await supabase
+                                                    .from('sacyr_irl_responses')
+                                                    .select('*')
+                                                    .eq('assignment_id', assignment.id)
+                                                    .single();
+                                                if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
+                                                const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
+                                                const irlIdx = (cfg?.irl ?? [0])[0] ?? 0;
+                                                const relUrl = (companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null;
+                                                const relName = (companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null;
+                                                const relRole = (companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null;
+                                                await generateSacyrIrlPdf({
+                                                    form,
+                                                    studentName: resp.student_name,
+                                                    studentRut: resp.student_rut,
+                                                    jobName: form.cargo_name,
+                                                    companyName: companyInfo?.name || 'Sacyr',
+                                                    motivo: resp.motivo,
+                                                    respuestas_parte1: resp.respuestas_parte1 || {},
+                                                    riesgos_identificados: resp.riesgos_identificados || [],
+                                                    imagen_riesgo_1: resp.imagen_riesgo_1 || '',
+                                                    imagen_medidas_1: resp.imagen_medidas_1 || '',
+                                                    imagen_riesgo_2: resp.imagen_riesgo_2 || '',
+                                                    imagen_medidas_2: resp.imagen_medidas_2 || '',
+                                                    studentSignatureUrl: resp.student_signature_url,
+                                                    relatorSignatureUrl: relUrl,
+                                                    relatorName: relName,
+                                                    relatorRole: relRole,
+                                                });
+                                            }}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
+                                        >
+                                            <Download className="w-3.5 h-3.5" /> PDF
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => setActiveSacyrIrl(assignment.id)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-orange-500/15 text-orange-300 border border-orange-500/30 rounded-xl text-xs font-black uppercase hover:bg-orange-500/25 transition-all"
+                                        >
+                                            <ChevronRight className="w-3.5 h-3.5" /> Completar
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Sacyr IRL form modal */}
+            {activeSacyrIrl && (() => {
+                const assignment = sacyrIrlAssignments.find(a => a.id === activeSacyrIrl);
+                if (!assignment) return null;
+                const form = SACYR_IRL_FORMS.find(f => f.slug === assignment.form_slug);
+                if (!form) return null;
+                const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
+                const irlIdx = (cfg?.irl ?? [0])[0] ?? 0;
+                return (
+                    <SacyrIrlFormModal
+                        assignmentId={assignment.id}
+                        formSlug={form.slug}
+                        studentId={user?.id || ''}
+                        studentName={`${user?.first_name || ''} ${user?.last_name || ''}`.trim()}
+                        studentRut={user?.rut || ''}
+                        jobName={form.cargo_name}
+                        companyName={companyInfo?.name || 'Sacyr'}
+                        relatorSignatureUrl={(companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null}
+                        relatorName={(companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null}
+                        relatorRole={(companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null}
+                        onComplete={() => {
+                            setActiveSacyrIrl(null);
+                            setSacyrIrlAssignments(prev => prev.map(a =>
+                                a.id === activeSacyrIrl ? { ...a, status: 'completed' } : a
+                            ));
+                        }}
+                        onClose={() => setActiveSacyrIrl(null)}
+                    />
+                );
+            })()}
 
             {/* Motor PDF (Oculto) */}
             {certData && (

@@ -1,0 +1,633 @@
+// ─── Sacyr IRL Forms Data ─────────────────────────────────────────────────────
+// 15 cargo-specific IRL forms exclusively for Sacyr
+// Company ID: c7fd2d19-c6a8-4ea0-b9fa-11082eaacac7
+
+export const SACYR_COMPANY_ID = "c7fd2d19-c6a8-4ea0-b9fa-11082eaacac7";
+
+export interface SacyrIrlPregunta {
+  pregunta: string;
+  opciones: string[];
+  correcta: number; // 0-based index
+}
+
+export interface SacyrIrlFormData {
+  slug: string;
+  cargo_name: string;
+  area: string;
+  descripcion_puesto: string;
+  tareas: string[];
+  lugares_trabajo: string[];
+  herramientas: string[];
+  orden_aseo: string[];
+  preguntas: SacyrIrlPregunta[];
+}
+
+// ─── Shared quiz questions (same for all 15 forms) ────────────────────────────
+export const SACYR_IRL_PREGUNTAS: SacyrIrlPregunta[] = [
+  {
+    pregunta: "¿Cuál de las siguientes contingencias son cubiertas por la ley 16.744?",
+    opciones: [
+      "Accidentes en el trayecto directo, de ida o regreso, entre la habitación y el lugar de trabajo.",
+      "Accidentes a causa con ocasión del trabajo, y que le produzcan incapacidad o muerte.",
+      "Enfermedades Profesionales causadas por el ejercicio de la profesión.",
+      "Todas las anteriores son correctas.",
+    ],
+    correcta: 3,
+  },
+  {
+    pregunta: "¿Cuál de las siguientes alternativas corresponde a la definición: \"Es la declaración escrita de los compromisos y principios valóricos por parte de la Alta Dirección\"?",
+    opciones: [
+      "Inducción de Informar los riesgos laborales.",
+      "Políticas de SST, Prevención de Alcohol, Tabaco y Drogas, Diversidad e Inclusión, Seguridad Vial.",
+      "Matriz de Identificación de Peligros y Evaluación de Riesgos.",
+      "Ninguna de las anteriores es correcta.",
+    ],
+    correcta: 1,
+  },
+  {
+    pregunta: "Si usted sufre una lesión física mientras realiza labores en la empresa y esta provoca incapacidad para continuar con sus labores, esta definición corresponde a:",
+    opciones: [
+      "Accidente Común.",
+      "Accidente del Trabajo.",
+      "Accidente de Trayecto.",
+      "Enfermedad Profesional.",
+    ],
+    correcta: 1,
+  },
+  {
+    pregunta: "Respecto a la pregunta anterior, si su lesión es menor y no le provoca incapacidad para seguir con sus labores, ¿qué es lo que usted debe hacer?",
+    opciones: [
+      "Esperar que la lesión provoque mayor dolencia para luego informar.",
+      "Informar inmediatamente a supervisor y/o personal de SST, antes del término del turno.",
+      "Dirigirse a urgencia sin informar a supervisor y/o personal de SST.",
+      "Las Alternativas a) y c) son correctas.",
+    ],
+    correcta: 1,
+  },
+  {
+    pregunta: "El Equipo de Protección Personal, cada vez que realice labores, usted debe:",
+    opciones: [
+      "Revisar que se encuentren en estado óptimo para ser utilizado.",
+      "Utilizar obligatoriamente.",
+      "No se podrán prestar entre compañeros.",
+      "Todas las anteriores son correctas.",
+    ],
+    correcta: 3,
+  },
+  {
+    pregunta: "¿Cuál de las siguientes alternativas son medidas preventivas frente a altas temperaturas?",
+    opciones: [
+      "Consumir frutas y verduras, evitando la ingesta de alimentos grasos.",
+      "Beber líquidos constantemente, aunque no sienta sed; priorizando el consumo de agua, evitando las bebidas alcohólicas y azucaradas.",
+      "Participar en actividades formativas de exposición sobre los riesgos asociados a trabajar en altas temperaturas.",
+      "Todas las alternativas son correctas.",
+    ],
+    correcta: 3,
+  },
+  {
+    pregunta: "Si detecta fuego recién iniciado en su centro de trabajo, usted debe:",
+    opciones: [
+      "Solo si está capacitado tratar de apagar con extintor PQS o CO2 según el tipo de fuego.",
+      "Si no pudo controlar fuego evacuar hacia zona de seguridad del centro y avisar a bomberos y a encargado del centro.",
+      "Salir corriendo y gritando hacia la calle y no avisar a nadie.",
+      "Alternativas a) y b) son correctas.",
+    ],
+    correcta: 3,
+  },
+  {
+    pregunta: "¿Cuál de las siguientes políticas indica en su descripción: \"Todas aquellas características que hacen de cada persona un ser único\"?",
+    opciones: [
+      "Política de Seguridad y Salud del Trabajo.",
+      "Política de Prevención para el Alcohol, Tabaco y Drogas en el trabajo.",
+      "Política de Inclusión y Diversidad.",
+      "Política de Seguridad Vial.",
+    ],
+    correcta: 2,
+  },
+];
+
+// ─── Helper: split concatenated list text into array items ────────────────────
+function splitList(raw: string): string[] {
+  if (!raw || raw.trim() === "No aplica.") return [];
+  // Split at boundaries: end-of-sentence followed by capital, or explicit newline
+  return raw
+    .split(/(?<=[.;])\s*(?=[A-ZÁÉÍÓÚ])|(?<=[a-záéíóúñ])\s*(?=[A-ZÁÉÍÓÚ][a-záéíóúñ])|[\n]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 2);
+}
+
+// ─── The 15 forms ─────────────────────────────────────────────────────────────
+export const SACYR_IRL_FORMS: SacyrIrlFormData[] = [
+  {
+    slug: "administrador_de_contrato",
+    cargo_name: "Administrador de Contrato",
+    area: "Edificación",
+    descripcion_puesto: "Es el encargado de gestionar los aspectos contractuales de un proyecto de construcción desde su inicio hasta su finalización. Su labor es coordinar la redacción, negociación, ejecución y seguimiento de contratos, asegurando que se cumplan los términos acordados y se minimicen los riesgos legales y financieros.",
+    tareas: [
+      "Revisar contratos de construcción, subcontratos, órdenes de compra, y documentos relacionados con el proyecto, asegurando su claridad, precisión y cumplimiento con las leyes y regulaciones aplicables.",
+      "Supervisar la ejecución de los contratos, verificando el cumplimiento de los plazos, costos, especificaciones técnicas y demás términos acordados.",
+      "Tramitar cambios en el alcance del proyecto, ampliaciones de plazo y gestionar reclamaciones o disputas contractuales.",
+      "Asegurar que las actividades de construcción se realicen conforme a los estándares de calidad y seguridad establecidos en los contratos y la normativa vigente.",
+      "Identificar y evaluar los riesgos contractuales y financieros asociados al proyecto, proponiendo medidas para mitigarlos.",
+    ],
+    lugares_trabajo: [
+      "Circula en forma permanente por toda la obra.",
+      "Sube y baja por escalas para desplazarse en los frentes de trabajo.",
+    ],
+    herramientas: [],
+    orden_aseo: [],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "ayudante",
+    cargo_name: "Ayudante de Especialidades",
+    area: "Edificación",
+    descripcion_puesto: "El ayudante realiza diversas tareas de apoyo, cargar y/o transportar materiales, mantener el área limpia y orden a distintas especialidades que se ejecutan en una obra.",
+    tareas: [
+      "Realizar levantamiento de cargas pesadas.",
+      "Realizar labores de aseo en distintos lugares de la obra.",
+      "Levantar, transportar y almacenar diversos materiales, como madera, ductos, cables, fierro, moldajes, escalerillas, etc.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre plataformas, escalas y andamios.",
+      "A nivel del terreno, en colocación de elementos diversos.",
+      "A nivel de terreno, en transporte y almacenamiento de diversos materiales.",
+    ],
+    herramientas: [
+      "Alicate", "Carretilla", "Transpaleta", "Destornillador", "Mazo",
+      "Sierra manual", "Tijeras", "Terraja de roscar", "Cincel", "Corta cartón",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas, destinar zonas de almacenamiento, en especial materiales combustibles e inflamables.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "capataz",
+    cargo_name: "Capataz",
+    area: "Edificación",
+    descripcion_puesto: "El capataz es el jefe de una especialidad en particular. Debe administrar los recursos y el grupo de trabajo que se le ha asignado (maestros, ayudantes, jornales, subcontratistas, etc.), para lograr los resultados esperados en plazos, costos, calidad y seguridad.",
+    tareas: [
+      "Planificar y controlar el uso de materiales, herramientas, maquinaria y equipos de su especialidad.",
+      "Supervisar en terreno las distintas faenas de su especialidad.",
+      "Dirigir y controlar al personal de su especialidad.",
+      "Instruir al personal a su cargo en cómo realizar las distintas tareas.",
+      "Identificar y controlar riesgos en los frentes de trabajo.",
+    ],
+    lugares_trabajo: [
+      "Circula en forma permanente por toda la obra.",
+      "Sube y baja por escalas para desplazarse en los frentes de trabajo.",
+      "En altura sobre andamios, plataformas, pasarelas o losas.",
+      "En trabajos nocturnos puede tener bajos niveles de iluminación.",
+    ],
+    herramientas: [
+      "Debe conocer las distintas herramientas de su especialidad.",
+      "Debe conocer el funcionamiento de los distintos equipos o maquinarias que se utilizan en su especialidad.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "carpintero_obra_civiles",
+    cargo_name: "Carpintero Obra Civiles",
+    area: "Edificación",
+    descripcion_puesto: "El carpintero de obra gruesa realiza tareas relacionadas con preparación y colocación de moldajes de distinto tipo, sean estos de madera o industrializados. Además, prepara y monta andamios y carreras para hormigonar, construye mesones de trabajo, escalas, caballetes, construye envigados, pisos, tabiques, cielos y techumbres, colocando los revestimientos que correspondan.",
+    tareas: [
+      "Saca niveles y realiza trazados de elementos geométricos complejos.",
+      "Realiza levantamiento de cargas.",
+      "Prepara, coloca y descimbra moldajes de todo tipo, de madera o industrializados.",
+      "Coloca marcos de madera y metálicos.",
+      "Ejecuta entramados de madera para estructuras de pisos o tabiques.",
+      "Construye andamios.",
+      "Construye cerchas y todo tipo de techumbres.",
+      "Prepara y coloca revestimientos de pisos, cielos y muros.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre plataformas, escalas y andamios.",
+      "A nivel del terreno, en colocación de elementos diversos.",
+      "En altura en la construcción de cielos, techumbres y colocación de moldajes exteriores.",
+      "Entorno de enfierradores.",
+    ],
+    herramientas: [
+      "Huincha, plomo, tizador, escuadras, nivel de mano.",
+      "Martillos, serruchos, alicates, llaves de punta.",
+      "Chuzo, carretillas, botadores, prensas metálicas, sargentos.",
+      "Formones, cepillo, escofinas, limas, atornilladores.",
+      "Sierra circular, taladro, caladora, esmeril angular.",
+      "Banco de sierra circular.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "carpintero_og",
+    cargo_name: "Carpintero Obra Gruesa (OG)",
+    area: "Edificación",
+    descripcion_puesto: "El carpintero de obra gruesa realiza tareas relacionadas con preparación y colocación de moldajes de distinto tipo, sean estos de madera o industrializados. Además, prepara y monta andamios y carreras para hormigonar, construye mesones de trabajo, escalas, caballetes, construye envigados, pisos, tabiques, cielos y techumbres, colocando los revestimientos que correspondan.",
+    tareas: [
+      "Saca niveles y realiza trazados de elementos geométricos complejos.",
+      "Realiza levantamiento de cargas.",
+      "Prepara, coloca y descimbra moldajes de todo tipo, de madera o industrializados.",
+      "Coloca marcos de madera y metálicos.",
+      "Ejecuta entramados de madera para estructuras de pisos o tabiques.",
+      "Construye andamios.",
+      "Construye cerchas y todo tipo de techumbres.",
+      "Prepara y coloca revestimientos de pisos, cielos y muros.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre plataformas, escalas y andamios.",
+      "A nivel del terreno, en colocación de elementos diversos.",
+      "En altura en la construcción de cielos, techumbres y colocación de moldajes exteriores.",
+    ],
+    herramientas: [
+      "Huincha, plomo, tizador, escuadras, nivel de mano.",
+      "Martillos, serruchos, alicates, llaves de punta.",
+      "Chuzo, carretillas, botadores, prensas metálicas, sargentos.",
+      "Formones, cepillo, escofinas, limas, atornilladores.",
+      "Sierra circular, taladro, caladora, esmeril angular.",
+      "Banco de sierra circular.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "carpintero_terminaciones",
+    cargo_name: "Carpintero Terminaciones",
+    area: "Edificación",
+    descripcion_puesto: "El carpintero de Terminaciones realiza tareas relacionadas con preparación, colocación y tratamiento de materiales de distinto tipo, ya sean en bruto, elaboradas o planchas de vulcanita, con el fin de ejecutar todo tipo de terminaciones de una obra.",
+    tareas: [
+      "Saca niveles y realiza trazados de elementos geométricos complejos.",
+      "Realiza movimientos repetitivos y levantamientos de cargas.",
+      "Coloca puertas, ventanas, mamparas, persianas, etc.",
+      "Coloca todo tipo de quincallería, chapas, picaportes, españoletas, bisagras, etc.",
+      "Coloca marcos de madera y metálicos.",
+      "Montaje y desmontaje de andamios.",
+      "Ejecuta toda clase de terminaciones interiores o exteriores en madera.",
+      "Coloca revestimientos especiales: terciado, vulcanitas, aislantes, etc.",
+      "Realiza terminaciones con pintura o barnices en madera.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre plataformas, escalas y andamios.",
+      "A nivel del terreno, en colocación de elementos diversos.",
+      "En altura, en el montaje de cielos, colocación de cornisas o terminaciones.",
+    ],
+    herramientas: [
+      "Huincha, plomo, tizador, escuadras, nivel de mano.",
+      "Martillos, serruchos, alicates, destornilladores, llaves de punta.",
+      "Formones, cepillo, escofinas, limas, atornilladores, prensas, cuchillo cartonero.",
+      "Sierra circular, taladro, caladora, esmeril angular.",
+      "Tronzadora, cepilladora eléctrica, caladora tupi portátil.",
+      "Banco de sierra circular, lijadora rotatoria o de banda.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "electricista",
+    cargo_name: "Electricista",
+    area: "Edificación",
+    descripcion_puesto: "El electricista ejecuta todo tipo de instalaciones eléctricas, de alumbrado o fuerza y realización de su mantención.",
+    tareas: [
+      "Realiza instalaciones eléctricas provisorias y definitivas.",
+      "Ejecuta instalaciones de alumbrado.",
+      "Ejecuta instalaciones de fuerza: motores monofásicos, trifásicos, motobombas y moto generadores.",
+      "Construye mallas de tierra y efectúa su medición posterior.",
+      "Traza y ejecuta canalizaciones aéreas y subterráneas.",
+      "Prepara, hace hilos y coloca tuberías o cañerías galvanizadas para recibir conductores.",
+      "Perfora todo tipo de materiales para embutir canalizaciones.",
+      "Prepara tuberías plásticas, corta, pule, curva con calor y pega.",
+      "Alambra canalizaciones y conecta tableros de control.",
+      "Realiza montaje de escalerillas y bandejas porta conductores.",
+      "Levanta y transporta materiales.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja a nivel del terreno en la instalación de canalizaciones subterráneas y mallas de tierra.",
+      "Trabaja a nivel de terreno en la instalación de la canalización, alambrado y montaje de tableros.",
+      "En altura en el montaje y mantención de líneas aéreas e instalación de escalerillas.",
+      "Circula por toda la obra, por escalas, plataformas y andamios.",
+    ],
+    herramientas: [
+      "Combos, puntos, cinceles.",
+      "Alicates, destornilladores, pelacables, cuchillos.",
+      "Limas, sierra, brocas, sierras copa.",
+      "Terrajas.",
+      "Prensas cadena.",
+      "Esmeril angular, taladro, caladoras.",
+      "Soplete a gas.",
+      "Cautín eléctrico.",
+      "Instrumentos para medir voltaje, intensidad de corriente, potencia, etc.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "enfierrador",
+    cargo_name: "Enfierrador",
+    area: "Edificación",
+    descripcion_puesto: "El enfierrador realiza tareas relacionadas con preparación y colocación de fierro de construcción en estructuras de hormigón armado.",
+    tareas: [
+      "Hace plantillas de doblado de fierro.",
+      "Estira y corta fierro en rollos.",
+      "Levanta, transporta y coloca paquetes de fierro.",
+      "Realiza trazados de distribución de fierro.",
+      "Prepara y coloca fierro de distinto diámetro.",
+      "Estira, dobla, corta, grifa, coloca y amarra todo tipo de fierro.",
+      "Prepara y coloca fierro para distintos tipos de elementos: fundaciones, pilares, vigas, losas y muros.",
+    ],
+    lugares_trabajo: [
+      "En general trabaja en etapa de obra gruesa, llevando el ritmo de avance de la obra.",
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre andamios, plataformas para armar muros.",
+      "A nivel de terreno o de losa, en armado de radieres o losas.",
+      "En altura, en el armado de pilares.",
+      "Trabaja en bancos de trabajo en talleres donde se mantiene el acopio de fierro.",
+    ],
+    herramientas: [
+      "Huincha, alicate, alambre.",
+      "Grifas industriales y construidas en obra.",
+      "Esmeril angular.",
+      "Cortadora y dobladora eléctrica.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "equipo_de_topografia",
+    cargo_name: "Equipo de Topografía (Trazador / Geomensor / Topógrafo)",
+    area: "Edificación",
+    descripcion_puesto: "Geomensor, Nivelador, Topógrafo: es el encargado de replantear en terreno los distintos elementos que se construirán, así como dar los niveles correspondientes de los elementos.",
+    tareas: [
+      "Transporta e instala instrumentos de medición.",
+      "Saca niveles y traslada cotas con nivel óptico.",
+      "Traza ejes con taquímetro de elementos estructurales o soleras, calzadas y urbanización en general.",
+      "Replantea y traza excavaciones para fundaciones de distinto tipo.",
+      "Da plomos, líneas, niveles, ejes y puntos de partida para cada una de las operaciones que se van iniciando.",
+      "Traza shaft, escotillas, ascensores, ductos, etc.",
+      "Da niveles de losas, pilares y chequea durante la faena de hormigonado.",
+    ],
+    lugares_trabajo: [
+      "Trabaja en interior y exterior.",
+      "Circula en forma permanente por toda la obra.",
+      "Sube y baja por escalas para desplazarse en los frentes de trabajo.",
+      "En altura sobre andamios, pasarelas o losas.",
+      "En trabajos nocturnos puede tener bajos niveles de iluminación.",
+    ],
+    herramientas: [
+      "Nivel óptico.",
+      "Taquímetro.",
+      "Mira topográfica.",
+      "Huinchas de diferentes longitudes.",
+      "Combos y estacas de madera.",
+      "Cal, marcadores y tizador.",
+    ],
+    orden_aseo: [
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "guardia",
+    cargo_name: "Guardia de Seguridad",
+    area: "Edificación",
+    descripcion_puesto: "El guardia efectúa la vigilancia en áreas internas y externas de las instalaciones para preservar la seguridad del recurso humano y económico de la obra, instalaciones, mobiliario, equipos y utensilios, así como para mantener el orden y tranquilidad en todas las áreas.",
+    tareas: [
+      "Se preocupa de la vigilancia y seguridad en las instalaciones.",
+      "Realiza el control del ingreso y retiro del personal.",
+      "Vigila la instalación para impedir la entrada ilícita, evita robos, incendios y otros riesgos.",
+      "Verifica y registra cualquier situación anormal que ocurra en las instalaciones.",
+      "En caso de activación de alarmas debe llamar a carabineros.",
+      "Eventualmente cumple funciones de portero verificando la entrada y salida del personal, proveedores y visitantes, controlando pérdidas y robos.",
+      "Atiende las solicitudes de información en general y se preocupa de entregar una respuesta satisfactoria.",
+      "Presta la ayuda necesaria para asegurar que el estacionamiento de automóviles se realice en condiciones de seguridad.",
+    ],
+    lugares_trabajo: [
+      "Exterior e interior de la obra.",
+      "Estacionamiento.",
+      "Casetas de vigilancia.",
+    ],
+    herramientas: [
+      "Equipo de radio transmisor portátil, linterna, alarmas, central de alarmas.",
+      "Circuito cerrado de televisión, cámaras de vigilancia.",
+    ],
+    orden_aseo: [
+      "Mantener las áreas de trabajo limpias y caseta de vigilancia.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "jefe_de_terreno",
+    cargo_name: "Jefe de Terreno",
+    area: "Edificación",
+    descripcion_puesto: "El Jefe de Terreno es el encargado de planificar, programar y controlar el avance físico de la obra en el corto y mediano plazo. Deberá dar cumplimiento a las normas y estándares asociados a calidad, medio ambiente y seguridad.",
+    tareas: [
+      "Participar de la planificación general del proyecto.",
+      "Estudiar y conocer en detalle los documentos relacionados con el proyecto: especificaciones técnicas, planos, bases administrativas.",
+      "Establecer relación con el Mandante, de manera de conocer y aplicar cualquier cambio en el proyecto.",
+      "Determinar la necesidad de recursos materiales y humanos para la ejecución de las actividades.",
+      "Generar planificaciones de trabajo para su línea de supervisión a cargo.",
+      "Evaluar y controlar el avance físico de cada una de las partidas y sus plazos de ejecución.",
+      "Coordinar las tareas de los subcontratos.",
+      "Revisar y controlar la calidad de las actividades realizadas en obra.",
+      "Revisar y controlar la aplicación efectiva de los procedimientos constructivos.",
+      "Aplicar el Plan de Prevención de Riesgos de la Obra.",
+    ],
+    lugares_trabajo: [
+      "Circula en forma permanente por toda la obra.",
+      "Sube y baja por escalas para desplazarse en los frentes de trabajo.",
+    ],
+    herramientas: [
+      "Debe conocer el funcionamiento de los distintos equipos o maquinarias que se utilizan en la Obra.",
+    ],
+    orden_aseo: [],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "maestro_de_instalaciones",
+    cargo_name: "Maestro de Instalaciones",
+    area: "Edificación",
+    descripcion_puesto: "El maestro de instalaciones es un personal calificado que se especializa en la instalación y mantenimiento de sistemas eléctricos, sanitarios, de climatización o de otro tipo en edificios o infraestructuras.",
+    tareas: [
+      "Interpreta planos de instalaciones para ejecutar en base al diseño y requerimientos técnicos de cada proyecto.",
+      "Instala, repara y da mantenimiento a los distintos sistemas de su especialidad.",
+      "Trabaja con materiales y herramientas específicas de su especialidad.",
+      "Verifica que las instalaciones cumplan con las normativas técnicas y de seguridad vigentes.",
+      "Coordina con otros equipos de trabajo en obra.",
+    ],
+    lugares_trabajo: [
+      "Realiza labores en el exterior e interior.",
+      "Trabaja sobre plataformas, escalas y andamios.",
+      "A nivel del terreno y en altura según la especialidad.",
+    ],
+    herramientas: [
+      "Herramientas específicas de la especialidad de instalaciones.",
+      "Equipos de medición y verificación.",
+      "Taladro, esmeril angular, cortatubos, llaves de diferentes tipos.",
+    ],
+    orden_aseo: [
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+      "Mantener un programa de limpieza y retiro de basura; incluir 5 minutos de limpieza antes y después de terminar la jornada.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "monitor_de_seguridad",
+    cargo_name: "Monitor de Seguridad",
+    area: "Edificación",
+    descripcion_puesto: "El monitor es la persona encargada de monitorear y prevenir los principales factores de riesgos laborales en el área de trabajo, promoviendo una cultura de seguridad y salud en el trabajo.",
+    tareas: [
+      "Implementación y realización de VerVic, dirigidas hacia el personal de Sacyr y empresas colaboradoras.",
+      "Verificar que los trabajadores cuenten con los EPP completos y correctamente utilizados.",
+      "Participar en la identificación de riesgos y proponer medidas de control.",
+      "Apoyar en la realización de charlas e inducciones de seguridad.",
+      "Reportar condiciones o actos inseguros a la jefatura directa y al equipo de SST.",
+      "Apoyar en la investigación de accidentes e incidentes.",
+    ],
+    lugares_trabajo: [
+      "Circula por toda la obra, supervisando frentes de trabajo.",
+      "Interior y exterior de la obra.",
+    ],
+    herramientas: [
+      "Herramientas de inspección y registro.",
+      "Equipos de medición de higiene ocupacional.",
+    ],
+    orden_aseo: [
+      "Mantener las áreas de trabajo limpias.",
+      "Mantener los pasillos de tránsito libres de obstáculos.",
+      "Mantener las áreas delimitadas y señalizadas.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "operador_de_maquinaria_pesada",
+    cargo_name: "Operador de Maquinaria Pesada",
+    area: "Edificación",
+    descripcion_puesto: "El operador de maquinaria pesada es el responsable de la operación y mantención básica del equipo. Cada equipo posee características propias que lo hacen distinto del resto.",
+    tareas: [
+      "Pone en funcionamiento, opera y realiza la mantención básica de su máquina.",
+      "Dependiendo de la función de la máquina, realiza excavaciones, rellenos, compactación, levantamiento de cargas, transporte de materiales, etc.",
+      "Colabora en el mantenimiento y limpieza de su equipo.",
+      "Verifica el estado de la máquina antes de iniciar la jornada (check list diario).",
+      "Informa de inmediato cualquier falla o anomalía de la máquina a su jefatura.",
+    ],
+    lugares_trabajo: [
+      "Opera en el exterior de la obra, principalmente.",
+      "Frentes de excavación, rellenos y compactación.",
+      "Zonas de acopio de materiales.",
+    ],
+    herramientas: [
+      "La maquinaria pesada que opera (retroexcavadora, bulldozer, compactador, grúa horquilla, etc.).",
+      "Herramientas menores para mantención básica.",
+    ],
+    orden_aseo: [
+      "Mantener el área operacional de la máquina limpia y despejada.",
+      "Eliminar materiales obsoletos o que no se utilizan.",
+      "Mantener las áreas de trabajo limpias.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+  {
+    slug: "operador_gt",
+    cargo_name: "Operador de Grúa Torre (GT)",
+    area: "Edificación",
+    descripcion_puesto: "El operador de Grúa Torre debe ser un trabajador capacitado, entrenado y autorizado en el uso de este equipo, destinado a realizar trabajos de levantamiento y transporte de cargas en la obra.",
+    tareas: [
+      "Realiza trabajos al interior.",
+      "Trabaja en altura física.",
+      "Opera en ambientes nocivos y ruidosos.",
+      "Verifica el estado de la grúa antes de iniciar cada turno (check list diario).",
+      "Realiza maniobras de izaje de cargas según indicaciones del encargado.",
+      "Informa de inmediato cualquier falla o anomalía a su jefatura.",
+    ],
+    lugares_trabajo: [
+      "Cabina de la grúa torre, en altura.",
+      "Interior y exterior de la obra.",
+    ],
+    herramientas: [
+      "Grúa Torre y sus elementos de mando.",
+      "Herramientas menores para mantención básica.",
+      "Equipo de comunicación (radio).",
+    ],
+    orden_aseo: [
+      "Mantener la cabina de la grúa limpia y despejada.",
+      "Mantener las áreas de acceso a la grúa despejadas.",
+    ],
+    preguntas: SACYR_IRL_PREGUNTAS,
+  },
+];
+
+// Map from cargo_name patterns to form slugs (for auto-detection by role)
+export const CARGO_TO_IRL_SLUG: Record<string, string> = {
+  "administrador de contrato": "administrador_de_contrato",
+  "ayudante": "ayudante",
+  "ayudante de especialidades": "ayudante",
+  "capataz": "capataz",
+  "carpintero obra civiles": "carpintero_obra_civiles",
+  "carpintero obras civiles": "carpintero_obra_civiles",
+  "carpintero og": "carpintero_og",
+  "carpintero obra gruesa": "carpintero_og",
+  "carpintero terminaciones": "carpintero_terminaciones",
+  "electricista": "electricista",
+  "enfierrador": "enfierrador",
+  "equipo de topografía": "equipo_de_topografia",
+  "topógrafo": "equipo_de_topografia",
+  "geomensor": "equipo_de_topografia",
+  "guardia": "guardia",
+  "guardia de seguridad": "guardia",
+  "jefe de terreno": "jefe_de_terreno",
+  "maestro de instalaciones": "maestro_de_instalaciones",
+  "monitor de seguridad": "monitor_de_seguridad",
+  "operador de maquinaria pesada": "operador_de_maquinaria_pesada",
+  "operador maquinaria pesada": "operador_de_maquinaria_pesada",
+  "operador gt": "operador_gt",
+  "operador grúa torre": "operador_gt",
+};
