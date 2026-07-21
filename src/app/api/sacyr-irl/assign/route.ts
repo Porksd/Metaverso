@@ -2,7 +2,7 @@
 // Admin assigns one or more IRL forms to a specific student.
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { SACYR_COMPANY_ID } from "@/lib/sacyrIrlData";
+import { SACYR_COMPANY_ID, SACYR_IRL_FORMS } from "@/lib/sacyrIrlData";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,7 +25,24 @@ export async function POST(req: NextRequest) {
     const admin = supabaseAdmin;
     if (!admin) return NextResponse.json({ error: "Error de configuración del servidor" }, { status: 500 });
 
-    // Get form IDs from slugs
+    // Auto-upsert any missing form records from the TypeScript source of truth
+    const formsToUpsert = SACYR_IRL_FORMS.filter(f => form_slugs.includes(f.slug)).map(f => ({
+      slug: f.slug,
+      cargo_name: f.cargo_name,
+      area: f.area,
+      descripcion_puesto: f.descripcion_puesto,
+      tareas: f.tareas,
+      lugares_trabajo: f.lugares_trabajo,
+      herramientas: f.herramientas,
+      orden_aseo: f.orden_aseo,
+      preguntas: f.preguntas,
+      is_active: true,
+    }));
+    if (formsToUpsert.length > 0) {
+      await admin.from("sacyr_irl_forms").upsert(formsToUpsert, { onConflict: "slug", ignoreDuplicates: false });
+    }
+
+    // Get form IDs from slugs (now guaranteed to exist)
     const { data: forms, error: formsErr } = await admin
       .from("sacyr_irl_forms")
       .select("id, slug")
@@ -33,7 +50,7 @@ export async function POST(req: NextRequest) {
       .eq("is_active", true);
 
     if (formsErr || !forms?.length) {
-      return NextResponse.json({ error: "No se encontraron los formularios indicados" }, { status: 404 });
+      return NextResponse.json({ error: "No se pudieron crear los formularios: " + formsErr?.message }, { status: 500 });
     }
 
     // Check which forms the student has already completed (to prevent re-assignment)
