@@ -24,7 +24,7 @@ export default function StudentRegister() {
         other_company: "",
         rut: "",
         job_position: "",
-        client_id: "c7fd2d19-c6a8-4ea0-b9fa-11082eaacac7" // Sacyr
+        client_id: "3024ab6f-8b7f-4735-992e-f6442d26b09b" // Sacyr
     });
 
     const [companies, setCompanies] = useState<any[]>([]);
