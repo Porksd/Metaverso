@@ -702,36 +702,46 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += boxH + 8;
 
   // â”€â”€ Signatures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  if (y > 245) { y = 245; }
+  // Signatures -- ensure enough space before drawing
+  const sigSpaceNeeded = 58;
+  const _curPage = (pdf as any).internal.getCurrentPageInfo().pageNumber;
+  if (y + sigSpaceNeeded > 278) {
+    addHeaderFooter(pdf, _curPage, 4, sacyrLogo);
+    pdf.addPage();
+    y = bodyTop;
+  }
 
   const sigW = (contentW - 20) / 2;
   const sigX1 = M + 5;
   const sigX2 = M + contentW / 2 + 5;
-  const sigLineY = y + 22;
+  const sigLineY = y + 26;
 
   // Relator signature
   if (relatorSig) {
-    try { pdf.addImage(relatorSig, "PNG", sigX1, y, sigW, 18); } catch { /* skip */ }
+    try { pdf.addImage(relatorSig, "PNG", sigX1, y, sigW, 22); } catch { /* skip */ }
   }
   pdf.setDrawColor(0, 0, 0);
   pdf.line(sigX1, sigLineY, sigX1 + sigW, sigLineY);
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(7.5);
-  pdf.text(input.relatorName || "Aplicada por", sigX1 + sigW / 2, sigLineY + 5, { align: "center" });
+  pdf.setFontSize(8);
+  pdf.text(fixenc(input.relatorName || "Aplicada por"), sigX1 + sigW / 2, sigLineY + 6, { align: "center" });
   pdf.setFont("helvetica", "normal");
-  pdf.text(input.relatorRole || "", sigX1 + sigW / 2, sigLineY + 10, { align: "center" });
+  pdf.setFontSize(7.5);
+  pdf.text(fixenc(input.relatorRole || ""), sigX1 + sigW / 2, sigLineY + 12, { align: "center" });
 
   // Student signature
   if (studentSig) {
-    try { pdf.addImage(studentSig, "PNG", sigX2, y, sigW, 18); } catch { /* skip */ }
+    try { pdf.addImage(studentSig, "PNG", sigX2, y, sigW, 22); } catch { /* skip */ }
   }
   pdf.line(sigX2, sigLineY, sigX2 + sigW, sigLineY);
   pdf.setFont("helvetica", "bold");
-  pdf.text(input.studentName, sigX2 + sigW / 2, sigLineY + 5, { align: "center" });
+  pdf.setFontSize(8);
+  pdf.text(input.studentName, sigX2 + sigW / 2, sigLineY + 6, { align: "center" });
   pdf.setFont("helvetica", "normal");
-  pdf.text(`Nombre del Trabajador`, sigX2 + sigW / 2, sigLineY + 10, { align: "center" });
+  pdf.setFontSize(7.5);
+  pdf.text("Nombre del Trabajador", sigX2 + sigW / 2, sigLineY + 12, { align: "center" });
 
-  addHeaderFooter(pdf, 3, 4, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 4, sacyrLogo);
 
   const safeName = (input.studentName || "trabajador").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`IRL_Sacyr_${input.form.cargo_name.replace(/\s+/g, "_")}_${safeName}.pdf`);

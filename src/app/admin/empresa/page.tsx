@@ -163,6 +163,7 @@ export default function EmpresaAdmin() {
     const [trainerPage, setTrainerPage] = useState(1);
     const [trainerPageSize, setTrainerPageSize] = useState(20);
     const [selectedStudentCourses, setSelectedStudentCourses] = useState<any | null>(null);
+    const [selectedStudentIrls, setSelectedStudentIrls] = useState<Array<{ id: string; form_slug: string; form_cargo_name: string; completed_at: string }>>([]);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
@@ -1217,7 +1218,7 @@ export default function EmpresaAdmin() {
                                             <td className="px-6 py-4">{st.company_roles?.name || 'Sin Cargo'}</td>
                                             <td className="px-6 py-4">
                                                 <button
-                                                    onClick={() => setSelectedStudentCourses({ student: st, enrollments: validEnrollments })}
+                                                    onClick={async () => { setSelectedStudentCourses({ student: st, enrollments: validEnrollments }); if (companyId === SACYR_COMPANY_ID) { const { data: irlData } = await supabase.from('sacyr_irl_assignments').select('id, status, completed_at, sacyr_irl_forms(slug, cargo_name)').eq('student_id', st.id).eq('status', 'completed').order('completed_at'); setSelectedStudentIrls((irlData || []).map((a: any) => ({ id: a.id, form_slug: a.sacyr_irl_forms?.slug || '', form_cargo_name: a.sacyr_irl_forms?.cargo_name || '', completed_at: a.completed_at }))); } else { setSelectedStudentIrls([]); } }}
                                                     className="px-2 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold"
                                                 >
                                                     {totalCourses} curso{totalCourses === 1 ? '' : 's'}
@@ -1242,7 +1243,7 @@ export default function EmpresaAdmin() {
                                             </td>
                                             <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
                                                 <button
-                                                    onClick={() => setSelectedStudentCourses({ student: st, enrollments: validEnrollments })}
+                                                    onClick={async () => { setSelectedStudentCourses({ student: st, enrollments: validEnrollments }); if (companyId === SACYR_COMPANY_ID) { const { data: irlData } = await supabase.from('sacyr_irl_assignments').select('id, status, completed_at, sacyr_irl_forms(slug, cargo_name)').eq('student_id', st.id).eq('status', 'completed').order('completed_at'); setSelectedStudentIrls((irlData || []).map((a: any) => ({ id: a.id, form_slug: a.sacyr_irl_forms?.slug || '', form_cargo_name: a.sacyr_irl_forms?.cargo_name || '', completed_at: a.completed_at }))); } else { setSelectedStudentIrls([]); } }}
                                                     className="p-2 rounded-xl bg-white/5 border border-white/10"
                                                     title="Ver cursos"
                                                 ><BookOpen className="w-4 h-4" /></button>
@@ -1372,6 +1373,44 @@ export default function EmpresaAdmin() {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* IRL Sacyr section */}
+                            {selectedStudentIrls.length > 0 && (
+                                <div className="mt-5 pt-4 border-t border-white/10">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Shield className="w-4 h-4 text-orange-400" />
+                                        <h4 className="text-sm font-black uppercase text-orange-300">IRL Sacyr</h4>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {selectedStudentIrls.map(irl => {
+                                            const irlForm = SACYR_IRL_FORMS.find(f => f.slug === irl.form_slug);
+                                            return (
+                                                <div key={irl.id} className="flex items-center justify-between p-3 rounded-xl bg-orange-900/15 border border-orange-500/25">
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white">{irl.form_cargo_name}</p>
+                                                        <p className="text-xs text-white/40">{irl.completed_at ? new Date(irl.completed_at).toLocaleDateString('es-CL') : '—'}</p>
+                                                    </div>
+                                                    {irlForm && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                const { data: resp } = await supabase.from('sacyr_irl_responses').select('*').eq('assignment_id', irl.id).single();
+                                                                if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
+                                                                const cfg = (await supabase.from('companies').select('cert_signature_config, signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3').eq('id', companyId!).single()).data;
+                                                                const irlIdx = ((cfg?.cert_signature_config as any)?.irl ?? [0])[0] ?? 0;
+                                                                const { generateSacyrIrlPdf } = await import('@/lib/generateSacyrIrlPdf');
+                                                                await generateSacyrIrlPdf({ form: irlForm, studentName: resp.student_name, studentRut: resp.student_rut, jobName: irlForm.cargo_name, companyName: companyName, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: (cfg as any)?.[`signature_url_${irlIdx + 1}`] || null, relatorName: (cfg as any)?.[`signature_name_${irlIdx + 1}`] || null, relatorRole: (cfg as any)?.[`signature_role_${irlIdx + 1}`] || null });
+                                                            }}
+                                                            className="inline-flex items-center gap-1 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-[10px] font-black uppercase text-orange-300 hover:bg-orange-500/30 transition-all"
+                                                        >
+                                                            <Download className="w-3 h-3" /> IRL
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
