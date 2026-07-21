@@ -315,7 +315,6 @@ export default function SacyrIrlFormModal({
                 <p className="text-white font-bold mb-3">Firma del trabajador</p>
                 <SignatureCanvas
                   onSave={sig => setStudentSignature(sig)}
-                  isSaving={saving}
                 />
                 {studentSignature && (
                   <div className="mt-2 flex items-center gap-2 text-green-400 text-sm">
