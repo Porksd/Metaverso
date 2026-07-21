@@ -1,5 +1,15 @@
-import jsPDF from "jspdf";
+﻿import jsPDF from "jspdf";
 import type { SacyrIrlFormData } from "./sacyrIrlData";
+
+export interface InduccionData {
+  politicas: Record<string, boolean>;
+  contenidos: Record<string, boolean | string>;
+  productos_quimicos: { tipo: string; riesgos: string; medidas: string }[];
+  equipos_maquinarias: { nombre: string; marca: string; modelo: string }[];
+  epp_tipo: string;
+  capacitacion: { riesgo: string; accion: string }[];
+  comprension: Record<string, boolean>;
+}
 
 export interface SacyrIrlPdfInput {
   form: SacyrIrlFormData;
@@ -9,7 +19,8 @@ export interface SacyrIrlPdfInput {
   companyName?: string;
   fecha?: string;
   motivo: "nueva_incorporacion" | "cambio_proceso" | "nuevas_actividades";
-  respuestas_parte1: Record<number, number>;      // {q_index: selected_option}
+  induccion?: InduccionData;
+  respuestas_parte1: Record<number, number>;
   riesgos_identificados: { riesgo: string; medidas: string }[];
   imagen_riesgo_1?: string;
   imagen_medidas_1?: string;
@@ -22,13 +33,13 @@ export interface SacyrIrlPdfInput {
 }
 
 const HEADER_CODE = "PG.10.06.CL-F03 Ed 05";
-const HEADER_TITLE = "INFORMACIÓN Y FORMACIÓN PREVENTIVA - INFORMAR LOS RIESGOS LABORALES (IRL)";
-const FOOTER_LINE1 = "DIRECCIÓN DE SEGURIDAD Y SALUD";
-const FOOTER_LINE2 = "La Dirección de Seguridad y Salud del Grupo Sacyr no garantiza que la copia impresa de este documento sea la Edición vigente.";
-const SYSTEM_LABEL = "SISTEMA DE GESTIÓN DE SEGURIDAD Y SALUD";
+const HEADER_TITLE = "INFORMACIÃ“N Y FORMACIÃ“N PREVENTIVA - INFORMAR LOS RIESGOS LABORALES (IRL)";
+const FOOTER_LINE1 = "DIRECCIÃ“N DE SEGURIDAD Y SALUD";
+const FOOTER_LINE2 = "La DirecciÃ³n de Seguridad y Salud del Grupo Sacyr no garantiza que la copia impresa de este documento sea la EdiciÃ³n vigente.";
+const SYSTEM_LABEL = "SISTEMA DE GESTIÃ“N DE SEGURIDAD Y SALUD";
 
 const MOTIVO_LABELS: Record<string, string> = {
-  nueva_incorporacion: "Nueva incorporación de Persona Trabajadora",
+  nueva_incorporacion: "Nueva incorporaciÃ³n de Persona Trabajadora",
   cambio_proceso: "Cambios en el proceso de trabajo o puesto de trabajo",
   nuevas_actividades: "Nuevas actividades",
 };
@@ -59,7 +70,7 @@ function addHeaderFooter(
   const W = 210;
   const headerH = 20;
 
-  // ── Header box ──────────────────────────────────────────────────────────
+  // â”€â”€ Header box â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.setDrawColor(0, 51, 102);
   pdf.setLineWidth(0.5);
   pdf.rect(10, 8, W - 20, headerH);
@@ -84,9 +95,9 @@ function addHeaderFooter(
   pdf.setFontSize(5.5);
   pdf.text(HEADER_CODE, W - 38, 14);
   pdf.setFont("helvetica", "normal");
-  pdf.text(`Pág. ${pageNum} de ${totalPages}`, W - 38, 19);
+  pdf.text(`PÃ¡g. ${pageNum} de ${totalPages}`, W - 38, 19);
 
-  // ── Footer ──────────────────────────────────────────────────────────────
+  // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const footerY = 285;
   pdf.setDrawColor(0, 51, 102);
   pdf.line(10, footerY, W - 10, footerY);
@@ -141,7 +152,7 @@ function bulletList(pdf: jsPDF, items: string[], x: number, y: number, maxW: num
   pdf.setFontSize(7.5);
   pdf.setTextColor(20, 20, 20);
   for (const item of items) {
-    const lines = pdf.splitTextToSize(`• ${item}`, maxW - 4);
+    const lines = pdf.splitTextToSize(`â€¢ ${item}`, maxW - 4);
     pdf.text(lines, x + 2, y);
     y += lines.length * 4 + 1;
   }
@@ -155,7 +166,7 @@ function checkbox(pdf: jsPDF, x: number, y: number, checked: boolean, label: str
   if (checked) {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
-    pdf.text("✓", x + 0.5, y + 0.3);
+    pdf.text("âœ“", x + 0.5, y + 0.3);
   }
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
@@ -178,10 +189,10 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     input.relatorSignatureUrl ? urlToDataUrl(input.relatorSignatureUrl) : Promise.resolve(null),
   ]);
 
-  // ── PAGE 1 ───────────────────────────────────────────────────────────────
+  // â”€â”€ PAGE 1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let y = bodyTop;
 
-  // ── Info header table ──────────────────────────────────────────────────
+  // â”€â”€ Info header table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const halfW = contentW / 2;
   const infoRows1: [string, string][] = [
     ["Centro de Trabajo:", "Hospital Provincia Cordillera"],
@@ -189,9 +200,9 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     ["Fecha:", fecha],
   ];
   const infoRows2: [string, string][] = [
-    ["País:", "Chile"],
-    ["Línea de Negocio:", "Infraestructura"],
-    ["Duración de IRL:", "8 horas"],
+    ["PaÃ­s:", "Chile"],
+    ["LÃ­nea de Negocio:", "Infraestructura"],
+    ["DuraciÃ³n de IRL:", "8 horas"],
   ];
 
   infoRows1.forEach(([label, value], i) => {
@@ -219,11 +230,11 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   y += 24;
 
-  // ── Worker info ────────────────────────────────────────────────────────
+  // â”€â”€ Worker info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const workerRows: [string, string][] = [
     ["Nombres y Apellidos:", input.studentName],
     ["RUT:", input.studentRut],
-    ["Área o sección de trabajo:", input.form.area],
+    ["Ãrea o secciÃ³n de trabajo:", input.form.area],
     ["Cargo o puesto de Trabajo:", input.form.cargo_name],
   ];
   for (const [label, value] of workerRows) {
@@ -231,8 +242,8 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   }
   y += 3;
 
-  // ── Job description ────────────────────────────────────────────────────
-  y = sectionTitle(pdf, "Descripción breve del puesto de trabajo", y, W);
+  // â”€â”€ Job description â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "DescripciÃ³n breve del puesto de trabajo", y, W);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
   pdf.setTextColor(20, 20, 20);
@@ -240,7 +251,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.text(descLines, M + 2, y + 5);
   y += descLines.length * 4.5 + 8;
 
-  // ── Tasks ──────────────────────────────────────────────────────────────
+  // â”€â”€ Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.tareas.length > 0) {
     y = sectionTitle(pdf, "Tareas que realizan", y, W);
     y += 3;
@@ -248,7 +259,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 4;
   }
 
-  // ── Work locations ─────────────────────────────────────────────────────
+  // â”€â”€ Work locations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.lugares_trabajo.length > 0) {
     y = sectionTitle(pdf, "Lugares de Trabajo", y, W);
     y += 3;
@@ -256,7 +267,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 4;
   }
 
-  // ── Tools ──────────────────────────────────────────────────────────────
+  // â”€â”€ Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.herramientas.length > 0) {
     y = sectionTitle(pdf, "Herramientas y Equipos", y, W);
     y += 3;
@@ -264,7 +275,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 4;
   }
 
-  // ── Order/cleanliness ──────────────────────────────────────────────────
+  // â”€â”€ Order/cleanliness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.orden_aseo.length > 0) {
     y = sectionTitle(pdf, "Condiciones de orden y aseo exigidas en el puesto de trabajo", y, W);
     y += 3;
@@ -272,18 +283,18 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 4;
   }
 
-  // ── IRL Reason ────────────────────────────────────────────────────────
+  // â”€â”€ IRL Reason â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Check if we need a new page
   if (y > 230) {
-    addHeaderFooter(pdf, 1, 2, sacyrLogo);
+    addHeaderFooter(pdf, 1, 4, sacyrLogo);
     pdf.addPage();
     y = bodyTop;
   }
 
-  y = sectionTitle(pdf, "Motivo de información de riesgos laborales", y, W);
+  y = sectionTitle(pdf, "Motivo de informaciÃ³n de riesgos laborales", y, W);
   y += 6;
   const motivos = [
-    { key: "nueva_incorporacion", label: "Nueva incorporación de Persona Trabajadora." },
+    { key: "nueva_incorporacion", label: "Nueva incorporaciÃ³n de Persona Trabajadora." },
     { key: "cambio_proceso", label: "Cambios en el proceso de trabajo o puesto de trabajo." },
     { key: "nuevas_actividades", label: "Nuevas actividades." },
   ];
@@ -293,21 +304,220 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   }
   y += 3;
 
-  // ── Legal declaration ──────────────────────────────────────────────────
-  const legalText = `En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, artículo 15 en "INFORMAR LOS RIESGOS LABORALES (IRL)". Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de control que deberá adoptar para ejecutar en forma segura sus labores.`;
+  // â”€â”€ Legal declaration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const legalText = `En cumplimiento a lo dispuesto en el Decreto NÂ° 44, tÃ­tulo II, pÃ¡rrafo 4, artÃ­culo 15 en "INFORMAR LOS RIESGOS LABORALES (IRL)". Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de mÃ©todos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberÃ¡ informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o ComitÃ© Paritario de Higiene y Seguridad, con la finalidad que estas condiciones sean analizadas y se establezcan los mÃ©todos y medidas de control que deberÃ¡ adoptar para ejecutar en forma segura sus labores.`;
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
   const legalLines = pdf.splitTextToSize(legalText, contentW - 4);
   pdf.text(legalLines, M + 2, y);
   y += legalLines.length * 4 + 6;
 
-  addHeaderFooter(pdf, 1, 2, sacyrLogo);
+  addHeaderFooter(pdf, 1, 4, sacyrLogo);
 
-  // ── PAGE 2 ────────────────────────────────────────────────────────────
+  // â”€â”€ PAGE 2: InducciÃ³n sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.addPage();
   y = bodyTop;
 
-  // ── Part 1: Multiple-choice questions ─────────────────────────────────
+  const ind = input.induccion;
+
+  // â”€â”€ PolÃ­ticas recibidas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "Recibe la InducciÃ³n por parte del Dpto. SST Sacyr Chile S.A.", y, W);
+  y += 4;
+  const politicasItems = [
+    { key: "prevencion", label: "PolÃ­tica de PrevenciÃ³n" },
+    { key: "alcohol",    label: "PolÃ­tica Alcohol, tabaco y drogas" },
+    { key: "vial",       label: "PolÃ­tica Seguridad Vial" },
+    { key: "inclusion",  label: "PolÃ­tica InclusiÃ³n" },
+  ];
+  const halfPol = contentW / 2;
+  for (let i = 0; i < politicasItems.length; i++) {
+    const pol = politicasItems[i];
+    const bx = i % 2 === 0 ? M : M + halfPol;
+    if (i % 2 === 0 && i > 0) y += 6;
+    checkbox(pdf, bx + 2, i % 2 === 0 ? y : y - 0, !!ind?.politicas?.[pol.key], pol.label);
+    if (i % 2 === 1) y += 6;
+  }
+  y += 6;
+
+  // â”€â”€ Contenidos recibidos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "Contenidos y materias informadas", y, W);
+  y += 4;
+
+  const contenidoItems = [
+    { key: "mipero",          label: "Matriz de IdentificaciÃ³n de peligros (MIPERO):", desc: "mipero_desc" },
+    { key: "erpt",            label: "EvaluaciÃ³n de Riesgos de Puesto y Lugar (ERPT y ERLT):", desc: "erpt_desc" },
+    { key: "restriccion",     label: "RestricciÃ³n mÃ©dica:", desc: "restriccion_desc" },
+    { key: "sensible",        label: "Persona especialmente sensible o vulnerable:", desc: "sensible_desc" },
+    { key: "plan_gestion",    label: "Plan de GestiÃ³n de PrevenciÃ³n y actividades asociadas." },
+    { key: "salud",           label: "Salud ocupacional: Protocolos MINSAL." },
+    { key: "ptos",            label: "Procedimiento PTOS relativo a su cargo." },
+    { key: "plan_emergencias",label: "Medidas contenidas en el Plan de emergencias y contingencias." },
+    { key: "ind_vial",        label: "InducciÃ³n de Seguridad Vial." },
+    { key: "epp_uso",         label: "Elementos de protecciÃ³n personal (cuidado y uso correcto)." },
+    { key: "comite",          label: "ComitÃ© Paritario de Higiene y Seguridad." },
+    { key: "req_legales",     label: "Requisitos Legales / Otros:", desc: "req_otros_desc" },
+    { key: "prod_quimicos",   label: "Productos quÃ­micos." },
+  ];
+
+  pdf.setFontSize(7.5);
+  for (const item of contenidoItems) {
+    checkbox(pdf, M + 2, y, !!ind?.contenidos?.[item.key], item.label);
+    y += 5.5;
+    if (item.desc) {
+      const descVal = ind?.contenidos?.[item.desc as string] as string || "";
+      if (descVal) {
+        pdf.setFont("helvetica", "italic");
+        pdf.setFontSize(7);
+        const dLines = pdf.splitTextToSize(`  â†’ ${descVal}`, contentW - 10);
+        pdf.text(dLines, M + 8, y);
+        y += dLines.length * 4 + 1;
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7.5);
+      }
+    }
+    if (y > 268) {
+      addHeaderFooter(pdf, 2, 4, sacyrLogo);
+      pdf.addPage();
+      y = bodyTop;
+    }
+  }
+  y += 3;
+
+  // Productos quÃ­micos table (if present)
+  if (ind?.productos_quimicos?.length) {
+    pdf.setFontSize(7.5);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Productos quÃ­micos:", M + 2, y); y += 5;
+    const colW = contentW / 3;
+    ["Tipo de producto quÃ­mico", "Riesgos asociados", "Medidas de control"].forEach((h, i) => {
+      pdf.setFillColor(220, 230, 242);
+      pdf.rect(M + i * colW, y, colW, 6, "F");
+      pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * colW, y, colW, 6);
+      pdf.setFont("helvetica", "bold"); pdf.setFontSize(6.5);
+      pdf.text(h, M + i * colW + 2, y + 4);
+    });
+    y += 6;
+    for (const row of ind.productos_quimicos) {
+      [row.tipo, row.riesgos, row.medidas].forEach((val, i) => {
+        pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * colW, y, colW, 7);
+        pdf.setFont("helvetica", "normal"); pdf.setFontSize(6.5);
+        pdf.text(pdf.splitTextToSize(val || "", colW - 4)[0] || "", M + i * colW + 2, y + 4);
+      });
+      y += 7;
+    }
+    y += 3;
+  }
+
+  if (y > 240) { addHeaderFooter(pdf, 2, 4, sacyrLogo); pdf.addPage(); y = bodyTop; }
+
+  // â”€â”€ Equipos y maquinarias â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "Equipos y/o maquinarias", y, W);
+  y += 3;
+  const eqColW = contentW / 3;
+  ["Nombre", "Marca", "Modelo"].forEach((h, i) => {
+    pdf.setFillColor(220, 230, 242);
+    pdf.rect(M + i * eqColW, y, eqColW, 6, "F");
+    pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * eqColW, y, eqColW, 6);
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(7);
+    pdf.text(h, M + i * eqColW + 2, y + 4);
+  });
+  y += 6;
+  const eqRows = ind?.equipos_maquinarias?.length ? ind.equipos_maquinarias : Array(4).fill({ nombre: "", marca: "", modelo: "" });
+  for (const row of eqRows.slice(0, 4)) {
+    [row.nombre, row.marca, row.modelo].forEach((val, i) => {
+      pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * eqColW, y, eqColW, 7);
+      pdf.setFont("helvetica", "normal"); pdf.setFontSize(7);
+      pdf.text(val || "", M + i * eqColW + 2, y + 4.5);
+    });
+    y += 7;
+  }
+  y += 4;
+
+  // â”€â”€ Tipo EPP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "Tipo de EPPs (Describir EPPs a utilizar)", y, W);
+  y += 3;
+  pdf.setDrawColor(150, 150, 150);
+  pdf.rect(M, y, contentW, 12);
+  if (ind?.epp_tipo) {
+    pdf.setFont("helvetica", "normal"); pdf.setFontSize(7.5);
+    pdf.text(pdf.splitTextToSize(ind.epp_tipo, contentW - 4), M + 2, y + 5);
+  }
+  y += 16;
+
+  // â”€â”€ CapacitaciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "CapacitaciÃ³n y formaciÃ³n recibida", y, W);
+  y += 3;
+  const capColW = contentW / 2;
+  ["Riesgo", "Nombre acciÃ³n formativa"].forEach((h, i) => {
+    pdf.setFillColor(220, 230, 242);
+    pdf.rect(M + i * capColW, y, capColW, 6, "F");
+    pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * capColW, y, capColW, 6);
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(7);
+    pdf.text(h, M + i * capColW + 2, y + 4);
+  });
+  y += 6;
+  const capRows = ind?.capacitacion?.length ? ind.capacitacion : Array(5).fill({ riesgo: "", accion: "" });
+  for (const row of capRows.slice(0, 5)) {
+    [row.riesgo, row.accion].forEach((val, i) => {
+      pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * capColW, y, capColW, 7);
+      pdf.setFont("helvetica", "normal"); pdf.setFontSize(7);
+      pdf.text(val || "", M + i * capColW + 2, y + 4.5);
+    });
+    y += 7;
+  }
+  pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text("ConsideraciÃ³n: capacitaciones que permitan a la persona trabajadora reconocer y gestionar los riesgos presentes en su entorno de trabajo.", M, y + 4);
+  pdf.setTextColor(20, 20, 20);
+  y += 10;
+
+  if (y > 220) { addHeaderFooter(pdf, 2, 4, sacyrLogo); pdf.addPage(); y = bodyTop; }
+
+  // â”€â”€ ComprensiÃ³n del trabajador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  y = sectionTitle(pdf, "El trabajador declara haber comprendido la inducciÃ³n y documentaciÃ³n al respecto:", y, W);
+  y += 4;
+  pdf.setDrawColor(180, 180, 180);
+  const compItems = [
+    { key: "plan_emergencias", label: "Plan de Emergencias, contingencias y/o Desastres" },
+    { key: "plan_gestion",     label: "Plan de GestiÃ³n de la PrevenciÃ³n" },
+    { key: "mipero",           label: "Matriz de IdentificaciÃ³n de Peligros (MIPERO)" },
+    { key: "erpt",             label: "EvaluaciÃ³n de Riesgos (ERPT y ERLT) *" },
+    { key: "riohs",            label: "RIOHS" },
+    { key: "protocolos",       label: "Protocolos del Cliente" },
+    { key: "ptos",             label: "Procedimiento Teletrabajo (PTOS)" },
+    { key: "calor",            label: "EstÃ¡ndar de Calor Extremo y Altas Temperatura" },
+  ];
+  const halfComp = contentW / 2;
+  for (let i = 0; i < compItems.length; i++) {
+    const ci = compItems[i];
+    const bx = i % 2 === 0 ? M : M + halfComp;
+    checkbox(pdf, bx + 2, y, !!ind?.comprension?.[ci.key], ci.label);
+    if (i % 2 === 1) y += 6;
+  }
+  if (compItems.length % 2 !== 0) y += 6;
+  pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text("* Herramientas que derivan del anÃ¡lisis MIPERO en las cuales se expresan los riesgos en el puesto de trabajo y lugar de trabajo.", M, y + 3);
+  pdf.setTextColor(20, 20, 20);
+  y += 8;
+
+  addHeaderFooter(pdf, 2, 4, sacyrLogo);
+
+  // â”€â”€ PAGE 3: Test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  pdf.addPage();
+  y = bodyTop;
+
+  y = sectionTitle(pdf, "TEST EVALUACION INDUCCION", y, W);
+  y += 3;
+  pdf.setFillColor(255, 160, 0);
+  pdf.rect(M, y, contentW, 7, "F");
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text("Cada Pregunta vale 1 punto. Para la aprobacion se necesita una calificacion de 80%", M + 2, y + 5);
+  pdf.setTextColor(20, 20, 20);
+  y += 10;
+
   y = sectionTitle(pdf, "Primera Parte: Preguntas de alternativas (marque con una X la respuesta correcta)", y, W);
   y += 4;
 
@@ -331,7 +541,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 3;
 
     if (y > 250 && qi < input.form.preguntas.length - 1) {
-      addHeaderFooter(pdf, 2, 2, sacyrLogo);
+      addHeaderFooter(pdf, 3, 4, sacyrLogo);
       pdf.addPage();
       y = bodyTop;
     }
@@ -339,20 +549,20 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   y += 4;
 
-  // ── Part 2: Workshop ──────────────────────────────────────────────────
+  // â”€â”€ Part 2: Workshop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (y > 200) {
-    addHeaderFooter(pdf, 2, 2, sacyrLogo);
+    addHeaderFooter(pdf, 3, 4, sacyrLogo);
     pdf.addPage();
     y = bodyTop;
   }
 
-  y = sectionTitle(pdf, "Segunda Parte: Taller de Aplicación", y, W);
+  y = sectionTitle(pdf, "Segunda Parte: Taller de AplicaciÃ³n", y, W);
   y += 4;
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
   pdf.text(
-    "Según la Matriz IPERO identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto en sus labores:",
+    "SegÃºn la Matriz IPERO identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto en sus labores:",
     M + 2,
     y
   );
@@ -395,7 +605,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   y += 6;
 
-  // ── Image analysis section ─────────────────────────────────────────────
+  // â”€â”€ Image analysis section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(7.5);
   pdf.text(
@@ -465,7 +675,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   });
   y += boxH + 8;
 
-  // ── Signatures ────────────────────────────────────────────────────────
+  // â”€â”€ Signatures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (y > 245) { y = 245; }
 
   const sigW = (contentW - 20) / 2;
@@ -495,8 +705,9 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setFont("helvetica", "normal");
   pdf.text(`Nombre del Trabajador`, sigX2 + sigW / 2, sigLineY + 10, { align: "center" });
 
-  addHeaderFooter(pdf, 2, 2, sacyrLogo);
+  addHeaderFooter(pdf, 3, 4, sacyrLogo);
 
   const safeName = (input.studentName || "trabajador").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`IRL_Sacyr_${input.form.cargo_name.replace(/\s+/g, "_")}_${safeName}.pdf`);
 }
+

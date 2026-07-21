@@ -1109,7 +1109,7 @@ export default function CoursesPage() {
                         <ClipboardList className="w-4 h-4 text-orange-400" />
                         <h2 className="text-base font-black uppercase tracking-widest text-orange-300">Formularios IRL Sacyr</h2>
                     </div>
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {sacyrIrlAssignments.map(assignment => {
                             const form = SACYR_IRL_FORMS.find(f => f.slug === assignment.form_slug);
                             if (!form) return null;
@@ -1149,6 +1149,7 @@ export default function CoursesPage() {
                                                     jobName: form.cargo_name,
                                                     companyName: companyInfo?.name || 'Sacyr',
                                                     motivo: resp.motivo,
+                                                    induccion: resp.induccion_data || undefined,
                                                     respuestas_parte1: resp.respuestas_parte1 || {},
                                                     riesgos_identificados: resp.riesgos_identificados || [],
                                                     imagen_riesgo_1: resp.imagen_riesgo_1 || '',
