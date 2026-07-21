@@ -1167,69 +1167,6 @@ export default function CoursesPage() {
                     })()}
                 </div>
             )}
-                                    <div className="flex items-start gap-2.5">
-                                        {isCompleted
-                                            ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                                            : <Lock className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
-                                        }
-                                        <div className="min-w-0">
-                                            <p className="font-bold text-sm text-white leading-tight">{form.cargo_name}</p>
-                                            <p className="text-xs text-white/40 mt-0.5">{isCompleted ? 'Completado' : 'Pendiente de completar'}</p>
-                                        </div>
-                                    </div>
-                                    {isCompleted ? (
-                                        <button
-                                            onClick={async () => {
-                                                // Re-generate PDF from stored response
-                                                const { data: resp } = await supabase
-                                                    .from('sacyr_irl_responses')
-                                                    .select('*')
-                                                    .eq('assignment_id', assignment.id)
-                                                    .single();
-                                                if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
-                                                const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
-                                                const irlIdx = (cfg?.irl ?? [0])[0] ?? 0;
-                                                const relUrl = (companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null;
-                                                const relName = (companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null;
-                                                const relRole = (companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null;
-                                                await generateSacyrIrlPdf({
-                                                    form,
-                                                    studentName: resp.student_name,
-                                                    studentRut: resp.student_rut,
-                                                    jobName: form.cargo_name,
-                                                    companyName: companyInfo?.name || 'Sacyr',
-                                                    motivo: resp.motivo,
-                                                    induccion: resp.induccion_data || undefined,
-                                                    respuestas_parte1: resp.respuestas_parte1 || {},
-                                                    riesgos_identificados: resp.riesgos_identificados || [],
-                                                    imagen_riesgo_1: resp.imagen_riesgo_1 || '',
-                                                    imagen_medidas_1: resp.imagen_medidas_1 || '',
-                                                    imagen_riesgo_2: resp.imagen_riesgo_2 || '',
-                                                    imagen_medidas_2: resp.imagen_medidas_2 || '',
-                                                    studentSignatureUrl: resp.student_signature_url,
-                                                    relatorSignatureUrl: relUrl,
-                                                    relatorName: relName,
-                                                    relatorRole: relRole,
-                                                });
-                                            }}
-                                            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
-                                        >
-                                            <Download className="w-3.5 h-3.5" /> PDF
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => setActiveSacyrIrl(assignment.id)}
-                                            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-500/15 text-orange-300 border border-orange-500/30 rounded-xl text-xs font-black uppercase hover:bg-orange-500/25 transition-all"
-                                        >
-                                            <ChevronRight className="w-3.5 h-3.5" /> Completar
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
 
             {/* Sacyr IRL form modal */}
             {activeSacyrIrl && (() => {

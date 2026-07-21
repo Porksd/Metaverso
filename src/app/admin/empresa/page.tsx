@@ -1408,31 +1408,33 @@ export default function EmpresaAdmin() {
                                                         <p className="text-xs text-white/40">{irl.completed_at ? new Date(irl.completed_at).toLocaleDateString('es-CL') : '—'}</p>
                                                     </div>
                                                     {irlForm && (
-                                                        <button
-                                                            onClick={async () => {
-                                                                const { data: resp } = await supabase.from('sacyr_irl_responses').select('*').eq('assignment_id', irl.id).single();
-                                                                if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
-                                                                const cfg = (await supabase.from('companies').select('cert_signature_config, signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3').eq('id', companyId!).single()).data;
-                                                                const irlIdx = ((cfg?.cert_signature_config as any)?.irl ?? [0])[0] ?? 0;
-                                                                const { generateSacyrIrlPdf } = await import('@/lib/generateSacyrIrlPdf');
-                                                                await generateSacyrIrlPdf({ form: irlForm, studentName: resp.student_name, studentRut: resp.student_rut, jobName: irlForm.cargo_name, companyName: companyName, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: (cfg as any)?.[`signature_url_${irlIdx + 1}`] || null, relatorName: (cfg as any)?.[`signature_name_${irlIdx + 1}`] || null, relatorRole: (cfg as any)?.[`signature_role_${irlIdx + 1}`] || null });
-                                                            }}
-                                                            className="inline-flex items-center gap-1 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-[10px] font-black uppercase text-orange-300 hover:bg-orange-500/30 transition-all"
-                                                        >
-                                                            <Download className="w-3 h-3" /> IRL
-                                                        </button>
-                                                        <button
-                                                            onClick={async () => {
-                                                                if (!confirm('¿Reiniciar este IRL? Se borrarán las respuestas y quedará pendiente nuevamente.')) return;
-                                                                const res = await fetch('/api/sacyr-irl/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assignment_id: irl.id }) });
-                                                                if (res.ok) setSelectedStudentIrls(prev => prev.filter(x => x.id !== irl.id));
-                                                                else alert('Error al reiniciar el IRL.');
-                                                            }}
-                                                            className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/5 px-3 py-1 text-[10px] font-black uppercase text-white/50 hover:bg-red-900/30 hover:text-red-400 hover:border-red-500/30 transition-all"
-                                                            title="Reiniciar — borra respuestas y deja pendiente"
-                                                        >
-                                                            <RefreshCw className="w-3 h-3" /> Reiniciar
-                                                        </button>
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={async () => {
+                                                                    const { data: resp } = await supabase.from('sacyr_irl_responses').select('*').eq('assignment_id', irl.id).single();
+                                                                    if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
+                                                                    const cfg = (await supabase.from('companies').select('cert_signature_config, signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3').eq('id', companyId!).single()).data;
+                                                                    const irlIdx = ((cfg?.cert_signature_config as any)?.irl ?? [0])[0] ?? 0;
+                                                                    const { generateSacyrIrlPdf } = await import('@/lib/generateSacyrIrlPdf');
+                                                                    await generateSacyrIrlPdf({ form: irlForm, studentName: resp.student_name, studentRut: resp.student_rut, jobName: irlForm.cargo_name, companyName: companyName, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: (cfg as any)?.[`signature_url_${irlIdx + 1}`] || null, relatorName: (cfg as any)?.[`signature_name_${irlIdx + 1}`] || null, relatorRole: (cfg as any)?.[`signature_role_${irlIdx + 1}`] || null });
+                                                                }}
+                                                                className="inline-flex items-center gap-1 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-[10px] font-black uppercase text-orange-300 hover:bg-orange-500/30 transition-all"
+                                                            >
+                                                                <Download className="w-3 h-3" /> IRL
+                                                            </button>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (!confirm('¿Reiniciar este IRL? Se borrarán las respuestas y quedará pendiente nuevamente.')) return;
+                                                                    const res = await fetch('/api/sacyr-irl/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assignment_id: irl.id }) });
+                                                                    if (res.ok) setSelectedStudentIrls(prev => prev.filter(x => x.id !== irl.id));
+                                                                    else alert('Error al reiniciar el IRL.');
+                                                                }}
+                                                                className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/5 px-3 py-1 text-[10px] font-black uppercase text-white/50 hover:bg-red-900/30 hover:text-red-400 hover:border-red-500/30 transition-all"
+                                                                title="Reiniciar"
+                                                            >
+                                                                <RefreshCw className="w-3 h-3" /> Reiniciar
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             );
