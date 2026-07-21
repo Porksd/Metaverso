@@ -1109,14 +1109,64 @@ export default function CoursesPage() {
                         <ClipboardList className="w-4 h-4 text-orange-400" />
                         <h2 className="text-base font-black uppercase tracking-widest text-orange-300">Formularios IRL Sacyr</h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {sacyrIrlAssignments.map(assignment => {
-                            const form = SACYR_IRL_FORMS.find(f => f.slug === assignment.form_slug);
-                            if (!form) return null;
-                            const isCompleted = assignment.status === 'completed';
+                    {/* Condition: at least one approved course */}
+                    {(() => {
+                        const hasApprovedCourse = enrollments.some((e: any) => e.status === 'completed');
+                        return (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {sacyrIrlAssignments.map(assignment => {
+                                    const form = SACYR_IRL_FORMS.find(f => f.slug === assignment.form_slug);
+                                    if (!form) return null;
+                                    const isCompleted = assignment.status === 'completed';
+                                    const isLocked = !isCompleted && !hasApprovedCourse;
 
-                            return (
-                                <div key={assignment.id} className={`flex flex-col gap-3 p-4 rounded-2xl border ${isCompleted ? 'bg-green-900/15 border-green-500/25' : 'bg-orange-900/15 border-orange-500/25'}`}>
+                                    return (
+                                        <div key={assignment.id} className={`flex flex-col gap-3 p-4 rounded-2xl border ${isCompleted ? 'bg-green-900/15 border-green-500/25' : isLocked ? 'bg-white/3 border-white/8 opacity-60' : 'bg-orange-900/15 border-orange-500/25'}`}>
+                                            <div className="flex items-start gap-2.5">
+                                                {isCompleted
+                                                    ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                                                    : <Lock className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isLocked ? 'text-white/20' : 'text-orange-400'}`} />
+                                                }
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-sm text-white leading-tight">{form.cargo_name}</p>
+                                                    <p className="text-xs text-white/40 mt-0.5">
+                                                        {isCompleted ? 'Completado' : isLocked ? 'Requiere al menos un curso aprobado' : 'Pendiente de completar'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {isCompleted ? (
+                                                <button
+                                                    onClick={async () => {
+                                                        const { data: resp } = await supabase.from('sacyr_irl_responses').select('*').eq('assignment_id', assignment.id).single();
+                                                        if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
+                                                        const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
+                                                        const irlIdx = (cfg?.irl ?? [0])[0] ?? 0;
+                                                        const relUrl = (companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null;
+                                                        const relName = (companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null;
+                                                        const relRole = (companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null;
+                                                        await generateSacyrIrlPdf({ form, studentName: resp.student_name, studentRut: resp.student_rut, jobName: form.cargo_name, companyName: companyInfo?.name || 'Sacyr', motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: relUrl, relatorName: relName, relatorRole: relRole });
+                                                    }}
+                                                    className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
+                                                >
+                                                    <Download className="w-3.5 h-3.5" /> PDF
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    disabled={isLocked}
+                                                    onClick={() => !isLocked && setActiveSacyrIrl(assignment.id)}
+                                                    className={`w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all ${isLocked ? 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed' : 'bg-orange-500/15 text-orange-300 border border-orange-500/30 hover:bg-orange-500/25'}`}
+                                                >
+                                                    <Lock className="w-3.5 h-3.5" /> {isLocked ? 'Bloqueado' : 'Completar'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
                                     <div className="flex items-start gap-2.5">
                                         {isCompleted
                                             ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />

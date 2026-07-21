@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { resolveAdminRole } from "@/lib/adminAuth";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 import { generateIrlCert } from "@/lib/generateIrlCert";
-import { SACYR_COMPANY_ID, SACYR_IRL_FORMS } from "@/lib/sacyrIrlData";
+import { SACYR_COMPANY_ID, SACYR_IRL_FORMS, CARGO_TO_IRL_SLUG } from "@/lib/sacyrIrlData";
 
 // Utility functions for RUT validation
 const cleanRut = (rut: string) => {
@@ -750,6 +750,14 @@ export default function EmpresaAdmin() {
 
         if (error) alert("Error al actualizar: " + error.message);
         else {
+            // Auto-assign IRL for Sacyr if role changed and matches a form
+            if (companyId === SACYR_COMPANY_ID && student.role_id) {
+                const roleName = cargos.find((c: any) => c.id === student.role_id)?.name || '';
+                const irlSlug = CARGO_TO_IRL_SLUG[roleName.toLowerCase().trim()];
+                if (irlSlug) {
+                    fetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: student.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
+                }
+            }
             setIsEditing(null);
             fetchData();
         }
@@ -835,6 +843,15 @@ export default function EmpresaAdmin() {
             age: "",
             gender: "",
         });
+        // Auto-assign IRL for Sacyr if new student role matches a form
+        if (companyId === SACYR_COMPANY_ID && newStudent.role_id) {
+            const { data: newSt } = await supabase.from('students').select('id').eq('client_id', companyId).order('created_at', { ascending: false }).limit(1).single();
+            if (newSt) {
+                const roleName = cargos.find((c: any) => c.id === newStudent.role_id)?.name || '';
+                const irlSlug = CARGO_TO_IRL_SLUG[roleName.toLowerCase().trim()];
+                if (irlSlug) fetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: newSt.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
+            }
+        }
         fetchData();
     };
 
@@ -1403,6 +1420,18 @@ export default function EmpresaAdmin() {
                                                             className="inline-flex items-center gap-1 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-[10px] font-black uppercase text-orange-300 hover:bg-orange-500/30 transition-all"
                                                         >
                                                             <Download className="w-3 h-3" /> IRL
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (!confirm('¿Reiniciar este IRL? Se borrarán las respuestas y quedará pendiente nuevamente.')) return;
+                                                                const res = await fetch('/api/sacyr-irl/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assignment_id: irl.id }) });
+                                                                if (res.ok) setSelectedStudentIrls(prev => prev.filter(x => x.id !== irl.id));
+                                                                else alert('Error al reiniciar el IRL.');
+                                                            }}
+                                                            className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-white/5 px-3 py-1 text-[10px] font-black uppercase text-white/50 hover:bg-red-900/30 hover:text-red-400 hover:border-red-500/30 transition-all"
+                                                            title="Reiniciar — borra respuestas y deja pendiente"
+                                                        >
+                                                            <RefreshCw className="w-3 h-3" /> Reiniciar
                                                         </button>
                                                     )}
                                                 </div>
