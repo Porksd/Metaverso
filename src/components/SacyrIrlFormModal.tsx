@@ -116,7 +116,11 @@ export default function SacyrIrlFormModal({
     if (step === "info") return motivo !== "";
     if (step === "induccion") return Object.values(comprension).some(Boolean);
     if (step === "quiz") return Object.keys(respParte1).length === form.preguntas.length;
-    if (step === "workshop") return riesgos.some(r => r.riesgo.trim() !== "");
+    if (step === "workshop") {
+      const riesgosOk = riesgos.filter(r => r.riesgo.trim()).length >= 1 && riesgos.some(r => r.riesgo.trim() && r.medidas.trim());
+      const imgOk = imgRiesgo1.trim() && imgMedidas1.trim() && imgRiesgo2.trim() && imgMedidas2.trim();
+      return riesgosOk && imgOk;
+    }
     if (step === "sign") return !!(studentSignature || savedSignatureUrl);
     return true;
   };
@@ -443,21 +447,13 @@ export default function SacyrIrlFormModal({
                 </div>
               </div>
               <div>
-                <p className="text-white font-bold mb-2 text-sm">Análisis de imagen</p>
-                <button
-                  type="button"
-                  onClick={() => setImageExpanded(e => !e)}
-                  className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl mb-2 text-sm text-white/70 hover:bg-white/8 transition-all"
-                >
-                  <span>{imageExpanded ? 'Ocultar imagen' : 'Ver imagen completa ↑'}</span>
-                  <span className="text-xs text-brand">{imageExpanded ? 'Colapsar' : 'Expandir'}</span>
-                </button>
-                {imageExpanded && (
-                  <div className="rounded-xl overflow-hidden border border-white/10 mb-3">
-                    <img src="/cert-assets/sacyr-irl-header.png" alt="Escena de obra" className="w-full object-contain" />
-                  </div>
-                )}
-                <p className="text-white/50 text-xs mb-3">Observe la imagen y analice situaciones de riesgo. Indique 2 con al menos 1 medida de control por cada una.</p>
+                <div className="bg-brand/10 border border-brand/25 rounded-xl p-3 mb-3">
+                  <p className="text-white font-bold text-sm mb-1">Análisis de imagen</p>
+                  <p className="text-white/70 text-xs">Observe la imagen y analice situaciones de riesgo. Indique 2 con al menos 1 medida de control por cada una.</p>
+                </div>
+                <div className="rounded-xl overflow-hidden border border-white/10 mb-4">
+                  <img src="/cert-assets/sacyr-irl-header.png" alt="Escena de obra" className="w-full object-contain" />
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[0, 1].map(idx => (
                     <div key={idx} className="space-y-2">
@@ -517,15 +513,28 @@ export default function SacyrIrlFormModal({
               <ChevronLeft className="w-4 h-4" /> Anterior
             </button>
           )}
-          <button
-            onClick={() => stepIdx === STEPS.length - 1 ? handleSubmit() : handleStepChange(STEPS[stepIdx + 1])}
-            disabled={!canNext() || saving}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand text-black rounded-xl font-black uppercase text-sm hover:bg-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {saving ? "Guardando..." : stepIdx === STEPS.length - 1
-              ? <><Check className="w-4 h-4" /> Enviar y Descargar PDF</>
-              : <>Siguiente <ChevronRight className="w-4 h-4" /></>}
-          </button>
+          <div className="flex-1 flex flex-col gap-2">
+            {step === "workshop" && !canNext() && (
+              <p className="text-xs text-orange-300/80 text-center">
+                {(() => {
+                  const r1ok = riesgos.some(r => r.riesgo.trim() && r.medidas.trim());
+                  const imgOk = imgRiesgo1.trim() && imgMedidas1.trim() && imgRiesgo2.trim() && imgMedidas2.trim();
+                  if (!r1ok) return "Describe al menos 1 riesgo con su medida de control.";
+                  if (!imgOk) return "Completa los 2 riesgos de la imagen con sus medidas de control.";
+                  return null;
+                })()}
+              </p>
+            )}
+            <button
+              onClick={() => stepIdx === STEPS.length - 1 ? handleSubmit() : handleStepChange(STEPS[stepIdx + 1])}
+              disabled={!canNext() || saving}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand text-black rounded-xl font-black uppercase text-sm hover:bg-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {saving ? "Guardando..." : stepIdx === STEPS.length - 1
+                ? <><Check className="w-4 h-4" /> Enviar y Descargar PDF</>
+                : <>Siguiente <ChevronRight className="w-4 h-4" /></>}
+            </button>
+          </div>
         </div>
       </div>
     </div>
