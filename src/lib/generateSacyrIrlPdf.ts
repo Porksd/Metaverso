@@ -33,16 +33,46 @@ export interface SacyrIrlPdfInput {
 }
 
 const HEADER_CODE = "PG.10.06.CL-F03 Ed 05";
-const HEADER_TITLE = "INFORMACIÃ“N Y FORMACIÃ“N PREVENTIVA - INFORMAR LOS RIESGOS LABORALES (IRL)";
-const FOOTER_LINE1 = "DIRECCIÃ“N DE SEGURIDAD Y SALUD";
-const FOOTER_LINE2 = "La DirecciÃ³n de Seguridad y Salud del Grupo Sacyr no garantiza que la copia impresa de este documento sea la EdiciÃ³n vigente.";
-const SYSTEM_LABEL = "SISTEMA DE GESTIÃ“N DE SEGURIDAD Y SALUD";
+const HEADER_TITLE = "INFORMACI\u00d3N Y FORMACI\u00d3N PREVENTIVA - INFORMAR LOS RIESGOS LABORALES (IRL)";
+const FOOTER_LINE1 = "DIRECCI\u00d3N DE SEGURIDAD Y SALUD";
+const FOOTER_LINE2 = "La Direcci\u00f3n de Seguridad y Salud del Grupo Sacyr no garantiza que la copia impresa de este documento sea la Edici\u00f3n vigente.";
+const SYSTEM_LABEL = "SISTEMA DE GESTI\u00d3N DE SEGURIDAD Y SALUD";
 
-const MOTIVO_LABELS: Record<string, string> = {
-  nueva_incorporacion: "Nueva incorporaciÃ³n de Persona Trabajadora",
-  cambio_proceso: "Cambios en el proceso de trabajo o puesto de trabajo",
-  nuevas_actividades: "Nuevas actividades",
-};
+/**
+ * Reverses the UTF-8 → Windows-1252 corruption introduced when PowerShell
+ * edited this file using the wrong encoding.
+ */
+function fixenc(s: string | null | undefined): string {
+  if (!s) return s ?? '';
+  return s
+    .replace(/\u00c3\u00a1/g, '\u00e1') // \u00e1 = \xc3\xa1
+    .replace(/\u00c3\u00a9/g, '\u00e9') // \u00e9
+    .replace(/\u00c3\u00ad/g, '\u00ed') // \u00ed
+    .replace(/\u00c3\u00b3/g, '\u00f3') // \u00f3
+    .replace(/\u00c3\u00ba/g, '\u00fa') // \u00fa
+    .replace(/\u00c3\u00b1/g, '\u00f1') // \u00f1
+    .replace(/\u00c3\u00bc/g, '\u00fc') // \u00fc
+    .replace(/\u00c3\u00a7/g, '\u00e7') // \u00e7
+    .replace(/\u00c3\u00a0/g, '\u00e0') // \u00e0
+    .replace(/\u00c3\u00b2/g, '\u00f2') // \u00f2
+    .replace(/\u00c3\u00b9/g, '\u00f9') // \u00f9
+    .replace(/\u00c3\u201c/g, '\u00d3') // \u00d3 (0x93 in cp1252 = U+201C)
+    .replace(/\u00c3\u2018/g, '\u00d1') // \u00d1 (0x91 = U+2018)
+    .replace(/\u00c3\u2030/g, '\u00c9') // \u00c9 (0x89 = U+2030)
+    .replace(/\u00c3\u0161/g, '\u00da') // \u00da (0x9A = U+0161)
+    .replace(/\u00c3\u0153/g, '\u00dc') // \u00dc (0x9C = U+0153)
+    .replace(/\u00c3\u0081/g, '\u00c1') // \u00c1 (0x81 undefined)
+    .replace(/\u00c2\u00b0/g, '\u00b0') // degree sign
+    .replace(/\u00c2\u00ba/g, '\u00ba') // masculine ordinal
+    .replace(/\u00c2\u00a1/g, '\u00a1') // inverted !
+    .replace(/\u00e2\u20ac\u00a2/g, '\u2022') // bullet
+    .replace(/\u00c3\u00af/g, '\u00ef') // \u00ef
+    .replace(/\u00c3\u00ae/g, '\u00ee') // \u00ee
+    .replace(/\u00c3\u00b4/g, '\u00f4') // \u00f4
+    .replace(/\u00c3\u201d/g, '\u00d4') // \u00d4
+    .replace(/\u00c3\u2019/g, '\u00d2') // \u00d2
+    ;
+}
 
 async function urlToDataUrl(url: string): Promise<string | null> {
   try {
@@ -95,7 +125,7 @@ function addHeaderFooter(
   pdf.setFontSize(5.5);
   pdf.text(HEADER_CODE, W - 38, 14);
   pdf.setFont("helvetica", "normal");
-  pdf.text(`PÃ¡g. ${pageNum} de ${totalPages}`, W - 38, 19);
+  pdf.text(`Pág. ${pageNum} de ${totalPages}`, W - 38, 19);
 
   // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const footerY = 285;
@@ -117,7 +147,7 @@ function sectionTitle(pdf: jsPDF, text: string, y: number, pageW: number) {
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(8);
   pdf.setTextColor(255, 255, 255);
-  pdf.text(text, 13, y + 4.5);
+  pdf.text(fixenc(text), 13, y + 4.5);
   pdf.setTextColor(0, 0, 0);
   return y + 6;
 }
@@ -138,11 +168,11 @@ function tableRow(
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(7.5);
   pdf.setTextColor(50, 50, 50);
-  pdf.text(label, 12, y + rowH - 2.5);
+  pdf.text(fixenc(label), 12, y + rowH - 2.5);
   pdf.setFont("helvetica", "normal");
   pdf.setTextColor(0, 0, 0);
   const maxW = lineW - labelW - 4;
-  const wrapped = pdf.splitTextToSize(value, maxW);
+  const wrapped = pdf.splitTextToSize(fixenc(value), maxW);
   pdf.text(wrapped[0] || "", 12 + labelW, y + rowH - 2.5);
   return y + rowH;
 }
@@ -152,7 +182,7 @@ function bulletList(pdf: jsPDF, items: string[], x: number, y: number, maxW: num
   pdf.setFontSize(7.5);
   pdf.setTextColor(20, 20, 20);
   for (const item of items) {
-    const lines = pdf.splitTextToSize(`â€¢ ${item}`, maxW - 4);
+    const lines = pdf.splitTextToSize(`• ${fixenc(item)}`, maxW - 4);
     pdf.text(lines, x + 2, y);
     y += lines.length * 4 + 1;
   }
@@ -166,11 +196,11 @@ function checkbox(pdf: jsPDF, x: number, y: number, checked: boolean, label: str
   if (checked) {
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(9);
-    pdf.text("âœ“", x + 0.5, y + 0.3);
+    pdf.text("x", x + 0.5, y + 0.3);
   }
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
-  pdf.text(label, x + 5.5, y);
+  pdf.text(fixenc(label), x + 5.5, y);
 }
 
 export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void> {
@@ -208,13 +238,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   infoRows1.forEach(([label, value], i) => {
     tableRow(pdf, label, value, y + i * 7, 40, 7, halfW);
   });
-  infoRows2.forEach(([label, value], i) => {
-    tableRow(pdf, label, value, y + i * 7, 40, 7, contentW);
-    // Adjust x for right column
-  });
-
-  // Draw right column
-  y = bodyTop;
+  // Right column only (no duplicate tableRow)
   for (let i = 0; i < infoRows2.length; i++) {
     const [label, value] = infoRows2[i];
     pdf.setDrawColor(180, 180, 180);
@@ -223,8 +247,10 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     pdf.rect(M + halfW + 40, y + i * 7, halfW - 40, 7);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7.5);
+    pdf.setTextColor(50, 50, 50);
     pdf.text(label, M + halfW + 2, y + i * 7 + 4.5);
     pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(0, 0, 0);
     pdf.text(value, M + halfW + 42, y + i * 7 + 4.5);
   }
 

@@ -105,7 +105,7 @@ export default function SacyrIrlFormModal({
   const [studentSignature, setStudentSignature] = useState<string | null>(null);
   const [savedSignatureUrl, setSavedSignatureUrl] = useState<string | null>(null);
   const [loadingSig, setLoadingSig] = useState(false);
-  const [imageExpanded, setImageExpanded] = useState(false);
+  const [imageExpanded, setImageExpanded] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
