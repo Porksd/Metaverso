@@ -58,15 +58,16 @@ const COMPRENSION_ITEMS = [
 
 function CB({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <label className="flex items-start gap-2.5 cursor-pointer select-none">
-      <div
-        onClick={() => onChange(!checked)}
-        className={`w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${checked ? "border-brand bg-brand" : "border-white/30 bg-white/5"}`}
-      >
+    <div
+      className="flex items-start gap-2.5 cursor-pointer select-none"
+      onMouseDown={e => e.preventDefault()}
+      onClick={() => onChange(!checked)}
+    >
+      <div className={`w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${checked ? "border-brand bg-brand" : "border-white/30 bg-white/5"}`}>
         {checked && <Check className="w-2.5 h-2.5 text-black" />}
       </div>
       <span className="text-sm text-white/80 leading-snug">{label}</span>
-    </label>
+    </div>
   );
 }
 
@@ -268,13 +269,15 @@ export default function SacyrIrlFormModal({
                     { key: "cambio_proceso",       label: "Cambios en el proceso de trabajo o puesto de trabajo" },
                     { key: "nuevas_actividades",   label: "Nuevas actividades" },
                   ] as {key: string, label: string}[]).map(({ key, label }) => (
-                    <label key={key} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${motivo === key ? "border-brand bg-brand/10" : "border-white/10 bg-white/5 hover:bg-white/8"}`}>
+                    <div key={key}
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={() => setMotivo(key as any)}
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${motivo === key ? "border-brand bg-brand/10" : "border-white/10 bg-white/5 hover:bg-white/8"}`}>
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${motivo === key ? "border-brand bg-brand" : "border-white/30"}`}>
                         {motivo === key && <Check className="w-2.5 h-2.5 text-black" />}
                       </div>
                       <span className="text-sm text-white/80">{label}</span>
-                      <input type="radio" name="motivo" value={key} checked={motivo === key} onChange={() => setMotivo(key as any)} className="sr-only" />
-                    </label>
+                    </div>
                   ))}
                 </div>
               </div>
