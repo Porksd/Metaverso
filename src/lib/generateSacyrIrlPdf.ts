@@ -1,4 +1,4 @@
-﻿import jsPDF from "jspdf";
+﻿﻿import jsPDF from "jspdf";
 import type { SacyrIrlFormData } from "./sacyrIrlData";
 
 export interface InduccionData {
@@ -395,7 +395,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
       if (descVal) {
         pdf.setFont("helvetica", "italic");
         pdf.setFontSize(7);
-        const dLines = pdf.splitTextToSize(`  â†’ ${descVal}`, contentW - 10);
+        const dLines = pdf.splitTextToSize(`   ${descVal}`, contentW - 10);
         pdf.text(dLines, M + 8, y);
         y += dLines.length * 4 + 1;
         pdf.setFont("helvetica", "normal");
