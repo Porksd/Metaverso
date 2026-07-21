@@ -113,6 +113,7 @@ export default function SacyrIrlFormModal({
 
   const canNext = () => {
     if (step === "info") return motivo !== "";
+    if (step === "induccion") return Object.values(comprension).some(Boolean);
     if (step === "quiz") return Object.keys(respParte1).length === form.preguntas.length;
     if (step === "workshop") return riesgos.some(r => r.riesgo.trim() !== "");
     if (step === "sign") return !!(studentSignature || savedSignatureUrl);

@@ -248,10 +248,10 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7.5);
     pdf.setTextColor(50, 50, 50);
-    pdf.text(label, M + halfW + 2, y + i * 7 + 4.5);
+    pdf.text(fixenc(label), M + halfW + 2, y + i * 7 + 4.5);
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(0, 0, 0);
-    pdf.text(value, M + halfW + 42, y + i * 7 + 4.5);
+    pdf.text(fixenc(value), M + halfW + 42, y + i * 7 + 4.5);
   }
 
   y += 24;
@@ -334,7 +334,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const legalText = `En cumplimiento a lo dispuesto en el Decreto NÂ° 44, tÃ­tulo II, pÃ¡rrafo 4, artÃ­culo 15 en "INFORMAR LOS RIESGOS LABORALES (IRL)". Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de mÃ©todos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberÃ¡ informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o ComitÃ© Paritario de Higiene y Seguridad, con la finalidad que estas condiciones sean analizadas y se establezcan los mÃ©todos y medidas de control que deberÃ¡ adoptar para ejecutar en forma segura sus labores.`;
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  const legalLines = pdf.splitTextToSize(legalText, contentW - 4);
+  const legalLines = pdf.splitTextToSize(fixenc(legalText), contentW - 4);
   pdf.text(legalLines, M + 2, y);
   y += legalLines.length * 4 + 6;
 
@@ -413,9 +413,9 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   if (ind?.productos_quimicos?.length) {
     pdf.setFontSize(7.5);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Productos quÃ­micos:", M + 2, y); y += 5;
+    pdf.text("Productos químicos:", M + 2, y); y += 5;
     const colW = contentW / 3;
-    ["Tipo de producto quÃ­mico", "Riesgos asociados", "Medidas de control"].forEach((h, i) => {
+    ["Tipo de producto químico", "Riesgos asociados", "Medidas de control"].forEach((h, i) => {
       pdf.setFillColor(220, 230, 242);
       pdf.rect(M + i * colW, y, colW, 6, "F");
       pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * colW, y, colW, 6);
@@ -474,7 +474,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y = sectionTitle(pdf, "CapacitaciÃ³n y formaciÃ³n recibida", y, W);
   y += 3;
   const capColW = contentW / 2;
-  ["Riesgo", "Nombre acciÃ³n formativa"].forEach((h, i) => {
+  ["Riesgo", "Nombre acción formativa"].forEach((h, i) => {
     pdf.setFillColor(220, 230, 242);
     pdf.rect(M + i * capColW, y, capColW, 6, "F");
     pdf.setDrawColor(150, 150, 150); pdf.rect(M + i * capColW, y, capColW, 6);
@@ -493,7 +493,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   }
   pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
   pdf.setTextColor(100, 100, 100);
-  pdf.text("ConsideraciÃ³n: capacitaciones que permitan a la persona trabajadora reconocer y gestionar los riesgos presentes en su entorno de trabajo.", M, y + 4);
+  pdf.text("Consideración: capacitaciones que permitan a la persona trabajadora reconocer y gestionar los riesgos presentes en su entorno de trabajo.", M, y + 4);
   pdf.setTextColor(20, 20, 20);
   y += 10;
 
@@ -523,7 +523,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   if (compItems.length % 2 !== 0) y += 6;
   pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
   pdf.setTextColor(100, 100, 100);
-  pdf.text("* Herramientas que derivan del anÃ¡lisis MIPERO en las cuales se expresan los riesgos en el puesto de trabajo y lugar de trabajo.", M, y + 3);
+  pdf.text("* Herramientas que derivan del análisis MIPERO en las cuales se expresan los riesgos en el puesto de trabajo y lugar de trabajo.", M, y + 3);
   pdf.setTextColor(20, 20, 20);
   y += 8;
 
@@ -588,7 +588,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
   pdf.text(
-    "SegÃºn la Matriz IPERO identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto en sus labores:",
+    fixenc("Seg\u00fan la Matriz IPERO identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto en sus labores:"),
     M + 2,
     y
   );
