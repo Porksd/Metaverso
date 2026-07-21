@@ -632,7 +632,12 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   y += 6;
 
-  // â”€â”€ Image analysis section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Image analysis + signatures always on fresh page
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 4, sacyrLogo);
+  pdf.addPage();
+  y = bodyTop;
+
+  // Image analysis section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(7.5);
   pdf.text(
