@@ -708,13 +708,16 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += boxH + 8;
 
   // â”€â”€ Signatures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Signatures -- ensure enough space before drawing
-  const sigSpaceNeeded = 58;
+  // Pin signatures to bottom of last content page
+  const sigBottomPin = 232; // signatures start y-position for bottom alignment
   const _curPage = (pdf as any).internal.getCurrentPageInfo().pageNumber;
-  if (y + sigSpaceNeeded > 278) {
+  if (y > sigBottomPin) {
+    // Content too long: need a new page for signatures
     addHeaderFooter(pdf, _curPage, 4, sacyrLogo);
     pdf.addPage();
     y = bodyTop;
+  } else {
+    y = sigBottomPin; // push to bottom
   }
 
   const sigW = (contentW - 20) / 2;
