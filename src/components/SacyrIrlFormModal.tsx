@@ -103,6 +103,9 @@ export default function SacyrIrlFormModal({
   const [imgMedidas2, setImgMedidas2]       = useState("");
 
   const [studentSignature, setStudentSignature] = useState<string | null>(null);
+  const [savedSignatureUrl, setSavedSignatureUrl] = useState<string | null>(null);
+  const [loadingSig, setLoadingSig] = useState(false);
+  const [imageExpanded, setImageExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
@@ -112,7 +115,22 @@ export default function SacyrIrlFormModal({
     if (step === "info") return motivo !== "";
     if (step === "quiz") return Object.keys(respParte1).length === form.preguntas.length;
     if (step === "workshop") return riesgos.some(r => r.riesgo.trim() !== "");
+    if (step === "sign") return !!(studentSignature || savedSignatureUrl);
     return true;
+  };
+
+  // Load saved signature when entering sign step
+  const handleStepChange = async (newStep: Step) => {
+    if (newStep === "sign" && !savedSignatureUrl && !loadingSig) {
+      setLoadingSig(true);
+      const { data } = await supabase.from("students").select("digital_signature_url").eq("id", studentId).single();
+      if (data?.digital_signature_url) {
+        setSavedSignatureUrl(data.digital_signature_url);
+        setStudentSignature(data.digital_signature_url);
+      }
+      setLoadingSig(false);
+    }
+    setStep(newStep);
   };
 
   const buildInduccionData = (): InduccionData => ({
@@ -379,16 +397,20 @@ export default function SacyrIrlFormModal({
               </div>
               <p className="text-white/50 text-xs">Primera Parte: Preguntas de alternativas, existe sólo una respuesta correcta (marque con una X).</p>
               {form.preguntas.map((q, qi) => (
-                <div key={qi} className="space-y-2">
+                <div key={qi} className="space-y-2 scroll-mt-4" id={`q-${qi}`}>
                   <p className="text-white font-bold text-sm">{qi + 1}. {q.pregunta}</p>
                   <div className="space-y-1.5">
                     {q.opciones.map((opt, oi) => (
-                      <label key={oi} className={`flex items-start gap-3 p-2.5 rounded-xl border cursor-pointer transition-all text-sm ${respParte1[qi] === oi ? "border-brand bg-brand/10 text-white" : "border-white/10 bg-white/5 text-white/70 hover:bg-white/8"}`}>
+                      <label key={oi}
+                        onClick={e => {
+                          e.preventDefault();
+                          setRespParte1(prev => ({ ...prev, [qi]: oi }));
+                        }}
+                        className={`flex items-start gap-3 p-2.5 rounded-xl border cursor-pointer transition-all text-sm ${respParte1[qi] === oi ? "border-brand bg-brand/10 text-white" : "border-white/10 bg-white/5 text-white/70 hover:bg-white/8"}`}>
                         <div className={`w-4 h-4 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center ${respParte1[qi] === oi ? "border-brand bg-brand" : "border-white/30"}`}>
                           {respParte1[qi] === oi && <Check className="w-2.5 h-2.5 text-black" />}
                         </div>
                         <span>{["a)", "b)", "c)", "d)"][oi]} {opt}</span>
-                        <input type="radio" name={`q${qi}`} checked={respParte1[qi] === oi} onChange={() => setRespParte1(prev => ({ ...prev, [qi]: oi }))} className="sr-only" />
                       </label>
                     ))}
                   </div>
@@ -418,9 +440,19 @@ export default function SacyrIrlFormModal({
               </div>
               <div>
                 <p className="text-white font-bold mb-2 text-sm">Análisis de imagen</p>
-                <div className="rounded-xl overflow-hidden border border-white/10 mb-3">
-                  <img src="/cert-assets/sacyr-irl-header.png" alt="Escena de obra" className="w-full max-h-52 object-cover" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setImageExpanded(e => !e)}
+                  className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl mb-2 text-sm text-white/70 hover:bg-white/8 transition-all"
+                >
+                  <span>{imageExpanded ? 'Ocultar imagen' : 'Ver imagen completa ↑'}</span>
+                  <span className="text-xs text-brand">{imageExpanded ? 'Colapsar' : 'Expandir'}</span>
+                </button>
+                {imageExpanded && (
+                  <div className="rounded-xl overflow-hidden border border-white/10 mb-3">
+                    <img src="/cert-assets/sacyr-irl-header.png" alt="Escena de obra" className="w-full object-contain" />
+                  </div>
+                )}
                 <p className="text-white/50 text-xs mb-3">Observe la imagen y analice situaciones de riesgo. Indique 2 con al menos 1 medida de control por cada una.</p>
                 <div className="grid grid-cols-2 gap-3">
                   {[0, 1].map(idx => (
@@ -445,11 +477,26 @@ export default function SacyrIrlFormModal({
               <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 text-sm text-blue-200 leading-relaxed">
                 En cumplimiento al Decreto N° 44, declaro haber recibido información sobre los riesgos laborales de mi cargo y me comprometo a cumplir las medidas preventivas establecidas.
               </div>
-              <div>
-                <p className="text-white font-bold mb-3">Firma del trabajador</p>
-                <SignatureCanvas onSave={sig => setStudentSignature(sig)} />
-                {studentSignature && <div className="mt-2 flex items-center gap-2 text-green-400 text-sm"><Check className="w-4 h-4" /> Firma registrada</div>}
-              </div>
+              {loadingSig ? (
+                <p className="text-white/40 text-sm">Verificando firma guardada…</p>
+              ) : savedSignatureUrl ? (
+                <div className="space-y-3">
+                  <p className="text-white font-bold">Firma registrada</p>
+                  <div className="bg-white rounded-xl p-3 flex justify-center">
+                    <img src={savedSignatureUrl} alt="Tu firma" className="max-h-24 object-contain" />
+                  </div>
+                  <div className="flex items-center gap-2 text-green-400 text-sm"><Check className="w-4 h-4" /> Firma guardada previamente — se usará en este IRL.</div>
+                  <button type="button" onClick={() => { setSavedSignatureUrl(null); setStudentSignature(null); }} className="text-xs text-white/40 underline">
+                    Firmar nuevamente
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-white font-bold mb-3">Firma del trabajador</p>
+                  <SignatureCanvas onSave={sig => setStudentSignature(sig)} />
+                  {studentSignature && <div className="mt-2 flex items-center gap-2 text-green-400 text-sm"><Check className="w-4 h-4" /> Firma registrada</div>}
+                </div>
+              )}
               {error && (
                 <div className="flex items-center gap-2 text-red-400 text-sm bg-red-900/20 border border-red-500/30 rounded-xl p-3">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
@@ -461,13 +508,13 @@ export default function SacyrIrlFormModal({
 
         <div className="sticky bottom-0 bg-[#0f1117] border-t border-white/10 px-6 py-4 flex gap-3">
           {stepIdx > 0 && (
-            <button onClick={() => setStep(STEPS[stepIdx - 1])}
+            <button onClick={() => handleStepChange(STEPS[stepIdx - 1])}
               className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white/70 hover:bg-white/10 text-sm font-bold">
               <ChevronLeft className="w-4 h-4" /> Anterior
             </button>
           )}
           <button
-            onClick={() => stepIdx === STEPS.length - 1 ? handleSubmit() : setStep(STEPS[stepIdx + 1])}
+            onClick={() => stepIdx === STEPS.length - 1 ? handleSubmit() : handleStepChange(STEPS[stepIdx + 1])}
             disabled={!canNext() || saving}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-brand text-black rounded-xl font-black uppercase text-sm hover:bg-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >

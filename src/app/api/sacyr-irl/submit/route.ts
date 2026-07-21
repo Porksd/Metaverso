@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Verify the assignment exists and belongs to this student
     const { data: assignment, error: assignErr } = await admin
       .from("sacyr_irl_assignments")
-      .select("id, status, student_id")
+      .select("id, status, student_id, form_id")
       .eq("id", assignment_id)
       .single();
 
@@ -50,11 +50,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Este formulario ya fue completado" }, { status: 409 });
     }
 
+    // Use the form_id UUID from the assignment (ignore the slug passed in body)
+    const formIdUUID = assignment.form_id;
+
     // Insert response
     const { error: respErr } = await admin.from("sacyr_irl_responses").insert({
       assignment_id,
       student_id,
-      form_id,
+      form_id: formIdUUID,  // UUID from DB, not slug from body
       motivo,
       induccion_data: induccion_data || {},
       respuestas_parte1: respuestas_parte1 || {},

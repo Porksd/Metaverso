@@ -1116,15 +1116,15 @@ export default function CoursesPage() {
                             const isCompleted = assignment.status === 'completed';
 
                             return (
-                                <div key={assignment.id} className={`flex items-center justify-between p-4 rounded-2xl border ${isCompleted ? 'bg-green-900/15 border-green-500/25' : 'bg-orange-900/15 border-orange-500/25'}`}>
-                                    <div className="flex items-center gap-3">
+                                <div key={assignment.id} className={`flex flex-col gap-3 p-4 rounded-2xl border ${isCompleted ? 'bg-green-900/15 border-green-500/25' : 'bg-orange-900/15 border-orange-500/25'}`}>
+                                    <div className="flex items-start gap-2.5">
                                         {isCompleted
-                                            ? <CheckCircle2 className="w-5 h-5 text-green-400" />
-                                            : <Lock className="w-5 h-5 text-orange-400" />
+                                            ? <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                                            : <Lock className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
                                         }
-                                        <div>
-                                            <p className="font-bold text-sm text-white">{form.cargo_name}</p>
-                                            <p className="text-xs text-white/40">{isCompleted ? 'Completado' : 'Pendiente de completar'}</p>
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-sm text-white leading-tight">{form.cargo_name}</p>
+                                            <p className="text-xs text-white/40 mt-0.5">{isCompleted ? 'Completado' : 'Pendiente de completar'}</p>
                                         </div>
                                     </div>
                                     {isCompleted ? (
@@ -1162,14 +1162,14 @@ export default function CoursesPage() {
                                                     relatorRole: relRole,
                                                 });
                                             }}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
+                                            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
                                         >
                                             <Download className="w-3.5 h-3.5" /> PDF
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => setActiveSacyrIrl(assignment.id)}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-orange-500/15 text-orange-300 border border-orange-500/30 rounded-xl text-xs font-black uppercase hover:bg-orange-500/25 transition-all"
+                                            className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-orange-500/15 text-orange-300 border border-orange-500/30 rounded-xl text-xs font-black uppercase hover:bg-orange-500/25 transition-all"
                                         >
                                             <ChevronRight className="w-3.5 h-3.5" /> Completar
                                         </button>
