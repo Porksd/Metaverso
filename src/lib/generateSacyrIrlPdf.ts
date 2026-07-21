@@ -125,7 +125,8 @@ function addHeaderFooter(
   pdf.setFontSize(5.5);
   pdf.text(HEADER_CODE, W - 38, 14);
   pdf.setFont("helvetica", "normal");
-  pdf.text(`Pág. ${pageNum} de ${totalPages}`, W - 38, 19);
+  // Page number is updated in the post-render pass at the end of generateSacyrIrlPdf
+  pdf.text(`Pág. ${pageNum}`, W - 38, 19);
 
   // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const footerY = 285;
@@ -741,7 +742,23 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setFontSize(7.5);
   pdf.text("Nombre del Trabajador", sigX2 + sigW / 2, sigLineY + 12, { align: "center" });
 
-  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 4, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
+
+  // Post-render: now that we know the total page count, go back and update each header
+  const totalPages = (pdf as any).internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    pdf.setPage(p);
+    // White rect to cover the old "Pág. X" text
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(210 - 40 + 1, 16, 36, 5, "F");
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(5.5);
+    pdf.setTextColor(0, 51, 102);
+    pdf.text(`Pág. ${p} de ${totalPages}`, 210 - 38, 19);
+    pdf.setTextColor(0, 0, 0);
+  }
+  // Return to last page before saving
+  pdf.setPage(totalPages);
 
   const safeName = (input.studentName || "trabajador").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`IRL_Sacyr_${input.form.cargo_name.replace(/\s+/g, "_")}_${safeName}.pdf`);
