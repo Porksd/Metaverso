@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
                 const { data: form } = await admin.from('sacyr_irl_forms').select('id').eq('slug', slug).single();
                 if (form?.id) {
                     await admin.from('sacyr_irl_assignments').upsert({
-                        student_id: student.id, form_id: form.id,
+                        student_id: student.id, form_id: form!.id,
                         company_id: normalizedClientId, assigned_by: 'auto', status: 'pending'
                     }, { onConflict: 'student_id,form_id', ignoreDuplicates: true });
                 }
@@ -306,7 +306,7 @@ export async function POST(request: NextRequest) {
                 const { data: form } = await admin.from('sacyr_irl_forms').select('id').eq('slug', slug).single();
                 if (form?.id) {
                     await admin.from('sacyr_irl_assignments').upsert({
-                        student_id: student.id, form_id: form.id,
+                        student_id: student.id, form_id: form!.id,
                         company_id: normalizedClientId, assigned_by: 'auto', status: 'pending'
                     }, { onConflict: 'student_id,form_id', ignoreDuplicates: true });
                 }
