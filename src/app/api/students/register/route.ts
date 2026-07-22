@@ -246,11 +246,72 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Auto-assign Sacyr IRL if student belongs to Sacyr and has a matching role
+        if (normalizedClientId === '3024ab6f-8b7f-4735-992e-f6442d26b09b' && role_id && student?.id) {
+            const { data: roleRow } = await admin.from('company_roles').select('name').eq('id', role_id).single();
+            const roleName = (roleRow?.name || '').toLowerCase().trim();
+            const CARGO_MAP: Record<string, string> = {
+                'administrador de contrato':'administrador_de_contrato','ayudante':'ayudante','capataz':'capataz',
+                'carpintero obra civiles':'carpintero_obra_civiles','carpintero og':'carpintero_og',
+                'carpintero terminaciones':'carpintero_terminaciones','electricista':'electricista',
+                'enfierrador':'enfierrador','equipo de topograf\u00eda':'equipo_de_topografia',
+                'guardia':'guardia','jefe de terreno':'jefe_de_terreno',
+                'maestro de instalaciones':'maestro_de_instalaciones','monitor de seguridad':'monitor_de_seguridad',
+                'operador de maquinaria pesada':'operador_de_maquinaria_pesada','operador gt':'operador_gt',
+                'operador montacargas':'operador_montacargas','operador de montacargas':'operador_montacargas',
+                'personal de aseo':'personal_de_aseo','auxiliar de aseo':'personal_de_aseo',
+                'prevencionista de riesgos':'prevencionista_de_riesgos','profesional':'profesional',
+                'rigger - se\u00f1alero':'rigger_se\u00f1alero','sanitario':'sanitario',
+                'soldador':'soldador','supervisor':'supervisor','visitas':'visitas'
+            };
+            const slug = CARGO_MAP[roleName];
+            if (slug) {
+                const { data: form } = await admin.from('sacyr_irl_forms').select('id').eq('slug', slug).single();
+                if (form) {
+                    await admin.from('sacyr_irl_assignments').upsert({
+                        student_id: student.id, form_id: form.id,
+                        company_id: normalizedClientId, assigned_by: 'auto', status: 'pending'
+                    }, { onConflict: 'student_id,form_id', ignoreDuplicates: true });
+                }
+            }
+        }
+
         return NextResponse.json({
             success: true,
             student,
             message: 'Estudiante registrado exitosamente'
         });
+
+        // Auto-assign Sacyr IRL if student belongs to Sacyr and has a matching role
+        // (fire-and-forget, does not block the response)
+        if (normalizedClientId === '3024ab6f-8b7f-4735-992e-f6442d26b09b' && role_id && student?.id) {
+            const { data: roleRow } = await admin.from('company_roles').select('name').eq('id', role_id).single();
+            const roleName = (roleRow?.name || '').toLowerCase().trim();
+            const CARGO_MAP: Record<string, string> = {
+                'administrador de contrato':'administrador_de_contrato','ayudante':'ayudante','capataz':'capataz',
+                'carpintero obra civiles':'carpintero_obra_civiles','carpintero og':'carpintero_og',
+                'carpintero terminaciones':'carpintero_terminaciones','electricista':'electricista',
+                'enfierrador':'enfierrador','equipo de topograf\u00eda':'equipo_de_topografia',
+                'guardia':'guardia','jefe de terreno':'jefe_de_terreno',
+                'maestro de instalaciones':'maestro_de_instalaciones','monitor de seguridad':'monitor_de_seguridad',
+                'operador de maquinaria pesada':'operador_de_maquinaria_pesada','operador gt':'operador_gt',
+                'operador montacargas':'operador_montacargas','operador de montacargas':'operador_montacargas',
+                'personal de aseo':'personal_de_aseo','auxiliar de aseo':'personal_de_aseo',
+                'prevencionista de riesgos':'prevencionista_de_riesgos','profesional':'profesional',
+                'rigger - se\u00f1alero':'rigger_se\u00f1alero','sanitario':'sanitario',
+                'soldador':'soldador','supervisor':'supervisor','visitas':'visitas'
+            };
+            const slug = CARGO_MAP[roleName];
+            if (slug) {
+                const { data: form } = await admin.from('sacyr_irl_forms').select('id').eq('slug', slug).single();
+                if (form) {
+                    await admin.from('sacyr_irl_assignments').upsert({
+                        student_id: student.id, form_id: form.id,
+                        company_id: normalizedClientId, assigned_by: 'auto', status: 'pending'
+                    }, { onConflict: 'student_id,form_id', ignoreDuplicates: true });
+                }
+            }
+        }
 
     } catch (error) {
         console.error('Registration error:', error);

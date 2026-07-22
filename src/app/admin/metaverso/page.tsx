@@ -275,10 +275,39 @@ export default function MetaversoAdmin() {
 
         if (error) alert("Error: " + error.message);
         else {
+            // Auto-assign Sacyr IRL if applicable
+            if (data.client_id === '3024ab6f-8b7f-4735-992e-f6442d26b09b' && data.role_id) {
+                const roleName = (data.company_roles?.name || '').toLowerCase().trim();
+                const CARGO_MAP: Record<string, string> = {
+                    'administrador de contrato':'administrador_de_contrato','ayudante':'ayudante','capataz':'capataz',
+                    'carpintero obra civiles':'carpintero_obra_civiles','carpintero og':'carpintero_og',
+                    'carpintero terminaciones':'carpintero_terminaciones','electricista':'electricista',
+                    'enfierrador':'enfierrador','equipo de topograf\u00eda':'equipo_de_topografia',
+                    'guardia':'guardia','jefe de terreno':'jefe_de_terreno',
+                    'maestro de instalaciones':'maestro_de_instalaciones','monitor de seguridad':'monitor_de_seguridad',
+                    'operador de maquinaria pesada':'operador_de_maquinaria_pesada','operador gt':'operador_gt',
+                    'operador montacargas':'operador_montacargas','personal de aseo':'personal_de_aseo',
+                    'prevencionista de riesgos':'prevencionista_de_riesgos','profesional':'profesional',
+                    'rigger - se\u00f1alero':'rigger_se\u00f1alero','sanitario':'sanitario',
+                    'soldador':'soldador','supervisor':'supervisor','visitas':'visitas'
+                };
+                const slug = CARGO_MAP[roleName];
+                if (slug && (id || student?.id)) {
+                    const studentId = id || student?.id;
+                    supabase.from('sacyr_irl_forms').select('id').eq('slug', slug).single().then(({ data: form }) => {
+                        if (form && studentId) {
+                            supabase.from('sacyr_irl_assignments').upsert({
+                                student_id: studentId, form_id: form.id,
+                                company_id: data.client_id, assigned_by: 'auto', status: 'pending'
+                            }, { onConflict: 'student_id,form_id', ignoreDuplicates: true });
+                        }
+                    });
+                }
+            }
             setEditingStudent(null);
             setIsCreatingStudent(false);
             fetchParticipants();
-            fetchCompanies(); // Recargar empresas para actualizar contador de cupos
+            fetchCompanies();
         }
     };
 
