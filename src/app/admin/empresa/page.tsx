@@ -1167,7 +1167,6 @@ export default function EmpresaAdmin() {
                             {companyBranchZone && (
                                 <p className="text-[11px] text-brand/80 font-bold uppercase tracking-widest">{companyBranchZone}</p>
                             )}
-                            <p className="text-xs text-white/40 uppercase font-bold tracking-widest">Portal de Gestión Corporativa</p>
                             {isMasterAdmin && (
                                 <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand">
                                     <Shield className="w-3.5 h-3.5" />
@@ -1177,7 +1176,9 @@ export default function EmpresaAdmin() {
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-end gap-2">
+                        <p className="text-[10px] text-white/25 uppercase font-bold tracking-widest">Portal de Gestión Corporativa</p>
+                        <div className="flex items-center gap-4">
                         {isMasterAdmin && (
                             <button
                                 onClick={() => {
@@ -1199,6 +1200,7 @@ export default function EmpresaAdmin() {
                         <button onClick={handleLogout} className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-red-400 transition-all" title="Cerrar Sesión">
                             <LogOut className="w-5 h-5" />
                         </button>
+                        </div>
                     </div>
                 </header>
 
