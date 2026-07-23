@@ -166,6 +166,7 @@ export default function EmpresaAdmin() {
     const [selectedStudentIrls, setSelectedStudentIrls] = useState<Array<{ id: string; form_slug: string; form_cargo_name: string; completed_at: string; status: 'pending' | 'completed' }>>([]);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
+    const [companyBranchZone, setCompanyBranchZone] = useState<string | null>(null);
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
     const [masterRole, setMasterRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
     const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true);
@@ -518,6 +519,10 @@ export default function EmpresaAdmin() {
 
         setCompanyId(storedId);
         setCompanyName(storedName || "Mi Empresa");
+        // Load branch_zone from DB
+        supabase.from('companies').select('branch_zone').eq('id', storedId).single().then(({ data }) => {
+            if (data?.branch_zone) setCompanyBranchZone(data.branch_zone);
+        });
     }, []);
 
     useEffect(() => {
@@ -1159,6 +1164,9 @@ export default function EmpresaAdmin() {
                         </div>
                         <div>
                             <h1 className="text-2xl font-black">{companyName}</h1>
+                            {companyBranchZone && (
+                                <p className="text-[11px] text-brand/80 font-bold uppercase tracking-widest">{companyBranchZone}</p>
+                            )}
                             <p className="text-xs text-white/40 uppercase font-bold tracking-widest">Portal de Gestión Corporativa</p>
                             {isMasterAdmin && (
                                 <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand">
