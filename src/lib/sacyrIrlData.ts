@@ -865,17 +865,23 @@ export const SACYR_IRL_FORMS: SacyrIrlFormData[] = [
     descripcion_puesto: "Es la persona externa del proyecto por parte de empresas colaboradoras, proveedores, oficina central de Sacyr, quien debe cumplir con los estándares de Sacyr Chile S.A. al momento de ingresar al proyecto.",
     tareas: [
       "Durante su estadía en nuestras instalaciones siempre estará acompañado por la persona que viene a visitar, designada por la empresa Sacyr Chile S.A. / H.P.C.",
-      "El personal deberá utilizar obligatoriamente casco, zapatos de seguridad y chaleco reflectante.",
-      "Cumplir con los estándares de seguridad al ingresar al proyecto.",
-      "Circular solo por las áreas autorizadas.",
-      "En caso de emergencia, acatar las instrucciones del personal de Sacyr Chile S.A. / H.P.C.",
+      "El personal deberá ir provisto con los Elementos de Protección Personal (Casco de seguridad, geólogo, zapatos de seguridad, ropa manga larga), durante toda la visita, o solicitar E.P.P. de visita en caso de no contar con ellos.",
+      "Está prohibido Fumar en sectores No habilitados.",
+      "El personal que acceda al centro respetará en todo momento las protecciones colectivas, así como toda la señalización existente: Respetar vías de tránsito peatonal y vehicular, respetar señales de rigger y toda instrucción entregada por el señalero.",
+      "Está prohibido apoyarse en barandas de seguridad y redes anticaídas.",
+      "El personal que vaya a ejecutar un trabajo específico deberá presentarse en Dpto. de Prevención de riesgos para verificar si están autorizados y cumplen con sistema de ingreso al SST.",
+      "En caso de emergencia deberá dirigirse al Punto de Encuentro y seguir las instrucciones del equipo de Emergencia o en su defecto del responsable que le acompañe.",
     ],
     lugares_trabajo: [
       "Áreas autorizadas del proyecto.",
       "Oficinas administrativas.",
     ],
     herramientas: [],
-    orden_aseo: [],
+    orden_aseo: [
+      "Recomendaciones de Salud en obra: Se recomienda el uso de mascarilla en caso de presentar síntomas que puedan ser atribuibles a Enfermedades Respiratorias (solicitar en la recepción).",
+      "Se recomienda lavado de manos frecuente con agua y jabón.",
+      "Cúbrase la boca y nariz con el antebrazo o use un pañuelo desechable cuando tosa o estornude.",
+    ],
     preguntas: SACYR_IRL_PREGUNTAS,
   },
 ];
