@@ -30,10 +30,10 @@ const POLITICAS = [
 ];
 
 const CONTENIDOS = [
-  { key: "mipero",          label: "Matriz de Identificación de peligros, evaluación de riesgos y oportunidades (MIPERO asociada al cargo):", desc: "mipero_desc" },
-  { key: "erpt",            label: "Evaluación de Riesgos de Puesto y Lugar de Trabajo (ERPT y ERLT asociada al cargo):", desc: "erpt_desc" },
-  { key: "restriccion",     label: "Restricción médica (describir motivo):", desc: "restriccion_desc" },
-  { key: "sensible",        label: "Persona especialmente sensible o vulnerable (describir motivo):", desc: "sensible_desc" },
+  { key: "mipero",          label: "Matriz de Identificación de peligros, evaluación de riesgos y oportunidades, (describir MIPERO asociada al cargo o puesto de trabajo):", desc: "mipero_desc" },
+  { key: "erpt",            label: "Evaluación de Riesgos de Puesto y Lugar de Trabajo, (describir ERPT y ERLT asociada al cargo o puesto de trabajo):", desc: "erpt_desc" },
+  { key: "restriccion",     label: "Restricción médica, (describir motivo):", desc: "restriccion_desc" },
+  { key: "sensible",        label: "Persona especialmente sensible o vulnerable, (describir motivo):", desc: "sensible_desc" },
   { key: "plan_gestion",    label: "Plan de Gestión de Prevención y actividades asociadas." },
   { key: "salud",           label: "Salud ocupacional: Protocolos MINSAL." },
   { key: "ptos",            label: "Procedimiento PTOS relativo a su cargo." },
@@ -77,6 +77,7 @@ export default function SacyrIrlFormModal({
   onComplete, onClose,
 }: Props) {
   const form = SACYR_IRL_FORMS.find(f => f.slug === formSlug);
+  const isVisitas = form?.slug === "visitas";
 
   type Step = "info" | "induccion" | "quiz" | "workshop" | "sign";
   const STEPS: Step[] = ["info", "induccion", "quiz", "workshop", "sign"];
@@ -243,7 +244,7 @@ export default function SacyrIrlFormModal({
               </div>
               {form.tareas.length > 0 && (
                 <div>
-                  <p className="text-white font-bold mb-2 text-sm">Tareas</p>
+                  <p className="text-white font-bold mb-2 text-sm">{isVisitas ? "Instrucciones de visita en obra" : "Tareas"}</p>
                   <ul className="space-y-1">{form.tareas.map((t, i) => <li key={i} className="text-white/60 text-xs flex gap-2"><span className="text-brand mt-0.5">•</span>{t}</li>)}</ul>
                 </div>
               )}
@@ -261,7 +262,7 @@ export default function SacyrIrlFormModal({
               )}
               {form.orden_aseo.length > 0 && (
                 <div>
-                  <p className="text-white font-bold mb-2 text-sm">Condiciones de orden y aseo</p>
+                  <p className="text-white font-bold mb-2 text-sm">{isVisitas ? "Recomendaciones de Salud en obra" : "Condiciones de orden y aseo"}</p>
                   <ul className="space-y-1">{form.orden_aseo.map((o, i) => <li key={i} className="text-white/60 text-xs flex gap-2"><span className="text-brand mt-0.5">•</span>{o}</li>)}</ul>
                 </div>
               )}
@@ -285,6 +286,20 @@ export default function SacyrIrlFormModal({
                   ))}
                 </div>
               </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white/80 leading-relaxed">
+                <p>
+                  En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”.
+                  Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe
+                  respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros.
+                </p>
+                <p className="mt-3">
+                  Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá
+                  informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad o
+                  figura símil que lo reemplace, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de
+                  control que deberá adoptar para ejecutar en forma segura sus labores.
+                </p>
+              </div>
             </div>
           )}
 
@@ -296,6 +311,7 @@ export default function SacyrIrlFormModal({
                   <Shield className="w-4 h-4 text-brand" />
                   Recibe la Inducción por parte del Dpto. SST Sacyr Chile S.A.
                 </p>
+                <p className="text-white/70 text-xs mb-2">en el centro de trabajo mencionado, acompañado de la siguiente documentación y temas tratados:</p>
                 <p className="text-white/40 text-xs mb-3">Confirma las políticas que fueron entregadas.</p>
                 <div className="space-y-2">
                   {POLITICAS.map(({ key, label }) => (
@@ -306,8 +322,6 @@ export default function SacyrIrlFormModal({
 
               {/* Contenidos */}
               <div>
-                <p className="text-white font-black text-sm mb-1">Contenidos y materias informadas</p>
-                <p className="text-white/40 text-xs mb-3">Marca todo lo que fue cubierto en la inducción.</p>
                 <div className="space-y-3">
                   {CONTENIDOS.map(({ key, label, desc }) => (
                     <div key={key} className="space-y-1">
@@ -431,7 +445,7 @@ export default function SacyrIrlFormModal({
             <div className="space-y-5">
               <p className="text-white/50 text-xs">Segunda Parte: Taller de Aplicación.</p>
               <div>
-                <p className="text-white font-bold mb-1 text-sm">Identifica 5 posibles riesgos y sus medidas de control</p>
+                <p className="text-white font-bold mb-1 text-sm">Según las Herramientas Preventivas “Matriz IPERO, Evaluación de Riesgos por Puestos Trabajo (ERPT) y Evaluación de Riesgos por Lugar de Trabajo (ERLT)” identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto día a día en sus labores.</p>
                 <div className="space-y-3">
                   {riesgos.map((r, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-3 space-y-2">
@@ -449,7 +463,7 @@ export default function SacyrIrlFormModal({
               <div>
                 <div className="bg-brand/10 border border-brand/25 rounded-xl p-3 mb-3">
                   <p className="text-white font-bold text-sm mb-1">Análisis de imagen</p>
-                  <p className="text-white/70 text-xs">Observe la imagen y analice situaciones de riesgo. Indique 2 con al menos 1 medida de control por cada una.</p>
+                  <p className="text-white/70 text-xs">Según su conocimiento y lo aprendido en la Inducción, observe la imagen y analice situaciones de riesgo, indique 2 con al menos 1 medida de control por cada una.</p>
                 </div>
                 <div className="rounded-xl overflow-hidden border border-white/10 mb-4">
                   <img src="/cert-assets/sacyr-irl-header.png" alt="Escena de obra" className="w-full object-contain" />

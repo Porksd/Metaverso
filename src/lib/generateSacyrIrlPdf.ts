@@ -280,7 +280,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.tareas.length > 0) {
-    y = sectionTitle(pdf, "Tareas que realizan", y, W);
+    y = sectionTitle(pdf, input.form.slug === "visitas" ? "Instrucciones de visita en obra" : "Tareas que realizan", y, W);
     y += 3;
     y = bulletList(pdf, input.form.tareas, M, y, contentW);
     y += 4;
@@ -304,7 +304,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Order/cleanliness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.orden_aseo.length > 0) {
-    y = sectionTitle(pdf, "Condiciones de orden y aseo exigidas en el puesto de trabajo", y, W);
+    y = sectionTitle(pdf, input.form.slug === "visitas" ? "Recomendaciones de Salud en obra" : "Condiciones de orden y aseo exigidas en el puesto de trabajo", y, W);
     y += 3;
     y = bulletList(pdf, input.form.orden_aseo, M, y, contentW);
     y += 4;
@@ -332,7 +332,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += 3;
 
   // â”€â”€ Legal declaration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const legalText = `En cumplimiento a lo dispuesto en el Decreto NÂ° 44, tÃ­tulo II, pÃ¡rrafo 4, artÃ­culo 15 en "INFORMAR LOS RIESGOS LABORALES (IRL)". Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de mÃ©todos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberÃ¡ informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o ComitÃ© Paritario de Higiene y Seguridad, con la finalidad que estas condiciones sean analizadas y se establezcan los mÃ©todos y medidas de control que deberÃ¡ adoptar para ejecutar en forma segura sus labores.`;
+  const legalText = `En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”. Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad o figura símil que lo reemplace, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de control que deberá adoptar para ejecutar en forma segura sus labores.`;
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
   const legalLines = pdf.splitTextToSize(fixenc(legalText), contentW - 4);
@@ -348,8 +348,13 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const ind = input.induccion;
 
   // â”€â”€ PolÃ­ticas recibidas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  y = sectionTitle(pdf, "Recibe la InducciÃ³n por parte del Dpto. SST Sacyr Chile S.A.", y, W);
+  y = sectionTitle(pdf, "Recibe la Inducción por parte del Dpto. SST Sacyr Chile S.A.", y, W);
   y += 4;
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(20, 20, 20);
+  pdf.text("en el centro de trabajo mencionado, acompañado de la siguiente documentación y temas tratados:", M + 2, y);
+  y += 5;
   const politicasItems = [
     { key: "prevencion", label: "PolÃ­tica de PrevenciÃ³n" },
     { key: "alcohol",    label: "PolÃ­tica Alcohol, tabaco y drogas" },
@@ -371,17 +376,17 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += 4;
 
   const contenidoItems = [
-    { key: "mipero",          label: "Matriz de IdentificaciÃ³n de peligros (MIPERO):", desc: "mipero_desc" },
-    { key: "erpt",            label: "EvaluaciÃ³n de Riesgos de Puesto y Lugar (ERPT y ERLT):", desc: "erpt_desc" },
-    { key: "restriccion",     label: "RestricciÃ³n mÃ©dica:", desc: "restriccion_desc" },
-    { key: "sensible",        label: "Persona especialmente sensible o vulnerable:", desc: "sensible_desc" },
+    { key: "mipero",          label: "Matriz de Identificación de peligros, evaluación de riesgos y oportunidades, (describir MIPERO asociada al cargo o puesto de trabajo):", desc: "mipero_desc" },
+    { key: "erpt",            label: "Evaluación de Riesgos de Puesto y Lugar de Trabajo, (describir ERPT y ERLT asociada al cargo o puesto de trabajo):", desc: "erpt_desc" },
+    { key: "restriccion",     label: "Restricción médica, (describir motivo):", desc: "restriccion_desc" },
+    { key: "sensible",        label: "Persona especialmente sensible o vulnerable, (describir motivo):", desc: "sensible_desc" },
     { key: "plan_gestion",    label: "Plan de GestiÃ³n de PrevenciÃ³n y actividades asociadas." },
     { key: "salud",           label: "Salud ocupacional: Protocolos MINSAL." },
     { key: "ptos",            label: "Procedimiento PTOS relativo a su cargo." },
-    { key: "plan_emergencias",label: "Medidas contenidas en el Plan de emergencias y contingencias." },
+    { key: "plan_emergencias",label: "Medidas contenidas en el Plan de emergencias, contingencias y/o desastre del centro." },
     { key: "ind_vial",        label: "InducciÃ³n de Seguridad Vial." },
     { key: "epp_uso",         label: "Elementos de protecciÃ³n personal (cuidado y uso correcto)." },
-    { key: "comite",          label: "ComitÃ© Paritario de Higiene y Seguridad." },
+    { key: "comite",          label: "Comité Paritario de Higiene y Seguridad (constitución y funcionamiento) o figura símil que lo represente." },
     { key: "req_legales",     label: "Requisitos Legales / Otros:", desc: "req_otros_desc" },
     { key: "prod_quimicos",   label: "Productos quÃ­micos." },
   ];
@@ -524,7 +529,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   if (compItems.length % 2 !== 0) y += 6;
   pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
   pdf.setTextColor(100, 100, 100);
-  pdf.text("* Herramientas que derivan del análisis MIPERO en las cuales se expresan los riesgos en el puesto de trabajo y lugar de trabajo.", M, y + 3);
+  pdf.text("* Herramientas que derivan del análisis MIPERO en las cuales expresan los Riesgos en el puesto de trabajo y Lugar de Trabajo, así como sus medidas de control, deben ir adjuntos al presente documento según cada área o sección de trabajo y cargo o puesto de Trabajo.", M, y + 3);
   pdf.setTextColor(20, 20, 20);
   y += 8;
 
@@ -583,13 +588,13 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y = bodyTop;
   }
 
-  y = sectionTitle(pdf, "Segunda Parte: Taller de AplicaciÃ³n", y, W);
+  y = sectionTitle(pdf, "Segunda Parte: Taller de aplicación.", y, W);
   y += 4;
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
   pdf.text(
-    fixenc("Seg\u00fan la Matriz IPERO identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto en sus labores:"),
+    fixenc("Según las Herramientas Preventivas “Matriz IPERO, Evaluación de Riesgos por Puestos Trabajo (ERPT) y Evaluación de Riesgos por Lugar de Trabajo (ERLT)” identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto día a día en sus labores."),
     M + 2,
     y
   );
@@ -641,7 +646,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(7.5);
   pdf.text(
-    "Observe la imagen y analice situaciones de riesgo. Indique 2 con al menos 1 medida de control por cada una:",
+    "Según su conocimiento y lo aprendido en la Inducción, observe la imagen y analice situaciones de riesgo, indique 2 con al menos 1 medida de control por cada una.",
     M + 2,
     y
   );
