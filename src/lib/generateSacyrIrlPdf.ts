@@ -190,15 +190,6 @@ function bulletList(pdf: jsPDF, items: string[], x: number, y: number, maxW: num
   return y;
 }
 
-function bulletListHeight(pdf: jsPDF, items: string[], maxW: number): number {
-  let h = 0;
-  for (const item of items) {
-    const lines = pdf.splitTextToSize(`• ${fixenc(item)}`, maxW - 4) as string[];
-    h += lines.length * 4 + 1;
-  }
-  return h;
-}
-
 function checkbox(pdf: jsPDF, x: number, y: number, checked: boolean, label: string) {
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.3);
@@ -258,6 +249,29 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     }
   };
 
+  const drawBulletedSection = (title: string, items: string[]) => {
+    if (!items.length) return;
+    ensureSpace(12);
+    y = sectionTitle(pdf, title, y, W);
+    y += 3;
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(20, 20, 20);
+
+    for (const item of items) {
+      const lines = pdf.splitTextToSize(`• ${fixenc(item)}`, contentW - 4) as string[];
+      const itemHeight = lines.length * 4 + 1;
+      if (y + itemHeight > bodyBottom) {
+        closePageAndContinue();
+        y = sectionTitle(pdf, title, y, W);
+        y += 3;
+      }
+      pdf.text(lines, M + 2, y);
+      y += itemHeight;
+    }
+    y += 4;
+  };
+
   // â”€â”€ Info header table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const halfW = contentW / 2;
   const infoRows1: [string, string][] = [
@@ -315,46 +329,27 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += descLines.length * 4.5 + 8;
 
   // â”€â”€ Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  if (input.form.tareas.length > 0) {
-    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.tareas, contentW) + 4);
-    y = sectionTitle(pdf, input.form.slug === "visitas" ? "Instrucciones de visita en obra" : "Tareas que realizan", y, W);
-    y += 3;
-    y = bulletList(pdf, input.form.tareas, M, y, contentW);
-    y += 4;
-  }
+  drawBulletedSection(
+    input.form.slug === "visitas" ? "Instrucciones de visita en obra" : "Tareas que realizan",
+    input.form.tareas
+  );
 
   // â”€â”€ Work locations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  if (input.form.lugares_trabajo.length > 0) {
-    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.lugares_trabajo, contentW) + 4);
-    y = sectionTitle(pdf, "Lugares de Trabajo", y, W);
-    y += 3;
-    y = bulletList(pdf, input.form.lugares_trabajo, M, y, contentW);
-    y += 4;
-  }
+  drawBulletedSection("Lugares de Trabajo", input.form.lugares_trabajo);
 
   // â”€â”€ Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  if (input.form.herramientas.length > 0) {
-    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.herramientas, contentW) + 4);
-    y = sectionTitle(pdf, "Herramientas y Equipos", y, W);
-    y += 3;
-    y = bulletList(pdf, input.form.herramientas, M, y, contentW);
-    y += 4;
-  }
+  drawBulletedSection("Herramientas y Equipos", input.form.herramientas);
 
   // â”€â”€ Order/cleanliness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  if (input.form.orden_aseo.length > 0) {
-    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.orden_aseo, contentW) + 4);
-    y = sectionTitle(pdf, input.form.slug === "visitas" ? "Recomendaciones de Salud en obra" : "Condiciones de orden y aseo exigidas en el puesto de trabajo", y, W);
-    y += 3;
-    y = bulletList(pdf, input.form.orden_aseo, M, y, contentW);
-    y += 4;
-  }
+  drawBulletedSection(
+    input.form.slug === "visitas" ? "Recomendaciones de Salud en obra" : "Condiciones de orden y aseo exigidas en el puesto de trabajo",
+    input.form.orden_aseo
+  );
 
   // â”€â”€ IRL Reason â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const legalText = `En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”. Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad o figura símil que lo reemplace, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de control que deberá adoptar para ejecutar en forma segura sus labores.`;
   const legalLines = pdf.splitTextToSize(fixenc(legalText), contentW - 4) as string[];
-  const reasonBlockHeight = 6 + 6 + (7 * 3) + 3 + legalLines.length * 4 + 6;
-  ensureSpace(reasonBlockHeight);
+  ensureSpace(24);
 
   y = sectionTitle(pdf, "Motivo de informaciÃ³n de riesgos laborales", y, W);
   y += 6;
@@ -364,6 +359,11 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     { key: "nuevas_actividades", label: "Nuevas actividades." },
   ];
   for (const m of motivos) {
+    if (y + 7 > bodyBottom) {
+      closePageAndContinue();
+      y = sectionTitle(pdf, "Motivo de informaciÃ³n de riesgos laborales", y, W);
+      y += 6;
+    }
     checkbox(pdf, M + 4, y, input.motivo === m.key, m.label);
     y += 7;
   }
@@ -372,8 +372,14 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   // â”€â”€ Legal declaration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  pdf.text(legalLines, M + 2, y);
-  y += legalLines.length * 4 + 6;
+  for (const line of legalLines) {
+    if (y + 4 > bodyBottom) {
+      closePageAndContinue();
+    }
+    pdf.text(line, M + 2, y);
+    y += 4;
+  }
+  y += 6;
 
   // â”€â”€ InducciÃ³n sections (continÃºa en misma pÃ¡gina si cabe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (y > 250) {
