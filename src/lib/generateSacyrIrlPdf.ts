@@ -190,6 +190,15 @@ function bulletList(pdf: jsPDF, items: string[], x: number, y: number, maxW: num
   return y;
 }
 
+function bulletListHeight(pdf: jsPDF, items: string[], maxW: number): number {
+  let h = 0;
+  for (const item of items) {
+    const lines = pdf.splitTextToSize(`• ${fixenc(item)}`, maxW - 4) as string[];
+    h += lines.length * 4 + 1;
+  }
+  return h;
+}
+
 function checkbox(pdf: jsPDF, x: number, y: number, checked: boolean, label: string) {
   pdf.setDrawColor(0, 0, 0);
   pdf.setLineWidth(0.3);
@@ -223,6 +232,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const M = 10;
   const contentW = W - 2 * M;
   const bodyTop = 32;
+  const bodyBottom = 274;
 
   const fecha = input.fecha || new Date().toLocaleDateString("es-CL");
 
@@ -235,6 +245,18 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ PAGE 1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let y = bodyTop;
+  const closePageAndContinue = () => {
+    const currentPage = (pdf as any).internal.getCurrentPageInfo().pageNumber;
+    addHeaderFooter(pdf, currentPage, 0, sacyrLogo);
+    pdf.addPage();
+    y = bodyTop;
+  };
+
+  const ensureSpace = (neededHeight: number) => {
+    if (y + neededHeight > bodyBottom) {
+      closePageAndContinue();
+    }
+  };
 
   // â”€â”€ Info header table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const halfW = contentW / 2;
@@ -283,16 +305,18 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += 3;
 
   // â”€â”€ Job description â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const descLines = pdf.splitTextToSize(input.form.descripcion_puesto, contentW - 4) as string[];
+  ensureSpace(6 + descLines.length * 4.5 + 8);
   y = sectionTitle(pdf, "DescripciÃ³n breve del puesto de trabajo", y, W);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
   pdf.setTextColor(20, 20, 20);
-  const descLines = pdf.splitTextToSize(input.form.descripcion_puesto, contentW - 4);
   pdf.text(descLines, M + 2, y + 5);
   y += descLines.length * 4.5 + 8;
 
   // â”€â”€ Tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.tareas.length > 0) {
+    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.tareas, contentW) + 4);
     y = sectionTitle(pdf, input.form.slug === "visitas" ? "Instrucciones de visita en obra" : "Tareas que realizan", y, W);
     y += 3;
     y = bulletList(pdf, input.form.tareas, M, y, contentW);
@@ -301,6 +325,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Work locations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.lugares_trabajo.length > 0) {
+    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.lugares_trabajo, contentW) + 4);
     y = sectionTitle(pdf, "Lugares de Trabajo", y, W);
     y += 3;
     y = bulletList(pdf, input.form.lugares_trabajo, M, y, contentW);
@@ -309,6 +334,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.herramientas.length > 0) {
+    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.herramientas, contentW) + 4);
     y = sectionTitle(pdf, "Herramientas y Equipos", y, W);
     y += 3;
     y = bulletList(pdf, input.form.herramientas, M, y, contentW);
@@ -317,6 +343,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Order/cleanliness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (input.form.orden_aseo.length > 0) {
+    ensureSpace(6 + 3 + bulletListHeight(pdf, input.form.orden_aseo, contentW) + 4);
     y = sectionTitle(pdf, input.form.slug === "visitas" ? "Recomendaciones de Salud en obra" : "Condiciones de orden y aseo exigidas en el puesto de trabajo", y, W);
     y += 3;
     y = bulletList(pdf, input.form.orden_aseo, M, y, contentW);
@@ -324,12 +351,10 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   }
 
   // â”€â”€ IRL Reason â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // Check if we need a new page
-  if (y > 230) {
-    addHeaderFooter(pdf, 1, 4, sacyrLogo);
-    pdf.addPage();
-    y = bodyTop;
-  }
+  const legalText = `En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”. Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad o figura símil que lo reemplace, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de control que deberá adoptar para ejecutar en forma segura sus labores.`;
+  const legalLines = pdf.splitTextToSize(fixenc(legalText), contentW - 4) as string[];
+  const reasonBlockHeight = 6 + 6 + (7 * 3) + 3 + legalLines.length * 4 + 6;
+  ensureSpace(reasonBlockHeight);
 
   y = sectionTitle(pdf, "Motivo de informaciÃ³n de riesgos laborales", y, W);
   y += 6;
@@ -345,14 +370,12 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += 3;
 
   // â”€â”€ Legal declaration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const legalText = `En cumplimiento a lo dispuesto en el Decreto N° 44, título II, párrafo 4, articulo 15 en “INFORMAR LOS RIESGOS LABORALES (IRL)”. Por tanto, el abajo firmante; declara conocer los riesgos que conllevan las labores que ejecuta, las medidas preventivas que debe respetar y cumplir de manera inmediata, ejecutando sus labores por medio de métodos de trabajos correctos y seguros. Por lo tanto, el abajo firmante; se compromete a que cuando se presenten condiciones de riesgo en los lugares de trabajo, deberá informarlos de manera inmediata y oportuna a su jefatura directa y/o personal de SST y/o Comité Paritario de Higiene y Seguridad o figura símil que lo reemplace, con la finalidad que estas condiciones sean analizadas y se establezcan los métodos y medidas de control que deberá adoptar para ejecutar en forma segura sus labores.`;
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
-  const legalLines = pdf.splitTextToSize(fixenc(legalText), contentW - 4);
   pdf.text(legalLines, M + 2, y);
   y += legalLines.length * 4 + 6;
 
-  addHeaderFooter(pdf, 1, 4, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
 
   // â”€â”€ PAGE 2: InducciÃ³n sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.addPage();
@@ -421,9 +444,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
       }
     }
     if (y > 268) {
-      addHeaderFooter(pdf, 2, 4, sacyrLogo);
-      pdf.addPage();
-      y = bodyTop;
+      closePageAndContinue();
     }
   }
   y += 3;
@@ -453,7 +474,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 3;
   }
 
-  if (y > 240) { addHeaderFooter(pdf, 2, 4, sacyrLogo); pdf.addPage(); y = bodyTop; }
+  if (y > 240) { closePageAndContinue(); }
 
   // â”€â”€ Equipos y maquinarias â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   y = sectionTitle(pdf, "Equipos y/o maquinarias", y, W);
@@ -516,7 +537,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setTextColor(20, 20, 20);
   y += 10;
 
-  if (y > 220) { addHeaderFooter(pdf, 2, 4, sacyrLogo); pdf.addPage(); y = bodyTop; }
+  if (y > 220) { closePageAndContinue(); }
 
   // â”€â”€ ComprensiÃ³n del trabajador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const comprensionIntro = "El trabajador manifiesta haber comprendido la inducción, explicaciones aclaratorias y documentación al respecto, dando por conocido y comprendida la existencia de:";
@@ -554,15 +575,13 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const footLines = pdf.splitTextToSize(fixenc(compFootnote), contentW - 2);
   const footHeight = footLines.length * 3.2;
   if (y + footHeight > 274) {
-    addHeaderFooter(pdf, 2, 4, sacyrLogo);
-    pdf.addPage();
-    y = bodyTop;
+    closePageAndContinue();
   }
   pdf.text(footLines, M, y + 3);
   pdf.setTextColor(20, 20, 20);
   y += footHeight + 4;
 
-  addHeaderFooter(pdf, 2, 4, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
 
   // â”€â”€ PAGE 3: Test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.addPage();
@@ -602,9 +621,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     y += 3;
 
     if (y > 250 && qi < input.form.preguntas.length - 1) {
-      addHeaderFooter(pdf, 3, 4, sacyrLogo);
-      pdf.addPage();
-      y = bodyTop;
+      closePageAndContinue();
     }
   }
 
@@ -612,9 +629,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   // â”€â”€ Part 2: Workshop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (y > 200) {
-    addHeaderFooter(pdf, 3, 4, sacyrLogo);
-    pdf.addPage();
-    y = bodyTop;
+    closePageAndContinue();
   }
 
   y = sectionTitle(pdf, "Segunda Parte: Taller de aplicación.", y, W);
