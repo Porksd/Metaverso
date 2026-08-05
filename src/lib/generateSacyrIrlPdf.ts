@@ -204,6 +204,19 @@ function checkbox(pdf: jsPDF, x: number, y: number, checked: boolean, label: str
   pdf.text(fixenc(label), x + 5.5, y);
 }
 
+function drawWrappedText(
+  pdf: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  maxW: number,
+  lineHeight: number
+): number {
+  const lines = pdf.splitTextToSize(fixenc(text), maxW);
+  pdf.text(lines, x, y);
+  return y + lines.length * lineHeight;
+}
+
 export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void> {
   const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const W = 210;
@@ -506,18 +519,25 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   if (y > 220) { addHeaderFooter(pdf, 2, 4, sacyrLogo); pdf.addPage(); y = bodyTop; }
 
   // â”€â”€ ComprensiÃ³n del trabajador â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  y = sectionTitle(pdf, "El trabajador declara haber comprendido la inducciÃ³n y documentaciÃ³n al respecto:", y, W);
-  y += 4;
+  const comprensionIntro = "El trabajador manifiesta haber comprendido la inducción, explicaciones aclaratorias y documentación al respecto, dando por conocido y comprendida la existencia de:";
+  pdf.setDrawColor(120, 120, 120);
+  pdf.setLineWidth(0.3);
+  pdf.rect(M, y, contentW, 12);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(8.5);
+  pdf.setTextColor(20, 20, 20);
+  y = drawWrappedText(pdf, comprensionIntro, M + 2, y + 4.5, contentW - 4, 4) + 3;
+
   pdf.setDrawColor(180, 180, 180);
   const compItems = [
     { key: "plan_emergencias", label: "Plan de Emergencias, contingencias y/o Desastres" },
-    { key: "plan_gestion",     label: "Plan de GestiÃ³n de la PrevenciÃ³n" },
-    { key: "mipero",           label: "Matriz de IdentificaciÃ³n de Peligros (MIPERO)" },
-    { key: "erpt",             label: "EvaluaciÃ³n de Riesgos (ERPT y ERLT) *" },
+    { key: "plan_gestion",     label: "Plan de Gestión de la Prevención" },
+    { key: "mipero",           label: "Matriz de Identificación de Peligros (MIPERO)" },
+    { key: "erpt",             label: "Evaluación de Riesgos (ERPT y ERLT) *" },
     { key: "riohs",            label: "RIOHS" },
     { key: "protocolos",       label: "Protocolos del Cliente" },
     { key: "ptos",             label: "Procedimiento Teletrabajo (PTOS)" },
-    { key: "calor",            label: "EstÃ¡ndar de Calor Extremo y Altas Temperatura" },
+    { key: "calor",            label: "Estándar de Calor Extremo y Altas Temperatura" },
   ];
   const halfComp = contentW / 2;
   for (let i = 0; i < compItems.length; i++) {
@@ -527,11 +547,20 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     if (i % 2 === 1) y += 6;
   }
   if (compItems.length % 2 !== 0) y += 6;
-  pdf.setFont("helvetica", "italic"); pdf.setFontSize(6);
+
+  const compFootnote = "* Herramientas que derivan del análisis MIPERO en las cuales expresan los Riesgos en el puesto de trabajo y Lugar de Trabajo, así como sus medidas de control, deben ir adjuntos al presente documento según cada área o sección de trabajo y cargo o puesto de Trabajo.";
+  pdf.setFont("helvetica", "italic"); pdf.setFontSize(6.5);
   pdf.setTextColor(100, 100, 100);
-  pdf.text("* Herramientas que derivan del análisis MIPERO en las cuales expresan los Riesgos en el puesto de trabajo y Lugar de Trabajo, así como sus medidas de control, deben ir adjuntos al presente documento según cada área o sección de trabajo y cargo o puesto de Trabajo.", M, y + 3);
+  const footLines = pdf.splitTextToSize(fixenc(compFootnote), contentW - 2);
+  const footHeight = footLines.length * 3.2;
+  if (y + footHeight > 274) {
+    addHeaderFooter(pdf, 2, 4, sacyrLogo);
+    pdf.addPage();
+    y = bodyTop;
+  }
+  pdf.text(footLines, M, y + 3);
   pdf.setTextColor(20, 20, 20);
-  y += 8;
+  y += footHeight + 4;
 
   addHeaderFooter(pdf, 2, 4, sacyrLogo);
 
@@ -593,12 +622,14 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7.5);
-  pdf.text(
-    fixenc("Según las Herramientas Preventivas “Matriz IPERO, Evaluación de Riesgos por Puestos Trabajo (ERPT) y Evaluación de Riesgos por Lugar de Trabajo (ERLT)” identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto día a día en sus labores."),
+  y = drawWrappedText(
+    pdf,
+    "Según las Herramientas Preventivas “Matriz IPERO, Evaluación de Riesgos por Puestos Trabajo (ERPT) y Evaluación de Riesgos por Lugar de Trabajo (ERLT)” identifique y describa 5 posibles riesgos y sus medidas de control a los cuales se encuentra expuesto día a día en sus labores.",
     M + 2,
-    y
-  );
-  y += 7;
+    y,
+    contentW - 4,
+    3.8
+  ) + 3;
 
   // Table header
   const colRiesgo = contentW * 0.5;
@@ -645,12 +676,14 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   // Image analysis section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.setFont("helvetica", "italic");
   pdf.setFontSize(7.5);
-  pdf.text(
+  y = drawWrappedText(
+    pdf,
     "Según su conocimiento y lo aprendido en la Inducción, observe la imagen y analice situaciones de riesgo, indique 2 con al menos 1 medida de control por cada una.",
     M + 2,
-    y
-  );
-  y += 6;
+    y,
+    contentW - 4,
+    3.8
+  ) + 2;
 
   // Load the construction scene image
   const analysisImg = await urlToDataUrl("/cert-assets/sacyr-irl-header.png");
