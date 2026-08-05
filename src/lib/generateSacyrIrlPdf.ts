@@ -375,11 +375,12 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.text(legalLines, M + 2, y);
   y += legalLines.length * 4 + 6;
 
-  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
-
-  // â”€â”€ PAGE 2: InducciÃ³n sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  pdf.addPage();
-  y = bodyTop;
+  // â”€â”€ InducciÃ³n sections (continÃºa en misma pÃ¡gina si cabe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  if (y > 250) {
+    closePageAndContinue();
+  } else {
+    y += 2;
+  }
 
   const ind = input.induccion;
 
