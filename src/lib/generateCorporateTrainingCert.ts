@@ -48,6 +48,8 @@ const COURSE_LINE_Y = 33;
 const COURSE_TABLE_HEADER_Y = 38;
 const COURSE_TABLE_BODY_Y = COURSE_TABLE_HEADER_Y + 8;
 const COURSE_TABLE_BOTTOM_Y = 270;
+const COURSE_HEADER_MAX_FONT_SIZE = 13;
+const COURSE_HEADER_MIN_FONT_SIZE = 10.5;
 
 // Cover page text sits below the "CERTIFICADO" title baked into the background.
 const COVER_DATE_Y = 70;
@@ -281,13 +283,13 @@ export async function generateCorporateTrainingCert(
     const baseText = `ACTIVIDAD DE CAPACITACION: ${courseName.toUpperCase()}`;
     const maxHeaderWidth = CONTENT_W;
     const lineHeight = 5;
-    let headerSize = 13;
+    let headerSize = COURSE_HEADER_MAX_FONT_SIZE;
 
     pdf.setFont("helvetica", "bold");
-    while (headerSize > 10) {
+    pdf.setFontSize(headerSize);
+    while (pdf.getTextWidth(baseText) > maxHeaderWidth && headerSize > COURSE_HEADER_MIN_FONT_SIZE) {
+      headerSize = Math.max(COURSE_HEADER_MIN_FONT_SIZE, headerSize - 0.4);
       pdf.setFontSize(headerSize);
-      if (pdf.getTextWidth(baseText) <= maxHeaderWidth) break;
-      headerSize -= 0.4;
     }
 
     pdf.setFontSize(headerSize);
