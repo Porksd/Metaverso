@@ -583,7 +583,8 @@ export default function MetaversoAdmin() {
             report_frequency: ['daily', 'weekly', 'monthly'].includes(data.report_frequency) ? data.report_frequency : 'weekly',
             report_include_dashboard_body: data.report_include_dashboard_body !== false,
             report_include_pdf_attachment: data.report_include_pdf_attachment !== false,
-            report_copy_emails: data.report_copy_emails_enabled ? ((data.report_copy_emails || '').trim() || null) : null
+            report_copy_emails: data.report_copy_emails_enabled ? ((data.report_copy_emails || '').trim() || null) : null,
+            cert_capacitaciones_enabled: data.cert_capacitaciones_enabled === true
         };
 
         if (!id) {
@@ -603,8 +604,8 @@ export default function MetaversoAdmin() {
             error = result.error;
         }
 
-        if (error?.message?.includes('report_copy_emails')) {
-            const { report_copy_emails, ...fallbackPayload } = companyPayload;
+        if (error?.message?.includes('report_copy_emails') || error?.message?.includes('cert_capacitaciones_enabled')) {
+            const { report_copy_emails, cert_capacitaciones_enabled, ...fallbackPayload } = companyPayload;
             result = !id
                 ? await supabase.from('companies').insert(fallbackPayload).select()
                 : await supabase.from('companies').update(fallbackPayload).eq('id', id).select();
@@ -846,7 +847,7 @@ export default function MetaversoAdmin() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "", report_auto_enabled: false, report_frequency: 'weekly', report_include_dashboard_body: true, report_include_pdf_attachment: true, report_copy_emails: '', report_copy_emails_enabled: false })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "", report_auto_enabled: false, report_frequency: 'weekly', report_include_dashboard_body: true, report_include_pdf_attachment: true, report_copy_emails: '', report_copy_emails_enabled: false, cert_capacitaciones_enabled: false })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -1035,7 +1036,7 @@ export default function MetaversoAdmin() {
                                                     </button>
                                                 </>
                                             )}
-                                            <button onClick={() => setEditingCompany({ ...company, report_copy_emails_enabled: Boolean((company.report_copy_emails || '').trim()) })} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
+                                            <button onClick={() => setEditingCompany({ ...company, report_copy_emails_enabled: Boolean((company.report_copy_emails || '').trim()), cert_capacitaciones_enabled: company.cert_capacitaciones_enabled === true })} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/10" title="Configurar Empresa">
                                                 <Settings className="w-4 h-4" />
                                             </button>
                                             <button onClick={() => openCourseManagement(company)} className="p-2.5 rounded-xl bg-white/5 hover:bg-brand/10 text-white/40 hover:text-brand transition-all border border-white/10" title="Gestión de Cursos">
@@ -1399,6 +1400,23 @@ export default function MetaversoAdmin() {
                                     <div className="flex gap-2">
                                         <button onClick={() => setEditingCompany({ ...editingCompany, is_active: true })} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${editingCompany.is_active ? 'bg-brand/20 border-brand text-brand' : 'bg-white/5 border-white/10 text-white/40'}`}>Activo</button>
                                         <button onClick={() => setEditingCompany({ ...editingCompany, is_active: false })} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${!editingCompany.is_active ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-white/40'}`}>Inactivo</button>
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Cert. Capacitaciones</label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setEditingCompany({ ...editingCompany, cert_capacitaciones_enabled: true })}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${editingCompany.cert_capacitaciones_enabled === true ? 'bg-brand/20 border-brand text-brand' : 'bg-white/5 border-white/10 text-white/40'}`}
+                                        >
+                                            Activo
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingCompany({ ...editingCompany, cert_capacitaciones_enabled: false })}
+                                            className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase border ${editingCompany.cert_capacitaciones_enabled === false ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-white/40'}`}
+                                        >
+                                            Inactivo
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">

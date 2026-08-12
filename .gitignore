@@ -42,3 +42,6 @@ next-env.d.ts
 
 # legacy archived nested repo (exclude from root tracking)
 /obsoletos/2026-05-20_limpieza/legacy/App_App/
+
+# local debug/test scratch files
+/.tmp/

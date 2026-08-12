@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { resolveAdminRole } from "@/lib/adminAuth";
 import { generateMetaversoCert } from "@/lib/generateMetaversoCert";
 import { generateIrlCert } from "@/lib/generateIrlCert";
+import { generateCorporateTrainingCert } from "@/lib/generateCorporateTrainingCert";
 import { SACYR_COMPANY_ID, SACYR_IRL_FORMS, CARGO_TO_IRL_SLUG } from "@/lib/sacyrIrlData";
 
 // Utility functions for RUT validation
@@ -166,6 +167,9 @@ export default function EmpresaAdmin() {
     const [selectedStudentIrls, setSelectedStudentIrls] = useState<Array<{ id: string; form_slug: string; form_cargo_name: string; completed_at: string; status: 'pending' | 'completed' }>>([]);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string>("Cargando...");
+    const [companyTaxId, setCompanyTaxId] = useState<string>("");
+    const [companyCorporateCertEnabled, setCompanyCorporateCertEnabled] = useState<boolean>(false);
+    const [isGeneratingCorporateCert, setIsGeneratingCorporateCert] = useState<boolean>(false);
     const [companyBranchZone, setCompanyBranchZone] = useState<string | null>(null);
     const [isMasterAdmin, setIsMasterAdmin] = useState<boolean>(false);
     const [masterRole, setMasterRole] = useState<'superadmin' | 'administrador' | 'editor' | null>(null);
@@ -559,6 +563,20 @@ export default function EmpresaAdmin() {
         if (!companyId) return;
 
         try {
+            const { data: companyData, error: companyError } = await supabase
+                .from('companies')
+                .select('name, tax_id, cert_capacitaciones_enabled')
+                .eq('id', companyId)
+                .single();
+
+            if (companyError) {
+                console.error("Error fetching company config:", companyError);
+            } else {
+                setCompanyName(companyData?.name || companyName || 'Mi Empresa');
+                setCompanyTaxId(companyData?.tax_id || '');
+                setCompanyCorporateCertEnabled(companyData?.cert_capacitaciones_enabled === true);
+            }
+
             const { data: stData, error: stError } = await supabase
                 .from('students')
                 .select('*, company_roles(name), enrollments(id, course_id, status, best_score, completed_at, current_attempt, max_attempts, irl_confirmed)')
@@ -691,6 +709,32 @@ export default function EmpresaAdmin() {
             setLastIssuedSignatures(signaturesMap);
         } catch (err) {
             console.error("Unexpected error in fetchData:", err);
+        }
+    };
+
+    const handleDownloadCorporateTrainingCert = async () => {
+        if (!companyId) return;
+
+        if (!companyCorporateCertEnabled) {
+            alert('El Certificado de Capacitaciones está desactivado para esta empresa. Actívalo en Metaverso Admin.');
+            return;
+        }
+
+        try {
+            setIsGeneratingCorporateCert(true);
+            const result = await generateCorporateTrainingCert({
+                companyId,
+                companyName,
+                companyRut: companyTaxId || null,
+                issueDate: new Date(),
+            });
+
+            alert(`Certificado corporativo generado. Cursos: ${result.courseCount} | Participantes: ${result.studentCount}`);
+        } catch (err: any) {
+            console.error('Error generating corporate training certificate:', err);
+            alert('Error al generar certificado corporativo: ' + (err?.message || 'Error desconocido'));
+        } finally {
+            setIsGeneratingCorporateCert(false);
         }
     };
 
@@ -1217,6 +1261,14 @@ export default function EmpresaAdmin() {
                                 {isCompanyCollabVisible && (
                                     <button onClick={() => setShowCompanyManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><BookOpen className="w-4 h-4" /> Empresas Colaboradoras</button>
                                 )}
+                                <button
+                                    onClick={handleDownloadCorporateTrainingCert}
+                                    disabled={isGeneratingCorporateCert || !companyCorporateCertEnabled}
+                                    className={`p-4 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all border ${companyCorporateCertEnabled ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20' : 'bg-white/5 border-white/10 text-white/35 cursor-not-allowed'}`}
+                                    title={companyCorporateCertEnabled ? 'Generar certificado corporativo de capacitaciones' : 'Activa este certificado en Metaverso Admin'}
+                                >
+                                    {isGeneratingCorporateCert ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Cert. Capacitaciones
+                                </button>
                                 <button onClick={() => setShowCargoManager(true)} className="p-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:bg-white/10"><Shield className="w-4 h-4" /> Cargos</button>
                                 <button onClick={() => setIsCreating(true)} className="p-4 bg-brand text-black rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-brand/10"><UserPlus className="w-4 h-4" /> Nuevo</button>
                             </div>
