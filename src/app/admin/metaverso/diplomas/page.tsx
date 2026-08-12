@@ -61,6 +61,7 @@ export default function DiplomasAdminPage() {
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewFile, setPreviewFile] = useState<File | null>(null);
     const [previewObjectUrl, setPreviewObjectUrl] = useState<string | null>(null);
+    const [backgroundVersion, setBackgroundVersion] = useState<number>(Date.now());
 
     useEffect(() => {
         loadConfig();
@@ -95,6 +96,13 @@ export default function DiplomasAdminPage() {
         setPreviewFile(file);
         if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
         setPreviewObjectUrl(URL.createObjectURL(file));
+        setBackgroundVersion(Date.now());
+    };
+
+    const getBackgroundPreviewUrl = (src: string) => {
+        if (!src || src.startsWith('blob:')) return src;
+        const separator = src.includes('?') ? '&' : '?';
+        return `${src}${separator}v=${backgroundVersion}`;
     };
 
     const uploadBackground = async (): Promise<string | null> => {
@@ -148,6 +156,7 @@ export default function DiplomasAdminPage() {
                 });
 
             if (error) throw error;
+            setBackgroundVersion(Date.now());
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
         } catch (err: any) {
@@ -160,6 +169,7 @@ export default function DiplomasAdminPage() {
     const handlePreview = async () => {
         setIsPreviewing(true);
         try {
+            const bgForPreview = previewObjectUrl || backgroundUrl;
             await generateMetaversoCert({
                 studentName: "MAURICIO ALVAREZ RIVERA",
                 rut: "17.452.318-5",
@@ -170,7 +180,7 @@ export default function DiplomasAdminPage() {
                 hours: "16",
                 date: "27 de marzo de 2026",
                 expirationDate: "27 de marzo de 2028",
-                backgroundUrl: previewObjectUrl || backgroundUrl,
+                backgroundUrl: bgForPreview && !bgForPreview.startsWith('blob:') ? getBackgroundPreviewUrl(bgForPreview) : bgForPreview,
                 fieldsConfig,
                 layoutConfig,
             });
@@ -214,6 +224,7 @@ export default function DiplomasAdminPage() {
     );
 
     const displayBg = previewObjectUrl || backgroundUrl;
+    const activeBackgroundUrl = displayBg && !displayBg.startsWith('blob:') ? getBackgroundPreviewUrl(displayBg) : displayBg;
 
     if (isLoading) {
         return (
@@ -300,10 +311,10 @@ export default function DiplomasAdminPage() {
 
                                 {/* Background preview */}
                                 <div className="relative bg-black/40 rounded-xl overflow-hidden border border-white/10" style={{ aspectRatio: "210/297" }}>
-                                    {displayBg ? (
+                                    {activeBackgroundUrl ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img
-                                            src={displayBg}
+                                            src={activeBackgroundUrl}
                                             alt="Fondo diploma"
                                             className="w-full h-full object-cover"
                                         />
