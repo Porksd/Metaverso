@@ -604,8 +604,13 @@ export default function MetaversoAdmin() {
             error = result.error;
         }
 
-        if (error?.message?.includes('report_copy_emails') || error?.message?.includes('cert_capacitaciones_enabled')) {
-            const { report_copy_emails, cert_capacitaciones_enabled, ...fallbackPayload } = companyPayload;
+        if (error?.message?.includes('cert_capacitaciones_enabled')) {
+            alert('No se pudo guardar Cert. Capacitaciones: falta aplicar la migracion 056 en la base de datos.');
+            return;
+        }
+
+        if (error?.message?.includes('report_copy_emails')) {
+            const { report_copy_emails, ...fallbackPayload } = companyPayload;
             result = !id
                 ? await supabase.from('companies').insert(fallbackPayload).select()
                 : await supabase.from('companies').update(fallbackPayload).eq('id', id).select();
