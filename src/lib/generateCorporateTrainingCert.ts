@@ -278,15 +278,44 @@ export async function generateCorporateTrainingCert(
   };
 
   const drawCourseHeader = (courseName: string, titleY: number = COURSE_TITLE_Y, lineY: number = COURSE_LINE_Y) => {
+    const baseText = `ACTIVIDAD DE CAPACITACION: ${courseName.toUpperCase()}`;
+    const maxHeaderWidth = CONTENT_W;
+    const lineHeight = 5;
+    let headerSize = 13;
+
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(13);
+    while (headerSize > 10) {
+      pdf.setFontSize(headerSize);
+      if (pdf.getTextWidth(baseText) <= maxHeaderWidth) break;
+      headerSize -= 0.4;
+    }
+
+    pdf.setFontSize(headerSize);
+    let headerLines = pdf.splitTextToSize(baseText, maxHeaderWidth) as string[];
+    if (headerLines.length > 2) {
+      const ellipsis = "...";
+      let secondLine = headerLines[1] || "";
+      while (secondLine.length > 0 && pdf.getTextWidth(`${secondLine}${ellipsis}`) > maxHeaderWidth) {
+        secondLine = secondLine.slice(0, -1);
+      }
+      headerLines = [headerLines[0], `${secondLine.trimEnd()}${ellipsis}`];
+    }
+
     pdf.setTextColor(38, 38, 38);
+    pdf.text(headerLines[0], MARGIN_X, titleY);
 
-    pdf.text(`ACTIVIDAD DE CAPACITACION: ${courseName.toUpperCase()}`, MARGIN_X, titleY);
+    let offsetY = 0;
+    if (headerLines.length > 1) {
+      offsetY = lineHeight;
+      pdf.text(headerLines[1], MARGIN_X, titleY + lineHeight);
+    }
 
+    const dividerY = lineY + offsetY;
     pdf.setDrawColor(40, 180, 95);
     pdf.setLineWidth(0.6);
-    pdf.line(MARGIN_X, lineY, PAGE_W - MARGIN_X, lineY);
+    pdf.line(MARGIN_X, dividerY, PAGE_W - MARGIN_X, dividerY);
+
+    return offsetY;
   };
 
   const drawTableHeader = (y: number) => {
@@ -315,16 +344,16 @@ export async function generateCorporateTrainingCert(
   const startCourseListPage = (courseName: string) => {
     // Hard reset to enforce each course list starts at the top of a new page.
     addInnerPage();
-    drawCourseHeader(courseName);
-    drawTableHeader(COURSE_TABLE_HEADER_Y);
-    return COURSE_TABLE_BODY_Y;
+    const headerOffset = drawCourseHeader(courseName);
+    drawTableHeader(COURSE_TABLE_HEADER_Y + headerOffset);
+    return COURSE_TABLE_BODY_Y + headerOffset;
   };
 
   // The first course list continues directly below the cover intro paragraph (same page).
   const startFirstCourseOnCoverPage = (courseName: string) => {
-    drawCourseHeader(courseName, COVER_FIRST_COURSE_TITLE_Y, COVER_FIRST_COURSE_LINE_Y);
-    drawTableHeader(COVER_FIRST_COURSE_TABLE_HEADER_Y);
-    return COVER_FIRST_COURSE_TABLE_BODY_Y;
+    const headerOffset = drawCourseHeader(courseName, COVER_FIRST_COURSE_TITLE_Y, COVER_FIRST_COURSE_LINE_Y);
+    drawTableHeader(COVER_FIRST_COURSE_TABLE_HEADER_Y + headerOffset);
+    return COVER_FIRST_COURSE_TABLE_BODY_Y + headerOffset;
   };
 
   let totalStudents = 0;

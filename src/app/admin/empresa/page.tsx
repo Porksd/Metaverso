@@ -722,14 +722,12 @@ export default function EmpresaAdmin() {
 
         try {
             setIsGeneratingCorporateCert(true);
-            const result = await generateCorporateTrainingCert({
+            await generateCorporateTrainingCert({
                 companyId,
                 companyName,
                 companyRut: companyTaxId || null,
                 issueDate: new Date(),
             });
-
-            alert(`Certificado corporativo generado. Cursos: ${result.courseCount} | Participantes: ${result.studentCount}`);
         } catch (err: any) {
             console.error('Error generating corporate training certificate:', err);
             alert('Error al generar certificado corporativo: ' + (err?.message || 'Error desconocido'));
