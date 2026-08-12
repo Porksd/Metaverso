@@ -22,33 +22,30 @@ if (!supabaseUrl || !serviceRoleKey) {
 const supabase = createClient(supabaseUrl, serviceRoleKey);
 const recoveryPassword = process.env.CRITICAL_ADMIN_RECOVERY_PASSWORD || 'Metaverso!2026#Admin';
 
-const CRITICAL_ADMINS = [
-  {
-    email: 'admin@metaversotec.com',
-    role: 'administrador',
-    permissions: { export_excel: false, delete_courses: true }
-  },
-  {
-    email: 'apacheco@metaversotec.com',
-    role: 'superadmin',
-    permissions: { all: true }
-  },
-  {
-    email: 'porksde@gmail.com',
-    role: 'superadmin',
-    permissions: { all: true }
-  },
-  {
-    email: 'soporte@lobus.cl',
-    role: 'superadmin',
-    permissions: { all: true }
-  },
-  {
-    email: 'm.poblete.m@gmail.com',
-    role: 'superadmin',
-    permissions: { all: true }
+function parseCriticalAdminsFromEnv() {
+  const raw = process.env.CRITICAL_ADMINS_JSON || '[]';
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((row) => row && typeof row.email === 'string' && typeof row.role === 'string')
+      .map((row) => ({
+        email: row.email.toLowerCase().trim(),
+        role: row.role,
+        permissions: row.permissions && typeof row.permissions === 'object' ? row.permissions : {}
+      }));
+  } catch (error) {
+    console.error('Invalid CRITICAL_ADMINS_JSON:', error.message);
+    return [];
   }
+}
+
+const BLOCKED_RECOVERY_EMAILS = [
+  'm.poblete.m@gmail.com',
+  'soporte@lobus.cl'
 ];
+
+const CRITICAL_ADMINS = parseCriticalAdminsFromEnv();
 
 async function listAllAuthUsers() {
   const users = [];
@@ -71,6 +68,19 @@ async function listAllAuthUsers() {
 }
 
 async function ensureCriticalAdmins() {
+  if (process.env.ENABLE_CRITICAL_ADMIN_RESTORE !== 'true') {
+    throw new Error('Automatic restore disabled. Set ENABLE_CRITICAL_ADMIN_RESTORE=true to run.');
+  }
+
+  if (CRITICAL_ADMINS.length === 0) {
+    throw new Error('No critical admins configured. Define CRITICAL_ADMINS_JSON first.');
+  }
+
+  const blockedTargets = CRITICAL_ADMINS.filter((admin) => BLOCKED_RECOVERY_EMAILS.includes(admin.email));
+  if (blockedTargets.length > 0) {
+    throw new Error(`Blocked recovery targets detected: ${blockedTargets.map((a) => a.email).join(', ')}`);
+  }
+
   const summary = {
     profilesUpserted: 0,
     authAlreadyPresent: 0,

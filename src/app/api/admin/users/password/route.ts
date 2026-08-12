@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { ADMINISTRADOR_EMAILS, SUPER_ADMIN_EMAILS } from '@/lib/adminAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -48,7 +47,6 @@ const findAuthUserByEmail = async (email: string) => {
 
 const isSuperAdmin = async (email: string): Promise<boolean> => {
   const normalizedEmail = email.toLowerCase().trim();
-  if (SUPER_ADMIN_EMAILS.includes(normalizedEmail)) return true;
 
   const { data: profile, error } = await supabaseAdmin
     .from('admin_profiles')
@@ -66,13 +64,9 @@ const isSuperAdmin = async (email: string): Promise<boolean> => {
 
 const hasAdminProfile = async (email: string): Promise<boolean> => {
   const normalizedEmail = email.toLowerCase().trim();
-  if (SUPER_ADMIN_EMAILS.includes(normalizedEmail) || ADMINISTRADOR_EMAILS.includes(normalizedEmail)) {
-    return true;
-  }
-
   const { data, error } = await supabaseAdmin
     .from('admin_profiles')
-    .select('id')
+    .select('id, role')
     .eq('email', normalizedEmail)
     .maybeSingle();
 

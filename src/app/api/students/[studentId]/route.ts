@@ -3,13 +3,38 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 type RouteParams = { studentId: string };
 
-const PROTECTED_ADMIN_EMAILS = [
-    'admin@metaversotec.com',
-    'apacheco@metaversotec.com',
-    'porksde@gmail.com',
-    'soporte@lobus.cl',
-    'm.poblete.m@gmail.com'
-];
+const parseEmailList = (rawValue: string | undefined): string[] => {
+    return (rawValue || '')
+        .split(',')
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean);
+};
+
+const PROTECTED_ADMIN_EMAILS = parseEmailList(process.env.PROTECTED_ADMIN_EMAILS);
+
+const isProtectedAdminAccount = async (email: string): Promise<boolean> => {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (!normalizedEmail) return false;
+
+    if (PROTECTED_ADMIN_EMAILS.includes(normalizedEmail)) {
+        return true;
+    }
+
+    if (!supabaseAdmin) return false;
+
+    const { data: adminProfile, error } = await supabaseAdmin
+        .from('admin_profiles')
+        .select('role')
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+
+    if (error) {
+        console.error('No se pudo validar admin_profiles para proteccion de auth:', error.message);
+        return false;
+    }
+
+    return adminProfile?.role === 'superadmin' || adminProfile?.role === 'administrador';
+};
 
 const getStudentId = async (context: { params: RouteParams | Promise<RouteParams> }) => {
     const params = await Promise.resolve(context.params);
@@ -103,7 +128,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
             }
 
             const authEmail = authUserData?.user?.email?.toLowerCase() || '';
-            const isProtectedAdmin = PROTECTED_ADMIN_EMAILS.includes(authEmail);
+            const isProtectedAdmin = await isProtectedAdminAccount(authEmail);
 
             if (isProtectedAdmin) {
                 console.error('Bloqueado: intento de eliminar Auth de admin protegido desde flujo de alumno:', {

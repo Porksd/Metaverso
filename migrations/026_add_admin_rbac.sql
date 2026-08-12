@@ -11,9 +11,8 @@ CREATE TABLE IF NOT EXISTS admin_profiles (
 INSERT INTO admin_profiles (email, role, permissions)
 VALUES 
 ('apacheco@lobus.cl', 'superadmin', '{"all": true}'),
-('admin@metaversotec.com', 'superadmin', '{"all": true}'),
-('porksde@gmail.com', 'superadmin', '{"all": true}')
-ON CONFLICT (email) DO UPDATE SET role = 'superadmin', permissions = '{"all": true}';
+('admin@metaversotec.com', 'administrador', '{"delete_courses": true, "export_excel": false}')
+ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role, permissions = EXCLUDED.permissions;
 
 -- RLS
 ALTER TABLE admin_profiles ENABLE ROW LEVEL SECURITY;

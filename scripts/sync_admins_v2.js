@@ -1,6 +1,24 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 
+function parseAdminsFromEnv() {
+    const raw = process.env.ADMIN_SYNC_ROWS_JSON || '[]';
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter((row) => row && typeof row.email === 'string' && typeof row.role === 'string')
+            .map((row) => ({
+                email: row.email.toLowerCase().trim(),
+                role: row.role,
+                permissions: row.permissions && typeof row.permissions === 'object' ? row.permissions : {}
+            }));
+    } catch (error) {
+        console.error('Invalid ADMIN_SYNC_ROWS_JSON:', error.message);
+        return [];
+    }
+}
+
 async function test() {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
     console.log('Testing connection...');
@@ -13,13 +31,11 @@ async function test() {
         console.error('admin_profiles NOT FOUND:', adminError.message);
     } else {
         console.log('admin_profiles IS FOUND. Proceeding with sync...');
-        const admins = [
-            { email: 'apacheco@metaversotec.com', role: 'superadmin', permissions: { all: true } },
-            { email: 'porksde@gmail.com', role: 'superadmin', permissions: { all: true } },
-            { email: 'soporte@lobus.cl', role: 'superadmin', permissions: { all: true } },
-            { email: 'm.poblete.m@gmail.com', role: 'superadmin', permissions: { all: true } },
-            { email: 'admin@metaversotec.com', role: 'editor', permissions: { all: false, delete: false } }
-        ];
+        const admins = parseAdminsFromEnv();
+        if (admins.length === 0) {
+            console.error('No admins configured. Define ADMIN_SYNC_ROWS_JSON to run this script safely.');
+            process.exit(1);
+        }
         for (const a of admins) {
             const { error: insErr } = await supabase.from('admin_profiles').upsert(a, { onConflict: 'email' });
             if (insErr) console.error(`Error for ${a.email}:`, insErr.message);

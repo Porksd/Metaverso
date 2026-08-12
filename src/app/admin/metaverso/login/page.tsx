@@ -42,6 +42,26 @@ function LoginForm() {
         } else {
             // Force refresh session state to be sure
             await supabase.auth.getSession();
+
+            const accessToken = data?.session?.access_token;
+            if (accessToken) {
+                fetch('/api/security/access-event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        eventType: 'login_success',
+                        action: 'admin_metaverso_login',
+                        allowed: true,
+                        metadata: { returnUrl }
+                    })
+                }).catch((logError) => {
+                    console.error('No se pudo registrar evento de acceso:', logError);
+                });
+            }
+
             router.push(returnUrl);
         }
         setLoading(false);

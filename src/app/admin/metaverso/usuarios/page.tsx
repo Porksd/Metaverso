@@ -41,6 +41,36 @@ export default function AdminUsersPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
+    const emitSecurityEvent = async (payload: {
+        eventType: 'permission_change' | 'user_created' | 'user_deleted' | 'password_changed' | 'manual_review';
+        action: string;
+        targetEmail?: string;
+        metadata?: Record<string, unknown>;
+    }) => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const accessToken = session?.access_token;
+            if (!accessToken) return;
+
+            await fetch('/api/security/access-event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    eventType: payload.eventType,
+                    action: payload.action,
+                    targetEmail: payload.targetEmail,
+                    allowed: true,
+                    metadata: payload.metadata || {}
+                })
+            });
+        } catch (error) {
+            console.error('No se pudo registrar evento de seguridad:', error);
+        }
+    };
+
     useEffect(() => {
         checkAuth();
     }, []);
@@ -57,9 +87,7 @@ export default function AdminUsersPage() {
         const email = session.user.email?.toLowerCase();
         const { role } = await resolveAdminRole(supabase, email, '/admin/metaverso/usuarios');
 
-        // Legacy fallback kept for historical bootstrap account.
-        const legacySuperAdmins = ['admin@metaversotec.com'];
-        if (role !== 'superadmin' && (!email || !legacySuperAdmins.includes(email))) {
+        if (role !== 'superadmin') {
             setIsAuthorized(false);
             return;
         }
@@ -138,6 +166,13 @@ export default function AdminUsersPage() {
             return;
         }
 
+        await emitSecurityEvent({
+            eventType: editingAdmin?.id ? 'permission_change' : 'user_created',
+            action: editingAdmin?.id ? 'admin_profile_updated' : 'admin_profile_created',
+            targetEmail: email,
+            metadata: { role }
+        });
+
         setShowForm(false);
         setEditingAdmin(null);
         loadAdmins();
@@ -151,6 +186,11 @@ export default function AdminUsersPage() {
 
         if (!confirm(`¿Seguro que desea eliminar el acceso de ${email}?`)) return;
         await supabase.from('admin_profiles').delete().eq('id', id);
+        await emitSecurityEvent({
+            eventType: 'user_deleted',
+            action: 'admin_profile_deleted',
+            targetEmail: email
+        });
         loadAdmins();
     };
 
@@ -206,6 +246,11 @@ export default function AdminUsersPage() {
             }
 
             alert(`Contraseña actualizada para ${passwordTargetEmail}.`);
+            await emitSecurityEvent({
+                eventType: 'password_changed',
+                action: 'admin_password_updated',
+                targetEmail: passwordTargetEmail
+            });
             setShowPasswordForm(false);
         } catch (err: any) {
             alert('Error actualizando contraseña: ' + (err?.message || 'Error desconocido'));

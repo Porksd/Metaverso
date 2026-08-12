@@ -13,8 +13,7 @@ ADD COLUMN IF NOT EXISTS user_registration_config JSONB DEFAULT '{
 INSERT INTO admin_profiles (email, role, permissions)
 VALUES 
 ('apacheco@lobus.cl', 'superadmin', '{"all": true}'),
-('admin@metaversotec.com', 'superadmin', '{"all": true}'),
-('porksde@gmail.com', 'superadmin', '{"all": true}')
+    ('admin@metaversotec.com', 'administrador', '{"delete_courses": true, "export_excel": false}')
 ON CONFLICT (email) DO UPDATE SET 
-role = 'superadmin', 
-permissions = '{"all": true}';
+role = EXCLUDED.role,
+permissions = EXCLUDED.permissions;

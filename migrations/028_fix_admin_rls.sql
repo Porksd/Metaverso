@@ -26,16 +26,12 @@ WITH CHECK (
     (SELECT role FROM admin_profiles WHERE email = auth.jwt() ->> 'email') = 'superadmin'
 );
 
--- 3. Ensure the primary test admin is SuperAdmin
--- This guarantees admin@metaversotec.com can access everything
+-- 3. Ensure dedicated administrador account keeps its limited role
 UPDATE admin_profiles 
-SET role = 'superadmin' 
+SET role = 'administrador', permissions = '{"delete_courses": true, "export_excel": false}'
 WHERE email = 'admin@metaversotec.com';
 
--- 4. Add Soporte as SuperAdmin if not exists
-INSERT INTO admin_profiles (email, role, permissions)
-VALUES ('porksde@gmail.com', 'superadmin', '{"all": true}')
-ON CONFLICT (email) DO UPDATE SET role = 'superadmin';
+-- 4. (Removed) No additional bootstrap superadmins are auto-seeded here.
 
 -- 5. Ensure RLS is enabled
 ALTER TABLE admin_profiles ENABLE ROW LEVEL SECURITY;

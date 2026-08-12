@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { resolveAdminRole } from "@/lib/adminAuth";
-import { ChevronLeft, LogOut, ShieldCheck, UserCog } from "lucide-react";
+import { ChevronLeft, LogOut, ShieldCheck, UserCog, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminSidebar({ children, title }: { children: React.ReactNode, title?: string }) {
@@ -87,6 +87,15 @@ export default function AdminSidebar({ children, title }: { children: React.Reac
                             </div>
                         )}
                         <div className="flex items-center gap-2 border-l border-white/10 pl-4">
+                            {userRole === 'superadmin' && (
+                                <button
+                                    onClick={() => router.push('/admin/metaverso/seguridad')}
+                                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all hover:bg-brand/10 hover:text-brand"
+                                    title="Registro de Seguridad"
+                                >
+                                    <ShieldAlert className="w-4 h-4" />
+                                </button>
+                            )}
                             {userRole === 'superadmin' && (
                                 <button 
                                     onClick={() => router.push('/admin/metaverso/usuarios')}

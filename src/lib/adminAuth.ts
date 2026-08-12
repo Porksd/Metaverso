@@ -1,15 +1,24 @@
 export type AdminRole = 'superadmin' | 'administrador' | 'editor';
 
-export const SUPER_ADMIN_EMAILS = [
-  'apacheco@lobus.cl',
-  'porksde@gmail.com',
-  'm.poblete.m@gmail.com',
-  'soporte@lobus.cl',
-  'apacheco@metaversotec.com'
-];
+function parseEmailList(rawValue: string | undefined): string[] {
+  return (rawValue || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
 
-// Fallback para el rol Administrador (puede eliminarse cursos, no puede exportar Excel)
-export const ADMINISTRADOR_EMAILS = ['admin@metaversotec.com'];
+// Bootstrap list intended only for emergency recovery. Keep empty by default.
+const bootstrapSuperAdmins = parseEmailList(
+  process.env.NEXT_PUBLIC_BOOTSTRAP_SUPER_ADMIN_EMAILS || process.env.BOOTSTRAP_SUPER_ADMIN_EMAILS
+);
+
+// Optional bootstrap list for administrador fallback. Keep empty by default.
+const bootstrapAdministradores = parseEmailList(
+  process.env.NEXT_PUBLIC_BOOTSTRAP_ADMINISTRADOR_EMAILS || process.env.BOOTSTRAP_ADMINISTRADOR_EMAILS
+);
+
+export const SUPER_ADMIN_EMAILS = bootstrapSuperAdmins;
+export const ADMINISTRADOR_EMAILS = bootstrapAdministradores;
 
 type ResolveRoleResult = {
   role: AdminRole | null;
