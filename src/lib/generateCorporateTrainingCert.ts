@@ -43,6 +43,7 @@ const SIGNATURE_W_MM = 98;
 const SIGNATURE_H_MM = SIGNATURE_W_MM * SIGNATURE_RATIO;
 const SIGNATURE_X_MM = (PAGE_W - SIGNATURE_W_MM) / 2;
 const SIGNATURE_Y_MM = 297 - SIGNATURE_H_MM - 18;
+const INNER_FOOTER_SAFE_TOP_Y = SIGNATURE_Y_MM - 4;
 const COURSE_TITLE_Y = 30;
 const COURSE_LINE_Y = 33;
 const COURSE_TABLE_HEADER_Y = 38;
@@ -375,6 +376,7 @@ export async function generateCorporateTrainingCert(
       let y = courseIdx === 0
         ? startFirstCourseOnCoverPage(course.courseName)
         : startCourseListPage(course.courseName);
+      let onCoverPage = courseIdx === 0;
 
       course.rows.forEach((row, idx) => {
         pdf.setFont("helvetica", "normal");
@@ -389,9 +391,13 @@ export async function generateCorporateTrainingCert(
         const maxLines = Math.max(nameLines.length, rutLines.length, roleLines.length, dateLines.length, 1);
         const lineH = 4.3;
         const rowH = Math.max(8.5, maxLines * lineH + 1.5);
+        const tableBottomY = onCoverPage
+          ? COURSE_TABLE_BOTTOM_Y
+          : Math.min(COURSE_TABLE_BOTTOM_Y, INNER_FOOTER_SAFE_TOP_Y);
 
-        if (y + rowH > COURSE_TABLE_BOTTOM_Y) {
+        if (y + rowH > tableBottomY) {
           y = startCourseListPage(course.courseName);
+          onCoverPage = false;
         }
 
         if (idx % 2 === 1) {
@@ -416,7 +422,7 @@ export async function generateCorporateTrainingCert(
 
       // Signature only on final course page.
       if (courseIdx === sortedCourses.length - 1) {
-        const requiredY = 255;
+        const requiredY = INNER_FOOTER_SAFE_TOP_Y;
         if (y > requiredY) {
           addInnerPage();
           y = 30;
