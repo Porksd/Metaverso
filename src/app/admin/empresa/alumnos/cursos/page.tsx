@@ -114,6 +114,13 @@ export default function CoursesPage() {
         return `${d.getDate()} de ${MONTHS_ES_LOCAL[d.getMonth()]} de ${d.getFullYear()}`;
     };
 
+    const formatCompletedDateEsCL = (value?: string | null) => {
+        if (!value) return null;
+        const parsedDate = new Date(value);
+        if (Number.isNaN(parsedDate.getTime())) return null;
+        return parsedDate.toLocaleDateString('es-CL');
+    };
+
     const confirmExitCourse = useCallback(() => {
         if (window.confirm(t.exit_course_confirm)) {
             setActiveCourse(null);
@@ -468,11 +475,19 @@ export default function CoursesPage() {
 
         console.log("📋 Certificate final data:", { jobName, age: studentSrc.age, gender: studentSrc.gender, company_name: companyInfo.name });
 
+        const completedDate = formatCompletedDateEsCL(enrollment.completed_at);
+        if (!completedDate) {
+            alert('El curso no tiene una fecha de realización válida. Contacta a tu administrador para regularizar la finalización.');
+            setIsGeneratingCert(false);
+            certGenerationLock.current = false;
+            return;
+        }
+
         setCertData({
             studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
             rut: studentSrc.rut,
             courseName: enrollment.course.name.toUpperCase(),
-            date: new Date(enrollment.completed_at || Date.now()).toLocaleDateString(),
+            date: completedDate,
             score: enrollment.best_score ?? 100,
             signatures: sigs,
             studentSignature: studentSignature,
@@ -514,6 +529,12 @@ export default function CoursesPage() {
 
             const studentSrc = freshStudent || user;
             const fc = diplomaConfig.fields_config || {};
+            const completedDate = formatCompletedDateEsCL(enrollment.completed_at);
+
+            if (!completedDate) {
+                alert('El curso no tiene una fecha de realización válida. Contacta a tu administrador para regularizar la finalización.');
+                return;
+            }
 
             await generateMetaversoCert({
                 studentName: `${studentSrc.first_name} ${studentSrc.last_name}`,
@@ -525,9 +546,7 @@ export default function CoursesPage() {
                 courseName: (enrollment.course?.name || '').toUpperCase(),
                 courseCode: enrollment.course?.code || '',
                 hours: enrollment.course?.config?.hours,
-                date: enrollment.completed_at
-                    ? new Date(enrollment.completed_at).toLocaleDateString('es-CL')
-                    : new Date().toLocaleDateString('es-CL'),
+                date: completedDate,
                 expirationDate: calcExpirationDate(enrollment.completed_at, enrollment.course?.company_course_validez_anios),
                 backgroundUrl: diplomaConfig.background_url,
                 layoutConfig: fc.layout,

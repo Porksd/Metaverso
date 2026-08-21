@@ -160,6 +160,25 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function formatRutForDisplay(value?: string | null): string {
+  const raw = (value || '').trim();
+  if (!raw) return '-';
+
+  const compact = raw.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (compact.length < 2) return raw;
+
+  const body = compact.slice(0, -1);
+  const dv = compact.slice(-1);
+  if (!/^\d+$/.test(body)) return raw;
+
+  const bodyWithDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${bodyWithDots}-${dv}`;
+}
+
+function normalizeFullName(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 /**
@@ -183,6 +202,8 @@ export async function generateMetaversoCert(
   let courseName = data.courseName;
   let courseCode = data.courseCode;
   let hours = data.hours;
+  const studentName = normalizeFullName(data.studentName);
+  const studentRut = formatRutForDisplay(data.rut);
 
   if (officialCompanyId || officialCourseId) {
     const [companyResult, courseResult] = await Promise.all([
@@ -212,6 +233,8 @@ export async function generateMetaversoCert(
     }
   }
 
+  const companyRutDisplay = formatRutForDisplay(companyRut);
+
   // ── 1. Background image ──────────────────────────────────────────────────
   const bgUrl =
     data.backgroundUrl && data.backgroundUrl.trim()
@@ -228,7 +251,7 @@ export async function generateMetaversoCert(
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(lc.student_name_size);
     pdf.setTextColor(30, 30, 30);
-    pdf.text(data.studentName.toUpperCase(), W / 2, lc.student_name_y, { align: "center" });
+    pdf.text(studentName.toUpperCase(), W / 2, lc.student_name_y, { align: "center" });
   }
 
   // ── 3. RUT ───────────────────────────────────────────────────────────────
@@ -237,7 +260,7 @@ export async function generateMetaversoCert(
       pdf,
       [
         { text: "RUT: ", bold: false, size: lc.rut_size },
-        { text: data.rut, bold: true, size: lc.rut_size, color: [30, 30, 30] },
+        { text: studentRut, bold: true, size: lc.rut_size, color: [30, 30, 30] },
       ],
       lc.rut_y,
       W
@@ -268,7 +291,7 @@ export async function generateMetaversoCert(
       pdf,
       [
         { text: "con RUT: ", bold: false, size: lc.company_rut_size },
-        { text: companyRut, bold: true, size: lc.company_rut_size, color: [30, 30, 30] },
+        { text: companyRutDisplay, bold: true, size: lc.company_rut_size, color: [30, 30, 30] },
       ],
       lc.company_rut_y,
       W
@@ -375,7 +398,7 @@ export async function generateMetaversoCert(
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────
-  const safeName = data.studentName.replace(/[^a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ ]/g, "").replace(/\s+/g, "_");
+  const safeName = studentName.replace(/[^a-zA-Z0-9ÁÉÍÓÚáéíóúÑñ ]/g, "").replace(/\s+/g, "_");
   const safeCourse = courseName.replace(/\s+/g, "_").substring(0, 25);
   pdf.save(`Certificado_${safeName}_${safeCourse}.pdf`);
 }

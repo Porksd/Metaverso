@@ -71,6 +71,13 @@ const formatDateEsCL = (value?: string | null) => {
     return parsedDate.toLocaleDateString('es-CL');
 };
 
+const formatCompletedDateEsCL = (value?: string | null) => {
+    if (!value) return null;
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) return null;
+    return parsedDate.toLocaleDateString('es-CL');
+};
+
 const COMPANY_CONTEXT_KEYS = ["empresa_id", "empresa_name", "empresa_slug", "is_master_admin", "master_role", "master_return_url", "master_entry_mode"] as const;
 
 const getStoredCompanyValue = (key: (typeof COMPANY_CONTEXT_KEYS)[number]) => {
@@ -348,7 +355,13 @@ export default function EmpresaAdmin() {
                 currentCompanyName,
             });
 
-            const certificateDate = formatDateEsCL(enrollment.completed_at);
+            const completedDate = formatCompletedDateEsCL(enrollment.completed_at);
+            if (!completedDate) {
+                alert('El curso no tiene una fecha de realización válida. Actualiza la fecha de finalización antes de emitir el certificado.');
+                return;
+            }
+
+            const certificateDate = completedDate;
 
             if (certificateType === 'aprobacion') {
                 if (!diplomaConfig) {
@@ -372,9 +385,7 @@ export default function EmpresaAdmin() {
                         courseName: course.name?.toUpperCase() || 'CURSO',
                         courseCode: course.code || '',
                         hours: course.config?.hours,
-                        date: enrollment.completed_at
-                            ? new Date(enrollment.completed_at).toLocaleDateString('es-CL')
-                            : new Date().toLocaleDateString('es-CL'),
+                        date: completedDate,
                         expirationDate: calcExpirationDate(enrollment.completed_at, course.company_course_validez_anios),
                         backgroundUrl: diplomaConfig.background_url,
                         layoutConfig: fc.layout,
