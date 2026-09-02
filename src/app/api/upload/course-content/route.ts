@@ -11,6 +11,20 @@ const getContentType = (fileName: string) => {
     return 'other';
 };
 
+// Supabase Storage rejects the literal "auto" Content-Type, so each extracted file needs a real MIME type.
+const getMimeType = (fileName: string): string => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    const map: Record<string, string> = {
+        html: 'text/html', htm: 'text/html', js: 'application/javascript', mjs: 'application/javascript',
+        css: 'text/css', json: 'application/json', xml: 'application/xml',
+        png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp', ico: 'image/x-icon',
+        mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', mp4: 'video/mp4', webm: 'video/webm',
+        woff: 'font/woff', woff2: 'font/woff2', ttf: 'font/ttf', eot: 'application/vnd.ms-fontobject', otf: 'font/otf',
+        pdf: 'application/pdf', txt: 'text/plain',
+    };
+    return map[ext] || 'application/octet-stream';
+};
+
 const BUCKET_NAME = 'course-content';
 
 export async function POST(request: NextRequest) {
@@ -77,15 +91,28 @@ export async function POST(request: NextRequest) {
 
             console.log(`Extracting ${zipEntries.length} files to ${courseId}/${subDir}/${folder}`);
 
+            let failedUploads = 0;
             for (const entry of zipEntries) {
                 if (entry.isDirectory) continue;
-                await supabaseAdmin.storage.from(BUCKET_NAME).upload(
-                    `${courseId}/${subDir}/${folder}/${entry.entryName}`, 
-                    entry.getData(), 
-                    { contentType: 'auto', upsert: true }
+                const { error: entryError } = await supabaseAdmin.storage.from(BUCKET_NAME).upload(
+                    `${courseId}/${subDir}/${folder}/${entry.entryName}`,
+                    entry.getData(),
+                    { contentType: getMimeType(entry.entryName), upsert: true }
                 );
+                if (entryError) {
+                    failedUploads++;
+                    console.error(`Failed to upload entry ${entry.entryName}:`, entryError.message);
+                }
             }
-            
+
+            if (failedUploads > 0) {
+                throw new Error(`Fallaron ${failedUploads} de ${zipEntries.length} archivos al subir el paquete SCORM. El contenido no quedó disponible, intenta nuevamente.`);
+            }
+
+            if (!entryPoint) {
+                throw new Error('El paquete no contiene index.html ni imsmanifest.xml. Revisa que el .zip tenga el contenido SCORM en la raíz.');
+            }
+
             const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(`${courseId}/${subDir}/${folder}/${entryPoint || ''}`);
             finalUrl = data.publicUrl;
 
