@@ -104,6 +104,7 @@ type ReportOverrides = {
   includeStudents?: boolean;
   includePdfAttachment?: boolean;
   copyEmails?: string | null;
+  testEmail?: string | null;
 };
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -903,7 +904,7 @@ async function buildReportPdf(report: ReportData): Promise<Buffer> {
   return Buffer.from(output);
 }
 
-async function sendMail(report: ReportData): Promise<void> {
+async function sendMail(report: ReportData, testEmail?: string | null): Promise<void> {
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = Number(process.env.SMTP_PORT || 587);
   const smtpUser = process.env.SMTP_USER;
@@ -944,13 +945,14 @@ async function sendMail(report: ReportData): Promise<void> {
   }
 
   const html = buildEmailHtml(report);
-  const copyRecipients = parseReportCopyEmails(report.company.report_copy_emails);
+  const isTestSend = Boolean(testEmail);
+  const copyRecipients = isTestSend ? [] : parseReportCopyEmails(report.company.report_copy_emails);
 
   await transporter.sendMail({
     from: smtpFrom,
-    to: report.company.email,
+    to: testEmail || report.company.email,
     cc: copyRecipients.length > 0 ? copyRecipients : undefined,
-    subject: `Informe de avance de cursos - ${report.company.name}`,
+    subject: `${isTestSend ? '[PRUEBA] ' : ''}Informe de avance de cursos - ${report.company.name}`,
     html,
     attachments
   });
@@ -970,17 +972,18 @@ async function markAsSent(companyId: string): Promise<void> {
 
 export async function sendCompanyProgressReport(companyId: string, options: SendSingleOptions = {}) {
   const force = options.force === true;
+  const testEmail = options.overrides?.testEmail?.trim() || null;
   const company = await fetchCompany(companyId);
 
   if (!company) {
     return { sent: false, reason: 'company_not_found' as const };
   }
 
-  if (!company.email) {
+  if (!company.email && !testEmail) {
     return { sent: false, reason: 'missing_email' as const };
   }
 
-  if (!shouldSendNow(company, new Date(), force)) {
+  if (!testEmail && !shouldSendNow(company, new Date(), force)) {
     return { sent: false, reason: 'not_due' as const };
   }
 
@@ -989,10 +992,13 @@ export async function sendCompanyProgressReport(companyId: string, options: Send
     return { sent: false, reason: 'company_not_found' as const };
   }
 
-  await sendMail(report);
-  await markAsSent(company.id);
+  await sendMail(report, testEmail);
 
-  return { sent: true as const, companyId: company.id, recipient: company.email };
+  if (!testEmail) {
+    await markAsSent(company.id);
+  }
+
+  return { sent: true as const, companyId: company.id, recipient: testEmail || company.email };
 }
 
 export async function getCompanyProgressReportPreview(companyId: string, overrides: ReportOverrides = {}) {

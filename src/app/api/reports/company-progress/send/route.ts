@@ -10,6 +10,7 @@ type BodyPayload = {
     includeStudents?: boolean;
     includePdfAttachment?: boolean;
     copyEmails?: string | null;
+    testEmail?: string | null;
   };
 };
 
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
       overrides: {
         includeStudents: typeof overrides.includeStudents === 'boolean' ? overrides.includeStudents : undefined,
         includePdfAttachment: typeof overrides.includePdfAttachment === 'boolean' ? overrides.includePdfAttachment : undefined,
-        copyEmails: typeof overrides.copyEmails === 'string' || overrides.copyEmails === null ? overrides.copyEmails : undefined
+        copyEmails: typeof overrides.copyEmails === 'string' || overrides.copyEmails === null ? overrides.copyEmails : undefined,
+        testEmail: typeof overrides.testEmail === 'string' ? overrides.testEmail : undefined
       }
     });
     return NextResponse.json({ ok: true, result });
