@@ -3,6 +3,10 @@
     {
       "path": "/api/security/reports/daily",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/reports/company-progress/dispatch",
+      "schedule": "0 13 * * *"
     }
   ]
 }

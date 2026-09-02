@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import nodemailer from 'nodemailer';
 import path from 'path';
 
-type ReportFrequency = 'daily' | 'weekly' | 'monthly';
+type ReportFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly';
 
 type CompanyReportConfig = {
   id: string;
@@ -122,7 +122,7 @@ function getSupabaseAdminClient() {
 }
 
 function normalizeFrequency(value: string | null | undefined): ReportFrequency {
-  if (value === 'daily' || value === 'weekly' || value === 'monthly') return value;
+  if (value === 'daily' || value === 'weekly' || value === 'biweekly' || value === 'monthly') return value;
   return 'weekly';
 }
 
@@ -139,6 +139,7 @@ function shouldSendNow(company: CompanyReportConfig, now: Date, force: boolean):
   const intervalByFrequency: Record<ReportFrequency, number> = {
     daily: ONE_DAY_MS,
     weekly: ONE_DAY_MS * 7,
+    biweekly: ONE_DAY_MS * 15,
     monthly: ONE_DAY_MS * 30
   };
 
@@ -487,47 +488,6 @@ function quickChartUrl(config: Record<string, unknown>, width = 700, height = 36
   return `https://quickchart.io/chart?c=${encoded}&w=${width}&h=${height}&devicePixelRatio=1&format=png&backgroundColor=white`;
 }
 
-async function sourceToBuffer(source: string | null | undefined): Promise<{ buffer: Buffer; contentType: string } | null> {
-  if (!source) return null;
-
-  if (source.startsWith('data:')) {
-    const dataMatch = source.match(/^data:([^;]+);base64,(.*)$/);
-    if (!dataMatch) return null;
-    return {
-      contentType: dataMatch[1],
-      buffer: Buffer.from(dataMatch[2], 'base64')
-    };
-  }
-
-  try {
-    if (source.startsWith('http://') || source.startsWith('https://')) {
-      const response = await fetch(source);
-      if (!response.ok) return null;
-      const contentType = response.headers.get('content-type') || 'image/png';
-      const buffer = Buffer.from(await response.arrayBuffer());
-      return { buffer, contentType };
-    }
-
-    const normalized = source.startsWith('/') ? source.slice(1) : source;
-    const localPath = path.join(process.cwd(), 'public', normalized);
-    if (!fs.existsSync(localPath)) return null;
-
-    const ext = path.extname(localPath).toLowerCase();
-    const contentType = ext === '.jpg' || ext === '.jpeg'
-      ? 'image/jpeg'
-      : ext === '.svg'
-        ? 'image/svg+xml'
-        : 'image/png';
-
-    return {
-      contentType,
-      buffer: fs.readFileSync(localPath)
-    };
-  } catch {
-    return null;
-  }
-}
-
 function buildCharts(report: ReportData) {
   const activityLabels = report.dailyActivity.map((point) => formatDateLabel(point.date));
   const activityEnrollments = report.dailyActivity.map((point) => point.enrollments);
@@ -638,155 +598,73 @@ function buildCharts(report: ReportData) {
   return { lineChart, statusDonut, topCoursesChart, scoreBands };
 }
 
-function buildEmailHtml(
-  report: ReportData,
-  chartSources?: { lineChart: string; statusDonut: string; topCoursesChart: string; scoreBands: string }
-): string {
-  const { company, totals, topCourses, generatedAt } = report;
-  const { lineChart, statusDonut, topCoursesChart, scoreBands } = chartSources || buildCharts(report);
+// Replica las reglas del panel "Insights y Recomendaciones" (EnhancedManagerDashboard.tsx) para incluirlas textualmente en el correo.
+function buildInsightsList(report: ReportData): string[] {
+  const { totals, studentSummary } = report;
+  const insights: string[] = [];
 
-  const logoHtml = company.logo_url
-    ? `<img src="${esc(company.logo_url)}" alt="Logo empresa" style="max-height:52px;max-width:180px;object-fit:contain;display:block;" />`
-    : `<div style="font-size:20px;font-weight:800;color:#0f172a;">${esc(company.name)}</div>`;
+  if (totals.completionRate < 50) {
+    insights.push(`Tasa de completitud baja (${totals.completionRate}%): considera enviar recordatorios a los colaboradores para completar sus cursos.`);
+  }
 
-  const statCard = (label: string, value: string | number) => `
-    <td style="padding:8px;vertical-align:top;">
-      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#f8fafc;min-width:120px;">
-        <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;">${label}</div>
-        <div style="font-size:24px;color:#0f172a;font-weight:700;line-height:1.2;">${value}</div>
-      </div>
-    </td>
-  `;
+  if (totals.avgScoreCompleted < 70 && totals.completedEnrollments > 0) {
+    insights.push(`Promedio general bajo (${totals.avgScoreCompleted}%): considera revisar el nivel de dificultad o proporcionar material de apoyo adicional.`);
+  }
+
+  if (totals.inProgressEnrollments > totals.completedEnrollments * 2 && totals.completedEnrollments > 0) {
+    insights.push(`Muchos cursos en progreso: hay ${totals.inProgressEnrollments} cursos iniciados vs ${totals.completedEnrollments} completados. Motiva a los estudiantes a finalizar.`);
+  }
+
+  const students8Plus = studentSummary.filter((student) => student.enrollments >= 8).length;
+  if (students8Plus > 0) {
+    insights.push(`¡Excelente compromiso! ${students8Plus} estudiante${students8Plus > 1 ? 's han' : ' ha'} completado 8 o más cursos. Considera reconocer su esfuerzo.`);
+  }
+
+  if (totals.totalEnrollments === 0) {
+    insights.push('Comienza asignando cursos: no hay inscripciones aún. Dirígete a la sección de administración para asignar cursos.');
+  }
+
+  if (insights.length === 0) {
+    insights.push('El desempeño de la organización se mantiene dentro de parámetros esperados, sin alertas relevantes en este periodo.');
+  }
+
+  return insights;
+}
+
+function buildEmailHtml(report: ReportData): string {
+  const { company, generatedAt } = report;
+  const insightsHtml = buildInsightsList(report)
+    .map((line) => `<li style="margin-bottom:8px;">${esc(line)}</li>`)
+    .join('');
+  const sentDateLabel = generatedAt.toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' });
 
   return `
-    <div style="font-family:Segoe UI,Arial,sans-serif;background:#ffffff;padding:20px 10px;color:#0f172a;">
-      <div style="max-width:1020px;margin:0 auto;background:#f8fafc;border-radius:20px;overflow:hidden;border:1px solid #dbe4ef;">
-        <div style="background:#ffffff;padding:24px 28px;color:#0f172a;border-bottom:1px solid #e2e8f0;">
-          <table style="width:100%;border-collapse:collapse;">
-            <tr>
-              <td style="vertical-align:top;">${logoHtml}</td>
-              <td style="text-align:right;vertical-align:top;">
-                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#475569;">Reporte ejecutivo LMS</div>
-                <div style="font-size:13px;margin-top:6px;color:#0f172a;font-weight:700;">${esc(company.name)}</div>
-                <div style="font-size:12px;color:#64748b;">${generatedAt.toLocaleString('es-CL')}</div>
-              </td>
-            </tr>
-          </table>
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px;">
-            <div style="background:#f8fafc;border:1px solid #dbe4ef;border-radius:12px;padding:10px 12px;">
-              <div style="font-size:10px;color:#64748b;text-transform:uppercase;">RUT</div>
-              <div style="font-size:13px;font-weight:700;color:#0f172a;">${esc(company.tax_id || '-')}</div>
-            </div>
-            <div style="background:#f8fafc;border:1px solid #dbe4ef;border-radius:12px;padding:10px 12px;">
-              <div style="font-size:10px;color:#64748b;text-transform:uppercase;">Zona / Sucursal</div>
-              <div style="font-size:13px;font-weight:700;color:#0f172a;">${esc(company.branch_zone || '-')}</div>
-            </div>
-            <div style="background:#f8fafc;border:1px solid #dbe4ef;border-radius:12px;padding:10px 12px;">
-              <div style="font-size:10px;color:#64748b;text-transform:uppercase;">Contacto</div>
-              <div style="font-size:13px;font-weight:700;color:#0f172a;">${esc(company.phone || company.email || '-')}</div>
-            </div>
-          </div>
-        </div>
+    <div style="font-family:Segoe UI,Arial,sans-serif;background:#ffffff;padding:24px 12px;color:#0f172a;">
+      <div style="max-width:680px;margin:0 auto;background:#ffffff;border-radius:16px;border:1px solid #e2e8f0;padding:32px 36px;">
+        <p style="font-size:16px;font-weight:700;margin:0 0 20px 0;color:#0f172a;">${esc(company.name)}</p>
 
-        <div style="padding:22px 22px 8px 22px;">
-          <h1 style="margin:0 0 10px 0;font-size:24px;line-height:1.15;color:#0f172a;">Informe de avance y desarrollo de cursos</h1>
-          <table style="border-collapse:collapse;width:100%;margin-bottom:12px;"><tr>
-            ${statCard('Participantes', totals.uniqueStudents)}
-            ${statCard('Cursos', totals.uniqueCourses)}
-            ${statCard('Matrículas', totals.totalEnrollments)}
-            ${statCard('Completitud', `${totals.completionRate}%`)}
-            ${statCard('Promedio', `${totals.avgScoreCompleted}%`)}
-          </tr></table>
-        </div>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 16px 0;color:#1f2937;">
+          Por medio del presente adjuntamos el informe periódico de capacitación de su organización, el cual presenta
+          el estado y avance de los cursos, junto con el listado de colaboradores capacitados.
+        </p>
 
-        <div style="padding:0 22px 12px 22px;">
-          <table style="width:100%;border-collapse:separate;border-spacing:10px;">
-            <tr>
-              <td style="width:50%;background:#ffffff;border:1px solid #dbe4ef;border-radius:14px;padding:12px;vertical-align:top;">
-                <h2 style="font-size:14px;margin:0 0 8px 0;color:#0f172a;">Actividad ultimos 14 dias</h2>
-                <img src="${lineChart}" alt="Actividad diaria" style="width:100%;border-radius:10px;" />
-              </td>
-              <td style="width:50%;background:#ffffff;border:1px solid #dbe4ef;border-radius:14px;padding:12px;vertical-align:top;">
-                <h2 style="font-size:14px;margin:0 0 8px 0;color:#0f172a;">Estado de matrículas</h2>
-                <img src="${statusDonut}" alt="Estado de matriculas" style="width:100%;border-radius:10px;" />
-              </td>
-            </tr>
-            <tr>
-              <td style="width:50%;background:#ffffff;border:1px solid #dbe4ef;border-radius:14px;padding:12px;vertical-align:top;">
-                <h2 style="font-size:14px;margin:0 0 8px 0;color:#0f172a;">Top cursos por volumen</h2>
-                <img src="${topCoursesChart}" alt="Top cursos" style="width:100%;border-radius:10px;" />
-              </td>
-              <td style="width:50%;background:#ffffff;border:1px solid #dbe4ef;border-radius:14px;padding:12px;vertical-align:top;">
-                <h2 style="font-size:14px;margin:0 0 8px 0;color:#0f172a;">Distribucion de puntajes</h2>
-                <img src="${scoreBands}" alt="Distribucion de puntajes" style="width:100%;border-radius:10px;" />
-              </td>
-            </tr>
-          </table>
-        </div>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 12px 0;color:#1f2937;">
+          Adicionalmente, ponemos a su consideración Insights y recomendaciones basados en la información del dashboard:
+        </p>
 
-        <div style="padding:0 22px 20px 22px;">
-          <h2 style="font-size:15px;margin:4px 0 8px 0;color:#0f172a;">Detalle por curso</h2>
-          <table style="width:100%;border-collapse:collapse;font-size:13px;background:#ffffff;border:1px solid #dbe4ef;border-radius:12px;overflow:hidden;">
-          <thead>
-            <tr>
-              <th style="text-align:left;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Curso</th>
-              <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Inscritos</th>
-              <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">En progreso</th>
-              <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Completados</th>
-              <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Promedio</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${topCourses.map((course) => `
-              <tr>
-                <td style="padding:10px;border-bottom:1px solid #f1f5f9;">
-                  <div style="font-weight:700;color:#0f172a;">${esc(course.courseName)}</div>
-                  <div style="font-size:11px;color:#64748b;">Codigo: ${esc(course.courseCode || '-')}</div>
-                </td>
-                <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${course.enrolled}</td>
-                <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${course.inProgress}</td>
-                <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${course.completed}</td>
-                <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${course.avgScore}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+        <ul style="font-size:14px;line-height:1.6;margin:0 0 20px 0;padding-left:20px;color:#1f2937;">
+          ${insightsHtml}
+        </ul>
 
-          ${report.company.report_include_dashboard_body ? `
-            <div style="margin-top:16px;">
-              <h2 style="font-size:15px;margin:4px 0 8px 0;color:#0f172a;">Listado de alumnos</h2>
-              <table style="width:100%;border-collapse:collapse;font-size:12px;background:#ffffff;border:1px solid #dbe4ef;border-radius:12px;overflow:hidden;">
-                <thead>
-                  <tr>
-                    <th style="text-align:left;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Alumno</th>
-                    <th style="text-align:left;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Correo</th>
-                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Matríc.</th>
-                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Compl.</th>
-                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">En prog.</th>
-                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e2e8f0;background:#f8fafc;">Prom.</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${report.studentSummary.map((student) => `
-                    <tr>
-                      <td style="padding:10px;border-bottom:1px solid #f1f5f9;font-weight:700;color:#0f172a;">${esc(student.fullName)}</td>
-                      <td style="padding:10px;border-bottom:1px solid #f1f5f9;color:#475569;">${esc(student.email || '-')}</td>
-                      <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${student.enrollments}</td>
-                      <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${student.completed}</td>
-                      <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${student.inProgress}</td>
-                      <td style="padding:10px;text-align:right;border-bottom:1px solid #f1f5f9;">${student.avgScore}%</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          ` : ''}
+        <p style="font-size:14px;line-height:1.6;margin:0 0 24px 0;color:#1f2937;">
+          Esperamos que la información adjunta, junto con los insights y recomendaciones presentadas, sean de utilidad
+          para fortalecer la gestión de la capacitación y apoyar la toma de decisiones orientadas a la mejora continua.
+        </p>
 
-          <div style="margin-top:14px;font-size:11px;color:#64748b;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-            <span>${esc(company.address || '')}</span>
-            <span>Informe generado por Metaverso Otec</span>
-          </div>
-        </div>
+        <p style="font-size:14px;line-height:1.6;margin:0;color:#1f2937;">Saludos cordiales,</p>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 20px 0;font-weight:700;color:#0f172a;">MetaversOtec</p>
+
+        <p style="font-size:13px;color:#64748b;margin:0;">Fecha: ${esc(sentDateLabel)}</p>
       </div>
     </div>
   `;
@@ -830,8 +708,8 @@ async function buildReportPdf(report: ReportData): Promise<Buffer> {
     try {
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(226, 232, 240);
-      doc.roundedRect(14, 11, 34, 13, 2, 2, 'FD');
-      doc.addImage(companyLogo, 'PNG', 16, 13, 30, 8.4);
+      doc.roundedRect(pageW - 48, 11, 34, 13, 2, 2, 'FD');
+      doc.addImage(companyLogo, 'PNG', pageW - 46, 13, 30, 8.4);
     } catch {
       // ignore invalid logo image
     }
@@ -1056,48 +934,6 @@ async function sendMail(report: ReportData): Promise<void> {
     contentDisposition?: 'inline' | 'attachment';
   }>;
 
-  const chartUrls = buildCharts(report);
-  const chartRefs = {
-    lineChart: 'chart-line@metaverso',
-    statusDonut: 'chart-status@metaverso',
-    topCoursesChart: 'chart-top@metaverso',
-    scoreBands: 'chart-score@metaverso'
-  };
-
-  const emailChartSources = {
-    lineChart: chartUrls.lineChart,
-    statusDonut: chartUrls.statusDonut,
-    topCoursesChart: chartUrls.topCoursesChart,
-    scoreBands: chartUrls.scoreBands
-  };
-
-  const chartConfigs: Array<{
-    key: keyof typeof emailChartSources;
-    cid: string;
-    filename: string;
-    source: string;
-  }> = [
-    { key: 'lineChart', cid: chartRefs.lineChart, filename: 'chart-actividad.png', source: chartUrls.lineChart },
-    { key: 'statusDonut', cid: chartRefs.statusDonut, filename: 'chart-estado.png', source: chartUrls.statusDonut },
-    { key: 'topCoursesChart', cid: chartRefs.topCoursesChart, filename: 'chart-top-cursos.png', source: chartUrls.topCoursesChart },
-    { key: 'scoreBands', cid: chartRefs.scoreBands, filename: 'chart-puntajes.png', source: chartUrls.scoreBands }
-  ];
-
-  for (const chart of chartConfigs) {
-    const image = await sourceToBuffer(chart.source);
-    if (!image) continue;
-
-    attachments.push({
-      filename: chart.filename,
-      content: image.buffer,
-      contentType: image.contentType,
-      cid: chart.cid,
-      contentDisposition: 'inline'
-    });
-
-    emailChartSources[chart.key] = `cid:${chart.cid}`;
-  }
-
   if (report.company.report_include_pdf_attachment) {
     attachments.push({
       filename: `informe-${report.company.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`,
@@ -1107,7 +943,7 @@ async function sendMail(report: ReportData): Promise<void> {
     });
   }
 
-  const html = buildEmailHtml(report, emailChartSources);
+  const html = buildEmailHtml(report);
   const copyRecipients = parseReportCopyEmails(report.company.report_copy_emails);
 
   await transporter.sendMail({

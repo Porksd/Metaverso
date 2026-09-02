@@ -36,9 +36,16 @@ async function hasApiAccess(req: Request): Promise<{ ok: boolean; reason?: strin
     return { ok: true };
   }
 
-  const { supabaseAdmin, supabaseAuthVerifier } = getSupabaseClients();
+  // Vercel Cron Jobs cannot send custom headers; they only send
+  // `Authorization: Bearer <CRON_SECRET>` automatically when that env var is set.
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+  if (token && ((cronSecret && token === cronSecret) || (process.env.CRON_SECRET && token === process.env.CRON_SECRET))) {
+    return { ok: true };
+  }
+
+  const { supabaseAdmin, supabaseAuthVerifier } = getSupabaseClients();
 
   if (!token) {
     return { ok: false, reason: 'No autorizado.' };
@@ -70,6 +77,22 @@ export async function POST(req: Request) {
     const companyId = body.companyId?.trim() || undefined;
 
     const result = await dispatchCompanyProgressReports({ force, companyId });
+    return NextResponse.json({ ok: true, ...result });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error inesperado.';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// Vercel Cron Jobs invoke this route with GET only, so dispatch must be reachable that way too.
+export async function GET(req: Request) {
+  try {
+    const access = await hasApiAccess(req);
+    if (!access.ok) {
+      return NextResponse.json({ error: access.reason || 'No autorizado.' }, { status: 401 });
+    }
+
+    const result = await dispatchCompanyProgressReports({});
     return NextResponse.json({ ok: true, ...result });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Error inesperado.';

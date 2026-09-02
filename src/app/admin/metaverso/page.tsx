@@ -580,7 +580,7 @@ export default function MetaversoAdmin() {
             primary_color: data.primary_color,
             secondary_color: data.secondary_color,
             report_auto_enabled: data.report_auto_enabled === true,
-            report_frequency: ['daily', 'weekly', 'monthly'].includes(data.report_frequency) ? data.report_frequency : 'weekly',
+            report_frequency: ['daily', 'weekly', 'biweekly', 'monthly'].includes(data.report_frequency) ? data.report_frequency : 'weekly',
             report_include_dashboard_body: data.report_include_dashboard_body !== false,
             report_include_pdf_attachment: data.report_include_pdf_attachment !== false,
             report_copy_emails: data.report_copy_emails_enabled ? ((data.report_copy_emails || '').trim() || null) : null,
@@ -1462,6 +1462,7 @@ export default function MetaversoAdmin() {
                                     >
                                         <option value="daily" className="bg-slate-900 text-white">Una vez al dia</option>
                                         <option value="weekly" className="bg-slate-900 text-white">Una vez a la semana</option>
+                                        <option value="biweekly" className="bg-slate-900 text-white">Cada 15 dias</option>
                                         <option value="monthly" className="bg-slate-900 text-white">Una vez al mes</option>
                                     </select>
                                 </div>
