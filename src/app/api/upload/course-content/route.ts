@@ -113,8 +113,9 @@ export async function POST(request: NextRequest) {
                 throw new Error('El paquete no contiene index.html ni imsmanifest.xml. Revisa que el .zip tenga el contenido SCORM en la raíz.');
             }
 
-            const { data } = supabaseAdmin.storage.from(BUCKET_NAME).getPublicUrl(`${courseId}/${subDir}/${folder}/${entryPoint || ''}`);
-            finalUrl = data.publicUrl;
+            // Serve via our own proxy route: Supabase Storage forces text/plain + sandbox CSP on HTML
+            // content even in public buckets, which breaks rendering the SCORM package in an iframe.
+            finalUrl = `/api/scorm-content/${courseId}/${subDir}/${folder}/${entryPoint}`;
 
             // Optional: Cleanup the temporary ZIP from storage if it was passed via storagePath
             if (storagePath) {
