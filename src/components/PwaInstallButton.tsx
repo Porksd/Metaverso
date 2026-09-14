@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, X } from "lucide-react";
+import { AppWindow, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -60,7 +60,7 @@ export default function PwaInstallButton() {
           className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-full bg-[#31D22D] px-4 py-3 text-sm font-semibold text-black shadow-lg shadow-black/30 transition hover:bg-[#55e852]"
           aria-label="Instalar aplicación Metaverso Otec"
         >
-          <Download className="h-4 w-4" />
+          <AppWindow className="h-4 w-4" />
           Instalar aplicación
         </button>
       ) : (
@@ -86,7 +86,7 @@ export default function PwaInstallButton() {
                 onClick={handleInstall}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-400/15 px-3 py-2.5 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-400/25"
               >
-                <Download className="h-4 w-4" />
+                <AppWindow className="h-4 w-4" />
                 Instalar aplicación
               </button>
             </div>
@@ -99,7 +99,7 @@ export default function PwaInstallButton() {
               aria-label="Mostrar opciones para instalar la aplicación"
               title="Instalar aplicación"
             >
-              <Download className="h-5 w-5" />
+              <AppWindow className="h-5 w-5" />
             </button>
           )}
         </div>
