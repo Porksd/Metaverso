@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import { randomBytes } from 'crypto';
 import fs from 'fs';
 import jsPDF from 'jspdf';
 import nodemailer from 'nodemailer';
 import path from 'path';
+import QRCode from 'qrcode';
 
 type ReportFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly';
 
@@ -107,6 +109,14 @@ type ReportOverrides = {
   testEmail?: string | null;
 };
 
+type ReportCertificate = {
+  token: string;
+  generatedAt: Date;
+  expiresAt: Date;
+  verificationUrl: string;
+  qrDataUrl: string;
+};
+
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 function getSupabaseAdminClient() {
@@ -120,6 +130,98 @@ function getSupabaseAdminClient() {
   return createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
+}
+
+function getApplicationBaseUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configuredUrl) return configuredUrl.replace(/\/$/, '');
+
+  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionUrl) return `https://${productionUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+
+  return 'https://metaverso-pi.vercel.app';
+}
+
+async function createReportCertificate(report: ReportData): Promise<{ pdfBuffer: Buffer; certificate: ReportCertificate }> {
+  const supabaseAdmin = getSupabaseAdminClient();
+  const token = randomBytes(32).toString('hex');
+  const generatedAt = new Date(report.generatedAt);
+  const expiresAt = new Date(generatedAt.getTime() + 7 * ONE_DAY_MS);
+  const storagePath = `${report.company.id}/${token}.pdf`;
+  const verificationUrl = `${getApplicationBaseUrl()}/api/reports/company-progress/certificate/${token}`;
+  const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
+    errorCorrectionLevel: 'M',
+    margin: 1,
+    width: 256,
+  });
+
+  const { error: insertError } = await supabaseAdmin
+    .from('report_certificates')
+    .insert({
+      token,
+      company_id: report.company.id,
+      storage_path: storagePath,
+      generated_at: generatedAt.toISOString(),
+      expires_at: expiresAt.toISOString(),
+    });
+
+  if (insertError) throw new Error(`No se pudo registrar el certificado: ${insertError.message}`);
+
+  const certificate = { token, generatedAt, expiresAt, verificationUrl, qrDataUrl };
+  const pdfBuffer = await buildReportPdf(report, certificate);
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from('report-certificates')
+    .upload(storagePath, pdfBuffer, { contentType: 'application/pdf', upsert: false });
+
+  if (uploadError) {
+    await supabaseAdmin.from('report_certificates').delete().eq('token', token);
+    throw new Error(`No se pudo guardar el certificado: ${uploadError.message}`);
+  }
+
+  return { pdfBuffer, certificate };
+}
+
+export async function getStoredReportCertificate(token: string) {
+  const supabaseAdmin = getSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
+    .from('report_certificates')
+    .select('storage_path, expires_at')
+    .eq('token', token)
+    .maybeSingle();
+
+  if (error) throw new Error(`No se pudo validar el certificado: ${error.message}`);
+  if (!data) return { status: 'not_found' as const };
+  if (new Date(data.expires_at).getTime() <= Date.now()) return { status: 'expired' as const };
+
+  const { data: file, error: downloadError } = await supabaseAdmin.storage
+    .from('report-certificates')
+    .download(data.storage_path);
+
+  if (downloadError || !file) {
+    throw new Error(`No se pudo recuperar el certificado: ${downloadError?.message || 'archivo no encontrado'}`);
+  }
+
+  return { status: 'ok' as const, pdf: Buffer.from(await file.arrayBuffer()) };
+}
+
+export async function purgeExpiredReportCertificates(): Promise<number> {
+  const supabaseAdmin = getSupabaseAdminClient();
+  const { data, error } = await supabaseAdmin
+    .from('report_certificates')
+    .select('id, storage_path')
+    .lte('expires_at', new Date().toISOString());
+
+  if (error) throw new Error(`No se pudieron listar certificados vencidos: ${error.message}`);
+  if (!data?.length) return 0;
+
+  await supabaseAdmin.storage.from('report-certificates').remove(data.map((row) => row.storage_path));
+  const { error: deleteError } = await supabaseAdmin
+    .from('report_certificates')
+    .delete()
+    .in('id', data.map((row) => row.id));
+
+  if (deleteError) throw new Error(`No se pudieron eliminar certificados vencidos: ${deleteError.message}`);
+  return data.length;
 }
 
 function normalizeFrequency(value: string | null | undefined): ReportFrequency {
@@ -671,7 +773,7 @@ function buildEmailHtml(report: ReportData): string {
   `;
 }
 
-async function buildReportPdf(report: ReportData): Promise<Buffer> {
+async function buildReportPdf(report: ReportData, certificate?: ReportCertificate): Promise<Buffer> {
   const companyLogo = await sourceToDataUri(buildSupabaseImageTransformUrl(report.company.logo_url, 280, 100));
   const { lineChart, statusDonut, topCoursesChart, scoreBands } = buildCharts(report);
   const [lineChartDataUri, statusDonutDataUri, topCoursesChartDataUri, scoreBandsDataUri] = await Promise.all([
@@ -687,17 +789,29 @@ async function buildReportPdf(report: ReportData): Promise<Buffer> {
 
   const drawFooter = () => {
     doc.setDrawColor(220, 227, 236);
-    doc.line(14, 282.4, 196, 282.4);
+    if (certificate) {
+      try {
+        doc.addImage(certificate.qrDataUrl, 'PNG', 14, 269, 13, 13);
+      } catch {
+        // Keep the report readable if QR rendering fails for an individual PDF.
+      }
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.2);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Certificado generado: ${certificate.generatedAt.toLocaleDateString('es-CL')}`, 31, 274.2);
+      doc.text(`Válido hasta: ${certificate.expiresAt.toLocaleDateString('es-CL')}`, 31, 278.2);
+    }
+    doc.line(14, 284.4, 196, 284.4);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10.5);
     doc.setTextColor(31, 41, 55);
-    doc.text('Metaverso', 14, 289.2);
+    doc.text('Metaverso', 14, 291.2);
     doc.setTextColor(49, 210, 45);
-    doc.text('Otec', 31.6, 289.2);
+    doc.text('Otec', 31.6, 291.2);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text('Informe corporativo de aprendizaje', pageW - 14, 289.6, { align: 'right' });
+    doc.text('Informe corporativo de aprendizaje', pageW - 14, 291.6, { align: 'right' });
   };
 
   doc.setFillColor(255, 255, 255);
@@ -868,7 +982,7 @@ async function buildReportPdf(report: ReportData): Promise<Buffer> {
 
     doc.setFont('helvetica', 'normal');
     report.studentSummary.forEach((row, index) => {
-      if (y > 279) {
+      if (y > 263) {
         drawFooter();
         doc.addPage();
         y = 20;
@@ -904,7 +1018,7 @@ async function buildReportPdf(report: ReportData): Promise<Buffer> {
   return Buffer.from(output);
 }
 
-async function sendMail(report: ReportData, testEmail?: string | null): Promise<void> {
+async function sendMail(report: ReportData, testEmail?: string | null, pdfBuffer?: Buffer | null): Promise<void> {
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = Number(process.env.SMTP_PORT || 587);
   const smtpUser = process.env.SMTP_USER;
@@ -935,10 +1049,10 @@ async function sendMail(report: ReportData, testEmail?: string | null): Promise<
     contentDisposition?: 'inline' | 'attachment';
   }>;
 
-  if (report.company.report_include_pdf_attachment) {
+  if (report.company.report_include_pdf_attachment && pdfBuffer) {
     attachments.push({
       filename: `informe-${report.company.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`,
-      content: await buildReportPdf(report),
+      content: pdfBuffer,
       contentType: 'application/pdf',
       contentDisposition: 'attachment'
     });
@@ -992,7 +1106,10 @@ export async function sendCompanyProgressReport(companyId: string, options: Send
     return { sent: false, reason: 'company_not_found' as const };
   }
 
-  await sendMail(report, testEmail);
+  const certificatePdf = report.company.report_include_pdf_attachment
+    ? await createReportCertificate(report)
+    : null;
+  await sendMail(report, testEmail, certificatePdf?.pdfBuffer || null);
 
   if (!testEmail) {
     await markAsSent(company.id);
@@ -1019,7 +1136,7 @@ export async function getCompanyProgressReportPdfPreview(companyId: string, over
     return null;
   }
 
-  const pdfBuffer = await buildReportPdf(report);
+  const { pdfBuffer } = await createReportCertificate(report);
   return {
     report,
     pdfBuffer
@@ -1044,6 +1161,8 @@ export async function getCompanyProgressReportData(companyId: string, overrides:
 export async function dispatchCompanyProgressReports(options: DispatchOptions = {}) {
   const supabaseAdmin = getSupabaseAdminClient();
   const force = options.force === true;
+
+  await purgeExpiredReportCertificates();
 
   let query = supabaseAdmin
     .from('companies')

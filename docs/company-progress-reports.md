@@ -20,6 +20,7 @@ Tambien deben existir las variables de Supabase ya utilizadas por la app:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_APP_URL` (opcional, pero recomendado; por ejemplo `https://metaverso-pi.vercel.app`, para que los QR usen el dominio oficial)
 
 ## Endpoints
 
@@ -78,4 +79,12 @@ En `Admin Maestro > Editar Empresa` ahora existen opciones para:
 
 - El cuerpo del correo es una carta simple (sin graficos ni tablas) con el texto institucional fijo, el nombre de la empresa, los insights y recomendaciones (mismas reglas que el panel "Insights y Recomendaciones" del dashboard, replicadas textualmente en el servidor) y la fecha de envio.
 - El PDF adjunto conserva el detalle completo (KPIs, graficos, tabla de cursos y listado de alumnos) y ahora ubica el logo de la empresa en la esquina superior derecha.
+
+## Validacion y vigencia del PDF
+
+Cada PDF de informe generado registra un token unico en `report_certificates` y se guarda en el bucket privado `report-certificates`. El pie del documento incluye un QR, la fecha de generacion y la fecha de vencimiento, siete dias despues.
+
+El QR abre `/api/reports/company-progress/certificate/<token>` y devuelve el mismo PDF almacenado. Una vez vencido, la ruta responde `410` y el dispatcher diario elimina el registro y el archivo del bucket.
+
+Antes del primer envio o descarga posterior a este cambio, aplica `migrations/059_add_report_certificate_storage.sql` en Supabase. La migracion crea la tabla, activa RLS sin exponer los archivos y crea el bucket privado; las operaciones de escritura y lectura se realizan exclusivamente con la clave service role en el servidor.
 
