@@ -581,7 +581,6 @@ export default function MetaversoAdmin() {
             secondary_color: data.secondary_color,
             report_auto_enabled: data.report_auto_enabled === true,
             report_frequency: ['daily', 'weekly', 'biweekly', 'monthly'].includes(data.report_frequency) ? data.report_frequency : 'weekly',
-            report_send_time: /^([01]\d|2[0-3]):[0-5]\d$/.test(String(data.report_send_time || '')) ? data.report_send_time : '10:00',
             report_include_dashboard_body: data.report_include_dashboard_body !== false,
             report_include_pdf_attachment: data.report_include_pdf_attachment !== false,
             report_copy_emails: data.report_copy_emails_enabled ? ((data.report_copy_emails || '').trim() || null) : null,
@@ -878,7 +877,7 @@ export default function MetaversoAdmin() {
 
                     <div className="flex gap-4">
                         <button
-                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "", report_auto_enabled: false, report_frequency: 'weekly', report_send_time: '10:00', report_include_dashboard_body: true, report_include_pdf_attachment: true, report_copy_emails: '', report_copy_emails_enabled: false, cert_capacitaciones_enabled: false })}
+                            onClick={() => setEditingCompany({ name: "", tax_id: null, branch_zone: "", is_active: true, total_quotas: 0, primary_color: "#AEFF00", secondary_color: "#000000", logo_url: "", logo_url_dark: "", logo_url_light: "", report_auto_enabled: false, report_frequency: 'weekly', report_include_dashboard_body: true, report_include_pdf_attachment: true, report_copy_emails: '', report_copy_emails_enabled: false, cert_capacitaciones_enabled: false })}
                             className="bg-brand text-black px-8 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/20 flex items-center gap-2"
                         >
                             <Plus className="w-4 h-4" /> Registrar Nueva Empresa
@@ -1493,17 +1492,11 @@ export default function MetaversoAdmin() {
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase text-white/40 pl-1">Horario de envío (Chile)</label>
-                                    <select
-                                        value={editingCompany.report_send_time || '10:00'}
-                                        onChange={(e) => setEditingCompany({ ...editingCompany, report_send_time: e.target.value })}
-                                        className="w-full bg-slate-900 text-white border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none"
-                                    >
-                                        {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((time) => (
-                                            <option key={time} value={time} className="bg-slate-900 text-white">{time} hrs.</option>
-                                        ))}
-                                    </select>
-                                    <p className="text-[10px] text-white/35 pl-1">Hora local de Chile.</p>
+                                    <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/5 px-4 py-3">
+                                        <div className="text-[10px] font-black uppercase text-cyan-200/80">Horario global de envío</div>
+                                        <div className="mt-1 text-sm font-semibold text-white">Todos los días a las 09:00 hrs. (Chile)</div>
+                                        <p className="mt-1 text-[10px] text-white/35">Aplica a todas las empresas.</p>
+                                    </div>
                                 </div>
                                 <div className="space-y-2 col-span-2 bg-white/5 border border-white/10 rounded-xl p-4">
                                     <label className="text-[10px] font-black uppercase text-white/40 pl-1">Formato del Informe</label>

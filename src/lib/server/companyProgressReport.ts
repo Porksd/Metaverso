@@ -21,7 +21,6 @@ type CompanyReportConfig = {
   secondary_color?: string | null;
   report_auto_enabled: boolean;
   report_frequency: ReportFrequency;
-  report_send_time?: string | null;
   report_include_dashboard_body: boolean;
   report_include_pdf_attachment: boolean;
   report_copy_emails?: string | null;
@@ -278,7 +277,7 @@ function shouldSendNow(company: CompanyReportConfig, now: Date, force: boolean):
   if (force) return true;
   if (!company.report_auto_enabled) return false;
 
-  const configuredTime = company.report_send_time || '10:00:00';
+  const configuredTime = '09:00';
   const chileTime = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'America/Santiago',
     hour: '2-digit',

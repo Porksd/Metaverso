@@ -64,7 +64,7 @@ GET /api/reports/company-progress/dispatch
 
 La fecha `report_last_sent_at` se actualiza solo despues de que SMTP confirma el envio. Por eso un error SMTP queda como `sent: false` y no bloquea silenciosamente los siguientes intentos.
 
-Cada empresa puede seleccionar una hora de envio en horario local de Chile. En Vercel Hobby, el Cron diario funciona como ejecucion minima; para respetar horarios distintos por empresa con precision se debe usar un scheduler externo que llame la ruta cada hora, o actualizar a Vercel Pro.
+El horario de envio es global: todos los informes se procesan a las 09:00 hora de Chile. En Vercel Hobby, el Cron diario esta configurado a las 12:00 UTC, equivalente a las 09:00 durante el horario de verano chileno. Vercel Cron trabaja en UTC y no ajusta automaticamente el cambio estacional; si se necesita mantener exactamente las 09:00 durante todo el ano, se debe ajustar el cron al cambiar la temporada o usar un scheduler con zona `America/Santiago`.
 
 ## Configuracion en panel
 
