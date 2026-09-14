@@ -6,6 +6,7 @@ import { sendCompanyProgressReport } from '@/lib/server/companyProgressReport';
 type BodyPayload = {
   companyId?: string;
   force?: boolean;
+  overwriteCertificateToken?: string | null;
   overrides?: {
     includeStudents?: boolean;
     includePdfAttachment?: boolean;
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
 
     const result = await sendCompanyProgressReport(companyId, {
       force,
+      overwriteCertificateToken: typeof body.overwriteCertificateToken === 'string' ? body.overwriteCertificateToken : null,
       overrides: {
         includeStudents: typeof overrides.includeStudents === 'boolean' ? overrides.includeStudents : undefined,
         includePdfAttachment: typeof overrides.includePdfAttachment === 'boolean' ? overrides.includePdfAttachment : undefined,

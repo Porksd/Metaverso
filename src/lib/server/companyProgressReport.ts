@@ -21,6 +21,7 @@ type CompanyReportConfig = {
   secondary_color?: string | null;
   report_auto_enabled: boolean;
   report_frequency: ReportFrequency;
+  report_send_time?: string | null;
   report_include_dashboard_body: boolean;
   report_include_pdf_attachment: boolean;
   report_copy_emails?: string | null;
@@ -95,6 +96,7 @@ type ReportData = {
 type SendSingleOptions = {
   force?: boolean;
   overrides?: ReportOverrides;
+  overwriteCertificateToken?: string | null;
 };
 
 type DispatchOptions = {
@@ -116,6 +118,14 @@ type ReportCertificate = {
   verificationUrl: string;
   qrDataUrl: string;
 };
+
+type CertificateLimitResult = {
+  status: 'limit_reached';
+  oldest: { token: string; generatedAt: string };
+};
+
+const REPORT_CERTIFICATE_LIMIT = 10;
+const REPORT_CERTIFICATE_VALIDITY_DAYS = 30;
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -142,11 +152,38 @@ function getApplicationBaseUrl(): string {
   return 'https://metaverso-pi.vercel.app';
 }
 
-async function createReportCertificate(report: ReportData): Promise<{ pdfBuffer: Buffer; certificate: ReportCertificate }> {
+async function createReportCertificate(
+  report: ReportData,
+  overwriteCertificateToken?: string | null,
+  allowAutomaticOverwrite = false
+): Promise<{ pdfBuffer: Buffer; certificate: ReportCertificate } | CertificateLimitResult> {
   const supabaseAdmin = getSupabaseAdminClient();
+  const now = new Date();
+  const { data: activeCertificates, error: activeError } = await supabaseAdmin
+    .from('report_certificates')
+    .select('token, generated_at, storage_path')
+    .eq('company_id', report.company.id)
+    .gt('expires_at', now.toISOString())
+    .order('generated_at', { ascending: true });
+
+  if (activeError) throw new Error(`No se pudieron revisar los certificados activos: ${activeError.message}`);
+  const oldest = activeCertificates?.[0];
+  const selectedOverwriteToken = overwriteCertificateToken || (allowAutomaticOverwrite && oldest?.token) || null;
+
+  if ((activeCertificates?.length || 0) >= REPORT_CERTIFICATE_LIMIT && !selectedOverwriteToken && oldest) {
+    return {
+      status: 'limit_reached',
+      oldest: { token: oldest.token, generatedAt: oldest.generated_at },
+    };
+  }
+
+  if (selectedOverwriteToken && !activeCertificates?.some((certificate) => certificate.token === selectedOverwriteToken)) {
+    throw new Error('El informe seleccionado para sobreescribir ya no está activo.');
+  }
+
   const token = randomBytes(32).toString('hex');
   const generatedAt = new Date(report.generatedAt);
-  const expiresAt = new Date(generatedAt.getTime() + 7 * ONE_DAY_MS);
+  const expiresAt = new Date(generatedAt.getTime() + REPORT_CERTIFICATE_VALIDITY_DAYS * ONE_DAY_MS);
   const storagePath = `${report.company.id}/${token}.pdf`;
   const verificationUrl = `${getApplicationBaseUrl()}/api/reports/company-progress/certificate/${token}`;
   const qrDataUrl = await QRCode.toDataURL(verificationUrl, {
@@ -176,6 +213,14 @@ async function createReportCertificate(report: ReportData): Promise<{ pdfBuffer:
   if (uploadError) {
     await supabaseAdmin.from('report_certificates').delete().eq('token', token);
     throw new Error(`No se pudo guardar el certificado: ${uploadError.message}`);
+  }
+
+  if (selectedOverwriteToken) {
+    const previous = activeCertificates?.find((certificate) => certificate.token === selectedOverwriteToken);
+    if (previous) {
+      await supabaseAdmin.storage.from('report-certificates').remove([previous.storage_path]);
+      await supabaseAdmin.from('report_certificates').delete().eq('token', selectedOverwriteToken);
+    }
   }
 
   return { pdfBuffer, certificate };
@@ -232,6 +277,15 @@ function normalizeFrequency(value: string | null | undefined): ReportFrequency {
 function shouldSendNow(company: CompanyReportConfig, now: Date, force: boolean): boolean {
   if (force) return true;
   if (!company.report_auto_enabled) return false;
+
+  const configuredTime = company.report_send_time || '10:00:00';
+  const chileTime = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Santiago',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(now);
+  if (chileTime < configuredTime.slice(0, 5)) return false;
 
   if (!company.report_last_sent_at) return true;
 
@@ -1107,9 +1161,16 @@ export async function sendCompanyProgressReport(companyId: string, options: Send
   }
 
   const certificatePdf = report.company.report_include_pdf_attachment
-    ? await createReportCertificate(report)
+    ? await createReportCertificate(report, options.overwriteCertificateToken, force === false)
     : null;
-  await sendMail(report, testEmail, certificatePdf?.pdfBuffer || null);
+  if (certificatePdf && 'status' in certificatePdf && certificatePdf.status === 'limit_reached') {
+    return {
+      sent: false as const,
+      reason: 'certificate_limit_reached' as const,
+      oldestCertificate: certificatePdf.oldest,
+    };
+  }
+  await sendMail(report, testEmail, certificatePdf && 'pdfBuffer' in certificatePdf ? certificatePdf.pdfBuffer : null);
 
   if (!testEmail) {
     await markAsSent(company.id);
@@ -1136,7 +1197,14 @@ export async function getCompanyProgressReportPdfPreview(companyId: string, over
     return null;
   }
 
-  const { pdfBuffer } = await createReportCertificate(report);
+  const result = await createReportCertificate(report, null, true);
+  if ('status' in result && result.status === 'limit_reached') {
+    throw new Error('Se alcanzó el límite de certificados activos.');
+  }
+  if (!('pdfBuffer' in result)) {
+    throw new Error('No se pudo generar el PDF del informe.');
+  }
+  const { pdfBuffer } = result;
   return {
     report,
     pdfBuffer

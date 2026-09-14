@@ -13,6 +13,6 @@ CREATE INDEX IF NOT EXISTS report_certificates_expires_at_idx
 
 ALTER TABLE public.report_certificates ENABLE ROW LEVEL SECURITY;
 
-INSERT INTO storage.buckets (id, name, public)
+INSERT INTO storage.buckets (id, name, "public")
 VALUES ('report-certificates', 'report-certificates', false)
 ON CONFLICT (id) DO NOTHING;
