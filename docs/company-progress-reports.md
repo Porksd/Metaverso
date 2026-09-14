@@ -42,12 +42,26 @@ El scheduler ya esta configurado en `vercel.json` (crons de Vercel), una vez al 
 
 Antes de esto **no existia ningun cron para `/api/reports/company-progress/dispatch`**, por lo que el despacho automatico nunca se ejecutaba (solo los envios manuales desde el panel funcionaban). Si usas un scheduler externo en su lugar (cron del hosting, GitHub Actions, EasyCron, etc.), la frecuencia recomendada tambien es cada 24 horas.
 
-La logica interna decide si corresponde enviar segun configuracion de cada empresa:
+La logica interna decide si corresponde enviar segun configuracion de cada empresa. Las opciones visibles en el panel son:
 
-- Diario
-- Semanal
-- Cada 15 dias
-- Mensual
+- Todos los días (cada 1 día)
+- Cada 7 días
+- Cada 15 días
+- Cada 30 días
+
+## Validacion de envios posteriores
+
+El despacho automatico se ejecuta una vez al dia mediante Vercel Cron. La ruta debe responder con `200` cuando Vercel la invoca con `Authorization: Bearer <CRON_SECRET>`.
+
+Una consulta sin credenciales debe responder `401`; esto confirma que la ruta esta protegida, pero no valida un envio. Para que los envios posteriores funcionen, `CRON_SECRET` debe estar configurado en Vercel para el entorno Production y debe existir un nuevo deployment despues de guardarlo. En los logs de Vercel, cada ejecucion debe mostrar `sent` para empresas cuyo intervalo ya vencio, o `not_due` cuando aun no corresponde enviar.
+
+El endpoint de diagnostico es:
+
+```text
+GET /api/reports/company-progress/dispatch
+```
+
+La fecha `report_last_sent_at` se actualiza solo despues de que SMTP confirma el envio. Por eso un error SMTP queda como `sent: false` y no bloquea silenciosamente los siguientes intentos.
 
 ## Configuracion en panel
 
