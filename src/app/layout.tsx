@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PwaRegistration from "@/components/PwaRegistration";
+import PwaInstallButton from "@/components/PwaInstallButton";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <body className="antialiased text-white">
         <PwaRegistration />
+        <PwaInstallButton />
         {children}
       </body>
     </html>
