@@ -842,29 +842,17 @@ async function buildReportPdf(report: ReportData, certificate?: ReportCertificat
 
   const drawFooter = () => {
     doc.setDrawColor(220, 227, 236);
-    if (certificate) {
-      try {
-        doc.addImage(certificate.qrDataUrl, 'PNG', 14, 269, 13, 13);
-      } catch {
-        // Keep the report readable if QR rendering fails for an individual PDF.
-      }
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.2);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`Certificado generado: ${certificate.generatedAt.toLocaleDateString('es-CL')}`, 31, 274.2);
-      doc.text(`Válido hasta: ${certificate.expiresAt.toLocaleDateString('es-CL')}`, 31, 278.2);
-    }
-    doc.line(14, 284.4, 196, 284.4);
+    doc.line(14, 282.4, 196, 282.4);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10.5);
     doc.setTextColor(31, 41, 55);
-    doc.text('Metaverso', 14, 291.2);
+    doc.text('Metaverso', 14, 289.2);
     doc.setTextColor(49, 210, 45);
-    doc.text('Otec', 31.6, 291.2);
+    doc.text('Otec', 31.6, 289.2);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
-    doc.text('Informe corporativo de aprendizaje', pageW - 14, 291.6, { align: 'right' });
+    doc.text('Informe corporativo de aprendizaje', pageW - 14, 289.6, { align: 'right' });
   };
 
   doc.setFillColor(255, 255, 255);
@@ -1035,7 +1023,7 @@ async function buildReportPdf(report: ReportData, certificate?: ReportCertificat
 
     doc.setFont('helvetica', 'normal');
     report.studentSummary.forEach((row, index) => {
-      if (y > 263) {
+      if (y > 279) {
         drawFooter();
         doc.addPage();
         y = 20;
@@ -1159,17 +1147,8 @@ export async function sendCompanyProgressReport(companyId: string, options: Send
     return { sent: false, reason: 'company_not_found' as const };
   }
 
-  const certificatePdf = report.company.report_include_pdf_attachment
-    ? await createReportCertificate(report, options.overwriteCertificateToken, force === false)
-    : null;
-  if (certificatePdf && 'status' in certificatePdf && certificatePdf.status === 'limit_reached') {
-    return {
-      sent: false as const,
-      reason: 'certificate_limit_reached' as const,
-      oldestCertificate: certificatePdf.oldest,
-    };
-  }
-  await sendMail(report, testEmail, certificatePdf && 'pdfBuffer' in certificatePdf ? certificatePdf.pdfBuffer : null);
+  const reportPdf = report.company.report_include_pdf_attachment ? await buildReportPdf(report) : null;
+  await sendMail(report, testEmail, reportPdf);
 
   if (!testEmail) {
     await markAsSent(company.id);
@@ -1196,14 +1175,7 @@ export async function getCompanyProgressReportPdfPreview(companyId: string, over
     return null;
   }
 
-  const result = await createReportCertificate(report, null, true);
-  if ('status' in result && result.status === 'limit_reached') {
-    throw new Error('Se alcanzó el límite de certificados activos.');
-  }
-  if (!('pdfBuffer' in result)) {
-    throw new Error('No se pudo generar el PDF del informe.');
-  }
-  const { pdfBuffer } = result;
+  const pdfBuffer = await buildReportPdf(report);
   return {
     report,
     pdfBuffer

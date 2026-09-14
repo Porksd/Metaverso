@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/lib/supabase";
+import QRCode from "qrcode";
 
 interface CorporateTrainingCertInput {
   companyId: string;
@@ -103,6 +104,10 @@ function formatDateShortEs(value?: string | null) {
   return d.toLocaleDateString("es-CL");
 }
 
+function formatDateShortFromIso(value: string) {
+  return formatDateShortEs(value);
+}
+
 function drawBackground(
   pdf: jsPDF,
   bg: { data: string; type: "JPEG" | "PNG" } | null
@@ -163,6 +168,38 @@ export async function generateCorporateTrainingCert(
   const issueDate = input.issueDate || new Date();
   const issueDateLabel = `Santiago, ${formatDateLongEs(issueDate)}`;
   const issueYear = issueDate.getFullYear();
+
+  let overwriteToken: string | null = null;
+  let certificateResponse = await fetch("/api/certificates/corporate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ companyId: input.companyId }),
+  });
+  const certificatePayload = await certificateResponse.json();
+  if (certificateResponse.status === 409 && certificatePayload?.reason === "certificate_limit_reached") {
+    const oldestDate = certificatePayload.oldestCertificate?.generatedAt
+      ? new Date(certificatePayload.oldestCertificate.generatedAt).toLocaleString("es-CL")
+      : "la fecha más antigua";
+    if (!window.confirm(`Se alcanzó el límite máximo de 10 certificados activos.\n\n¿Desea sobreescribir el certificado generado el ${oldestDate}?`)) {
+      return { courseCount: 0, studentCount: 0 };
+    }
+    overwriteToken = certificatePayload.oldestCertificate.token;
+    certificateResponse = await fetch("/api/certificates/corporate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ companyId: input.companyId, overwriteToken }),
+    });
+  }
+  const refreshedPayload = certificateResponse === undefined ? certificatePayload : await certificateResponse.json().catch(() => certificatePayload);
+  const effectiveCertificatePayload = overwriteToken ? refreshedPayload : certificatePayload;
+  if (!certificateResponse.ok) {
+    throw new Error(effectiveCertificatePayload?.error || "No se pudo preparar la validación del certificado.");
+  }
+  const qrDataUrl = await QRCode.toDataURL(effectiveCertificatePayload.verificationUrl, {
+    errorCorrectionLevel: "M",
+    margin: 1,
+    width: 256,
+  });
 
   const [coverBg, innerBg, signatureImg] = await Promise.all([
     urlToBase64(BG_COVER),
@@ -438,6 +475,33 @@ export async function generateCorporateTrainingCert(
         );
       }
     });
+  }
+
+  const lastPage = pdf.getNumberOfPages();
+  pdf.setPage(lastPage);
+  try {
+    pdf.addImage(qrDataUrl, "PNG", 174, 259, 18, 18);
+  } catch {
+    throw new Error("No se pudo incorporar el código QR al certificado.");
+  }
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(6.2);
+  pdf.setTextColor(70, 70, 70);
+  pdf.text(`Certificado generado: ${formatDateShortFromIso(effectiveCertificatePayload.generatedAt)}`, 169, 265, { align: "right" });
+  pdf.text(`Válido hasta: ${formatDateShortFromIso(effectiveCertificatePayload.expiresAt)}`, 169, 270, { align: "right" });
+
+  const pdfBlob = pdf.output("blob");
+  const uploadForm = new FormData();
+  uploadForm.append("token", effectiveCertificatePayload.token);
+  if (effectiveCertificatePayload.overwriteToken) uploadForm.append("overwriteToken", effectiveCertificatePayload.overwriteToken);
+  uploadForm.append("file", pdfBlob, "certificado-capacitaciones.pdf");
+  const uploadResponse = await fetch("/api/certificates/corporate", {
+    method: "POST",
+    body: uploadForm,
+  });
+  if (!uploadResponse.ok) {
+    const uploadPayload = await uploadResponse.json().catch(() => null);
+    throw new Error(uploadPayload?.error || "No se pudo guardar el certificado para validación.");
   }
 
   const safeCompany = sanitizeFilenamePart(input.companyName || "Empresa");
