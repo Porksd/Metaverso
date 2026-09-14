@@ -1460,10 +1460,10 @@ export default function MetaversoAdmin() {
                                         onChange={(e) => setEditingCompany({ ...editingCompany, report_frequency: e.target.value })}
                                         className="w-full bg-slate-900 text-white border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-brand/40 outline-none"
                                     >
-                                        <option value="daily" className="bg-slate-900 text-white">Una vez al dia</option>
-                                        <option value="weekly" className="bg-slate-900 text-white">Una vez a la semana</option>
-                                        <option value="biweekly" className="bg-slate-900 text-white">Cada 15 dias</option>
-                                        <option value="monthly" className="bg-slate-900 text-white">Una vez al mes</option>
+                                        <option value="daily" className="bg-slate-900 text-white">Todos los días</option>
+                                        <option value="weekly" className="bg-slate-900 text-white">Cada 7 días</option>
+                                        <option value="biweekly" className="bg-slate-900 text-white">Cada 15 días</option>
+                                        <option value="monthly" className="bg-slate-900 text-white">Cada 30 días</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2 col-span-2 bg-white/5 border border-white/10 rounded-xl p-4">
