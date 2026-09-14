@@ -52,7 +52,7 @@ La logica interna decide si corresponde enviar segun configuracion de cada empre
 
 ## Validacion de envios posteriores
 
-El despacho automatico se ejecuta cada hora mediante Vercel Cron. La ruta debe responder con `200` cuando Vercel la invoca con `Authorization: Bearer <CRON_SECRET>`.
+El despacho automatico se ejecuta una vez al dia mediante Vercel Cron en el plan Hobby. La ruta debe responder con `200` cuando Vercel la invoca con `Authorization: Bearer <CRON_SECRET>`.
 
 Una consulta sin credenciales debe responder `401`; esto confirma que la ruta esta protegida, pero no valida un envio. Para que los envios posteriores funcionen, `CRON_SECRET` debe estar configurado en Vercel para el entorno Production y debe existir un nuevo deployment despues de guardarlo. En los logs de Vercel, cada ejecucion debe mostrar `sent` para empresas cuyo intervalo ya vencio, o `not_due` cuando aun no corresponde enviar.
 
@@ -64,7 +64,7 @@ GET /api/reports/company-progress/dispatch
 
 La fecha `report_last_sent_at` se actualiza solo despues de que SMTP confirma el envio. Por eso un error SMTP queda como `sent: false` y no bloquea silenciosamente los siguientes intentos.
 
-Cada empresa puede seleccionar una hora de envio en horario local de Chile. El dispatcher se ejecuta cada hora y compara esa hora con `America/Santiago`; asi cada empresa conserva su propio horario. La ejecucion horaria puede depender del plan de Vercel: si el plan no permite esta frecuencia, el deployment rechazara el cron y se debera usar un scheduler externo o actualizar el plan.
+Cada empresa puede seleccionar una hora de envio en horario local de Chile. En Vercel Hobby, el Cron diario funciona como ejecucion minima; para respetar horarios distintos por empresa con precision se debe usar un scheduler externo que llame la ruta cada hora, o actualizar a Vercel Pro.
 
 ## Configuracion en panel
 
