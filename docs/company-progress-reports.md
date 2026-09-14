@@ -64,6 +64,8 @@ GET /api/reports/company-progress/dispatch
 
 La fecha `report_last_sent_at` se actualiza solo despues de que SMTP confirma el envio. Por eso un error SMTP queda como `sent: false` y no bloquea silenciosamente los siguientes intentos.
 
+Cada empresa puede seleccionar una hora de envio en horario local de Chile. El dispatcher mantiene una ejecucion diaria; para respetar cualquier hora seleccionada con precision se requiere un scheduler horario (por ejemplo, Vercel Cron con ejecucion cada hora o un scheduler externo). En Vercel Hobby la frecuencia de Cron puede estar limitada a una ejecucion diaria.
+
 ## Configuracion en panel
 
 En `Admin Maestro > Editar Empresa` ahora existen opciones para:
@@ -82,7 +84,9 @@ En `Admin Maestro > Editar Empresa` ahora existen opciones para:
 
 ## Validacion y vigencia del PDF
 
-Cada PDF de informe generado registra un token unico en `report_certificates` y se guarda en el bucket privado `report-certificates`. El pie del documento incluye un QR, la fecha de generacion y la fecha de vencimiento, siete dias despues.
+Cada PDF de informe generado registra un token unico en `report_certificates` y se guarda en el bucket privado `report-certificates`. El pie del documento incluye un QR, la fecha de generacion y la fecha de vencimiento, treinta dias despues.
+
+Se conservan como maximo 10 certificados activos por empresa. Al generar manualmente un informe adicional, el panel solicita confirmacion para reemplazar el mas antiguo. Los envios automaticos reemplazan el mas antiguo de forma controlada para no detener la periodicidad por falta de interaccion humana.
 
 El QR abre `/api/reports/company-progress/certificate/<token>` y devuelve el mismo PDF almacenado. Una vez vencido, la ruta responde `410` y el dispatcher diario elimina el registro y el archivo del bucket.
 
