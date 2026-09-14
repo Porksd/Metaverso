@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/reports/company-progress/dispatch",
-      "schedule": "0 13 * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
