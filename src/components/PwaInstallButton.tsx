@@ -1,6 +1,6 @@
 "use client";
 
-import { AppWindow } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -11,19 +11,20 @@ type InstallPromptEvent = Event & {
 
 type InstallAction = "install" | "open";
 
+const getIsStandalone = () =>
+  typeof window !== "undefined" &&
+  (window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true);
+
 export default function PwaInstallButton() {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [installAction, setInstallAction] = useState<InstallAction>("install");
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled] = useState(getIsStandalone);
+  const [canRenderButton, setCanRenderButton] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-    setIsInstalled(isStandalone);
-    if (isStandalone) return;
+    if (getIsStandalone()) return;
 
     let nativePromptAvailable = false;
     const userAgent = navigator.userAgent.toLowerCase();
@@ -34,21 +35,26 @@ export default function PwaInstallButton() {
       nativePromptAvailable = true;
       setInstallPrompt(event as InstallPromptEvent);
       setInstallAction("install");
+      setCanRenderButton(true);
     };
 
     const handleAppInstalled = () => {
       window.localStorage.setItem("metaverso-pwa-installed", "true");
       setInstallPrompt(null);
       setInstallAction("open");
+      setCanRenderButton(true);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     const fallbackTimer = window.setTimeout(() => {
-      if (!nativePromptAvailable && !isIos) {
+      if (nativePromptAvailable || isIos) return;
+
+      if (window.localStorage.getItem("metaverso-pwa-installed") === "true") {
         const wasInstalled = window.localStorage.getItem("metaverso-pwa-installed") === "true";
         setInstallAction(wasInstalled ? "open" : "install");
+        setCanRenderButton(true);
       }
     }, 1200);
 
@@ -59,7 +65,7 @@ export default function PwaInstallButton() {
     };
   }, []);
 
-  if (isInstalled) return null;
+  if (isInstalled || !canRenderButton) return null;
 
   const isStudentDashboard = pathname === "/admin/empresa/alumnos/cursos";
   const buttonText = installAction === "open" ? "Abrir en la app" : "Instalar app";
@@ -94,7 +100,9 @@ export default function PwaInstallButton() {
       }
       aria-label={`${buttonText} Metaverso Otec`}
     >
-      <AppWindow className="h-4 w-4" />
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white p-1">
+        <Image src="/icons/app_16529957.svg" alt="" width={12} height={12} aria-hidden="true" />
+      </span>
       {buttonText}
     </button>
   );
