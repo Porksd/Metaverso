@@ -26,13 +26,18 @@ export default function PwaInstallButton() {
   useEffect(() => {
     if (getIsStandalone()) return;
 
-    let nativePromptAvailable = false;
     const userAgent = navigator.userAgent.toLowerCase();
     const isIos = /iphone|ipad|ipod/.test(userAgent);
+    const initialStateTimer = window.setTimeout(() => {
+      setCanRenderButton(!isIos);
+
+      if (window.localStorage.getItem("metaverso-pwa-installed") === "true") {
+        setInstallAction("open");
+      }
+    }, 0);
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
-      nativePromptAvailable = true;
       setInstallPrompt(event as InstallPromptEvent);
       setInstallAction("install");
       setCanRenderButton(true);
@@ -48,18 +53,8 @@ export default function PwaInstallButton() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    const fallbackTimer = window.setTimeout(() => {
-      if (nativePromptAvailable || isIos) return;
-
-      if (window.localStorage.getItem("metaverso-pwa-installed") === "true") {
-        const wasInstalled = window.localStorage.getItem("metaverso-pwa-installed") === "true";
-        setInstallAction(wasInstalled ? "open" : "install");
-        setCanRenderButton(true);
-      }
-    }, 1200);
-
     return () => {
-      window.clearTimeout(fallbackTimer);
+      window.clearTimeout(initialStateTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -77,6 +72,8 @@ export default function PwaInstallButton() {
     }
 
     if (!installPrompt) {
+      window.localStorage.removeItem("metaverso-pwa-installed");
+      setInstallAction("install");
       return;
     }
 
