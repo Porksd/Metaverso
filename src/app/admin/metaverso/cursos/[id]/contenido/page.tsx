@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { adminApiFetch } from "@/lib/adminApiFetch";
 import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Plus, Trash2, GripVertical,
@@ -255,7 +256,7 @@ export default function DynamicCourseEditor() {
         if (evalModule) {
             newOrderIndex = evalModule.order_index;
             // Update eval in DB to shift
-            await fetch('/api/admin/content', {
+            await adminApiFetch('/api/admin/content', {
                 method: 'PUT',
                 body: JSON.stringify({ table: 'course_modules', id: evalModule.id, data: { order_index: newOrderIndex + 1 } })
             });
@@ -268,7 +269,7 @@ export default function DynamicCourseEditor() {
             order_index: newOrderIndex
         };
 
-        const res = await fetch('/api/admin/content', {
+        const res = await adminApiFetch('/api/admin/content', {
             method: 'POST',
             body: JSON.stringify({ table: 'course_modules', data: newModule })
         });
@@ -308,7 +309,7 @@ export default function DynamicCourseEditor() {
                 }
             };
             
-            const moduleRes = await fetch('/api/admin/content', {
+            const moduleRes = await adminApiFetch('/api/admin/content', {
                 method: 'POST',
                 body: JSON.stringify({ table: 'course_modules', data: evalModulePayload })
             });
@@ -357,7 +358,7 @@ export default function DynamicCourseEditor() {
             ];
             
             // Insertar items en bulk
-            const itemsRes = await fetch('/api/admin/content', {
+            const itemsRes = await adminApiFetch('/api/admin/content', {
                 method: 'POST',
                 body: JSON.stringify({ table: 'module_items', data: items })
             });
@@ -385,7 +386,7 @@ export default function DynamicCourseEditor() {
         setLoading(true);
 
         // 1. Create Module Copy via Admin API
-        const modRes = await fetch('/api/admin/content', {
+        const modRes = await adminApiFetch('/api/admin/content', {
             method: 'POST',
             body: JSON.stringify({
                 table: 'course_modules',
@@ -413,7 +414,7 @@ export default function DynamicCourseEditor() {
 
             if (itemsToInsert.length > 0) {
                 // Bulk insert via Admin API
-                await fetch('/api/admin/content', {
+                await adminApiFetch('/api/admin/content', {
                     method: 'POST',
                     body: JSON.stringify({ table: 'module_items', data: itemsToInsert })
                 });
@@ -456,7 +457,7 @@ export default function DynamicCourseEditor() {
         // Save
         setLoading(true);
         for (const m of finalModules) {
-            await fetch('/api/admin/content', {
+            await adminApiFetch('/api/admin/content', {
                 method: 'PUT',
                 body: JSON.stringify({ table: 'course_modules', id: m.id, data: { order_index: m.order_index } })
             });
@@ -468,7 +469,7 @@ export default function DynamicCourseEditor() {
         if (!confirm("¿Eliminar este slide y todo su contenido?")) return;
 
         if (moduleId) {
-            await fetch('/api/admin/content', {
+            await adminApiFetch('/api/admin/content', {
                 method: 'DELETE',
                 body: JSON.stringify({ table: 'course_modules', id: moduleId })
             });
@@ -515,7 +516,7 @@ export default function DynamicCourseEditor() {
         };
 
         // Call our Admin DB API to bypass RLS safely
-        const res = await fetch('/api/admin/content', {
+        const res = await adminApiFetch('/api/admin/content', {
             method: 'POST',
             body: JSON.stringify({ table: 'module_items', data: newItemPayload })
         });
@@ -552,7 +553,7 @@ export default function DynamicCourseEditor() {
             order_index: module.items.length
         };
 
-        const res = await fetch('/api/admin/content', {
+        const res = await adminApiFetch('/api/admin/content', {
             method: 'POST',
             body: JSON.stringify({ table: 'module_items', data: newItemPayload })
         });
@@ -582,7 +583,7 @@ export default function DynamicCourseEditor() {
 
     const handleDeleteItem = async (itemId: string, moduleIdx: number, itemIdx: number) => {
         if (itemId) {
-            await fetch('/api/admin/content', {
+            await adminApiFetch('/api/admin/content', {
                 method: 'DELETE',
                 body: JSON.stringify({ table: 'module_items', id: itemId })
             });
@@ -594,7 +595,7 @@ export default function DynamicCourseEditor() {
         if (!tempCourseData.name) return alert("El nombre es obligatorio");
 
         // 1. Update Course Name via Admin API
-        const res = await fetch('/api/admin/content', {
+        const res = await adminApiFetch('/api/admin/content', {
             method: 'PUT',
             body: JSON.stringify({ table: 'courses', id: courseId, data: { name: tempCourseData.name } })
         });
@@ -654,7 +655,7 @@ export default function DynamicCourseEditor() {
         for (const mod of modules) {
             // Update Module Title/Settings
             if (mod.id) {
-                await fetch('/api/admin/content', {
+                await adminApiFetch('/api/admin/content', {
                     method: 'PUT',
                     body: JSON.stringify({ 
                         table: 'course_modules', 
@@ -669,7 +670,7 @@ export default function DynamicCourseEditor() {
                         const content = item.type === 'quiz'
                             ? { ...item.content, questions: dedupeQuestions(item.content?.questions) }
                             : item.content;
-                        await fetch('/api/admin/content', {
+                        await adminApiFetch('/api/admin/content', {
                             method: 'PUT',
                             body: JSON.stringify({ 
                                 table: 'module_items', 
@@ -1313,7 +1314,7 @@ export default function DynamicCourseEditor() {
                                     <button 
                                         onClick={async () => {
                                             if (!module.id) return;
-                                            await fetch('/api/admin/content', {
+                                            await adminApiFetch('/api/admin/content', {
                                                 method: 'PUT',
                                                 body: JSON.stringify({ 
                                                     table: 'course_modules', 
@@ -1606,7 +1607,7 @@ export default function DynamicCourseEditor() {
                                                         <button 
                                                             onClick={async () => {
                                                                 const mIdx = modules.findIndex(m => m.id === module.id);
-                                                                await fetch('/api/admin/content', {
+                                                                await adminApiFetch('/api/admin/content', {
                                                                     method: 'PUT',
                                                                     body: JSON.stringify({ 
                                                                         table: 'module_items', 

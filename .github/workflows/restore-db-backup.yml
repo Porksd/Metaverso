@@ -1,0 +1,79 @@
+name: Restore encrypted database backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_key:
+        description: "Exact S3 object key, e.g. metaverso/weekly/20261030T080000Z.dump.age"
+        required: true
+        type: string
+      confirmation:
+        description: "Type RESTORE-PRODUCTION to replace database objects/data with this backup"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  restore:
+    if: ${{ inputs.confirmation == 'RESTORE-PRODUCTION' }}
+    runs-on: ubuntu-latest
+    environment: production-restore
+    container: postgres:17-alpine
+    env:
+      BACKUP_KEY: ${{ inputs.backup_key }}
+      BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+      BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+      BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+      BACKUP_AGE_IDENTITY: ${{ secrets.BACKUP_AGE_IDENTITY }}
+      SUPABASE_RESTORE_DB_URL: ${{ secrets.SUPABASE_RESTORE_DB_URL }}
+    steps:
+      - name: Download, verify, decrypt, and restore
+        shell: sh
+        run: |
+          set -eu
+          : "${BACKUP_S3_ENDPOINT:?Configure the BACKUP_S3_ENDPOINT variable}"
+          : "${BACKUP_S3_BUCKET:?Configure the BACKUP_S3_BUCKET variable}"
+          : "${BACKUP_S3_REGION:?Configure the BACKUP_S3_REGION variable}"
+          : "${AWS_ACCESS_KEY_ID:?Configure the BACKUP_S3_ACCESS_KEY_ID secret}"
+          : "${AWS_SECRET_ACCESS_KEY:?Configure the BACKUP_S3_SECRET_ACCESS_KEY secret}"
+          : "${BACKUP_AGE_IDENTITY:?Configure the BACKUP_AGE_IDENTITY secret}"
+          : "${SUPABASE_RESTORE_DB_URL:?Configure the SUPABASE_RESTORE_DB_URL secret}"
+
+          printf '%s' "$BACKUP_KEY" | grep -Eq '^metaverso/weekly/[0-9]{8}T[0-9]{6}Z\.dump\.age$'
+          apk add --no-cache age aws-cli
+          umask 077
+          restore_dir="$(mktemp -d)"
+          trap 'rm -rf "$restore_dir"' EXIT
+
+          encrypted_file="$restore_dir/backup.dump.age"
+          dump_file="$restore_dir/backup.dump"
+          checksum_file="$restore_dir/backup.dump.age.sha256"
+          identity_file="$restore_dir/age-identity"
+          printf '%s\n' "$BACKUP_AGE_IDENTITY" > "$identity_file"
+
+          aws s3 cp "s3://$BACKUP_S3_BUCKET/$BACKUP_KEY" "$encrypted_file" \
+            --endpoint-url "$BACKUP_S3_ENDPOINT" \
+            --region "$BACKUP_S3_REGION" \
+            --only-show-errors
+          aws s3 cp "s3://$BACKUP_S3_BUCKET/$BACKUP_KEY.sha256" "$checksum_file" \
+            --endpoint-url "$BACKUP_S3_ENDPOINT" \
+            --region "$BACKUP_S3_REGION" \
+            --only-show-errors
+          printf '%s  %s\n' "$(cat "$checksum_file")" "$encrypted_file" | sha256sum -c -
+          age --decrypt --identity "$identity_file" --output "$dump_file" "$encrypted_file"
+          pg_restore --list "$dump_file" > "$restore_dir/archive-list.txt"
+
+          pg_restore \
+            --schema=public \
+            --clean \
+            --if-exists \
+            --no-owner \
+            --no-acl \
+            --exit-on-error \
+            --single-transaction \
+            --dbname="$SUPABASE_RESTORE_DB_URL" \
+            "$dump_file"

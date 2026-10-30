@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { createAuditedAdminClient } from '@/lib/server/auditedAdmin';
 
 type RouteParams = { studentId: string };
 
@@ -41,10 +42,14 @@ const getStudentId = async (context: { params: RouteParams | Promise<RouteParams
     return params.studentId;
 };
 
-export async function DELETE(_request: Request, context: { params: Promise<RouteParams> }) {
+export async function DELETE(request: Request, context: { params: Promise<RouteParams> }) {
     try {
         if (!supabaseAdmin) {
             return NextResponse.json({ error: 'Configuracion invalida: supabaseAdmin no disponible' }, { status: 500 });
+        }
+        const admin = await createAuditedAdminClient(request);
+        if (!admin) {
+            return NextResponse.json({ error: 'Sesion administrativa requerida' }, { status: 401 });
         }
 
         const studentId = await getStudentId(context);
@@ -52,7 +57,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
             return NextResponse.json({ error: 'studentId es requerido' }, { status: 400 });
         }
 
-        const { data: student, error: studentLookupError } = await supabaseAdmin
+        const { data: student, error: studentLookupError } = await admin
             .from('students')
             .select('id, auth_user_id, rut, client_id')
             .eq('id', studentId)
@@ -67,7 +72,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
             return NextResponse.json({ error: 'Alumno no encontrado' }, { status: 404 });
         }
 
-        const { data: enrollments, error: enrollmentsError } = await supabaseAdmin
+        const { data: enrollments, error: enrollmentsError } = await admin
             .from('enrollments')
             .select('id')
             .eq('student_id', student.id);
@@ -80,7 +85,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
         const enrollmentIds = (enrollments || []).map((row) => row.id);
 
         if (enrollmentIds.length > 0) {
-            const { error: courseProgressError } = await supabaseAdmin
+            const { error: courseProgressError } = await admin
                 .from('course_progress')
                 .delete()
                 .in('enrollment_id', enrollmentIds);
@@ -90,7 +95,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
                 return NextResponse.json({ error: 'No se pudo eliminar avance del curso' }, { status: 500 });
             }
 
-            const { error: activityLogsError } = await supabaseAdmin
+            const { error: activityLogsError } = await admin
                 .from('activity_logs')
                 .delete()
                 .in('enrollment_id', enrollmentIds);
@@ -101,7 +106,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
             }
         }
 
-        const { error: enrollmentsDeleteError } = await supabaseAdmin
+        const { error: enrollmentsDeleteError } = await admin
             .from('enrollments')
             .delete()
             .eq('student_id', student.id);
@@ -111,7 +116,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
             return NextResponse.json({ error: 'No se pudo eliminar la inscripcion del alumno' }, { status: 500 });
         }
 
-        const { error: studentDeleteError } = await supabaseAdmin
+        const { error: studentDeleteError } = await admin
             .from('students')
             .delete()
             .eq('id', student.id);
@@ -122,7 +127,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
         }
 
         if (student.auth_user_id) {
-            const { data: authUserData, error: authLookupError } = await supabaseAdmin.auth.admin.getUserById(student.auth_user_id);
+            const { data: authUserData, error: authLookupError } = await admin.auth.admin.getUserById(student.auth_user_id);
             if (authLookupError) {
                 console.error('Error buscando usuario auth antes de eliminar:', authLookupError);
             }
@@ -137,7 +142,7 @@ export async function DELETE(_request: Request, context: { params: Promise<Route
                     email: authEmail
                 });
             } else {
-                const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(student.auth_user_id);
+                const { error: authDeleteError } = await admin.auth.admin.deleteUser(student.auth_user_id);
                 if (authDeleteError) {
                     console.error('Error eliminando usuario de auth:', authDeleteError);
                     // No revertimos porque el alumno ya fue eliminado de negocio.

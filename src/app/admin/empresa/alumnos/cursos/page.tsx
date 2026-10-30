@@ -634,6 +634,7 @@ export default function CoursesPage() {
                 jobName,
                 date: new Date().toLocaleDateString('es-CL'),
                 companyName: companyInfo?.name || null,
+                companyLogoUrl: companyInfo?.logo_url || null,
                 studentSignatureUrl: user.digital_signature_url || null,
                 ...((() => {
                     const cfg = companyInfo?.cert_signature_config as { irl?: number[] } | null;
@@ -1163,7 +1164,7 @@ export default function CoursesPage() {
                                                         const relUrl = (companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null;
                                                         const relName = (companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null;
                                                         const relRole = (companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null;
-                                                        await generateSacyrIrlPdf({ form, studentName: resp.student_name, studentRut: resp.student_rut, jobName: form.cargo_name, companyName: companyInfo?.name || 'Sacyr', motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: relUrl, relatorName: relName, relatorRole: relRole });
+                                                        await generateSacyrIrlPdf({ form, studentName: resp.student_name, studentRut: resp.student_rut, jobName: form.cargo_name, companyName: companyInfo?.name || 'Sacyr', companyLogoUrl: companyInfo?.logo_url || null, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: relUrl, relatorName: relName, relatorRole: relRole });
                                                     }}
                                                     className="w-full flex items-center justify-center gap-1.5 px-4 py-2 bg-green-500/15 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase hover:bg-green-500/25 transition-all"
                                                 >
@@ -1204,6 +1205,7 @@ export default function CoursesPage() {
                         studentRut={user?.rut || ''}
                         jobName={form.cargo_name}
                         companyName={companyInfo?.name || 'Sacyr'}
+                        companyLogoUrl={companyInfo?.logo_url || null}
                         relatorSignatureUrl={(companyInfo as any)?.[`signature_url_${irlIdx + 1}`] || null}
                         relatorName={(companyInfo as any)?.[`signature_name_${irlIdx + 1}`] || null}
                         relatorRole={(companyInfo as any)?.[`signature_role_${irlIdx + 1}`] || null}

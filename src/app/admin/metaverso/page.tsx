@@ -46,6 +46,7 @@ const normalizeRegistrationConfig = (config?: Record<string, any> | null) => {
 export default function MetaversoAdmin() {
     const router = useRouter();
     const [companies, setCompanies] = useState<any[]>([]);
+    const [companyFetchError, setCompanyFetchError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [editingCompany, setEditingCompany] = useState<any>(null);
     const [signatureModal, setSignatureModal] = useState<any>(null);
@@ -255,10 +256,15 @@ export default function MetaversoAdmin() {
     const handleSaveStudent = async (student: any) => {
         const { id, enrollments, companies: companyRef, company_roles, ...data } = student;
         
-        // Validación de cupos para nuevos alumnos o cambio de empresa
-        if (!id && data.client_id) {
+        // A student uses one company quota, regardless of how many courses they take.
+        const currentCompanyId = student.client_id || companyRef?.id;
+        if (data.client_id && (!id || data.client_id !== currentCompanyId)) {
             const company = companies.find(c => c.id === data.client_id);
-            if (company && company.used_quotas >= company.total_quotas) {
+            if (!company) {
+                alert('No se pudo validar el cupo: no se encontró la empresa seleccionada.');
+                return;
+            }
+            if (Number(company.used_quotas || 0) >= Number(company.total_quotas || 0)) {
                 alert(`Error: La empresa ${company.name} no tiene cupos disponibles (${company.used_quotas}/${company.total_quotas}).`);
                 return;
             }
@@ -420,11 +426,12 @@ export default function MetaversoAdmin() {
     const saveCompanyCourses = async () => {
         if (!selectedCompanyId) return alert('Selecciona primero una empresa');
 
-        // Los cupos de empresa corresponden a alumnos únicos, no a matrículas por curso.
+        // Use the same unique-student count shown in the company quota summary.
         const company = companies.find(c => c.id === selectedCompanyId);
-        const studentCount = participants.filter(p => (p.companies?.id === selectedCompanyId || p.client_id === selectedCompanyId)).length;
+        if (!company) return alert('No se pudo validar el cupo de la empresa seleccionada.');
+        const studentCount = Number(company.used_quotas || 0);
 
-        if (company && studentCount > company.total_quotas) {
+        if (studentCount > Number(company.total_quotas || 0)) {
             alert(`Error: La empresa tiene ${studentCount} alumnos y solo dispone de ${company.total_quotas} cupos totales.`);
             return;
         }
@@ -516,6 +523,7 @@ export default function MetaversoAdmin() {
 
     const fetchCompanies = async () => {
         setIsLoading(true);
+        setCompanyFetchError(null);
         try {
             // 1. Obtener empresas básicas
             const { data: companiesData, error: compError } = await supabase
@@ -525,31 +533,37 @@ export default function MetaversoAdmin() {
             
             if (compError) throw compError;
 
-            // 2. Obtener conteo real de matrículas (enrollments) agrupado por empresa (vía student.client_id)
-            const { data: enrollmentsData, error: enrollError } = await supabase
-                .from('enrollments')
-                .select('id, students!inner(client_id)');
-            
-            if (enrollError) throw enrollError;
+            // Count student profiles, not course enrollments, and page through Supabase's row limit.
+            const studentCounts: Record<string, number> = {};
+            const pageSize = 500;
+            let pageStart = 0;
+            let studentPage: { client_id: string | null }[] = [];
 
-            // 3. Procesar conteo
-            const enrollmentCounts: Record<string, number> = {};
-            enrollmentsData?.forEach((en: any) => {
-                const clientId = en.students?.client_id;
-                if (clientId) {
-                    enrollmentCounts[clientId] = (enrollmentCounts[clientId] || 0) + 1;
-                }
-            });
+            do {
+                const { data, error: studentsError } = await supabase
+                    .from('students')
+                    .select('id, client_id')
+                    .not('client_id', 'is', null)
+                    .order('id')
+                    .range(pageStart, pageStart + pageSize - 1);
 
-            // 4. Integrar datos
+                if (studentsError) throw studentsError;
+                studentPage = data || [];
+                studentPage.forEach(({ client_id: clientId }) => {
+                    if (clientId) studentCounts[clientId] = (studentCounts[clientId] || 0) + 1;
+                });
+                pageStart += pageSize;
+            } while (studentPage.length === pageSize);
+
             const updatedCompanies = (companiesData || []).map(c => ({
                 ...c,
-                used_quotas: enrollmentCounts[c.id] || 0
+                used_quotas: studentCounts[c.id] || 0
             }));
 
             setCompanies(updatedCompanies);
         } catch (err: any) {
             console.error('Error fetching dynamic quotas:', err.message);
+            setCompanyFetchError('No se pudieron cargar las empresas y sus cupos. Intenta actualizar la vista.');
         } finally {
             setIsLoading(false);
         }
@@ -885,6 +899,12 @@ export default function MetaversoAdmin() {
                     </div>
                 </header>
 
+                {companyFetchError && (
+                    <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                        {companyFetchError}
+                    </div>
+                )}
+
                 <div className="flex border-b border-white/10 gap-8">
                     <button 
                         onClick={() => setView('companies')} 
@@ -930,7 +950,7 @@ export default function MetaversoAdmin() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {[
                         { label: "Empresas Activas", value: companies.filter(c => c.is_active).length, icon: Building2, color: "brand" },
-                        { label: "Matrículas Totales", value: companies.reduce((acc, c) => acc + (c.used_quotas || 0), 0).toLocaleString(), icon: Layers, color: "brand" },
+                        { label: "Cupos Utilizados", value: companies.reduce((acc, c) => acc + (c.used_quotas || 0), 0).toLocaleString(), icon: Layers, color: "brand" },
                         { label: "Participantes Registrados", value: participants.length.toLocaleString(), icon: Users, color: "brand" },
                         { label: "Cursos en Catálogo", value: courses.length, icon: BookOpen, color: "brand" },
                     ].map((stat, i) => (

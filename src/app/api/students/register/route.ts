@@ -66,6 +66,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        let companyTotalQuotas: number | null = null;
+        if (normalizedClientId) {
+            const { data: company, error: companyError } = await admin
+                .from('companies')
+                .select('total_quotas')
+                .eq('id', normalizedClientId)
+                .maybeSingle();
+
+            if (companyError) {
+                console.error('Error checking company student quota:', companyError);
+                return NextResponse.json({ error: 'No se pudo validar el cupo de la empresa.' }, { status: 500 });
+            }
+            if (!company) {
+                return NextResponse.json({ error: 'Empresa principal no encontrada.' }, { status: 400 });
+            }
+            companyTotalQuotas = company.total_quotas;
+        }
+
         // 1. Create or Update Supabase Auth User
         // Usamos admin para crear el usuario y confirmar el email inmediatamente.
 
@@ -115,6 +133,22 @@ export async function POST(request: NextRequest) {
 
             if (rutAlreadyExistsInCompany) {
                 return NextResponse.json({ error: DUPLICATE_RUT_MESSAGE }, { status: 409 });
+            }
+        }
+
+        if (normalizedClientId) {
+            const { count, error: quotaError } = await admin
+                .from('students')
+                .select('id', { count: 'exact', head: true })
+                .eq('client_id', normalizedClientId);
+
+            if (quotaError) {
+                console.error('Error checking company student quota:', quotaError);
+                return NextResponse.json({ error: 'No se pudo validar el cupo de la empresa.' }, { status: 500 });
+            }
+
+            if ((count || 0) >= Number(companyTotalQuotas || 0)) {
+                return NextResponse.json({ error: 'La empresa no tiene cupos disponibles.' }, { status: 409 });
             }
         }
 

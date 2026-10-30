@@ -269,3 +269,28 @@ export async function generateIrlCert(input: GenerateIrlCertInput): Promise<void
   const safeName = (input.studentName || "alumno").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`certificado_irl_${safeName}.pdf`);
 }
+  companyLogoUrl?: string | null;
+  const companyLogoData = input.companyLogoUrl ? await urlToDataUrl(input.companyLogoUrl) : null;
+  if (companyLogoData) {
+    try {
+      const { width, height } = pdf.getImageProperties(companyLogoData);
+      const maxLogoWidth = 30;
+      const maxLogoHeight = 18;
+      const scale = Math.min(maxLogoWidth / width, maxLogoHeight / height);
+      const logoWidth = width * scale;
+      const logoHeight = height * scale;
+      const format = companyLogoData.startsWith("data:image/jpeg") || companyLogoData.startsWith("data:image/jpg") ? "JPEG" : "PNG";
+      pdf.addImage(
+        companyLogoData,
+        format,
+        pageW - margin - maxLogoWidth,
+        10 + (maxLogoHeight - logoHeight) / 2,
+        logoWidth,
+        logoHeight,
+        undefined,
+        "FAST"
+      );
+    } catch (error) {
+      console.warn("No se pudo incluir el logo de la empresa en el certificado IRL.", error);
+    }
+  }

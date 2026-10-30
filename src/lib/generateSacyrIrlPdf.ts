@@ -17,6 +17,7 @@ export interface SacyrIrlPdfInput {
   studentRut: string;
   jobName?: string;
   companyName?: string;
+  companyLogoUrl?: string | null;
   fecha?: string;
   motivo: "nueva_incorporacion" | "cambio_proceso" | "nuevas_actividades";
   induccion?: InduccionData;
@@ -95,7 +96,8 @@ function addHeaderFooter(
   pdf: jsPDF,
   pageNum: number,
   totalPages: number,
-  sacyrLogoData: string | null
+  sacyrLogoData: string | null,
+  companyLogoData: string | null
 ) {
   const W = 210;
   const headerH = 20;
@@ -119,14 +121,28 @@ function addHeaderFooter(
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(5.5);
   pdf.text(HEADER_TITLE, 47, 18);
-  // Right cell: code + page
+  // Right cell: company logo, code, and page
   pdf.line(W - 40, 8, W - 40, 28);
+  if (companyLogoData) {
+    try {
+      const { width, height } = pdf.getImageProperties(companyLogoData);
+      const maxLogoW = 26;
+      const maxLogoH = 9;
+      const scale = Math.min(maxLogoW / width, maxLogoH / height);
+      const logoW = width * scale;
+      const logoH = height * scale;
+      const format = companyLogoData.startsWith("data:image/jpeg") || companyLogoData.startsWith("data:image/jpg") ? "JPEG" : "PNG";
+      pdf.addImage(companyLogoData, format, W - 38, 9 + (maxLogoH - logoH) / 2, logoW, logoH, undefined, "FAST");
+    } catch (error) {
+      console.warn("No se pudo incluir el logo de la empresa en el certificado IRL.", error);
+    }
+  }
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(5.5);
-  pdf.text(HEADER_CODE, W - 38, 14);
+  pdf.text(HEADER_CODE, W - 38, 21);
   pdf.setFont("helvetica", "normal");
   // Page number is updated in the post-render pass at the end of generateSacyrIrlPdf
-  pdf.text(`Pág. ${pageNum}`, W - 38, 19);
+  pdf.text(`Pág. ${pageNum}`, W - 38, 26);
 
   // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const footerY = 285;
@@ -228,8 +244,9 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const fecha = input.fecha || new Date().toLocaleDateString("es-CL");
 
   // Pre-load images
-  const [sacyrLogo, studentSig, relatorSig] = await Promise.all([
+  const [sacyrLogo, companyLogo, studentSig, relatorSig] = await Promise.all([
     urlToDataUrl("/cert-assets/logo_sacyr.png"),
+    input.companyLogoUrl ? urlToDataUrl(input.companyLogoUrl) : Promise.resolve(null),
     input.studentSignatureUrl ? urlToDataUrl(input.studentSignatureUrl) : Promise.resolve(null),
     input.relatorSignatureUrl ? urlToDataUrl(input.relatorSignatureUrl) : Promise.resolve(null),
   ]);
@@ -238,7 +255,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   let y = bodyTop;
   const closePageAndContinue = () => {
     const currentPage = (pdf as any).internal.getCurrentPageInfo().pageNumber;
-    addHeaderFooter(pdf, currentPage, 0, sacyrLogo);
+    addHeaderFooter(pdf, currentPage, 0, sacyrLogo, companyLogo);
     pdf.addPage();
     y = bodyTop;
   };
@@ -588,7 +605,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setTextColor(20, 20, 20);
   y += footHeight + 4;
 
-  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo, companyLogo);
 
   // â”€â”€ PAGE 3: Test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   pdf.addPage();
@@ -691,7 +708,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   y += 6;
 
   // Image analysis + signatures always on fresh page
-  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 4, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 4, sacyrLogo, companyLogo);
   pdf.addPage();
   y = bodyTop;
 
@@ -773,7 +790,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const _curPage = (pdf as any).internal.getCurrentPageInfo().pageNumber;
   if (y > sigBottomPin) {
     // Content too long: need a new page for signatures
-    addHeaderFooter(pdf, _curPage, 4, sacyrLogo);
+    addHeaderFooter(pdf, _curPage, 4, sacyrLogo, companyLogo);
     pdf.addPage();
     y = bodyTop;
   } else {
@@ -810,7 +827,7 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   pdf.setFontSize(7.5);
   pdf.text("Nombre del Trabajador", sigX2 + sigW / 2, sigLineY + 12, { align: "center" });
 
-  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo);
+  addHeaderFooter(pdf, (pdf as any).internal.getCurrentPageInfo().pageNumber, 0, sacyrLogo, companyLogo);
 
   // Post-render: now that we know the total page count, go back and update each header
   const totalPages = (pdf as any).internal.getNumberOfPages();
@@ -818,11 +835,11 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
     pdf.setPage(p);
     // White rect to cover the old "Pág. X" text
     pdf.setFillColor(255, 255, 255);
-    pdf.rect(210 - 40 + 1, 16, 36, 5, "F");
+    pdf.rect(W - 39, 22, 29, 5, "F");
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(5.5);
     pdf.setTextColor(0, 51, 102);
-    pdf.text(`Pág. ${p} de ${totalPages}`, 210 - 38, 19);
+    pdf.text(`Pág. ${p} de ${totalPages}`, W - 38, 26);
     pdf.setTextColor(0, 0, 0);
   }
   // Return to last page before saving
@@ -831,4 +848,3 @@ export async function generateSacyrIrlPdf(input: SacyrIrlPdfInput): Promise<void
   const safeName = (input.studentName || "trabajador").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`IRL_Sacyr_${input.form.cargo_name.replace(/\s+/g, "_")}_${safeName}.pdf`);
 }
-

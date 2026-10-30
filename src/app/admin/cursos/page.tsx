@@ -1,36 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
     Plus, Save, Trash2, Edit3, Settings2,
     HelpCircle, CheckCircle2, Package, Percent, LogOut, Eye, X
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { resolveAdminRole } from "@/lib/adminAuth";
+import { adminApiFetch } from "@/lib/adminApiFetch";
 import { useRouter } from "next/navigation";
 
 export default function CursosAdmin() {
     const [courses, setCourses] = useState<any[]>([]);
     const [editingCourse, setEditingCourse] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        const auth = localStorage.getItem('cursos_auth');
-        if (!auth) {
-            router.push("/admin/cursos/login");
-        } else {
-            setIsAuthenticated(true);
-            fetchCourses();
-        }
-    }, []);
-
-    const fetchCourses = async () => {
+    const fetchCourses = useCallback(async () => {
         const { data } = await supabase.from('courses').select('*').order('name');
         setCourses(data || []);
-    };
+    }, []);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error || !session) {
+                router.push("/admin/metaverso/login?returnUrl=/admin/cursos");
+                return;
+            }
+
+            const { role } = await resolveAdminRole(supabase, session.user.email, "admin-cursos");
+            if (!role) {
+                await supabase.auth.signOut();
+                router.push("/admin/metaverso/login?returnUrl=/admin/cursos");
+                return;
+            }
+
+            await fetchCourses();
+        };
+        void checkAuth();
+    }, [fetchCourses, router]);
 
     const handleSave = async () => {
         if (!editingCourse) return;
@@ -78,7 +89,10 @@ export default function CursosAdmin() {
                     </div>
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => { localStorage.removeItem('cursos_auth'); window.location.href = '/admin/cursos/login'; }}
+                            onClick={async () => {
+                                await supabase.auth.signOut();
+                                router.push('/admin/metaverso/login');
+                            }}
                             className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all group"
                             title="Cerrar Sesión"
                         >
@@ -103,7 +117,7 @@ export default function CursosAdmin() {
                                     ];
 
                                     for (const mod of defaultModules) {
-                                        await fetch('/api/admin/content', {
+                                        await adminApiFetch('/api/admin/content', {
                                             method: 'POST',
                                             body: JSON.stringify({ table: 'course_modules', data: mod })
                                         });

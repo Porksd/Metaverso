@@ -2,6 +2,7 @@
 // Student submits a completed IRL form.
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { createAuditedAdminClient } from "@/lib/server/auditedAdmin";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
     }
 
-    const admin = supabaseAdmin;
+    const admin = await createAuditedAdminClient(req) || supabaseAdmin;
     if (!admin) return NextResponse.json({ error: "Error de configuración del servidor" }, { status: 500 });
 
     // Verify the assignment exists and belongs to this student

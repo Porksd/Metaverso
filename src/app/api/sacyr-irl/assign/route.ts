@@ -1,7 +1,7 @@
 // POST /api/sacyr-irl/assign
 // Admin assigns one or more IRL forms to a specific student.
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { createAuditedAdminClient } from "@/lib/server/auditedAdmin";
 import { SACYR_COMPANY_ID, SACYR_IRL_FORMS } from "@/lib/sacyrIrlData";
 
 export async function POST(req: NextRequest) {
@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Este sistema IRL es exclusivo para Sacyr" }, { status: 403 });
     }
 
-    const admin = supabaseAdmin;
-    if (!admin) return NextResponse.json({ error: "Error de configuración del servidor" }, { status: 500 });
+    const admin = await createAuditedAdminClient(req);
+    if (!admin) return NextResponse.json({ error: "Se requiere una sesión administrativa válida" }, { status: 401 });
 
     // Auto-upsert any missing form records from the TypeScript source of truth
     const formsToUpsert = SACYR_IRL_FORMS.filter(f => form_slugs.includes(f.slug)).map(f => ({
@@ -103,8 +103,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "student_id y form_id son requeridos" }, { status: 400 });
     }
 
-    const admin = supabaseAdmin;
-    if (!admin) return NextResponse.json({ error: "Error de configuración del servidor" }, { status: 500 });
+    const admin = await createAuditedAdminClient(req);
+    if (!admin) return NextResponse.json({ error: "Se requiere una sesión administrativa válida" }, { status: 401 });
 
     const { error } = await admin
       .from("sacyr_irl_assignments")

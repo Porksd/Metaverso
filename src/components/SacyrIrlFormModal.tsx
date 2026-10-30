@@ -15,6 +15,7 @@ interface Props {
   studentRut: string;
   jobName?: string;
   companyName?: string;
+  companyLogoUrl?: string | null;
   relatorSignatureUrl?: string | null;
   relatorName?: string | null;
   relatorRole?: string | null;
@@ -73,7 +74,7 @@ function CB({ checked, onChange, label }: { checked: boolean; onChange: (v: bool
 
 export default function SacyrIrlFormModal({
   assignmentId, formSlug, studentId, studentName, studentRut,
-  jobName, companyName, relatorSignatureUrl, relatorName, relatorRole,
+  jobName, companyName, companyLogoUrl, relatorSignatureUrl, relatorName, relatorRole,
   onComplete, onClose,
 }: Props) {
   const form = SACYR_IRL_FORMS.find(f => f.slug === formSlug);
@@ -190,6 +191,7 @@ export default function SacyrIrlFormModal({
         form, studentName, studentRut,
         jobName: jobName || form.cargo_name,
         companyName: companyName || "Sacyr",
+        companyLogoUrl,
         motivo: motivo as any,
         induccion: induccionData,
         respuestas_parte1: respParte1,

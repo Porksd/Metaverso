@@ -1,0 +1,100 @@
+name: Weekly encrypted database backup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    container: postgres:17-alpine
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+      BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+      BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_ACCESS_KEY }}
+      BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+    steps:
+      - name: Dump, encrypt, upload, and expire old backups
+        shell: sh
+        run: |
+          set -eu
+          : "${SUPABASE_DB_URL:?Configure the SUPABASE_DB_URL secret}"
+          : "${BACKUP_S3_ENDPOINT:?Configure the BACKUP_S3_ENDPOINT variable}"
+          : "${BACKUP_S3_BUCKET:?Configure the BACKUP_S3_BUCKET variable}"
+          : "${BACKUP_S3_REGION:?Configure the BACKUP_S3_REGION variable}"
+          : "${AWS_ACCESS_KEY_ID:?Configure the BACKUP_S3_ACCESS_KEY_ID secret}"
+          : "${AWS_SECRET_ACCESS_KEY:?Configure the BACKUP_S3_SECRET_ACCESS_KEY secret}"
+          : "${BACKUP_AGE_RECIPIENT:?Configure the BACKUP_AGE_RECIPIENT variable}"
+
+          apk add --no-cache age aws-cli python3
+          umask 077
+          backup_dir="$(mktemp -d)"
+          trap 'rm -rf "$backup_dir"' EXIT
+
+          timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          dump_file="$backup_dir/metaverso-$timestamp.dump"
+          encrypted_file="$dump_file.age"
+          object_key="metaverso/weekly/$timestamp.dump.age"
+
+          pg_dump --format=custom --schema=public --no-owner --no-acl --dbname="$SUPABASE_DB_URL" --file="$dump_file"
+          pg_restore --list "$dump_file" > "$backup_dir/archive-list.txt"
+          age --encrypt --recipient "$BACKUP_AGE_RECIPIENT" --output "$encrypted_file" "$dump_file"
+          sha256sum "$encrypted_file" | awk '{print $1}' > "$backup_dir/checksum"
+
+          aws s3 cp "$encrypted_file" "s3://$BACKUP_S3_BUCKET/$object_key" \
+            --endpoint-url "$BACKUP_S3_ENDPOINT" \
+            --region "$BACKUP_S3_REGION" \
+            --only-show-errors
+          aws s3 cp "$backup_dir/checksum" "s3://$BACKUP_S3_BUCKET/$object_key.sha256" \
+            --endpoint-url "$BACKUP_S3_ENDPOINT" \
+            --region "$BACKUP_S3_REGION" \
+            --only-show-errors
+
+          python3 - "$BACKUP_S3_BUCKET" "$BACKUP_S3_ENDPOINT" "$BACKUP_S3_REGION" <<'PY'
+          import datetime
+          import json
+          import subprocess
+          import sys
+
+          bucket, endpoint, region = sys.argv[1:]
+          prefix = "metaverso/weekly/"
+          cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=90)
+          listing = subprocess.run(
+              [
+                  "aws", "s3api", "list-objects-v2",
+                  "--bucket", bucket,
+                  "--prefix", prefix,
+                  "--endpoint-url", endpoint,
+                  "--region", region,
+                  "--output", "json",
+              ],
+              check=True,
+              capture_output=True,
+              text=True,
+          )
+          objects = json.loads(listing.stdout).get("Contents", [])
+          for item in objects:
+              key = item["Key"]
+              modified = datetime.datetime.fromisoformat(item["LastModified"].replace("Z", "+00:00"))
+              if (
+                  key.startswith(prefix)
+                  and key.endswith(".dump.age")
+                  and modified < cutoff
+              ):
+                  for expired_key in (key, f"{key}.sha256"):
+                      subprocess.run(
+                          [
+                              "aws", "s3", "rm",
+                              f"s3://{bucket}/{expired_key}",
+                              "--endpoint-url", endpoint,
+                              "--region", region,
+                              "--only-show-errors",
+                          ],
+                          check=True,
+                      )
+          PY

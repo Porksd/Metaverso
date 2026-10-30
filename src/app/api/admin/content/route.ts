@@ -1,17 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// Initialize Admin Client (runs only on server)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { autoRefreshToken: false, persistSession: false }
-  }
-);
+import { createAuditedAdminClient } from '@/lib/server/auditedAdmin';
 
 export async function POST(req: Request) {
   try {
+    const supabaseAdmin = await createAuditedAdminClient(req);
+    if (!supabaseAdmin) return NextResponse.json({ error: 'Sesión administrativa requerida' }, { status: 401 });
     const { table, data } = await req.json();
     
     if (!table || !data) {
@@ -38,6 +31,8 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const supabaseAdmin = await createAuditedAdminClient(req);
+    if (!supabaseAdmin) return NextResponse.json({ error: 'Sesión administrativa requerida' }, { status: 401 });
     const { table, id, data } = await req.json();
     
     if (!table || !id || !data) {
@@ -64,6 +59,8 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const supabaseAdmin = await createAuditedAdminClient(req);
+    if (!supabaseAdmin) return NextResponse.json({ error: 'Sesión administrativa requerida' }, { status: 401 });
     const { table, id } = await req.json();
     
     if (!table || !id) {

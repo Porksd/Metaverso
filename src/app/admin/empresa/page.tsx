@@ -7,6 +7,7 @@ import {
     Shield, UserCog, X, Trash2, LogOut, UserPlus, Settings, Building2, Lock, Award as AwardIcon, Pencil, Eye, EyeOff, RefreshCw
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { adminApiFetch } from "@/lib/adminApiFetch";
 import CertificateCanvas from "@/components/CertificateCanvas";
 import ManagerDashboard from "@/components/ManagerDashboard";
 import EnhancedManagerDashboard from "@/components/EnhancedManagerDashboard";
@@ -418,6 +419,7 @@ export default function EmpresaAdmin() {
                 const irlSig = irlSigs[0];
                 await generateIrlCert({
                     studentName: `${student.first_name} ${student.last_name}`,
+                    companyLogoUrl: comp.logo_url,
                     rut: student.rut,
                     age: studentData?.age,
                     jobName: jobName || studentData?.job_position || student.company_roles?.name || 'Sin cargo',
@@ -813,7 +815,7 @@ export default function EmpresaAdmin() {
                 const roleName = cargos.find((c: any) => c.id === student.role_id)?.name || '';
                 const irlSlug = CARGO_TO_IRL_SLUG[roleName.toLowerCase().trim()];
                 if (irlSlug) {
-                    fetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: student.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
+                    adminApiFetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: student.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
                 }
             }
             setIsEditing(null);
@@ -907,7 +909,7 @@ export default function EmpresaAdmin() {
             if (newSt) {
                 const roleName = cargos.find((c: any) => c.id === newStudent.role_id)?.name || '';
                 const irlSlug = CARGO_TO_IRL_SLUG[roleName.toLowerCase().trim()];
-                if (irlSlug) fetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: newSt.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
+                if (irlSlug) adminApiFetch('/api/sacyr-irl/assign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: newSt.id, form_slugs: [irlSlug], company_id: companyId, assigned_by: 'auto' }) });
             }
         }
         fetchData();
@@ -1490,10 +1492,10 @@ export default function EmpresaAdmin() {
                                                                 onClick={async () => {
                                                                     const { data: resp } = await supabase.from('sacyr_irl_responses').select('*').eq('assignment_id', irl.id).single();
                                                                     if (!resp) { alert('No se encontró la respuesta guardada.'); return; }
-                                                                    const cfg = (await supabase.from('companies').select('cert_signature_config, signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3').eq('id', companyId!).single()).data;
+                                                                    const cfg = (await supabase.from('companies').select('logo_url, cert_signature_config, signature_url_1, signature_name_1, signature_role_1, signature_url_2, signature_name_2, signature_role_2, signature_url_3, signature_name_3, signature_role_3').eq('id', companyId!).single()).data;
                                                                     const irlIdx = ((cfg?.cert_signature_config as any)?.irl ?? [0])[0] ?? 0;
                                                                     const { generateSacyrIrlPdf } = await import('@/lib/generateSacyrIrlPdf');
-                                                                    await generateSacyrIrlPdf({ form: irlForm, studentName: resp.student_name, studentRut: resp.student_rut, jobName: irlForm.cargo_name, companyName: companyName, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: (cfg as any)?.[`signature_url_${irlIdx + 1}`] || null, relatorName: (cfg as any)?.[`signature_name_${irlIdx + 1}`] || null, relatorRole: (cfg as any)?.[`signature_role_${irlIdx + 1}`] || null });
+                                                                    await generateSacyrIrlPdf({ form: irlForm, studentName: resp.student_name, studentRut: resp.student_rut, jobName: irlForm.cargo_name, companyName: companyName, companyLogoUrl: cfg?.logo_url, motivo: resp.motivo, induccion: resp.induccion_data || undefined, respuestas_parte1: resp.respuestas_parte1 || {}, riesgos_identificados: resp.riesgos_identificados || [], imagen_riesgo_1: resp.imagen_riesgo_1 || '', imagen_medidas_1: resp.imagen_medidas_1 || '', imagen_riesgo_2: resp.imagen_riesgo_2 || '', imagen_medidas_2: resp.imagen_medidas_2 || '', studentSignatureUrl: resp.student_signature_url, relatorSignatureUrl: (cfg as any)?.[`signature_url_${irlIdx + 1}`] || null, relatorName: (cfg as any)?.[`signature_name_${irlIdx + 1}`] || null, relatorRole: (cfg as any)?.[`signature_role_${irlIdx + 1}`] || null });
                                                                 }}
                                                                 className="inline-flex items-center gap-1 rounded-lg border border-green-500/40 bg-green-500/15 px-3 py-1 text-[10px] font-black uppercase text-green-300 hover:bg-green-500/25 transition-all"
                                                             >
@@ -1783,10 +1785,10 @@ export default function EmpresaAdmin() {
                                                                     if (isPending) {
                                                                         const a = sacyrIrlAssignments.find(x => x.form_slug === form.slug);
                                                                         if (!a) return;
-                                                                        await fetch(`/api/sacyr-irl/assign?student_id=${isEditing.id}&form_id=${a.form_id}`, { method: 'DELETE' });
+                                                                        await adminApiFetch(`/api/sacyr-irl/assign?student_id=${isEditing.id}&form_id=${a.form_id}`, { method: 'DELETE' });
                                                                         setSacyrIrlAssignments(prev => prev.filter(x => x.form_slug !== form.slug));
                                                                     } else {
-                                                                        await fetch('/api/sacyr-irl/assign', {
+                                                                        await adminApiFetch('/api/sacyr-irl/assign', {
                                                                             method: 'POST',
                                                                             headers: { 'Content-Type': 'application/json' },
                                                                             body: JSON.stringify({ student_id: isEditing.id, form_slugs: [form.slug], company_id: companyId, assigned_by: companyName }),
