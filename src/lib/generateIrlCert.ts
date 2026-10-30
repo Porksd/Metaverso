@@ -20,6 +20,7 @@ export interface GenerateIrlCertInput {
   jobName: string;
   date?: string;
   companyName?: string | null;
+  companyLogoUrl?: string | null;
   studentSignatureUrl?: string | null;
   relatorSignatureUrl?: string | null;
   relatorName?: string | null;
@@ -152,6 +153,7 @@ export async function generateIrlCert(input: GenerateIrlCertInput): Promise<void
   const relatorRole = input.relatorRole?.trim() || "Relator";
   const companyName = input.companyName?.trim() || "la empresa";
   const formattedRut = input.rut ? formatRutCl(input.rut) : input.rut;
+  const companyLogoData = input.companyLogoUrl ? await urlToDataUrl(input.companyLogoUrl) : null;
 
   pdf.setFillColor(255, 255, 255);
   pdf.rect(0, 0, 210, 297, "F");
@@ -159,6 +161,30 @@ export async function generateIrlCert(input: GenerateIrlCertInput): Promise<void
   pdf.setDrawColor(100, 100, 100);
   pdf.setLineWidth(0.45);
   pdf.roundedRect(5, 6, 200, 285, 4, 4);
+
+  if (companyLogoData) {
+    try {
+      const { width, height } = pdf.getImageProperties(companyLogoData);
+      const maxLogoWidth = 30;
+      const maxLogoHeight = 18;
+      const scale = Math.min(maxLogoWidth / width, maxLogoHeight / height);
+      const logoWidth = width * scale;
+      const logoHeight = height * scale;
+      const format = companyLogoData.startsWith("data:image/jpeg") || companyLogoData.startsWith("data:image/jpg") ? "JPEG" : "PNG";
+      pdf.addImage(
+        companyLogoData,
+        format,
+        pageW - margin - maxLogoWidth,
+        10 + (maxLogoHeight - logoHeight) / 2,
+        logoWidth,
+        logoHeight,
+        undefined,
+        "FAST"
+      );
+    } catch (error) {
+      console.warn("No se pudo incluir el logo de la empresa en el certificado IRL.", error);
+    }
+  }
 
   pdf.setTextColor(20, 20, 20);
   pdf.setFont("helvetica", "bold");
@@ -269,28 +295,3 @@ export async function generateIrlCert(input: GenerateIrlCertInput): Promise<void
   const safeName = (input.studentName || "alumno").replace(/[^a-zA-Z0-9_-]+/g, "_");
   pdf.save(`certificado_irl_${safeName}.pdf`);
 }
-  companyLogoUrl?: string | null;
-  const companyLogoData = input.companyLogoUrl ? await urlToDataUrl(input.companyLogoUrl) : null;
-  if (companyLogoData) {
-    try {
-      const { width, height } = pdf.getImageProperties(companyLogoData);
-      const maxLogoWidth = 30;
-      const maxLogoHeight = 18;
-      const scale = Math.min(maxLogoWidth / width, maxLogoHeight / height);
-      const logoWidth = width * scale;
-      const logoHeight = height * scale;
-      const format = companyLogoData.startsWith("data:image/jpeg") || companyLogoData.startsWith("data:image/jpg") ? "JPEG" : "PNG";
-      pdf.addImage(
-        companyLogoData,
-        format,
-        pageW - margin - maxLogoWidth,
-        10 + (maxLogoHeight - logoHeight) / 2,
-        logoWidth,
-        logoHeight,
-        undefined,
-        "FAST"
-      );
-    } catch (error) {
-      console.warn("No se pudo incluir el logo de la empresa en el certificado IRL.", error);
-    }
-  }
